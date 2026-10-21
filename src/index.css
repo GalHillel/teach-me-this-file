@@ -147,19 +147,6 @@
   }
 }
 
-.notebook {
-  background-color: var(--color-surface);
-  background-image:
-    linear-gradient(to right, transparent 0, transparent 2.75rem, var(--color-margin) 2.75rem, var(--color-margin) calc(2.75rem + 1.5px), transparent calc(2.75rem + 1.5px)),
-    repeating-linear-gradient(to bottom, transparent 0, transparent calc(2rem - 1px), var(--color-rule) calc(2rem - 1px), var(--color-rule) 2rem);
-}
-
-@media (max-width: 640px) {
-  .notebook {
-    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(2rem - 1px), var(--color-rule) calc(2rem - 1px), var(--color-rule) 2rem);
-  }
-}
-
 mark.marker {
   background: linear-gradient(to bottom, transparent 15%, var(--color-marker) 15%, var(--color-marker) 88%, transparent 88%);
   color: inherit;

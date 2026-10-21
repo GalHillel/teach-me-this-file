@@ -119,8 +119,8 @@ export default function LessonScreen({ lesson, settings, onOpenSettings }) {
         </div>
 
         <div className="relative min-h-0 flex-1">
-          <div ref={scrollRef} onScroll={onScroll} className="notebook h-full overflow-y-auto">
-            <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-6 sm:ps-16 sm:pe-8">
+          <div ref={scrollRef} onScroll={onScroll} className="h-full overflow-y-auto bg-surface">
+            <div className="mx-auto flex min-h-full max-w-3xl flex-col gap-6 px-4 py-6 sm:border-s-2 sm:border-margin/50 sm:px-8">
               {tutor.messages.map((message) => (
                 <ChatMessage key={message.id} message={message} chunkLabels={chunkLabels} onOpenSource={openSource} />
               ))}

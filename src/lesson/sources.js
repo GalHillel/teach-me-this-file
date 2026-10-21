@@ -38,6 +38,6 @@ export const highlightPassage = (passage, message) => {
   return passage.split(/([\p{L}\p{N}]+)/u).map((part, index) => ({
     key: index,
     text: part,
-    hit: index % 2 === 1 && terms.has(tokenize(part)[0]),
+    hit: index % 2 === 1 && part.length >= 4 && terms.has(tokenize(part)[0]),
   }));
 };
