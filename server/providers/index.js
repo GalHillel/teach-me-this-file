@@ -15,7 +15,7 @@ export const detectProvider = (apiKey) => {
 
 const createProvider = (name, apiKey) => {
   const model = config.models[name];
-  if (name === 'gemini') return createGeminiProvider({ apiKey, model, graderModel: config.models.geminiGrader });
+  if (name === 'gemini') return createGeminiProvider({ apiKey, models: model, graderModels: config.models.geminiGrader });
   return createOpenAiCompatibleProvider({ name, apiKey, model });
 };
 

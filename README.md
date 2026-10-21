@@ -83,7 +83,7 @@ Without a key you can still click through the whole flow: set `ALLOW_MOCK_PROVID
 
 Get a free key from one of:
 
-- Google AI Studio: https://aistudio.google.com/apikey (default models `gemini-3.5-flash`, and `gemini-3.5-flash-lite` for grading)
+- Google AI Studio: https://aistudio.google.com/apikey (default models `gemini-3.5-flash`, and `gemini-3.5-flash-lite` for grading, each with fallbacks)
 - Groq: https://console.groq.com/keys (default model `llama-3.3-70b-versatile`)
 - OpenRouter: https://openrouter.ai/keys (default model `meta-llama/llama-3.3-70b-instruct:free`)
 
@@ -98,8 +98,8 @@ As an option, the server can have its own key: set `AI_API_KEY` (and `AI_PROVIDE
 | `PORT` | `8787` | Local API port |
 | `AI_API_KEY` | empty | Optional server key, used when the request has no key (`GEMINI_API_KEY` also works) |
 | `AI_PROVIDER` | detected | `gemini`, `groq` or `openrouter` for the server key |
-| `GEMINI_MODEL` | `gemini-3.5-flash` | Gemini model for planning and teaching |
-| `GEMINI_GRADER_MODEL` | `gemini-3.5-flash-lite` | Gemini model that grades answers (faster, and a separate free-tier quota) |
+| `GEMINI_MODEL` | `gemini-3.5-flash,gemini-2.5-flash,gemini-flash-latest` | Gemini models for planning and teaching, tried in order when one is overloaded, out of quota or unavailable |
+| `GEMINI_GRADER_MODEL` | `gemini-3.5-flash-lite,gemini-flash-lite-latest,gemini-3.5-flash` | Gemini models that grade answers (faster, and a separate free-tier quota) |
 | `GROQ_MODEL` | `llama-3.3-70b-versatile` | Model for Groq keys |
 | `OPENROUTER_MODEL` | `meta-llama/llama-3.3-70b-instruct:free` | Model for OpenRouter keys |
 | `GEMINI_TUTOR_THINKING_BUDGET` | `0` | Gemini thinking tokens for the streamed tutor reply. `0` makes the first words appear faster; leave empty for models that do not accept the setting |

@@ -36,7 +36,7 @@ describe('Gemini provider', () => {
       { candidates: [{ content: { parts: [{ text: 'Hello ' }] } }] },
       { candidates: [{ content: { parts: [{ text: 'student' }] }, finishReason: 'STOP' }] },
     ]));
-    const provider = createGeminiProvider({ apiKey: 'AIzaTest', model: 'gemini-test' });
+    const provider = createGeminiProvider({ apiKey: 'AIzaTest', models: ['gemini-test'] });
     const text = await collect(provider.streamText({ system: 'sys', messages: [{ role: 'user', content: 'hi' }, { role: 'assistant', content: 'yo' }] }));
     expect(text).toBe('Hello student');
 
@@ -52,14 +52,14 @@ describe('Gemini provider', () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(Response.json({
       candidates: [{ content: { parts: [{ text: '```json\n{"verdict":"partial"}\n```' }] } }],
     }));
-    const provider = createGeminiProvider({ apiKey: 'AIzaTest', model: 'gemini-test' });
+    const provider = createGeminiProvider({ apiKey: 'AIzaTest', models: ['gemini-test'] });
     expect(await provider.generateJson({ system: 's', prompt: 'p' })).toEqual({ verdict: 'partial' });
   });
 
   it('maps a quota error and a blocked prompt', async () => {
     const quota = '{"error":{"status":"RESOURCE_EXHAUSTED","details":[{"retryDelay":"58s"}]}}';
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(quota, { status: 429 }));
-    const provider = createGeminiProvider({ apiKey: 'AIzaTest', model: 'gemini-test' });
+    const provider = createGeminiProvider({ apiKey: 'AIzaTest', models: ['gemini-test'] });
     await expect(provider.generateJson({ system: 's', prompt: 'p' })).rejects.toMatchObject({ code: 'rate_limited' });
 
     fetch.mockResolvedValueOnce(Response.json({ promptFeedback: { blockReason: 'SAFETY' } }));
@@ -70,10 +70,29 @@ describe('Gemini provider', () => {
     vi.spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(new Response('{"error":{"details":[{"retryDelay":"0.01s"}]}}', { status: 429 }))
       .mockResolvedValueOnce(Response.json({ candidates: [{ content: { parts: [{ text: '{"verdict":"correct"}' }] } }] }));
-    const provider = createGeminiProvider({ apiKey: 'AIzaTest', model: 'flash', graderModel: 'flash-lite' });
+    const provider = createGeminiProvider({ apiKey: 'AIzaTest', models: ['flash'], graderModels: ['flash-lite'] });
     expect(await provider.generateJson({ task: 'assessment', system: 's', prompt: 'p' })).toEqual({ verdict: 'correct' });
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(fetch.mock.calls[0][0]).toContain('/models/flash-lite:generateContent');
+  });
+});
+
+describe('Gemini model fallback', () => {
+  it('moves to the next model when one is overloaded or unavailable', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response('{"error":{"status":"UNAVAILABLE"}}', { status: 503 }))
+      .mockResolvedValueOnce(new Response('{"error":{"status":"NOT_FOUND"}}', { status: 404 }))
+      .mockResolvedValueOnce(Response.json({ candidates: [{ content: { parts: [{ text: '{"ok":true}' }] } }] }));
+    const provider = createGeminiProvider({ apiKey: 'AIzaTest', models: ['a', 'b', 'c'] });
+    expect(await provider.generateJson({ task: 'plan', system: 's', prompt: 'p' })).toEqual({ ok: true });
+    expect(fetch.mock.calls.map(([url]) => url.split('/models/')[1].split(':')[0])).toEqual(['a', 'b', 'c']);
+  });
+
+  it('does not fall back when the key is invalid', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{"error":{"message":"API key not valid"}}', { status: 400 }));
+    const provider = createGeminiProvider({ apiKey: 'AIzaBad', models: ['a', 'b'] });
+    await expect(provider.generateJson({ task: 'plan', system: 's', prompt: 'p' })).rejects.toMatchObject({ code: 'invalid_key' });
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });
 

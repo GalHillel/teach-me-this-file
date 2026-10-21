@@ -32,20 +32,35 @@ const answerText = (data) => {
     .join('');
 };
 
-export const createGeminiProvider = ({ apiKey, model, graderModel = model }) => {
-  const call = (method, body, signal, modelName = model) =>
-    postJson(`${BASE_URL}/${encodeURIComponent(modelName)}:${method}`, {
-      headers: { 'x-goog-api-key': apiKey },
-      body,
-      signal,
-    });
+const FALLBACK_CODES = new Set(['provider_unavailable', 'rate_limited', 'model_unavailable']);
+
+const asList = (models) => (Array.isArray(models) ? models : [models]);
+
+export const createGeminiProvider = ({ apiKey, models, graderModels = models }) => {
+  const call = async (modelNames, method, body, signal) => {
+    let lastError;
+    for (const modelName of asList(modelNames)) {
+      try {
+        return await postJson(`${BASE_URL}/${encodeURIComponent(modelName)}:${method}`, {
+          headers: { 'x-goog-api-key': apiKey },
+          body,
+          signal,
+        });
+      } catch (error) {
+        if (!(error instanceof AppError) || !FALLBACK_CODES.has(error.code)) throw error;
+        lastError = error;
+      }
+    }
+    throw lastError;
+  };
 
   return {
     name: 'gemini',
-    model,
+    model: asList(models)[0],
 
     async generateJson({ task, system, prompt, signal }) {
       const response = await call(
+        task === 'assessment' ? graderModels : models,
         'generateContent',
         {
           systemInstruction: { parts: [{ text: system }] },
@@ -53,13 +68,13 @@ export const createGeminiProvider = ({ apiKey, model, graderModel = model }) => 
           generationConfig: { responseMimeType: 'application/json', temperature: 0.3 },
         },
         signal,
-        task === 'assessment' ? graderModel : model,
       );
       return parseJsonText(answerText(await response.json()));
     },
 
     async *streamText({ system, messages, signal }) {
       const response = await call(
+        models,
         'streamGenerateContent?alt=sse',
         {
           systemInstruction: { parts: [{ text: system }] },
