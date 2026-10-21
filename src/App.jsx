@@ -35,6 +35,7 @@ export default function App() {
       if (uploadRef.current === id) setUpload({ status: 'ready', file: meta, document });
     } catch (error) {
       if (uploadRef.current !== id) return;
+      if (!error.code) console.error('file extraction failed', error);
       const message = error.code ? error.message : 'This file could not be read. It may be damaged or in an unexpected format.';
       setUpload({ status: 'error', file: meta, error: message });
     }

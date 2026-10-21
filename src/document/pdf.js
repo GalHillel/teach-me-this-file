@@ -14,14 +14,16 @@ const pageText = (items) =>
     .replace(/[ \t]+\n/g, '\n');
 
 const openPdf = async (data) => {
+  const task = pdfjs.getDocument({
+    data,
+    cMapUrl: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/cmaps/`,
+    cMapPacked: true,
+    isEvalSupported: false,
+  });
   try {
-    return await pdfjs.getDocument({
-      data,
-      cMapUrl: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/cmaps/`,
-      cMapPacked: true,
-      isEvalSupported: false,
-    }).promise;
+    return { task, pdf: await task.promise };
   } catch (error) {
+    await task.destroy();
     if (error?.name === 'PasswordException') {
       throw new ExtractionError('password', 'This PDF is password protected. Remove the password and upload it again.');
     }
@@ -30,29 +32,32 @@ const openPdf = async (data) => {
 };
 
 export const extractPdf = async (file, onProgress) => {
-  const pdf = await openPdf(new Uint8Array(await file.arrayBuffer()));
-  const pageCount = Math.min(pdf.numPages, MAX_PDF_PAGES);
+  const { task, pdf } = await openPdf(new Uint8Array(await file.arrayBuffer()));
+  const totalPages = pdf.numPages;
+  const pageCount = Math.min(totalPages, MAX_PDF_PAGES);
   const sections = [];
   const emptyPages = [];
 
-  for (let number = 1; number <= pageCount; number += 1) {
-    const page = await pdf.getPage(number);
-    const content = await page.getTextContent();
-    const text = pageText(content.items);
-    if (text.replace(/\s/g, '').length < MIN_PAGE_CHARS) {
-      emptyPages.push(number);
-    } else {
-      sections.push({ label: `Page ${number}`, text });
+  try {
+    for (let number = 1; number <= pageCount; number += 1) {
+      const page = await pdf.getPage(number);
+      const content = await page.getTextContent();
+      const text = pageText(content.items);
+      if (text.replace(/\s/g, '').length < MIN_PAGE_CHARS) {
+        emptyPages.push(number);
+      } else {
+        sections.push({ label: `Page ${number}`, text });
+      }
+      page.cleanup();
+      onProgress?.(number / pageCount);
     }
-    page.cleanup();
-    onProgress?.(number / pageCount);
+  } finally {
+    await task.destroy();
   }
 
-  await pdf.destroy();
-
   const warnings = [];
-  if (pdf.numPages > MAX_PDF_PAGES) {
-    warnings.push(`Only the first ${MAX_PDF_PAGES} of ${pdf.numPages} pages were read.`);
+  if (totalPages > MAX_PDF_PAGES) {
+    warnings.push(`Only the first ${MAX_PDF_PAGES} of ${totalPages} pages were read.`);
   }
   if (sections.length === 0) {
     throw new ExtractionError(
@@ -66,7 +71,7 @@ export const extractPdf = async (file, onProgress) => {
     );
   }
 
-  return { sections, pageCount: pdf.numPages, warnings };
+  return { sections, pageCount: totalPages, warnings };
 };
 
 const formatPages = (pages) => {
