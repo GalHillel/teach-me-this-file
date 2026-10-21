@@ -2,22 +2,24 @@
 
 @theme {
   --font-sans: 'Rubik', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Fraunces', 'Rubik', ui-serif, Georgia, serif;
+  --font-display: 'Bricolage Grotesque', 'Rubik', ui-sans-serif, sans-serif;
 
-  --color-paper: #f7f3ec;
-  --color-surface: #fffdf9;
-  --color-ink: #1c2826;
-  --color-muted: #5b6965;
-  --color-line: #e3dccf;
-  --color-pine: #1f4e46;
-  --color-pine-strong: #163a34;
-  --color-pine-soft: #e3eeea;
-  --color-amber: #e8b04a;
-  --color-amber-soft: #fbf0d7;
-  --color-danger: #a93f2c;
-  --color-danger-soft: #f9e6e1;
-  --color-success: #2c7149;
-  --color-success-soft: #e2f1e7;
+  --color-paper: #f3f6fa;
+  --color-surface: #ffffff;
+  --color-ink: #17223a;
+  --color-muted: #56627a;
+  --color-line: #d9e0ea;
+  --color-rule: #e7ecf3;
+  --color-margin: #e0645c;
+  --color-pen: #2847c4;
+  --color-pen-strong: #1d36a0;
+  --color-pen-soft: #e6ebfb;
+  --color-marker: #fff07a;
+  --color-marker-soft: #fff9cc;
+  --color-danger: #b83a2a;
+  --color-danger-soft: #fbe9e6;
+  --color-success: #1d7550;
+  --color-success-soft: #e0f2e9;
 }
 
 @layer base {
@@ -30,7 +32,7 @@
   }
 
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-pine;
+    @apply outline-2 outline-offset-2 outline-pen;
   }
 
   button {
@@ -47,7 +49,7 @@
 }
 
 @utility btn-primary {
-  @apply btn bg-pine text-white hover:bg-pine-strong;
+  @apply btn bg-pen text-white hover:bg-pen-strong;
 }
 
 @utility btn-secondary {
@@ -59,7 +61,7 @@
 }
 
 @utility field {
-  @apply w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-[15px] text-ink placeholder:text-muted/70 focus:border-pine focus:outline-none focus:ring-2 focus:ring-pine/20;
+  @apply w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-[15px] text-ink placeholder:text-muted/70 focus:border-pen focus:outline-none focus:ring-2 focus:ring-pen/20;
 }
 
 .prose-tutor {
@@ -142,5 +144,48 @@
   .typing-dot {
     animation: none;
     opacity: 0.6;
+  }
+}
+
+.notebook {
+  background-color: var(--color-surface);
+  background-image:
+    linear-gradient(to right, transparent 0, transparent 2.75rem, var(--color-margin) 2.75rem, var(--color-margin) calc(2.75rem + 1.5px), transparent calc(2.75rem + 1.5px)),
+    repeating-linear-gradient(to bottom, transparent 0, transparent calc(2rem - 1px), var(--color-rule) calc(2rem - 1px), var(--color-rule) 2rem);
+}
+
+@media (max-width: 640px) {
+  .notebook {
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(2rem - 1px), var(--color-rule) calc(2rem - 1px), var(--color-rule) 2rem);
+  }
+}
+
+mark.marker {
+  background: linear-gradient(to bottom, transparent 15%, var(--color-marker) 15%, var(--color-marker) 88%, transparent 88%);
+  color: inherit;
+  padding: 0 0.1em;
+}
+
+.streaming-caret .prose-tutor > :last-child::after,
+.streaming-caret .prose-tutor:empty::after {
+  content: '';
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-inline-start: 2px;
+  vertical-align: -0.12em;
+  background: var(--color-pen);
+  animation: caret 1s steps(2) infinite;
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .streaming-caret .prose-tutor > :last-child::after {
+    animation: none;
   }
 }
