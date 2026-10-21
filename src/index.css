@@ -1,0 +1,146 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Rubik', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', 'Rubik', ui-serif, Georgia, serif;
+
+  --color-paper: #f7f3ec;
+  --color-surface: #fffdf9;
+  --color-ink: #1c2826;
+  --color-muted: #5b6965;
+  --color-line: #e3dccf;
+  --color-pine: #1f4e46;
+  --color-pine-strong: #163a34;
+  --color-pine-soft: #e3eeea;
+  --color-amber: #e8b04a;
+  --color-amber-soft: #fbf0d7;
+  --color-danger: #a93f2c;
+  --color-danger-soft: #f9e6e1;
+  --color-success: #2c7149;
+  --color-success-soft: #e2f1e7;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-pine;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50;
+}
+
+@utility btn-primary {
+  @apply btn bg-pine text-white hover:bg-pine-strong;
+}
+
+@utility btn-secondary {
+  @apply btn border border-line bg-surface text-ink hover:bg-paper;
+}
+
+@utility btn-ghost {
+  @apply btn text-muted hover:bg-line/40 hover:text-ink;
+}
+
+@utility field {
+  @apply w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-[15px] text-ink placeholder:text-muted/70 focus:border-pine focus:outline-none focus:ring-2 focus:ring-pine/20;
+}
+
+.prose-tutor {
+  line-height: 1.65;
+}
+
+.prose-tutor > * + * {
+  margin-top: 0.7em;
+}
+
+.prose-tutor ul {
+  list-style: disc;
+  padding-inline-start: 1.25rem;
+}
+
+.prose-tutor ol {
+  list-style: decimal;
+  padding-inline-start: 1.25rem;
+}
+
+.prose-tutor li + li {
+  margin-top: 0.25em;
+}
+
+.prose-tutor strong {
+  font-weight: 600;
+}
+
+.prose-tutor code {
+  font-size: 0.9em;
+  background: var(--color-paper);
+  border-radius: 4px;
+  padding: 0.1em 0.3em;
+}
+
+.prose-tutor table {
+  border-collapse: collapse;
+  font-size: 0.92em;
+  display: block;
+  overflow-x: auto;
+}
+
+.prose-tutor th,
+.prose-tutor td {
+  border: 1px solid var(--color-line);
+  padding: 0.3em 0.6em;
+  text-align: start;
+}
+
+.prose-tutor .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.2em 0;
+}
+
+.typing-dot {
+  animation: typing 1.2s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes typing {
+  0%, 80%, 100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typing-dot {
+    animation: none;
+    opacity: 0.6;
+  }
+}
