@@ -37,10 +37,10 @@ const send = async (url, { headers, body, signal }) => {
 
 export const postJson = async (url, options) => {
   let response = await send(url, options);
-  if (response.status === 429) {
+  if (response.status === 429 || response.status === 503) {
     const detail = await response.text().catch(() => '');
-    const delay = retryDelayMs(response, detail);
-    if (delay > MAX_RETRY_WAIT_MS) throw providerError(429, detail);
+    const delay = response.status === 503 ? 1500 : retryDelayMs(response, detail);
+    if (delay > MAX_RETRY_WAIT_MS) throw providerError(response.status, detail);
     await wait(delay, options.signal);
     response = await send(url, options);
   }
