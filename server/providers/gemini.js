@@ -32,7 +32,7 @@ const answerText = (data) => {
     .join('');
 };
 
-const FALLBACK_CODES = new Set(['provider_unavailable', 'rate_limited', 'model_unavailable']);
+const FALLBACK_CODES = new Set(['provider_unavailable', 'rate_limited', 'model_unavailable', 'timeout']);
 
 const asList = (models) => (Array.isArray(models) ? models : [models]);
 
