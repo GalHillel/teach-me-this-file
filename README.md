@@ -4,9 +4,10 @@ A teacher uploads a file and writes a short prompt ("Teach this to 7th graders, 
 
 I built it as a home assignment for an AI Engineer role. The reasoning behind the main choices is in [DECISIONS.md](DECISIONS.md).
 
-- Live app: LIVE_URL
+- Live app: https://teach-me-this-file.vercel.app
+- Repository: https://github.com/GalHillel/teach-me-this-file
 - Stack: React 19 + Vite + Tailwind CSS 4 (JavaScript) on the front end, Node.js + Express 5 on the back end, deployed on Vercel.
-- AI: bring your own key. Google AI Studio (Gemini), Groq and OpenRouter keys work.
+- AI: bring your own key. Google AI Studio (Gemini), Groq and OpenRouter keys work. The live app also has a Gemini key on the server, so it works without one; a key typed in the settings is used instead when present.
 
 ## What it does
 
@@ -82,7 +83,7 @@ Without a key you can still click through the whole flow: set `ALLOW_MOCK_PROVID
 
 Get a free key from one of:
 
-- Google AI Studio: https://aistudio.google.com/apikey (default model `gemini-2.5-flash`)
+- Google AI Studio: https://aistudio.google.com/apikey (default models `gemini-2.5-flash`, and `gemini-2.5-flash-lite` for grading)
 - Groq: https://console.groq.com/keys (default model `llama-3.3-70b-versatile`)
 - OpenRouter: https://openrouter.ai/keys (default model `meta-llama/llama-3.3-70b-instruct:free`)
 
@@ -97,9 +98,11 @@ As an option, the server can have its own key: set `AI_API_KEY` (and `AI_PROVIDE
 | `PORT` | `8787` | Local API port |
 | `AI_API_KEY` | empty | Optional server key, used when the request has no key (`GEMINI_API_KEY` also works) |
 | `AI_PROVIDER` | detected | `gemini`, `groq` or `openrouter` for the server key |
-| `GEMINI_MODEL` | `gemini-2.5-flash` | Model for Gemini keys |
+| `GEMINI_MODEL` | `gemini-2.5-flash` | Gemini model for planning and teaching |
+| `GEMINI_GRADER_MODEL` | `gemini-2.5-flash-lite` | Gemini model that grades answers (faster, and a separate free-tier quota) |
 | `GROQ_MODEL` | `llama-3.3-70b-versatile` | Model for Groq keys |
 | `OPENROUTER_MODEL` | `meta-llama/llama-3.3-70b-instruct:free` | Model for OpenRouter keys |
+| `GEMINI_TUTOR_THINKING_BUDGET` | `0` | Gemini thinking tokens for the streamed tutor reply. `0` makes the first words appear faster; leave empty for models that do not accept the setting |
 | `PROVIDER_TIMEOUT_MS` | `45000` | Timeout for one provider call |
 | `RATE_LIMIT_PER_MINUTE` | `30` | Requests per minute per IP on the AI endpoints |
 | `ALLOW_MOCK_PROVIDER` | `false` | Enables the mock provider, for local testing only |

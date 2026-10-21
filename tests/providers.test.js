@@ -45,6 +45,7 @@ describe('Gemini provider', () => {
     const body = JSON.parse(options.body);
     expect(body.contents.map((content) => content.role)).toEqual(['user', 'model']);
     expect(body.systemInstruction.parts[0].text).toBe('sys');
+    expect(body.generationConfig.thinkingConfig).toEqual({ thinkingBudget: 0 });
   });
 
   it('parses JSON answers, even inside code fences', async () => {
@@ -56,12 +57,23 @@ describe('Gemini provider', () => {
   });
 
   it('maps a quota error and a blocked prompt', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response('{"error":{"status":"RESOURCE_EXHAUSTED"}}', { status: 429 }));
+    const quota = '{"error":{"status":"RESOURCE_EXHAUSTED","details":[{"retryDelay":"58s"}]}}';
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(quota, { status: 429 }));
     const provider = createGeminiProvider({ apiKey: 'AIzaTest', model: 'gemini-test' });
     await expect(provider.generateJson({ system: 's', prompt: 'p' })).rejects.toMatchObject({ code: 'rate_limited' });
 
     fetch.mockResolvedValueOnce(Response.json({ promptFeedback: { blockReason: 'SAFETY' } }));
     await expect(provider.generateJson({ system: 's', prompt: 'p' })).rejects.toMatchObject({ code: 'blocked' });
+  });
+
+  it('retries once after a short rate-limit wait', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response('{"error":{"details":[{"retryDelay":"0.01s"}]}}', { status: 429 }))
+      .mockResolvedValueOnce(Response.json({ candidates: [{ content: { parts: [{ text: '{"verdict":"correct"}' }] } }] }));
+    const provider = createGeminiProvider({ apiKey: 'AIzaTest', model: 'flash', graderModel: 'flash-lite' });
+    expect(await provider.generateJson({ task: 'assessment', system: 's', prompt: 'p' })).toEqual({ verdict: 'correct' });
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(fetch.mock.calls[0][0]).toContain('/models/flash-lite:generateContent');
   });
 });
 

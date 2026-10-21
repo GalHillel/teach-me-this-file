@@ -1,3 +1,4 @@
+import { config } from '../config.js';
 import { AppError } from '../errors.js';
 import { parseJsonText, postJson, readSseData } from './http.js';
 
@@ -8,6 +9,13 @@ const toContents = (messages) =>
     role: message.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: message.content }],
   }));
+
+const tutorGenerationConfig = () => {
+  const budget = Number.parseInt(config.geminiTutorThinkingBudget, 10);
+  return Number.isInteger(budget)
+    ? { temperature: 0.6, thinkingConfig: { thinkingBudget: budget } }
+    : { temperature: 0.6 };
+};
 
 const answerText = (data) => {
   const candidate = data.candidates?.[0];
@@ -24,9 +32,9 @@ const answerText = (data) => {
     .join('');
 };
 
-export const createGeminiProvider = ({ apiKey, model }) => {
-  const call = (method, body, signal) =>
-    postJson(`${BASE_URL}/${encodeURIComponent(model)}:${method}`, {
+export const createGeminiProvider = ({ apiKey, model, graderModel = model }) => {
+  const call = (method, body, signal, modelName = model) =>
+    postJson(`${BASE_URL}/${encodeURIComponent(modelName)}:${method}`, {
       headers: { 'x-goog-api-key': apiKey },
       body,
       signal,
@@ -36,7 +44,7 @@ export const createGeminiProvider = ({ apiKey, model }) => {
     name: 'gemini',
     model,
 
-    async generateJson({ system, prompt, signal }) {
+    async generateJson({ task, system, prompt, signal }) {
       const response = await call(
         'generateContent',
         {
@@ -45,6 +53,7 @@ export const createGeminiProvider = ({ apiKey, model }) => {
           generationConfig: { responseMimeType: 'application/json', temperature: 0.3 },
         },
         signal,
+        task === 'assessment' ? graderModel : model,
       );
       return parseJsonText(answerText(await response.json()));
     },
@@ -55,7 +64,7 @@ export const createGeminiProvider = ({ apiKey, model }) => {
         {
           systemInstruction: { parts: [{ text: system }] },
           contents: toContents(messages),
-          generationConfig: { temperature: 0.6 },
+          generationConfig: tutorGenerationConfig(),
         },
         signal,
       );
