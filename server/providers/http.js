@@ -40,11 +40,15 @@ export const postJson = async (url, options) => {
   if (response.status === 429) {
     const detail = await response.text().catch(() => '');
     const delay = retryDelayMs(response, detail);
-    if (delay > MAX_RETRY_WAIT_MS) throw providerError(429, detail);
+    if (delay > MAX_RETRY_WAIT_MS) {
+      console.log(`provider ${new URL(url).pathname} 429`);
+      throw providerError(429, detail);
+    }
     await wait(delay, options.signal);
     response = await send(url, options);
   }
   if (!response.ok) {
+    console.log(`provider ${new URL(url).pathname} ${response.status}`);
     throw providerError(response.status, await response.text().catch(() => ''));
   }
   return response;
