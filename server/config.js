@@ -8,8 +8,8 @@ export const config = {
   serverApiKey: process.env.AI_API_KEY || process.env.GEMINI_API_KEY || '',
   serverProvider: process.env.AI_PROVIDER || '',
   models: {
-    gemini: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
-    geminiGrader: process.env.GEMINI_GRADER_MODEL || 'gemini-2.5-flash-lite',
+    gemini: process.env.GEMINI_MODEL || 'gemini-3.5-flash',
+    geminiGrader: process.env.GEMINI_GRADER_MODEL || 'gemini-3.5-flash-lite',
     groq: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
     openrouter: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free',
   },
