@@ -132,9 +132,9 @@ describe('POST /api/turns', () => {
       name: 'failing',
       model: 'x',
       generateJson: async () => ({}),
-      async *streamText() {
-        throw new AppError('invalid_key');
-      },
+      streamText: () => ({
+        [Symbol.asyncIterator]: () => ({ next: () => Promise.reject(new AppError('invalid_key')) }),
+      }),
     };
     const app = createApp({ providerFor: () => failing });
     const events = parseEvents((await request(app).post('/api/turns').send(turn())).text);
