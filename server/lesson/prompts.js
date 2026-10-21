@@ -104,7 +104,7 @@ export const moveInstructions = ({ move, assessment, attempts, reviewTitles }) =
     case 'introduce':
       return 'Start the lesson. Greet the student in one short sentence and say in one sentence what they will learn. Then teach the current step: explain its idea simply with one example, and ask its check question in your own words.';
     case 'hint':
-      return `${notes}\nReply to the student's answer about the current step. Start by naming what is right, if anything. Then give ${HINTS[Math.min(attempts, 2)]} End by inviting them to try again.`;
+      return `${notes}\nReply to the student's answer about the current step. The answer is not complete yet, so do not call it right or correct as a whole. Start by naming the part that is right, if there is one. Then give ${HINTS[Math.min(attempts, 2)]} End by inviting them to try again.`;
     case 'advance':
       return `${notes}\nThe student answered the previous step correctly. Confirm it in one specific sentence. ${nextStepText}`;
     case 'reveal_and_advance':
