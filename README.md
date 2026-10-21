@@ -132,5 +132,6 @@ Any Node host works too: run `npm run build`, serve `dist/` as static files, and
 - Very long documents: the plan is built from up to about 60,000 characters sampled evenly across the file. Every passage is still used for the source panel.
 - The lesson lives in the browser tab. Reloading the page ends it.
 - The rate limit is in memory, per server instance.
+- The live app's own Gemini key is on the free tier. If its daily quota is used up, the server falls back to Flash-Lite, and when that is used up too, the app says the quota was reached. Adding your own key in the settings avoids this.
 
 More in [DECISIONS.md](DECISIONS.md#weaknesses-i-know-about).
