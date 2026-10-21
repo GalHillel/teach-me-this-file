@@ -1,11 +1,28 @@
 import { config } from '../config.js';
 import { AppError, providerError } from '../errors.js';
 
-export const postJson = async (url, { headers, body, signal }) => {
+const MAX_RETRY_WAIT_MS = 10000;
+
+const retryDelayMs = (response, detail) => {
+  const header = Number(response.headers.get('retry-after'));
+  if (Number.isFinite(header) && header > 0) return header * 1000;
+  const match = detail.match(/"retryDelay":\s*"(\d+(?:\.\d+)?)s"/);
+  return match ? Number(match[1]) * 1000 : 2000;
+};
+
+const wait = (ms, signal) =>
+  new Promise((resolve, reject) => {
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener('abort', () => {
+      clearTimeout(timer);
+      reject(signal.reason);
+    }, { once: true });
+  });
+
+const send = async (url, { headers, body, signal }) => {
   const timeout = AbortSignal.timeout(config.providerTimeoutMs);
-  let response;
   try {
-    response = await fetch(url, {
+    return await fetch(url, {
       method: 'POST',
       headers: { 'content-type': 'application/json', ...headers },
       body: JSON.stringify(body),
@@ -15,6 +32,17 @@ export const postJson = async (url, { headers, body, signal }) => {
     if (signal?.aborted) throw error;
     if (timeout.aborted) throw new AppError('timeout');
     throw new AppError('provider_unavailable');
+  }
+};
+
+export const postJson = async (url, options) => {
+  let response = await send(url, options);
+  if (response.status === 429) {
+    const detail = await response.text().catch(() => '');
+    const delay = retryDelayMs(response, detail);
+    if (delay > MAX_RETRY_WAIT_MS) throw providerError(429, detail);
+    await wait(delay, options.signal);
+    response = await send(url, options);
   }
   if (!response.ok) {
     throw providerError(response.status, await response.text().catch(() => ''));
