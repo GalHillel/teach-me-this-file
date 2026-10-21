@@ -69,10 +69,9 @@ describe('Gemini provider', () => {
     vi.spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(new Response('{"error":{"details":[{"retryDelay":"0.01s"}]}}', { status: 429 }))
       .mockResolvedValueOnce(Response.json({ candidates: [{ content: { parts: [{ text: '{"verdict":"correct"}' }] } }] }));
-    const provider = createGeminiProvider({ apiKey: 'AIzaTest', models: ['flash'], graderModels: ['flash-lite'] });
-    expect(await provider.generateJson({ task: 'assessment', system: 's', prompt: 'p' })).toEqual({ verdict: 'correct' });
+    const provider = createGeminiProvider({ apiKey: 'AIzaTest', models: ['flash'] });
+    expect(await provider.generateJson({ system: 's', prompt: 'p' })).toEqual({ verdict: 'correct' });
     expect(fetch).toHaveBeenCalledTimes(2);
-    expect(fetch.mock.calls[0][0]).toContain('/models/flash-lite:generateContent');
   });
 });
 

@@ -28,7 +28,7 @@ const FALLBACK_CODES = new Set(['provider_unavailable', 'rate_limited', 'model_u
 
 const asList = (models) => (Array.isArray(models) ? models : [models]);
 
-export const createGeminiProvider = ({ apiKey, models, graderModels = models }) => {
+export const createGeminiProvider = ({ apiKey, models }) => {
   const call = async (modelNames, method, body, signal) => {
     let lastError;
     for (const modelName of asList(modelNames)) {
@@ -50,9 +50,9 @@ export const createGeminiProvider = ({ apiKey, models, graderModels = models }) 
     name: 'gemini',
     model: asList(models)[0],
 
-    async generateJson({ task, system, prompt, signal }) {
+    async generateJson({ system, prompt, signal }) {
       const response = await call(
-        task === 'assessment' ? graderModels : models,
+        models,
         'generateContent',
         {
           systemInstruction: { parts: [{ text: system }] },
