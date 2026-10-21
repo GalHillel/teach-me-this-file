@@ -13,7 +13,7 @@ export const config = {
   serverApiKey: process.env.AI_API_KEY || process.env.GEMINI_API_KEY || '',
   serverProvider: process.env.AI_PROVIDER || '',
   models: {
-    gemini: listFromEnv('GEMINI_MODEL', ['gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-flash-latest']),
+    gemini: listFromEnv('GEMINI_MODEL', ['gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-3.5-flash-lite']),
     geminiGrader: listFromEnv('GEMINI_GRADER_MODEL', ['gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.5-flash']),
     groq: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
     openrouter: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free',

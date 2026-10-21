@@ -98,7 +98,7 @@ As an option, the server can have its own key: set `AI_API_KEY` (and `AI_PROVIDE
 | `PORT` | `8787` | Local API port |
 | `AI_API_KEY` | empty | Optional server key, used when the request has no key (`GEMINI_API_KEY` also works) |
 | `AI_PROVIDER` | detected | `gemini`, `groq` or `openrouter` for the server key |
-| `GEMINI_MODEL` | `gemini-3.5-flash,gemini-2.5-flash,gemini-flash-latest` | Gemini models for planning and teaching, tried in order when one is overloaded, out of quota or unavailable |
+| `GEMINI_MODEL` | `gemini-3.5-flash,gemini-2.5-flash,gemini-flash-latest,gemini-3.5-flash-lite` | Gemini models for planning and teaching, tried in order when one is overloaded, out of quota or unavailable. The Lite model is the last resort |
 | `GEMINI_GRADER_MODEL` | `gemini-3.5-flash-lite,gemini-flash-lite-latest,gemini-3.5-flash` | Gemini models that grade answers (faster, and a separate free-tier quota) |
 | `GROQ_MODEL` | `llama-3.3-70b-versatile` | Model for Groq keys |
 | `OPENROUTER_MODEL` | `meta-llama/llama-3.3-70b-instruct:free` | Model for OpenRouter keys |
