@@ -1,4 +1,3 @@
-import { config } from '../config.js';
 import { AppError } from '../errors.js';
 import { parseJsonText, postJson, readSseData } from './http.js';
 
@@ -9,13 +8,6 @@ const toContents = (messages) =>
     role: message.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: message.content }],
   }));
-
-const tutorGenerationConfig = () => {
-  const budget = Number.parseInt(config.geminiTutorThinkingBudget, 10);
-  return Number.isInteger(budget)
-    ? { temperature: 0.6, thinkingConfig: { thinkingBudget: budget } }
-    : { temperature: 0.6 };
-};
 
 const answerText = (data) => {
   const candidate = data.candidates?.[0];
@@ -79,7 +71,7 @@ export const createGeminiProvider = ({ apiKey, models, graderModels = models }) 
         {
           systemInstruction: { parts: [{ text: system }] },
           contents: toContents(messages),
-          generationConfig: tutorGenerationConfig(),
+          generationConfig: { temperature: 0.6 },
         },
         signal,
       );

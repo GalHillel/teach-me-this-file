@@ -102,7 +102,6 @@ As an option, the server can have its own key: set `AI_API_KEY` (and `AI_PROVIDE
 | `GEMINI_GRADER_MODEL` | `gemini-3.5-flash-lite,gemini-flash-lite-latest,gemini-3.5-flash` | Gemini models that grade answers (faster, and a separate free-tier quota) |
 | `GROQ_MODEL` | `llama-3.3-70b-versatile` | Model for Groq keys |
 | `OPENROUTER_MODEL` | `meta-llama/llama-3.3-70b-instruct:free` | Model for OpenRouter keys |
-| `GEMINI_TUTOR_THINKING_BUDGET` | `0` | Gemini thinking tokens for the streamed tutor reply. `0` makes the first words appear faster; leave empty for models that do not accept the setting |
 | `PROVIDER_TIMEOUT_MS` | `25000` | Timeout for one provider call, after which the next Gemini model is tried |
 | `RATE_LIMIT_PER_MINUTE` | `30` | Requests per minute per IP on the AI endpoints |
 | `ALLOW_MOCK_PROVIDER` | `false` | Enables the mock provider, for local testing only |

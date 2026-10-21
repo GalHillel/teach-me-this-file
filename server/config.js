@@ -18,7 +18,6 @@ export const config = {
     groq: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
     openrouter: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free',
   },
-  geminiTutorThinkingBudget: process.env.GEMINI_TUTOR_THINKING_BUDGET ?? '0',
   allowMockProvider: process.env.ALLOW_MOCK_PROVIDER === 'true',
   providerTimeoutMs: numberFromEnv('PROVIDER_TIMEOUT_MS', 25000),
   rateLimitPerMinute: numberFromEnv('RATE_LIMIT_PER_MINUTE', 30),

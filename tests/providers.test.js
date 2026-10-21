@@ -45,7 +45,6 @@ describe('Gemini provider', () => {
     const body = JSON.parse(options.body);
     expect(body.contents.map((content) => content.role)).toEqual(['user', 'model']);
     expect(body.systemInstruction.parts[0].text).toBe('sys');
-    expect(body.generationConfig.thinkingConfig).toEqual({ thinkingBudget: 0 });
   });
 
   it('parses JSON answers, even inside code fences', async () => {
