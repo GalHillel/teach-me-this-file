@@ -1,0 +1,90 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createGeminiProvider } from '../server/providers/gemini.js';
+import { detectProvider, resolveProvider } from '../server/providers/index.js';
+import { createOpenAiCompatibleProvider } from '../server/providers/openaiCompatible.js';
+
+const sseResponse = (events) =>
+  new Response(events.map((event) => `data: ${typeof event === 'string' ? event : JSON.stringify(event)}\n\n`).join(''), {
+    headers: { 'content-type': 'text/event-stream' },
+  });
+
+const collect = async (iterator) => {
+  let text = '';
+  for await (const part of iterator) text += part;
+  return text;
+};
+
+afterEach(() => vi.restoreAllMocks());
+
+describe('provider selection', () => {
+  it('detects the provider from the key prefix', () => {
+    expect(detectProvider('AIzaSyExample')).toBe('gemini');
+    expect(detectProvider('gsk_example')).toBe('groq');
+    expect(detectProvider('sk-or-v1-example')).toBe('openrouter');
+    expect(detectProvider('sk-example')).toBe(null);
+  });
+
+  it('lets the user pick a provider for an unknown key format', () => {
+    expect(resolveProvider({ apiKey: 'custom-key', provider: 'groq' }).name).toBe('groq');
+  });
+});
+
+describe('Gemini provider', () => {
+  it('streams text and skips thought parts', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(sseResponse([
+      { candidates: [{ content: { parts: [{ text: 'thinking', thought: true }] } }] },
+      { candidates: [{ content: { parts: [{ text: 'Hello ' }] } }] },
+      { candidates: [{ content: { parts: [{ text: 'student' }] }, finishReason: 'STOP' }] },
+    ]));
+    const provider = createGeminiProvider({ apiKey: 'AIzaTest', model: 'gemini-test' });
+    const text = await collect(provider.streamText({ system: 'sys', messages: [{ role: 'user', content: 'hi' }, { role: 'assistant', content: 'yo' }] }));
+    expect(text).toBe('Hello student');
+
+    const [url, options] = fetch.mock.calls[0];
+    expect(url).toContain('/models/gemini-test:streamGenerateContent?alt=sse');
+    const body = JSON.parse(options.body);
+    expect(body.contents.map((content) => content.role)).toEqual(['user', 'model']);
+    expect(body.systemInstruction.parts[0].text).toBe('sys');
+  });
+
+  it('parses JSON answers, even inside code fences', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(Response.json({
+      candidates: [{ content: { parts: [{ text: '```json\n{"verdict":"partial"}\n```' }] } }],
+    }));
+    const provider = createGeminiProvider({ apiKey: 'AIzaTest', model: 'gemini-test' });
+    expect(await provider.generateJson({ system: 's', prompt: 'p' })).toEqual({ verdict: 'partial' });
+  });
+
+  it('maps a quota error and a blocked prompt', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response('{"error":{"status":"RESOURCE_EXHAUSTED"}}', { status: 429 }));
+    const provider = createGeminiProvider({ apiKey: 'AIzaTest', model: 'gemini-test' });
+    await expect(provider.generateJson({ system: 's', prompt: 'p' })).rejects.toMatchObject({ code: 'rate_limited' });
+
+    fetch.mockResolvedValueOnce(Response.json({ promptFeedback: { blockReason: 'SAFETY' } }));
+    await expect(provider.generateJson({ system: 's', prompt: 'p' })).rejects.toMatchObject({ code: 'blocked' });
+  });
+});
+
+describe('OpenAI-compatible provider', () => {
+  it('streams deltas until [DONE]', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(sseResponse([
+      { choices: [{ delta: { role: 'assistant' } }] },
+      { choices: [{ delta: { content: 'Bon' } }] },
+      { choices: [{ delta: { content: 'jour' } }] },
+      '[DONE]',
+    ]));
+    const provider = createOpenAiCompatibleProvider({ name: 'groq', apiKey: 'gsk_test', model: 'llama' });
+    expect(await collect(provider.streamText({ system: 's', messages: [{ role: 'user', content: 'hi' }] }))).toBe('Bonjour');
+
+    const [url, options] = fetch.mock.calls[0];
+    expect(url).toBe('https://api.groq.com/openai/v1/chat/completions');
+    expect(options.headers.authorization).toBe('Bearer gsk_test');
+    expect(JSON.parse(options.body).messages[0]).toEqual({ role: 'system', content: 's' });
+  });
+
+  it('maps an invalid key', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{"error":"bad key"}', { status: 401 }));
+    const provider = createOpenAiCompatibleProvider({ name: 'openrouter', apiKey: 'sk-or-x', model: 'm' });
+    await expect(provider.generateJson({ system: 's', prompt: 'p' })).rejects.toMatchObject({ code: 'invalid_key' });
+  });
+});
