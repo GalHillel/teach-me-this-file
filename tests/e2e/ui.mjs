@@ -55,9 +55,10 @@ const startServer = () => {
 };
 
 const audit = async (page) => {
+  await page.evaluate(() => Promise.all(document.getAnimations().filter((animation) => animation.effect?.getTiming().iterations !== Infinity).map((animation) => animation.finished.catch(() => null))));
   await page.evaluate(axeSource);
   const layout = await page.evaluate(() => {
-    const width = window.innerWidth;
+    const width = Math.min(window.innerWidth, Math.round(window.visualViewport?.width ?? window.innerWidth));
     const visible = (element) => {
       const style = getComputedStyle(element);
       const rect = element.getBoundingClientRect();
@@ -184,6 +185,13 @@ try {
       await page.waitForSelector('h1');
       await startLesson(page);
       record('lesson-start', viewport, language, await audit(page));
+      let helped = false;
+      await step('ask for a hint', async () => {
+        const count = await page.locator('article').count();
+        await page.locator('form [role=group] button').first().click({ timeout: 3000 });
+        await waitTutorDone(page, count);
+        helped = await page.locator('form [role=group]').count() > 0;
+      });
       await answer(page, 'I think it is wrong');
       await answer(page, 'Still wrong, sorry');
       await answer(page, 'Wrong again');
@@ -206,11 +214,22 @@ try {
         record('source-dialog', viewport, language, await audit(page));
         await page.keyboard.press('Escape');
       });
-      for (let turn = 0; turn < 3 && !(await page.locator('#summary-title').count()); turn += 1) {
+      await answer(page, 'there is a gap in this answer');
+      const detourShown = await page.locator('[role=note]').filter({ hasText: language === 'he' ? 'רעיון קודם' : 'earlier idea' }).count() > 0;
+      record('detour', viewport, language, await audit(page), { detourShown });
+      const inFinal = async () => (await page.locator('#answer').getAttribute('placeholder')) === (language === 'he' ? 'תשובה מהזיכרון' : 'Answer from memory');
+      for (let turn = 0; turn < 6 && !(await inFinal()); turn += 1) {
+        await answer(page, 'Leaves take in carbon dioxide and roots take in water to make glucose and oxygen.');
+      }
+      const finalShown = await inFinal();
+      record('final-check', viewport, language, await audit(page), { finalShown });
+      await answer(page, 'This is a wrong answer');
+      for (let turn = 0; turn < 4 && !(await page.locator('#summary-title').count()); turn += 1) {
         await answer(page, 'Leaves take in carbon dioxide and roots take in water to make glucose and oxygen.');
       }
       record('lesson-complete', viewport, language, await audit(page), {
         completed: Boolean(await page.locator('#summary-title').count()),
+        helped,
       });
 
       let reviewed = false;
@@ -220,7 +239,7 @@ try {
         await page.waitForFunction(() => document.querySelector('[role=progressbar]')?.previousElementSibling?.textContent.match(/\d/), null, { timeout: 5000 });
         record('review', viewport, language, await audit(page));
         await answer(page, 'Leaves take in carbon dioxide and roots take in water to make glucose.');
-        reviewed = await page.locator('section[aria-labelledby="summary-title"] .rounded-full.bg-success-soft').count() > 0;
+        reviewed = await page.locator('section[aria-labelledby="summary-title"] p').filter({ hasText: language === 'he' ? 'תרגול:' : 'Practice:' }).count() > 0;
       });
       record('review-done', viewport, language, await audit(page), { reviewed, errors: [...errors], blocked });
 
@@ -311,7 +330,7 @@ try {
       await page.locator('main button.btn-primary').last().click();
       await page.waitForSelector('[role=progressbar]', { timeout: 20000 });
       await waitTutorDone(page, 0);
-      await page.locator('section button[aria-label]').filter({ has: page.locator('svg') }).first().click();
+      await page.getByRole('button', { name: language === 'he' ? 'חיפוש בקובץ' : 'Search the file' }).click();
       await page.waitForSelector('dialog[open] #document-search', { timeout: 5000 });
       record('document-panel', viewport, language, await audit(page));
       result.sectionsListed = await page.locator('dialog[open] li').count();
@@ -327,7 +346,7 @@ try {
       }
       if (await page.locator('dialog[open]').count()) await page.locator('dialog[open] button[aria-label]').first().click();
       await page.waitForFunction(() => !document.querySelector('dialog[open]'), null, { timeout: 3000 });
-      for (let turn = 0; turn < 4 && !(await page.locator('#summary-title').count()); turn += 1) await answer(page, 'Leaves take in carbon dioxide and water and make glucose.');
+      for (let turn = 0; turn < 10 && !(await page.locator('#summary-title').count()); turn += 1) await answer(page, 'Leaves take in carbon dioxide and water and make glucose.');
       const download = page.waitForEvent('download', { timeout: 5000 });
       await page.locator('section[aria-labelledby="summary-title"] button').filter({ hasText: language === 'he' ? 'הורדת סיכום' : 'Download notes' }).click();
       const file = await download;
@@ -370,6 +389,9 @@ const summary = {
       return all;
     }, {})),
   lessonCompleted: results.filter((row) => row.screen === 'lesson-complete').every((row) => row.completed),
+  helpActions: results.filter((row) => row.screen === 'lesson-complete').every((row) => row.helped),
+  detourShown: results.filter((row) => row.screen === 'detour').every((row) => row.detourShown),
+  finalCheckShown: results.filter((row) => row.screen === 'final-check').every((row) => row.finalShown),
   lessonRestored: results.filter((row) => row.screen === 'lesson-restored').every((row) => row.restored),
   recheckShown: results.filter((row) => row.screen === 'lesson-progress').every((row) => row.recheckShown),
   reviewCompleted: results.filter((row) => row.screen === 'review-done').every((row) => row.reviewed),
@@ -381,5 +403,5 @@ print(JSON.stringify(summary, null, 2));
 if (reportPath) writeFileSync(reportPath, `${JSON.stringify({ summary, results }, null, 2)}\n`);
 
 const serious = summary.axe.filter((violation) => violation.impact === 'serious' || violation.impact === 'critical');
-const failed = features.some((item) => item.error || !item.notesFile || !item.searchResults) || !keyboard?.escapeStops || !keyboard?.skipFocusesAnswer || !pdfStructure || pdfStructure.headerLeft || pdfStructure.footerLeft || pdfStructure.sections.length < 3 || !summary.recheckShown || !summary.reviewCompleted || summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
+const failed = features.some((item) => item.error || !item.notesFile || !item.searchResults) || !keyboard?.escapeStops || !keyboard?.skipFocusesAnswer || !pdfStructure || pdfStructure.headerLeft || pdfStructure.footerLeft || pdfStructure.sections.length < 3 || !summary.recheckShown || !summary.reviewCompleted || !summary.helpActions || !summary.detourShown || !summary.finalCheckShown || summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
 if (strict && failed) process.exit(1);

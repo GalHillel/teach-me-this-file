@@ -14,6 +14,7 @@ export default function Dialog({ open, onClose, title, children, variant = 'cent
 
   const placement = {
     center: 'm-auto w-[min(32rem,calc(100vw-2rem))] rounded-2xl',
+    wide: 'm-auto max-h-[92dvh] w-[min(60rem,calc(100vw-1.5rem))] rounded-2xl',
     side: 'my-0 ms-auto me-0 h-dvh max-h-dvh w-[min(30rem,100%)] sm:rounded-s-2xl max-sm:mt-auto max-sm:h-[80dvh] max-sm:w-full max-sm:max-w-full max-sm:rounded-t-2xl',
   }[variant];
 

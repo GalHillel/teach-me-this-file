@@ -2,7 +2,7 @@ import { localizeLabel, useI18n } from '../i18n/translate.js';
 import { highlightPassage, readableText } from '../lesson/sources.js';
 import Dialog from './Dialog.jsx';
 
-const KINDS = new Set(['based', 'related', 'step']);
+const KINDS = new Set(['cited', 'based', 'related', 'step']);
 
 export default function SourcePanel({ selection, chunks, onClose }) {
   const { t } = useI18n();

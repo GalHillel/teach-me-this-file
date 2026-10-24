@@ -104,3 +104,17 @@ export const highlightPassage = (passage, message) => {
     };
   });
 };
+
+export const conceptInFile = (concept, chunks) => {
+  if (!concept?.trim() || !chunks.length) return false;
+  return scoreChunks(concept, indexFor(chunks)).some((match) => match.queryCoverage >= 0.999);
+};
+
+export const stepDepths = (plan) => {
+  const depths = [];
+  plan.steps.forEach((step, index) => {
+    const parents = (step.prerequisites ?? []).map((id) => plan.steps.findIndex((item) => item.id === id)).filter((parent) => parent >= 0 && parent < index);
+    depths[index] = parents.length ? Math.max(...parents.map((parent) => depths[parent])) + 1 : 0;
+  });
+  return depths;
+};

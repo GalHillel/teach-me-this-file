@@ -1,20 +1,15 @@
+import { stepEvidence } from '../../shared/lesson.js';
 import { languageName, useI18n } from '../i18n/translate.js';
 import Icon from './Icon.jsx';
+import { LEVEL_STYLES } from './levels.js';
 
-const NEEDS_REVIEW = new Set(['recovered', 'review']);
+const MARKER_ICONS = { applied: 'target', shown: 'check', shown_with_help: 'check' };
 
-function StepMarker({ state, index }) {
-  if (state.status === 'done') {
-    const review = NEEDS_REVIEW.has(state.outcome);
-    return (
-      <span className={`grid size-6 shrink-0 place-items-center rounded-full ${review ? 'bg-marker text-ink' : 'bg-success text-white'}`}>
-        {review ? <span className="text-xs font-semibold">!</span> : <Icon name="check" className="size-3.5" />}
-      </span>
-    );
-  }
+function StepMarker({ level, index }) {
+  const icon = MARKER_ICONS[level];
   return (
-    <span className={`grid size-6 shrink-0 place-items-center rounded-full border text-xs font-medium ${state.status === 'active' ? 'border-pen bg-pen text-white' : 'border-line bg-surface text-muted'}`}>
-      {index + 1}
+    <span className={`grid size-6 shrink-0 place-items-center rounded-full text-xs font-semibold ${LEVEL_STYLES[level].marker}`}>
+      {icon ? <Icon name={icon} className="size-3.5" /> : level === 'needs_practice' ? '!' : index + 1}
     </span>
   );
 }
@@ -62,9 +57,10 @@ export default function LessonPlanPanel({ plan, progress, onSelectStep }) {
             const state = progress.steps[index];
             const active = (state.status === 'active' && progress.status === 'active') || (progress.status === 'reviewing' && progress.review.queue[progress.review.position] === index);
             const reachable = state.status !== 'pending' && onSelectStep;
+            const { level, signals } = stepEvidence(progress, index);
             const content = (
               <>
-                <StepMarker state={state} index={index} />
+                <StepMarker level={level} index={index} />
                 <span className="min-w-0 text-start">
                   <span dir="auto" className={`block text-sm leading-snug ${state.status === 'pending' ? 'text-muted' : 'font-medium text-ink'}`}>{step.title}</span>
                   {step.prerequisites?.length > 0 && (
@@ -72,13 +68,16 @@ export default function LessonPlanPanel({ plan, progress, onSelectStep }) {
                       {t('plan.buildsOn', { steps: step.prerequisites.map((id) => plan.steps.findIndex((item) => item.id === id) + 1).filter(Boolean).join(', ') })}
                     </span>
                   )}
+                  {active && Number.isInteger(state.detour) && <span className="mt-0.5 block text-xs font-medium text-ink">{t('plan.detour', { step: state.detour + 1 })}</span>}
                   {active && state.phase === 'recheck' && <span className="mt-0.5 block text-xs text-muted">{t('plan.recheck')}</span>}
-                  {active && state.phase !== 'recheck' && state.attempts > 0 && (
+                  {active && progress.status === 'active' && state.phase !== 'recheck' && state.attempts > 0 && (
                     <span className="mt-0.5 block text-xs text-muted">{t('plan.attempt', { count: state.attempts + 1 })}</span>
                   )}
-                  {state.outcome && <span className="mt-0.5 block text-xs text-muted">{t(`outcome.${state.outcome}`)}</span>}
-                  {progress.review?.results?.[index] && (
-                    <span className="mt-0.5 block text-xs text-muted">{t('plan.reviewed', { result: t(`reviewResult.${progress.review.results[index]}`) })}</span>
+                  {state.status === 'done' && (
+                    <span className="mt-0.5 block text-xs text-muted">
+                      {t(`level.${level}`)}
+                      {signals.length > 0 && `: ${signals.map((signal) => t(`signal.${signal}`)).join(', ')}`}
+                    </span>
                   )}
                 </span>
               </>

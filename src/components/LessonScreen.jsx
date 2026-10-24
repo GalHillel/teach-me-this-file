@@ -1,5 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '../i18n/translate.js';
+import { inFinalCheck, stepEvidence } from '../../shared/lesson.js';
 import { lessonSummary } from '../lesson/chatReducer.js';
 import { useTutor } from '../lesson/useTutor.js';
 import ChatMessage from './ChatMessage.jsx';
@@ -7,7 +8,9 @@ import Composer from './Composer.jsx';
 import Dialog from './Dialog.jsx';
 import DocumentPanel from './DocumentPanel.jsx';
 import Icon from './Icon.jsx';
+import LearningMap from './LearningMap.jsx';
 import LessonPlanPanel from './LessonPlanPanel.jsx';
+import { LEVEL_STYLES } from './levels.js';
 import SourcePanel from './SourcePanel.jsx';
 
 const PHASE_KEYS = {
@@ -16,16 +19,14 @@ const PHASE_KEYS = {
   teaching: 'lesson.writing',
 };
 
-const FINISH_MOVES = new Set(['finish', 'review_and_finish', 'review_finish']);
+const FINISH_MOVES = new Set(['final_finish', 'finish_skipped', 'review_finish', 'finish', 'review_and_finish']);
+
+const SUMMARY_LEVELS = ['applied', 'shown', 'shown_with_help', 'needs_practice'];
+
+const DAY_MS = 86400000;
 
 const KEY_ERRORS = ['missing_key', 'invalid_key', 'unknown_provider', 'server_key_restricted', 'server_key_budget', 'quota_exhausted'];
 
-const OUTCOME_STYLES = {
-  mastered: 'bg-success',
-  learned: 'bg-success/60',
-  recovered: 'bg-marker',
-  review: 'bg-danger/70',
-};
 
 function TypingIndicator({ phase }) {
   const { t } = useI18n();
@@ -77,29 +78,31 @@ function ErrorNotice({ failed, onRetry, onDismiss, onOpenSettings }) {
   );
 }
 
-const summaryText = (plan, summary, t) =>
-  [
-    plan.title,
-    '',
-    ...plan.steps.map((step, index) => `${index + 1}. ${step.title}`),
-    '',
-    ...(summary.review.length
-      ? [`${t('summary.review')}:`, ...summary.review.map((item) => `- ${item.title}${item.result ? ` (${t(`reviewResult.${item.result}`)})` : ''}`)]
-      : [t('summary.allGood')]),
-  ].join('\n');
+const reviewDate = (days, language) => new Intl.DateTimeFormat(language, { weekday: 'short', day: 'numeric', month: 'short' }).format(new Date(Date.now() + days * DAY_MS));
 
-const notesMarkdown = (plan, progress, messages, summary, t) => {
+const summaryLines = (plan, summary, t, language) => {
+  const lines = [];
+  if (summary.final) lines.push(summary.final.skipped ? t('summary.finalSkipped') : t('summary.final', summary.final), '');
+  for (const level of SUMMARY_LEVELS) {
+    if (!summary.groups[level].length) continue;
+    lines.push(`${t(`level.${level}`)}:`);
+    summary.groups[level].forEach((step) => lines.push(`- ${step.title}${step.signals.length ? ` (${step.signals.map((signal) => t(`signal.${signal}`)).join(', ')})` : ''}`));
+    lines.push('');
+  }
+  if (summary.schedule.length) {
+    lines.push(`${t('summary.schedule')}:`);
+    summary.schedule.forEach((item) => lines.push(`- ${reviewDate(item.days, language)}: ${item.title}`));
+  }
+  return lines;
+};
+
+const summaryText = (plan, summary, t, language) => [plan.title, '', ...summaryLines(plan, summary, t, language)].join('\n');
+
+const notesMarkdown = (plan, messages, summary, t, language) => {
   const lines = [`# ${plan.title}`, ''];
   if (plan.objectives.length) lines.push(`## ${t('plan.goals')}`, ...plan.objectives.map((item) => `- ${item}`), '');
-  lines.push(`## ${t('plan.steps')}`);
-  plan.steps.forEach((step, index) => {
-    const outcome = progress.steps[index].outcome;
-    const result = progress.review?.results?.[index];
-    lines.push(`${index + 1}. ${step.title}${outcome ? ` (${t(`outcome.${outcome}`)}${result ? `; ${t(`reviewResult.${result}`)}` : ''})` : ''}`);
-  });
-  lines.push('', summary.review.length ? `## ${t('summary.review')}` : t('summary.allGood'));
-  summary.review.forEach((item) => lines.push(`- ${item.title}`));
-  lines.push('', `## ${t('lesson.chat')}`, '');
+  lines.push(`## ${t('summary.title')}`, '', ...summaryLines(plan, summary, t, language), '');
+  lines.push(`## ${t('lesson.chat')}`, '');
   messages
     .filter((message) => (message.role === 'tutor' || message.role === 'student') && message.content)
     .forEach((message) => lines.push(`**${message.role === 'tutor' ? t('chat.tutor') : t('summary.you')}:** ${message.content}`, ''));
@@ -116,13 +119,14 @@ const downloadText = (name, text) => {
 };
 
 function CompletionCard({ plan, progress, messages, busy, onReview, onNewLesson }) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const [copied, setCopied] = useState(false);
   const summary = lessonSummary(plan, progress);
+  const practicePassed = summary.practice.filter((item) => item.result === 'pass').length;
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(summaryText(plan, summary, t));
+      await navigator.clipboard.writeText(summaryText(plan, summary, t, language));
       setCopied(true);
     } catch {
       setCopied(false);
@@ -130,59 +134,71 @@ function CompletionCard({ plan, progress, messages, busy, onReview, onNewLesson 
   };
 
   return (
-    <section className="rounded-2xl border border-line bg-paper px-5 py-5" aria-labelledby="summary-title">
+    <section className="step-enter rounded-2xl border border-line bg-paper px-5 py-5" aria-labelledby="summary-title">
       <h2 id="summary-title" className="font-display text-lg font-semibold">{t('summary.title')}</h2>
-      <p className="mt-1 text-sm text-muted">{t('summary.intro', { total: summary.total, title: plan.title })}</p>
+      <p className="mt-1 text-sm text-muted">{t('summary.basedOn')}</p>
 
-      <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-        {Object.entries(summary.counts).filter(([, count]) => count > 0).map(([outcome, count]) => (
-          <li key={outcome} className="flex items-center gap-2 text-sm">
-            <span className={`size-2.5 rounded-full ${OUTCOME_STYLES[outcome]}`} aria-hidden="true" />
-            <span className="font-medium tabular-nums">{count}</span>
-            <span className="text-muted">{t(`outcome.${outcome}`)}</span>
-          </li>
-        ))}
-      </ul>
+      {summary.final && (
+        <p className="mt-3 flex items-center gap-2 text-sm font-medium">
+          <Icon name="target" className="size-4 text-applied" />
+          {summary.final.skipped ? t('summary.finalSkipped') : t('summary.final', summary.final)}
+        </p>
+      )}
 
-      <div className="mt-4">
-        {summary.review.length > 0 ? (
-          <>
-            <h3 className="text-sm font-semibold">{t('summary.review')}</h3>
-            <ul className="mt-1.5 space-y-1 text-sm">
-              {summary.review.map((item) => (
-                <li key={item.index} className="flex flex-wrap items-center gap-2">
-                  <span dir="auto">{item.title}</span>
-                  {item.result && (
-                    <span className={`rounded-full px-2 py-0.5 text-xs ${item.result === 'pass' ? 'bg-success-soft text-success' : 'bg-danger-soft text-danger'}`}>
-                      {t(`reviewResult.${item.result}`)}
-                    </span>
-                  )}
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        {SUMMARY_LEVELS.filter((level) => summary.groups[level].length).map((level) => (
+          <div key={level}>
+            <h3 className="flex items-center gap-2 text-sm font-semibold">
+              <span className={`size-2.5 rounded-full ${LEVEL_STYLES[level].dot}`} aria-hidden="true" />
+              {t(`level.${level}`)}
+            </h3>
+            <ul className="mt-1.5 space-y-1.5 text-sm">
+              {summary.groups[level].map((step) => (
+                <li key={step.index}>
+                  <span dir="auto" className="block">{step.title}</span>
+                  {step.signals.length > 0 && <span className="block text-xs text-muted">{step.signals.map((signal) => t(`signal.${signal}`)).join(', ')}</span>}
                 </li>
               ))}
             </ul>
-            {summary.reviewed && (
-              <p className="mt-2 text-sm text-muted">
-                {t('summary.reviewResult', { passed: summary.review.filter((item) => item.result === 'pass').length, total: summary.review.length })}
-              </p>
-            )}
-          </>
-        ) : (
-          <p className="text-sm">{t('summary.allGood')}</p>
-        )}
+          </div>
+        ))}
       </div>
 
+      {summary.practiced && <p className="mt-3 text-sm text-muted">{t('summary.practiceResult', { passed: practicePassed, total: summary.practice.length })}</p>}
+
+      {summary.schedule.length > 0 && (
+        <div className="mt-5 rounded-xl border border-line bg-surface px-4 py-3">
+          <h3 className="flex items-center gap-2 text-sm font-semibold">
+            <Icon name="calendar" className="size-4 text-muted" />
+            {t('summary.schedule')}
+          </h3>
+          <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
+            {summary.schedule.map((item) => (
+              <Fragment key={item.index}>
+                <dt className="whitespace-nowrap font-medium">
+                  {t('summary.inDays', { count: item.days })}
+                  <span className="ms-1.5 font-normal text-muted">{reviewDate(item.days, language)}</span>
+                </dt>
+                <dd dir="auto">{item.title}</dd>
+              </Fragment>
+            ))}
+          </dl>
+          <p className="mt-2 text-xs text-muted">{t('summary.scheduleNote')}</p>
+        </div>
+      )}
+
       <div className="mt-5 flex flex-wrap items-center gap-2">
-        {summary.review.length > 0 && !summary.reviewed && (
+        {summary.practice.length > 0 && !summary.practiced && (
           <button type="button" className="btn-primary py-1.5" onClick={onReview} disabled={busy}>
             <Icon name="retry" className="size-4" />
-            {t('summary.practise', { count: summary.review.length })}
+            {t('summary.practise', { count: summary.practice.length })}
           </button>
         )}
         <button type="button" className="btn-secondary py-1.5" onClick={copy}>
           <Icon name={copied ? 'check' : 'copy'} className="size-4" />
           {copied ? t('summary.copied') : t('summary.copy')}
         </button>
-        <button type="button" className="btn-secondary py-1.5" onClick={() => downloadText('lesson-notes.md', notesMarkdown(plan, progress, messages, summary, t))}>
+        <button type="button" className="btn-secondary py-1.5" onClick={() => downloadText('lesson-notes.md', notesMarkdown(plan, messages, summary, t, language))}>
           <Icon name="download" className="size-4" />
           {t('summary.download')}
         </button>
@@ -193,27 +209,63 @@ function CompletionCard({ plan, progress, messages, busy, onReview, onNewLesson 
   );
 }
 
+const focusLabel = (plan, progress, t) => {
+  if (progress.status === 'reviewing') {
+    const values = { current: progress.review.position + 1, total: progress.review.queue.length };
+    return progress.review.kind === 'final' ? t('focus.final', values) : t('focus.practice', values);
+  }
+  if (progress.status === 'completed') return t('focus.done');
+  const detour = progress.steps[progress.currentStep].detour;
+  if (Number.isInteger(detour)) return t('focus.detour', { step: detour + 1 });
+  return t('focus.step', { current: progress.currentStep + 1, total: plan.steps.length });
+};
+
+function StepFocus({ plan, progress }) {
+  const { t } = useI18n();
+  if (progress.status === 'completed') return null;
+  const index = progress.status === 'reviewing' ? progress.review.queue[progress.review.position] : progress.steps[progress.currentStep].detour ?? progress.currentStep;
+  const step = plan.steps[index];
+  const final = inFinalCheck(progress);
+  const special = progress.status === 'reviewing' || Number.isInteger(progress.steps[progress.currentStep].detour);
+  return (
+    <div className={`border-b border-line px-4 py-2.5 sm:px-6 ${final ? 'bg-pen-soft' : 'bg-surface'}`}>
+      <div className="mx-auto flex max-w-3xl flex-wrap items-baseline gap-x-3 gap-y-1">
+        {special && <span className={`text-xs font-semibold uppercase tracking-wide ${final ? 'text-pen' : 'text-ink'}`}>{focusLabel(plan, progress, t)}</span>}
+        <span dir="auto" className="min-w-0 text-sm font-medium">{step.title}</span>
+        {!final && <span dir="auto" className="hidden min-w-0 flex-1 truncate text-sm text-muted md:block">{step.goal}</span>}
+      </div>
+    </div>
+  );
+}
+
 function StepCounter({ plan, progress }) {
   const { t } = useI18n();
   const completed = progress.status !== 'active';
   const done = progress.steps.filter((step) => step.status === 'done').length;
+  const reviewValues = progress.review ? { current: progress.review.position + 1, total: progress.review.queue.length } : null;
   const label = progress.status === 'reviewing'
-    ? t('lesson.reviewOf', { current: progress.review.position + 1, total: progress.review.queue.length })
+    ? t(progress.review.kind === 'final' ? 'lesson.finalOf' : 'lesson.practiceOf', reviewValues)
     : completed ? t('lesson.complete') : t('lesson.stepOf', { current: progress.currentStep + 1, total: plan.steps.length });
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
       <span className="whitespace-nowrap text-sm font-medium tabular-nums">{label}</span>
-      <div className="flex h-2 w-24 gap-0.5 sm:w-36" role="progressbar" aria-label={t('lesson.progress')} aria-valuemin={0} aria-valuemax={plan.steps.length} aria-valuenow={done}>
+      <div className="flex h-2 w-14 gap-0.5 sm:w-36" role="progressbar" aria-label={t('lesson.progress')} aria-valuemin={0} aria-valuemax={plan.steps.length} aria-valuenow={done}>
         {progress.steps.map((step, index) => (
           <span
             key={plan.steps[index].id}
-            className={`flex-1 rounded-full ${step.status === 'done' ? OUTCOME_STYLES[step.outcome] ?? 'bg-success' : step.status === 'active' && !completed ? 'bg-pen' : 'bg-line'}`}
+            className={`flex-1 rounded-full ${LEVEL_STYLES[stepEvidence(progress, index).level].dot}`}
           />
         ))}
       </div>
     </div>
   );
 }
+
+const composerMode = (progress) => {
+  if (progress.status === 'completed') return 'completed';
+  if (progress.status === 'reviewing') return progress.review.kind === 'final' ? 'final' : 'practice';
+  return Number.isInteger(progress.steps[progress.currentStep].detour) ? 'detour' : 'learn';
+};
 
 const useStickToBottom = (dependency) => {
   const ref = useRef(null);
@@ -241,6 +293,7 @@ export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLe
   const tutor = useTutor({ lesson, settings });
   const [planOpen, setPlanOpen] = useState(false);
   const [documentOpen, setDocumentOpen] = useState(false);
+  const [mapOpen, setMapOpen] = useState(false);
   const [sourceSelection, setSourceSelection] = useState(null);
   const chunkLabels = useMemo(() => new Map(lesson.document.chunks.map((chunk) => [chunk.id, chunk.label])), [lesson.document.chunks]);
   const lastContent = tutor.messages.at(-1)?.content;
@@ -264,6 +317,7 @@ export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLe
   const showStep = useCallback((index) => {
     setPlanOpen(false);
     setDocumentOpen(false);
+    setMapOpen(false);
     const target = scrollRef.current?.querySelector(`[data-step-index="${index}"]`);
     if (!target) return;
     setPinned(false);
@@ -285,17 +339,22 @@ export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLe
           {t('lesson.skipToAnswer')}
         </a>
         <div className="flex items-center justify-between gap-3 border-b border-line bg-surface/80 px-4 py-2.5 backdrop-blur sm:px-6">
-          <h1 className="min-w-0 truncate font-display text-base font-semibold lg:sr-only" dir="auto">{plan.title}</h1>
-          <div className="flex items-center gap-2 lg:ms-auto">
+          <h1 className="min-w-0 truncate font-display text-base font-semibold max-sm:sr-only lg:sr-only" dir="auto">{plan.title}</h1>
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-1 sm:gap-2">
             <StepCounter plan={plan} progress={progress} />
-            <button type="button" className="btn-ghost min-h-10 px-2" onClick={() => setDocumentOpen(true)} aria-label={t('doc.title')} title={t('doc.title')}>
+            <button type="button" className="btn-ghost min-h-10 px-1.5 sm:px-2" onClick={() => setMapOpen(true)} aria-label={t('map.open')} title={t('map.open')}>
+              <Icon name="map" />
+            </button>
+            <button type="button" className="btn-ghost min-h-10 px-1.5 sm:px-2" onClick={() => setDocumentOpen(true)} aria-label={t('doc.title')} title={t('doc.title')}>
               <Icon name="search" />
             </button>
-            <button type="button" className="btn-ghost min-h-10 px-2 lg:hidden" onClick={() => setPlanOpen(true)} aria-label={t('lesson.showPlan')}>
+            <button type="button" className="btn-ghost min-h-10 px-1.5 sm:px-2 lg:hidden" onClick={() => setPlanOpen(true)} aria-label={t('lesson.showPlan')}>
               <Icon name="list" />
             </button>
           </div>
         </div>
+
+        <StepFocus plan={plan} progress={progress} />
 
         <div className="relative min-h-0 flex-1">
           <div ref={scrollRef} onScroll={onScroll} className="h-full overflow-y-auto bg-surface">
@@ -325,7 +384,7 @@ export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLe
           )}
         </div>
 
-        <Composer busy={tutor.busy} completed={completed} onSend={tutor.send} onStop={tutor.stop} />
+        <Composer busy={tutor.busy} mode={composerMode(progress)} onSend={tutor.send} onStop={tutor.stop} onAsk={tutor.ask} />
       </section>
 
       <Dialog open={planOpen} onClose={() => setPlanOpen(false)} title={plan.title} variant="side" labelId="plan-title">
@@ -333,6 +392,8 @@ export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLe
       </Dialog>
 
       <SourcePanel selection={sourceSelection} chunks={lesson.document.chunks} onClose={() => setSourceSelection(null)} />
+
+      <LearningMap open={mapOpen} onClose={() => setMapOpen(false)} plan={plan} progress={progress} chunks={lesson.document.chunks} onShowStep={showStep} />
 
       <DocumentPanel
         open={documentOpen}

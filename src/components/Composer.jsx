@@ -4,7 +4,7 @@ import Icon from './Icon.jsx';
 
 const MAX_LENGTH = 2000;
 
-export default function Composer({ busy, completed, onSend, onStop }) {
+export default function Composer({ busy, mode, onSend, onStop, onAsk }) {
   const { t } = useI18n();
   const [text, setText] = useState('');
   const inputRef = useRef(null);
@@ -26,6 +26,9 @@ export default function Composer({ busy, completed, onSend, onStop }) {
     setText('');
   };
 
+  const completed = mode === 'completed';
+  const placeholder = completed ? t('composer.followUp') : mode === 'final' ? t('composer.finalPlaceholder') : t('composer.placeholder');
+
   return (
     <form
       className="border-t border-line bg-surface px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:px-6"
@@ -34,6 +37,29 @@ export default function Composer({ busy, completed, onSend, onStop }) {
         submit();
       }}
     >
+      {mode === 'learn' && (
+        <div className="mx-auto mb-2 flex max-w-3xl flex-wrap items-center gap-1.5" role="group" aria-label={t('composer.helpLabel')}>
+          <button type="button" className="chip-action" disabled={busy} onClick={() => onAsk('hint', t('composer.hintRequest'))}>
+            <Icon name="bulb" className="size-3.5" />
+            {t('composer.hintButton')}
+          </button>
+          <button type="button" className="chip-action" disabled={busy} onClick={() => onAsk('explain', t('composer.explainRequest'))}>
+            <Icon name="retry" className="size-3.5" />
+            {t('composer.explainButton')}
+          </button>
+        </div>
+      )}
+      {mode === 'final' && (
+        <div className="mx-auto mb-2 flex max-w-3xl flex-wrap items-center justify-between gap-2 text-xs text-muted">
+          <span className="flex items-center gap-1.5">
+            <Icon name="target" className="size-3.5" />
+            {t('composer.finalNote')}
+          </span>
+          <button type="button" className="chip-action" disabled={busy} onClick={() => onAsk('skip_final', t('composer.skipRequest'))}>
+            {t('composer.skipFinal')}
+          </button>
+        </div>
+      )}
       <div className="mx-auto flex max-w-3xl items-end gap-2">
         <label htmlFor="answer" className="sr-only">{t('composer.label')}</label>
         <textarea
@@ -50,7 +76,7 @@ export default function Composer({ busy, completed, onSend, onStop }) {
               submit();
             }
           }}
-          placeholder={completed ? t('composer.followUp') : t('composer.placeholder')}
+          placeholder={placeholder}
           className="field min-h-11 resize-none py-2.5 leading-normal"
         />
         {busy ? (

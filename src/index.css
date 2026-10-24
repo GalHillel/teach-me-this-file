@@ -20,6 +20,8 @@
   --color-danger-soft: #fbe9e6;
   --color-success: #1d7550;
   --color-success-soft: #e0f2e9;
+  --color-applied: #0f5b3d;
+  --color-help: #5a6fd6;
 }
 
 @layer base {
@@ -58,6 +60,10 @@
 
 @utility btn-ghost {
   @apply btn text-muted hover:bg-line/40 hover:text-ink;
+}
+
+@utility chip-action {
+  @apply inline-flex min-h-8 items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-sm text-ink transition-colors hover:border-pen hover:text-pen disabled:opacity-50 disabled:hover:border-line disabled:hover:text-ink;
 }
 
 @utility field {
@@ -198,6 +204,44 @@ mark.marker {
 
 @media (prefers-reduced-motion: reduce) {
   .streaming-caret .prose-tutor > :last-child::after {
+    animation: none;
+  }
+}
+
+.cite-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin-inline: 0.15em;
+  padding: 0 0.45em;
+  border: 1px solid var(--color-line);
+  border-radius: 0.4em;
+  background: var(--color-surface);
+  color: var(--color-pen);
+  font-size: 12.5px;
+  line-height: 1.2;
+  vertical-align: middle;
+  white-space: nowrap;
+  unicode-bidi: isolate;
+}
+
+.cite-chip:hover {
+  border-color: var(--color-pen);
+}
+
+.step-enter {
+  animation: step-enter 240ms ease-out;
+}
+
+@keyframes step-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step-enter {
     animation: none;
   }
 }
