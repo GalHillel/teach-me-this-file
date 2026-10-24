@@ -19,7 +19,9 @@
     "test:e2e": "vite build && node tests/e2e/ui.mjs --strict",
     "eval:retrieval": "node eval/retrieval.js",
     "eval:sources": "node eval/sources.js",
-    "bench": "node eval/bench.js"
+    "bench": "node eval/bench.js",
+    "eval:hybrid": "node eval/hybrid-retrieval.js",
+    "eval:load": "node eval/load.mjs"
   },
   "dependencies": {
     "@fontsource/bricolage-grotesque": "^5.3.0",

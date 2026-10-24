@@ -47,3 +47,21 @@ describe('rankChunks', () => {
     expect(rankChunks('glucose', [])).toEqual([]);
   });
 });
+
+describe('character trigram experiment', async () => {
+  const { buildNgramIndex, fuseRanks, scoreNgrams } = await import('../shared/ngrams.js');
+
+  it('matches word forms that share most letters, which word matching misses', () => {
+    const chunks = [
+      { id: 'c1', text: 'The plant photosynthesizes in its leaves.' },
+      { id: 'c2', text: 'Roots hold the soil together.' },
+    ];
+    const scored = scoreNgrams('photosynthesis', buildNgramIndex(chunks)).sort((a, b) => b.score - a.score);
+    expect(scored[0].chunk.id).toBe('c1');
+    expect(scored[1].score).toBeLessThan(0.1);
+  });
+
+  it('fuses rankings by reciprocal rank', () => {
+    expect(fuseRanks([['a', 'b', 'c'], ['b', 'c', 'a']])).toEqual(['b', 'a', 'c']);
+  });
+});
