@@ -104,7 +104,19 @@ const STEP_STATUSES = new Set(['pending', 'active', 'done']);
 const PHASES = new Set(['learn', 'recheck']);
 const OUTCOMES = new Set([null, ...LESSON_OUTCOMES]);
 
-const count = (value, max) => (Number.isInteger(value) && value >= 0 ? Math.min(value, max) : 0);
+const count = (value, max, name) => {
+  if (value === undefined || value === null) return 0;
+  if (!Number.isInteger(value) || value < 0 || value > max) fail(`${name} is out of range`);
+  return value;
+};
+
+const checkConsistency = ({ status, currentStep, steps }) => {
+  steps.forEach((step, index) => {
+    if ((step.status === 'done') !== (step.outcome !== null)) fail('progress step outcome does not match its status');
+    const expected = status !== 'active' ? 'done' : index < currentStep ? 'done' : index === currentStep ? 'active' : 'pending';
+    if (step.status !== expected) fail('progress steps do not match the current step');
+  });
+};
 
 const review = (value, status, stepCount) => {
   if (status !== 'reviewing' && (value === null || value === undefined)) return null;
@@ -119,7 +131,7 @@ const review = (value, status, stepCount) => {
     if (!queue.includes(Number(key)) || !REVIEW_RESULTS.includes(result)) fail('progress.review.results is not valid');
     return [Number(key), result];
   }));
-  return { queue, position: value.position, results: cleanResults, stalls: count(value.stalls, 10) };
+  return { queue, position: value.position, results: cleanResults, stalls: count(value.stalls, 10, 'progress.review.stalls') };
 };
 
 const progress = (value, stepCount) => {
@@ -130,24 +142,26 @@ const progress = (value, stepCount) => {
     fail('progress.currentStep is out of range');
   }
   if (!['active', 'completed', 'reviewing'].includes(value.status)) fail('progress.status is not valid');
-  return {
+  const clean = {
     status: value.status,
     currentStep: value.currentStep,
     review: review(value.review, value.status, stepCount),
     steps: steps.map((step) => {
-      if (!isObject(step) || !STEP_STATUSES.has(step.status) || !OUTCOMES.has(step.outcome ?? null)) {
+      if (!isObject(step) || !STEP_STATUSES.has(step.status) || !OUTCOMES.has(step.outcome ?? null) || !PHASES.has(step.phase ?? 'learn')) {
         fail('progress step is not valid');
       }
       return {
         status: step.status,
-        phase: PHASES.has(step.phase) ? step.phase : 'learn',
-        attempts: count(step.attempts, 10),
-        stalls: count(step.stalls, 10),
+        phase: step.phase ?? 'learn',
+        attempts: count(step.attempts, 10, 'progress step attempts'),
+        stalls: count(step.stalls, 10, 'progress step stalls'),
         probed: step.probed === true,
         outcome: step.outcome ?? null,
       };
     }),
   };
+  checkConsistency(clean);
+  return clean;
 };
 
 const history = (value) =>

@@ -115,13 +115,23 @@ describe('chat reducer', () => {
     expect(chatReducer(state, { type: 'dismiss_error' }).failed).toBe(null);
   });
 
-  it('builds history from finished messages only', () => {
-    const state = chatReducer(run(answerTurn), { type: 'stopped' });
-    expect(historyFor(state.messages, null)).toEqual([
+  it('builds history from finished messages only, so an interrupted reply never becomes the question', () => {
+    const opening = [
+      { type: 'turn_started', tutorId: 't0' },
+      { type: 'progress', move: 'introduce', progress },
+      { type: 'delta', text: 'What do mitochondria do?' },
+      { type: 'done' },
+    ];
+    const stopped = chatReducer(run([...opening, ...answerTurn]), { type: 'stopped' });
+    expect(stopped.progress).toBe(progress);
+    expect(historyFor(stopped.messages, null)).toEqual([
+      { role: 'tutor', content: 'What do mitochondria do?' },
       { role: 'student', content: 'They release energy' },
-      { role: 'tutor', content: expect.stringContaining('[message interrupted by the student]') },
     ]);
-    expect(historyFor(state.messages, 's1')).toHaveLength(1);
+    expect(historyFor(stopped.messages, 's1')).toEqual([{ role: 'tutor', content: 'What do mitochondria do?' }]);
+
+    const failed = chatReducer(run([...opening, ...answerTurn]), { type: 'failed', failed: { code: 'timeout', retryable: true, studentId: 's1' } });
+    expect(historyFor(failed.messages, 's1')).toEqual([{ role: 'tutor', content: 'What do mitochondria do?' }]);
   });
 });
 

@@ -3,7 +3,14 @@ const MAX_HEADING_LENGTH = 90;
 const HEADING_SIZE_RATIO = 1.2;
 const MARKDOWN_HEADING = /^#{1,6}\s+(.+?)\s*#*\s*$/;
 
-const lineKey = (text) => text.trim().toLowerCase().replace(/\d+/g, '#').replace(/\s+/g, ' ');
+const PAGE_MARKER = /(?:page|pg\.?|p\.|seite|página|pagina|עמוד|עמ['׳]|страница|صفحة)\s*\d+(?:\s*(?:of|\/|מתוך|de|von|di|из|من)\s*\d+)?/giu;
+const EDGE_NUMBER = /^\d+\s*[|·•\-–—]\s*|\s*[|·•\-–—]\s*\d+$/gu;
+
+const lineKey = (text) => {
+  const clean = text.trim().toLowerCase().replace(/\s+/g, ' ');
+  if (/^[^\p{L}\p{N}]*\d+(?:\s*(?:\/|of)\s*\d+)?[^\p{L}\p{N}]*$/u.test(clean)) return '#';
+  return clean.replace(PAGE_MARKER, '#').replace(EDGE_NUMBER, ' #');
+};
 
 export const pageLines = (items) => {
   const lines = [];

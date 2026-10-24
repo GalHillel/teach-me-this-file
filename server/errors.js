@@ -38,6 +38,8 @@ const STATUS = {
 
 const RETRYABLE = new Set(['rate_limited', 'timeout', 'provider_unavailable', 'bad_response', 'too_many_requests', 'unsafe_output', 'internal']);
 
+export const ERROR_CODES = Object.keys(MESSAGES);
+
 export const FALLBACK_CODES = new Set(['provider_unavailable', 'timeout', 'quota_exhausted', 'rate_limited', 'model_unavailable']);
 
 export class AppError extends Error {

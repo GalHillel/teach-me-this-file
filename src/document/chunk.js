@@ -68,7 +68,7 @@ export const buildChunks = (sections) => {
   };
 
   for (const source of sections) {
-    const headings = source.headings?.length ? new Set(source.headings) : null;
+    const headings = source.headings?.length ? new Set(source.headings.map(normalizeText)) : null;
     let current = [];
     let length = 0;
     let currentSection = section;

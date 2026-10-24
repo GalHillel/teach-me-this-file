@@ -82,5 +82,17 @@ describe('validatePlan with prerequisites', () => {
     const plan = validatePlan({ steps: [step('A', [2]), step('B', [1])] }, chunks, { fallbackTitle: 'f' });
     expect(plan.steps).toHaveLength(2);
     expect(plan.warnings).toContain('prerequisite_cycle');
+    expect(plan.steps.map((item) => [item.id, item.title, item.prerequisites])).toEqual([['s1', 'A', []], ['s2', 'B', ['s1']]]);
+  });
+
+  it('never lists a later step as a prerequisite', () => {
+    fc.assert(fc.property(
+      fc.integer({ min: 1, max: 8 }).chain((count) => fc.array(fc.array(fc.integer({ min: 1, max: count }), { maxLength: 3 }), { minLength: count, maxLength: count })),
+      fc.integer({ min: 2, max: 8 }),
+      (edges, maxSteps) => {
+        const plan = validatePlan({ steps: edges.map((prerequisites, index) => step(`Step ${index}`, prerequisites)) }, chunks, { fallbackTitle: 'f', maxSteps });
+        return plan.steps.every((item, index) => item.prerequisites.every((id) => Number(id.slice(1)) - 1 < index));
+      },
+    ));
   });
 });

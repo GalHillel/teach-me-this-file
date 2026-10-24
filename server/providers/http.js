@@ -18,18 +18,45 @@ const wait = (ms, signal) =>
     }, { once: true });
   });
 
+const bodies = new WeakMap();
+
 const send = async (url, { headers, body, signal, timeoutMs }) => {
-  const timeout = AbortSignal.timeout(timeoutMs);
+  const controller = new AbortController();
+  const state = { timedOut: false, timer: null, idleMs: timeoutMs };
+  const expire = () => {
+    state.timedOut = true;
+    controller.abort();
+  };
+  const stop = () => controller.abort(signal.reason);
+  signal?.addEventListener('abort', stop, { once: true });
+  state.ended = new Promise((resolve, reject) => {
+    controller.signal.addEventListener('abort', () => reject(state.timedOut ? new AppError('timeout') : controller.signal.reason), { once: true });
+  });
+  state.ended.catch(() => {});
+  state.timer = setTimeout(expire, timeoutMs);
   try {
-    return await fetch(url, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: { 'content-type': 'application/json', ...headers },
       body: JSON.stringify(body),
-      signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+      signal: controller.signal,
     });
+    clearTimeout(state.timer);
+    state.restart = () => {
+      clearTimeout(state.timer);
+      state.timer = setTimeout(expire, state.idleMs);
+    };
+    state.release = () => {
+      clearTimeout(state.timer);
+      signal?.removeEventListener('abort', stop);
+    };
+    bodies.set(response, state);
+    return response;
   } catch (error) {
+    clearTimeout(state.timer);
+    signal?.removeEventListener('abort', stop);
     if (signal?.aborted) throw error;
-    if (timeout.aborted) throw new AppError('timeout');
+    if (state.timedOut) throw new AppError('timeout');
     throw new AppError('provider_unavailable');
   }
 };
@@ -51,20 +78,34 @@ export const postJson = async (url, options) => {
 };
 
 export async function* readSseData(response) {
+  const state = bodies.get(response);
+  const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
-  for await (const bytes of response.body) {
-    buffer += decoder.decode(bytes, { stream: true });
-    const events = buffer.split(/\r?\n\r?\n/);
-    buffer = events.pop();
-    for (const event of events) {
-      const data = event
-        .split(/\r?\n/)
-        .filter((line) => line.startsWith('data:'))
-        .map((line) => line.slice(5).trimStart())
-        .join('\n');
-      if (data) yield data;
+  try {
+    state?.restart();
+    while (true) {
+      const { done, value } = await (state ? Promise.race([reader.read(), state.ended]) : reader.read());
+      if (done) break;
+      state?.restart();
+      buffer += decoder.decode(value, { stream: true });
+      const events = buffer.split(/\r?\n\r?\n/);
+      buffer = events.pop();
+      for (const event of events) {
+        const data = event
+          .split(/\r?\n/)
+          .filter((line) => line.startsWith('data:'))
+          .map((line) => line.slice(5).trimStart())
+          .join('\n');
+        if (data) yield data;
+      }
     }
+  } catch (error) {
+    if (state?.timedOut) throw new AppError('timeout');
+    throw error;
+  } finally {
+    state?.release();
+    reader.cancel().catch(() => {});
   }
 }
 

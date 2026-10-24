@@ -128,6 +128,21 @@ describe('POST /api/turns', () => {
     expect(response.body.error.message).toMatch(/currentStep/);
   });
 
+  it('rejects edited lesson states that skip steps, fake a finished lesson or carry impossible counts', async () => {
+    const fresh = createProgress(plan);
+    const forged = [
+      { ...fresh, currentStep: 1 },
+      { ...fresh, status: 'completed', steps: fresh.steps.map((step) => ({ ...step, attempts: 2 })) },
+      { ...fresh, steps: [{ ...fresh.steps[0], attempts: 99 }, fresh.steps[1]] },
+      { ...fresh, steps: [{ ...fresh.steps[0], phase: 'bogus' }, fresh.steps[1]] },
+      { ...fresh, steps: [{ ...fresh.steps[0], outcome: 'mastered' }, fresh.steps[1]] },
+    ];
+    for (const progress of forged) {
+      const response = await request(mockApp()).post('/api/turns').send(turn({ kind: 'reply', studentMessage: 'x', progress }));
+      expect(response.status).toBe(400);
+    }
+  });
+
   it('sends provider errors as an error event', async () => {
     const failing = {
       name: 'failing',
@@ -272,6 +287,14 @@ describe('output leak guard', () => {
     guard.push('student, tmtf is not the marker.');
     expect(guard.flush()).toBe('Hello student, tmtf is not the marker.');
     expect(sent.join('')).toBe('Hello student, tmtf is not the marker.');
+  });
+
+  it('stops a reply that ends with most of the marker, so no part of it reaches the student', () => {
+    const sent = [];
+    const guard = guardStream('tmtf-abcdef123456', (text) => sent.push(text));
+    guard.push('The code is tmt');
+    expect(() => guard.push('f-abcdef1234')).toThrow(expect.objectContaining({ code: 'unsafe_output' }));
+    expect(sent.join('')).not.toContain('tmtf');
   });
 });
 

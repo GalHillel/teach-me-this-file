@@ -132,12 +132,9 @@ export const savedChat = (state) => ({ progress: state.progress, messages: state
 
 export const historyFor = (messages, excludeId) =>
   messages
-    .filter((message) => message.id !== excludeId && (message.role === 'tutor' || message.role === 'student') && message.content)
-    .filter((message) => message.role === 'student' || message.status === 'done' || message.status === 'stopped')
-    .map((message) => ({
-      role: message.role,
-      content: message.status === 'stopped' ? `${message.content} [message interrupted by the student]` : message.content,
-    }))
+    .filter((message) => message.id !== excludeId && message.content)
+    .filter((message) => message.role === 'student' || (message.role === 'tutor' && message.status === 'done'))
+    .map((message) => ({ role: message.role, content: message.content }))
     .slice(-20);
 
 export const lessonSummary = (plan, progress) => {

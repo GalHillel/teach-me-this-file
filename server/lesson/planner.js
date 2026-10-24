@@ -72,7 +72,7 @@ export const validatePlan = (raw, chunks, { fallbackTitle, lessonLanguage = null
   const { order, brokenEdges } = orderByPrerequisites(candidates.length, (index) =>
     candidates[index].rawPrerequisites.map((rawIndex) => position.get(rawIndex)).filter((other) => other !== undefined));
   const kept = order.slice(0, maxSteps);
-  const idOf = new Map(kept.map((candidateIndex, index) => [candidateIndex, `s${index + 1}`]));
+  const placeOf = new Map(kept.map((candidateIndex, index) => [candidateIndex, index]));
 
   const steps = kept.map((candidateIndex, index) => {
     const { step, rawSourceIds, rawPrerequisites } = candidates[candidateIndex];
@@ -82,7 +82,7 @@ export const validatePlan = (raw, chunks, { fallbackTitle, lessonLanguage = null
       ...step,
       goal: step.goal || step.title,
       successCriteria: step.successCriteria || step.goal || step.title,
-      prerequisites: [...new Set(rawPrerequisites.map((other) => idOf.get(position.get(other))).filter((other) => other && other !== id))],
+      prerequisites: [...new Set(rawPrerequisites.map((other) => placeOf.get(position.get(other))).filter((place) => place !== undefined && place < index))].map((place) => `s${place + 1}`),
       sourceIds: stepSources(rawSourceIds, step, chunks, validIds),
     };
   });

@@ -33,14 +33,17 @@ export const publicAssessment = (assessment) =>
 
 export const newCanary = () => `tmtf-${randomBytes(6).toString('hex')}`;
 
+const CANARY_PROBE = 9;
+
 export const guardStream = (canary, send) => {
   let reply = '';
   let sent = 0;
-  const holdBack = canary.length - 1;
+  const probe = canary.slice(0, CANARY_PROBE);
+  const holdBack = probe.length - 1;
   return {
     push(text) {
       reply += text;
-      if (reply.includes(canary)) throw new AppError('unsafe_output');
+      if (reply.includes(probe)) throw new AppError('unsafe_output');
       const safeEnd = Math.max(sent, reply.length - holdBack);
       if (safeEnd > sent) {
         send(reply.slice(sent, safeEnd));

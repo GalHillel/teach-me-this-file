@@ -124,6 +124,26 @@ describe('document structure', async () => {
     expect(stripRepeatedLines(mixed).removed).toBe(0);
   });
 
+  it('masks only page numbers, so numbered lines with real content survive', () => {
+    const worksheet = [1, 2, 3, 4].map((number) => ({
+      label: `Page ${number}`,
+      lines: [
+        { text: `Exercise ${number}` },
+        { text: `Solve for x: ${number}x + ${number + 2} = ${3 * number + 2}` },
+        { text: `Body text for page ${'abcd'[number - 1]}` },
+        { text: `Answer: x = ${number === 1 ? 2 : number}` },
+        { text: `${number} | Algebra Workbook` },
+      ],
+    }));
+    const { pages: cleaned, removed } = stripRepeatedLines(worksheet);
+    expect(removed).toBe(4);
+    expect(cleaned[2].lines.map((line) => line.text)).toEqual(['Exercise 3', 'Solve for x: 3x + 5 = 11', 'Body text for page c', 'Answer: x = 3']);
+    const plain = [1, 2, 3].map((number) => ({ label: `Page ${number}`, lines: [{ text: `Text ${number}.` }, { text: `- ${number} -` }] }));
+    expect(stripRepeatedLines(plain).removed).toBe(3);
+    const hebrew = [1, 2, 3].map((number) => ({ label: `Page ${number}`, lines: [{ text: `תוכן ${number}` }, { text: `עמוד ${number} מתוך 3` }] }));
+    expect(stripRepeatedLines(hebrew).removed).toBe(3);
+  });
+
   it('marks larger, short lines without final punctuation as PDF headings', () => {
     const pages = markPdfHeadings([{ label: 'Page 1', lines: [
       { text: 'The water cycle', size: 16 },
@@ -145,6 +165,11 @@ describe('document structure', async () => {
       ['Page 1', 'Condensation', 'Condensation'],
       ['Page 2', 'Condensation', 'Clouds form from the droplets.'],
     ]);
+  });
+
+  it('matches PDF headings that had odd spacing in the file', () => {
+    const chunks = buildChunks([{ label: 'Page 1', text: 'Chapter  2:\u00a0Cells\nCells are small.', headings: ['Chapter  2:\u00a0Cells'] }]);
+    expect(chunks[0].section).toBe('Chapter 2: Cells');
   });
 
   it('reads Markdown headings in text files', () => {

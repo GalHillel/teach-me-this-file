@@ -190,17 +190,69 @@ describe('OpenAI-compatible provider', () => {
   });
 });
 
-describe('timeouts per task', () => {
+describe('timeouts', () => {
+  const hangingFetch = () => vi.spyOn(globalThis, 'fetch').mockImplementation((url, init) => new Promise((resolve, reject) => {
+    init.signal.addEventListener('abort', () => reject(init.signal.reason ?? new Error('aborted')), { once: true });
+  }));
+
+  const slowStream = (gaps) => {
+    const encoder = new TextEncoder();
+    let index = 0;
+    return new Response(new ReadableStream({
+      pull(controller) {
+        if (index >= gaps.length) {
+          controller.close();
+          return undefined;
+        }
+        const gap = gaps[index];
+        index += 1;
+        return new Promise((resolve) => setTimeout(() => {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text: `w${index} ` }] } }] })}\n\n`));
+          resolve();
+        }, gap));
+      },
+    }), { headers: { 'content-type': 'text/event-stream' } });
+  };
+
+  afterEach(() => vi.useRealTimers());
+
   it('gives planning a longer attempt timeout than a lesson turn', async () => {
-    const seen = [];
-    vi.spyOn(AbortSignal, 'timeout').mockImplementation((ms) => {
-      seen.push(ms);
-      return new AbortController().signal;
-    });
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => jsonAnswer({ ok: true }));
-    const provider = createGeminiProvider({ apiKey: 'AIzaTimeouts', models: ['a'], timeoutMs: 12000, planTimeoutMs: 35000 });
-    await provider.generateJson({ task: 'plan', system: 's', prompt: 'p' });
-    await provider.generateJson({ task: 'assessment', system: 's', prompt: 'p' });
-    expect(seen).toEqual([35000, 12000]);
+    vi.useFakeTimers();
+    hangingFetch();
+    const provider = createGeminiProvider({ apiKey: 'AIzaTimeouts', models: ['a'], timeoutMs: 12000, deadlineMs: 13000, planTimeoutMs: 35000, planDeadlineMs: 36000 });
+    const settled = (promise) => {
+      const state = { done: false };
+      promise.catch((error) => {
+        state.done = true;
+        state.code = error.code;
+      });
+      return state;
+    };
+    const plan = settled(provider.generateJson({ task: 'plan', system: 's', prompt: 'p' }));
+    const turn = settled(provider.generateJson({ task: 'assessment', system: 's', prompt: 'p' }));
+    await vi.advanceTimersByTimeAsync(12500);
+    expect(turn).toMatchObject({ done: true, code: 'timeout' });
+    expect(plan.done).toBe(false);
+    await vi.advanceTimersByTimeAsync(23000);
+    expect(plan).toMatchObject({ done: true, code: 'timeout' });
+  });
+
+  it('lets a reply keep streaming past the attempt timeout while words keep coming', async () => {
+    vi.useFakeTimers();
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => slowStream([4000, 4000, 4000, 4000, 4000]));
+    const provider = createGeminiProvider({ apiKey: 'AIzaStream', models: ['a'], timeoutMs: 10000 });
+    const text = collect(provider.streamText({ system: 's', messages: [{ role: 'user', content: 'hi' }] }));
+    await vi.advanceTimersByTimeAsync(21000);
+    await expect(text).resolves.toBe('w1 w2 w3 w4 w5 ');
+  });
+
+  it('stops a reply that goes silent for longer than the timeout', async () => {
+    vi.useFakeTimers();
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => slowStream([1000, 15000]));
+    const provider = createGeminiProvider({ apiKey: 'AIzaSilent', models: ['a'], timeoutMs: 10000 });
+    const text = collect(provider.streamText({ system: 's', messages: [{ role: 'user', content: 'hi' }] }));
+    const outcome = text.catch((error) => error.code);
+    await vi.advanceTimersByTimeAsync(12000);
+    await expect(outcome).resolves.toBe('timeout');
   });
 });

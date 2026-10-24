@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { ERROR_CODES } from '../server/errors.js';
 import { MESSAGES } from '../src/i18n/messages.js';
 import { createTranslator, localizeLabel } from '../src/i18n/translate.js';
 import { clearLesson, loadLesson, saveChat, saveLesson } from '../src/lesson/storage.js';
@@ -29,6 +30,10 @@ describe('translations', () => {
       expect(Object.keys(MESSAGES[language]).filter((key) => !(key in MESSAGES.en) && !(base(key) in MESSAGES.en))).toEqual([]);
     });
   }
+
+  it('has a translated message for every error code the server sends', () => {
+    expect(ERROR_CODES.filter((code) => !(`errors.${code}` in MESSAGES.en))).toEqual([]);
+  });
 
   it('fills parameters, picks plural forms and falls back', () => {
     const t = createTranslator('fr');

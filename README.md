@@ -11,17 +11,20 @@ I built it as a home assignment for an AI Engineer role. The reasoning behind th
 
 ## What it does
 
-- Upload a PDF (with selectable text), Word `.docx`, or `.txt` / `.md` file by drag and drop or file picker. The file is read in the browser and split into passages that keep their page, section or line numbers.
-- Clear messages for files the app cannot use: empty, damaged, password protected, scanned PDFs without a text layer (no OCR), unsupported types, files over 25 MB.
+- Upload a PDF (with selectable text), Word `.docx`, or `.txt` / `.md` file by drag and drop or file picker, or start from one of two sample files (English and Hebrew). The file is read in the browser and split into passages that keep their page or line numbers and the heading they sit under. Running headers and footers that repeat on most PDF pages are removed, and identical passages are kept once.
+- Clear messages for files the app cannot use: empty, damaged, password protected, scanned PDFs without a text layer (no OCR), unsupported types, files over 25 MB, and files whose content does not match their name (a renamed image is not read as a PDF).
 - The teacher prompt sets age, style, length and goals. The lesson language is a separate choice (or taken from the prompt). Three editable examples are included, one in Hebrew.
-- The server builds a structured lesson plan: objectives, the content type, 2 to 8 steps sized to the file and the time, and per step an approach (explanation, worked example or practice), a check question, success criteria, a common mistake, and the passages it is based on.
-- Each student answer is graded first: verdict, completeness, concepts shown and missing, misconception, an evidence quote and a confidence level. The server checks the grade, then decides the next move in code: hint, stronger hint, a follow-up when the grader is unsure, an explanation followed by one more check after three tries, the next step, or a summary at the end.
+- The server builds a structured lesson plan: objectives, the content type, 2 to 8 steps sized to the file and the time, and per step an approach (explanation, worked example or practice), a check question, success criteria, a common mistake, the steps it builds on, and the passages it is based on. Steps are put in an order where each comes after the steps it builds on.
+- Each student answer is graded first: verdict, completeness, concepts shown and missing, misconception, what kind of problem it is (misread the question, unsure, does not know, right without the reasoning), an evidence quote and a confidence level. The server checks the grade, then decides the next move in code: hint, stronger hint, the question asked another way, a fresh explanation, a follow-up when the grader is unsure, an explanation followed by one more check after three tries, the next step, or a summary at the end.
 - Tutor answers stream token by token. Stop cancels the request on the server and the provider, keeps the partial text, and leaves the lesson state unchanged.
-- "Step 3 of 7" progress, a lesson plan panel with the outcome of each step, labels for what the tutor is doing (hint, follow-up, explanation, summary), and a summary card at the end with the steps worth reviewing.
+- "Step 3 of 7" progress, a lesson plan panel with the outcome of each step, labels for what the tutor is doing (hint, follow-up, explanation, summary), and a summary card at the end with the steps worth reviewing. From the card the student can practise those steps in a short review round and download the lesson notes as Markdown.
+- The student can ask a question at any point. The app finds the passages of the whole file that answer it and sends them with the turn, so the tutor can answer from the file without losing its place in the lesson.
+- A search panel lists the lesson's key concepts and the file's sections, highlights matches, and says which step teaches each passage.
 - A source button under tutor messages opens the exact passage from the file, labelled "based on", "related" or "step material", with the shared words highlighted.
 - The interface is in English, Hebrew or French, with a right-to-left layout for Hebrew. Lessons and documents can be right-to-left too.
 - The lesson survives a reload in the same tab. The API key does not; it stays in memory only.
 - If the main AI models are busy and a lighter backup model answers, the app says so.
+- Keyboard: Esc stops a reply, a skip link jumps to the answer box, and new messages are announced to screen readers.
 
 ## How it works
 
@@ -61,16 +64,20 @@ server/
   lesson/prompts.js          all prompts, untrusted-content fencing
   lesson/tutor.js            one turn: grade, decide, stream
   providers/                 Gemini (model tiers, cooldowns), OpenAI-compatible (Groq, OpenRouter), mock
+  lesson/ordering.js         prerequisite ordering of plan steps
 shared/text.js               tokenizer, stopwords, BM25 ranking, text direction
+shared/lesson.js             lesson helpers used by both server and browser
 src/
   App.jsx                    screens, settings, file reading
   api/                       fetch client and SSE reader
-  document/                  PDF, Word and text extraction, chunking
-  lesson/                    chat reducer, useTutor hook, source matching, session storage
+  document/                  PDF, Word and text extraction, structure (headers, headings), chunking
+  lesson/                    chat reducer, useTutor hook, source matching and search, session storage
+  samples/                   the two sample files
   i18n/                      English, Hebrew and French strings, translator
   components/                UI
-eval/                        golden sets and runners for source matching and grading
-tests/                       Vitest unit and API tests
+eval/                        golden sets and runners for source matching, retrieval and grading; benchmark
+tests/                       Vitest unit, property and API tests
+tests/e2e/ui.mjs             browser harness: 15 viewports, English and Hebrew, axe-core, full lesson flow
 ```
 
 ## Run it locally
@@ -97,7 +104,7 @@ Get a free key from one of:
 
 Paste it in the settings dialog. The provider is detected from the key prefix, or you can pick it. The key is kept in the page's memory only (a reload clears it), sent to the server in the `X-AI-Key` header with each request, passed on to the provider, and never stored or logged by the server.
 
-As an option, the server can have its own key: set `AI_API_KEY` (and `AI_PROVIDER` if the prefix is not recognised) in the environment. A key typed in the settings always wins. The server key only answers same-origin requests from the app's own page and has a daily budget, so it can not be used through the API from elsewhere.
+As an option, the server can have its own key: set `AI_API_KEY` (and `AI_PROVIDER` if the prefix is not recognised) in the environment. A key typed in the settings always wins. The server key only answers requests that look like they come from the app's own page (`Sec-Fetch-Site: same-origin`, or a matching `Origin`) and has a daily budget. A browser on another site can not use it, but a script that forges those headers can, up to the budget. It is a brake on casual use, not access control.
 
 ## Environment variables
 
@@ -111,20 +118,26 @@ As an option, the server can have its own key: set `AI_API_KEY` (and `AI_PROVIDE
 | `GEMINI_BACKUP_MODELS` | `gemini-3.5-flash-lite` | Lighter models used only after the main ones fail; the UI tells the student when one answered |
 | `GROQ_MODEL` | `llama-3.3-70b-versatile` | Model for Groq keys |
 | `OPENROUTER_MODEL` | `meta-llama/llama-3.3-70b-instruct:free` | Model for OpenRouter keys |
-| `PROVIDER_TIMEOUT_MS` | `20000` | Timeout for one model call, after which the next model is tried |
-| `PROVIDER_DEADLINE_MS` | `45000` | Total time one AI call may spend across all models |
+| `PROVIDER_TIMEOUT_MS` | `15000` | Timeout for one model call during a lesson turn, after which the next model is tried |
+| `PROVIDER_DEADLINE_MS` | `40000` | Total time one turn call may spend across all models |
+| `PLAN_TIMEOUT_MS` | `35000` | Timeout for one model call while planning the lesson |
+| `PLAN_DEADLINE_MS` | `75000` | Total time planning may spend across all models |
 | `RATE_LIMIT_PER_MINUTE` | `30` | Requests per minute per IP on the AI endpoints |
 | `ALLOW_MOCK_PROVIDER` | `false` | Enables the mock provider, for local testing only |
 
 ## Tests
 
 ```bash
-npm test        # Vitest: extraction, chunking, source matching, state machine, grading checks, prompts, API, i18n, storage
+npm test              # Vitest: extraction, chunking, source matching, state machine, grading checks, prompts, API, i18n, storage, property tests
 npm run lint
-npm run build
-node eval/sources.js                                       # source matching on the golden set, no AI calls
+npm run test:e2e      # builds, then runs the browser harness with the mock provider
+npm run eval:sources  # source matching on the golden set, no AI calls
+npm run eval:retrieval
+npm run bench         # chunking, indexing and scoring times on synthetic documents
 EVAL_API_KEY=your-key EVAL_LABEL=mine node eval/grading.js # grading on 43 golden answers, real model calls
 ```
+
+`npm run test:e2e` uses the Chromium that Playwright installs (`npx playwright install chromium` once). It serves the build with the headers from `vercel.json`, checks every screen at 15 sizes from 320 to 2560 px in English and Hebrew for overflow, unreachable buttons, small targets and axe-core violations, runs a full lesson with a re-check and a review round, reads a generated PDF, and fails on any problem. `--report=file.json` saves the details. It checks layout and flow with canned replies, not teaching quality.
 
 `eval/grading.js` writes its results to `eval/results/grading-<label>.json`: accuracy, how often a wrong or partial answer was graded correct, median latency, and which models answered.
 
@@ -147,6 +160,8 @@ Any Node host works too: run `npm run build`, serve `dist/` as static files, and
 - Very long documents: the plan is built from up to about 60,000 characters sampled evenly across the file. Every passage is still used for the source panel.
 - The lesson lives in the browser tab. A reload restores it; closing the tab ends it, and the key must be entered again after a reload.
 - The rate limit, the server-key budget, model cooldowns and metrics are in memory, per server instance.
+- The leak check on the tutor's output catches only a verbatim copy of a marker in the instructions. It does not stop a model that paraphrases its instructions.
+- Heading detection in PDFs uses font size, so a PDF that marks headings only with bold text of normal size gets no sections.
 - The live app's own Gemini key is on the free tier and only answers requests from the site itself. If its daily quota is used up, the server falls back to Flash-Lite and says so, and when that is used up too, the app says the daily quota is used up. Adding your own key in the settings avoids this.
 
 More in [DECISIONS.md](DECISIONS.md#weaknesses-i-know-about).

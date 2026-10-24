@@ -24,7 +24,7 @@ The cost is a second model call per student message and about a second of extra 
 
 ### Stateless server, state in the browser
 
-There is no database. The lesson lives in a `useReducer` in the browser and the needed parts are sent with each turn. Free hosting runs functions that can start on any instance, there are no users or accounts in scope, and it keeps the server simple. The server validates everything the client sends (`validation.js`), including the phase, counters and outcome of every step, so a broken or edited state is rejected with a 400.
+There is no database. The lesson lives in a `useReducer` in the browser and the needed parts are sent with each turn. Free hosting runs functions that can start on any instance, there are no users or accounts in scope, and it keeps the server simple. The server validates everything the client sends (`validation.js`), including the phase, counters and outcome of every step, and that the steps agree with each other: steps before the current one are done, the current one is active, later ones are pending, and a finished lesson has every step done. A broken or edited state that breaks these rules is rejected with a 400. A student can still edit a state into another valid one (mark a step done with an outcome they did not earn); that only affects their own lesson.
 
 The lesson is saved in `sessionStorage` after every finished turn: the plan and document once, the chat and progress per turn. A reload in the same tab restores it with a short notice. It is cleared by "New lesson" and when the tab closes. The API key is never saved; it stays in memory only.
 
@@ -81,7 +81,7 @@ The live site also has a server key. Anyone could call `/api/*` directly and spe
 
 ### Untrusted content
 
-The file is treated as data. In every prompt the passages sit inside `<document>` or `<sources>` tags, the system prompt says text inside them is never an instruction, and tags in the file that could close those blocks are removed (`fence()` in `prompts.js`). The grader has an `off_topic` verdict for messages that try to change the tutor's role, and the server refuses a "correct" for answers that contain instructions to the grader. This reduces the risk; it does not remove it. A model can still be talked into things by text in its context, and I do not claim otherwise.
+The file is treated as data. In every prompt the passages sit inside `<document>` or `<sources>` tags, the system prompt says text inside them is never an instruction, and tags in the file that could close those blocks are removed (`fence()` in `prompts.js`). The grader has an `off_topic` verdict for messages that try to change the tutor's role, and the server refuses a "correct" for answers that contain instructions to the grader. Each turn's system prompt also carries a random marker (`tmtf-` and 12 hex characters). The server holds back the last few characters of the stream so a marker split across chunks is still seen, and a reply that contains it is stopped with `unsafe_output` and removed in the browser. That catches a model copying its instructions word for word, nothing more. This reduces the risk; it does not remove it. A model can still be talked into things by text in its context, and I do not claim otherwise.
 
 ### Pedagogy
 
@@ -92,7 +92,9 @@ The file is treated as data. In every prompt the passages sit inside `<document>
 - A correct answer the grader is unsure about gets one short follow-up before the lesson moves on.
 - A question from the student is answered, but the tutor does not give away the answer to its own open check question.
 - The pace adjusts: after two steps understood first try, the tutor is asked to be more concise; when the student struggles or needed the explanation, simpler words and a concrete example.
-- The lesson ends with a summary message and a summary card: how many steps were understood first try, after hints, after an explanation, and which steps are worth reviewing.
+- The grade names the kind of problem when there is one. A misread question gets the question asked another way, not a hint. "I think it's X, not sure" with a right X gets a short check instead of a hint. "I have no idea" gets a fresh, simpler explanation instead of a hint the student can not use. A right answer without the asked-for reasoning gets a request for the reason.
+- The lesson ends with a summary message and a summary card: how many steps were understood first try, after hints, after an explanation, and which steps are worth reviewing. A "Practise" button starts a review round: one new question per weak step, graded the same way, with the result shown per step.
+- Steps can build on other steps. The plan says which, the steps are ordered so that a step never comes before what it builds on, and the tutor is told what the step builds on.
 
 ### Languages
 
@@ -119,7 +121,8 @@ Text the app stores (system notes, file warnings, errors) is stored as a code wi
 - **No database or accounts.** Not needed to show the teaching. `sessionStorage` covers reloads in the same tab.
 - **No OCR.** Too slow and large in the browser, and server OCR does not fit free hosting. Pages without text are detected and reported.
 - **No embeddings or vector search.** For one document, BM25 is enough, costs nothing, runs in the browser in any language, and is measured. It fails across languages, which is why the step-material fallback exists. I would add embeddings if the golden set showed paraphrase misses mattered; today it has one.
-- **No retrieval beyond the step's passages during a turn.** A student question about another part of the file may get a weaker answer.
+- **No graph search for the lesson path.** The planner returns at most 8 steps and there are no reliable costs between them, so A* or shortest paths would add machinery without a measurable gain. A topological order with the document order as the tie-break is enough and is testable.
+- **No Hebrew stemmer.** Hebrew prefixes (ו, ה, ב, ל, מ, ש, כ) are added as extra variants of a word, never instead of it, so a false split costs a little precision, not a miss. A real morphological analyser would be a large dependency for a small set.
 - **No TypeScript, no state library, no UI kit, no i18n library.** The stack in the assignment is JavaScript; the translations are one file and a 20-line translator with plural rules from `Intl.PluralRules`.
 
 ## Weaknesses I know about
@@ -129,17 +132,16 @@ Text the app stores (system notes, file warnings, errors) is stored as a code wi
 - Two model calls per answer double the request count, and the free tier has per-minute and per-day limits per model.
 - The confidence level comes from the model. It is a signal, not a calibrated probability; the eval reports how often misses had low confidence.
 - PDF text order can be wrong for multi-column layouts, tables and formulas.
-- Source matching is lexical. A paraphrase with different words is missed, and a translated lesson always falls back to the step's passage.
+- Source matching and question retrieval are lexical. A paraphrase with different words is missed, and a translated lesson always falls back to the step's passage. Retrieval was tuned on 20 English questions and checked on 11 held-out Hebrew and French ones; that is enough to see a direction, not to promise a number.
 - The rate limit, the server-key budget, the cooldowns and the metrics are in memory per serverless instance.
 - Prompt-injection defences reduce the risk but do not remove it.
 
 ## What I would do next
 
-1. When the student asks a question, rank passages from the whole file for that question and give them to the tutor.
-2. A teacher view at the end: time per step, the student's answers, and the grades with their evidence.
-3. Shared state for limits and metrics (a small KV store), so they hold across instances.
-4. Run the grading eval on every prompt change in CI, with a fixed key and model, and fail the build when false "correct" verdicts go up.
-5. Paste text as an alternative to uploading, and OCR through the provider's vision model.
+1. A teacher view at the end: time per step, the student's answers, and the grades with their evidence.
+2. Shared state for limits and metrics (a small KV store), so they hold across instances.
+3. Run the grading eval on every prompt change in CI, with a fixed key and model, and fail the build when false "correct" verdicts go up.
+4. Paste text as an alternative to uploading, and OCR through the provider's vision model.
 
 ## How I know it works
 
