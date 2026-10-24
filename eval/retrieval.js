@@ -1,11 +1,16 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { buildIndex, rankChunks, scoreChunks } from '../shared/text.js';
-import { findMessageSources } from '../src/lesson/sources.js';
+import { findMessageSources, findRelatedPassages } from '../src/lesson/sources.js';
 
 const golden = JSON.parse(readFileSync(new URL('./golden/retrieval.json', import.meta.url), 'utf8'));
 
 const strategies = {
   tutor: (query, chunks) => findMessageSources(query.text, chunks).filter((source) => source.kind === 'based').map((source) => source.chunkId),
+  question: (query, chunks) => findRelatedPassages(query.text, chunks).map((chunk) => chunk.id),
+};
+
+export const baselineStrategies = {
+  ...strategies,
   question: (query, chunks) => rankChunks(query.text, chunks, { limit: 2, minShared: 2, minScore: 0.2 }).map((match) => match.chunk.id),
 };
 

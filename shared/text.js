@@ -47,22 +47,43 @@ const hebrewVariants = (token) => {
   return variants;
 };
 
-export const termGroups = (text) =>
+const LATIN_WORD = /^[a-z]+$/;
+
+const latinVariants = (token) => {
+  if (token.length < 4 || !LATIN_WORD.test(token)) return [];
+  const variants = [];
+  if (token.endsWith('ies') && token.length > 4) variants.push(`${token.slice(0, -3)}y`);
+  else if ((token.endsWith('s') || token.endsWith('x')) && !token.endsWith('ss')) variants.push(token.slice(0, -1));
+  if (token.endsWith('ing') && token.length > 5) variants.push(token.slice(0, -3));
+  if (token.endsWith('ed') && token.length > 4) variants.push(token.slice(0, -2), token.slice(0, -1));
+  return variants.filter((variant) => variant.length >= 3 && !STOPWORDS.has(variant));
+};
+
+export const TERM_OPTIONS = { hebrew: true, latin: false, sectionWeight: 0 };
+
+export const termGroups = (text, options = TERM_OPTIONS) =>
   tokenize(text)
     .filter((token) => !STOPWORDS.has(token))
-    .map((token) => (HEBREW_WORD.test(token) ? [token, ...hebrewVariants(token)] : [token]));
+    .map((token) => {
+      if (HEBREW_WORD.test(token)) return options.hebrew ? [token, ...hebrewVariants(token)] : [token];
+      return options.latin ? [token, ...latinVariants(token)] : [token];
+    });
 
 const K1 = 1.2;
 const B = 0.75;
 
-export const buildIndex = (chunks) => {
+export const buildIndex = (chunks, options = TERM_OPTIONS) => {
   const docs = chunks.map((chunk) => {
     const tf = new Map();
     let length = 0;
-    for (const group of termGroups(chunk.text)) {
-      length += 1;
-      for (const form of group) tf.set(form, (tf.get(form) ?? 0) + 1);
-    }
+    const add = (groups, weight) => {
+      for (const group of groups) {
+        length += weight;
+        for (const form of new Set(group)) tf.set(form, (tf.get(form) ?? 0) + weight);
+      }
+    };
+    add(termGroups(chunk.text, options), 1);
+    if (chunk.section && options.sectionWeight > 0) add(termGroups(chunk.section, options), options.sectionWeight);
     return { chunk, tf, length };
   });
   const df = new Map();
@@ -70,7 +91,7 @@ export const buildIndex = (chunks) => {
     for (const form of doc.tf.keys()) df.set(form, (df.get(form) ?? 0) + 1);
   }
   const averageLength = docs.reduce((sum, doc) => sum + doc.length, 0) / Math.max(docs.length, 1) || 1;
-  return { docs, df, averageLength, size: docs.length };
+  return { docs, df, averageLength, size: docs.length, options };
 };
 
 const idf = (index, form) => {
@@ -88,10 +109,12 @@ const uniqueGroups = (groups) => {
 };
 
 export const scoreChunks = (query, index) => {
-  const groups = uniqueGroups(termGroups(query));
+  const groups = uniqueGroups(termGroups(query, index.options));
   const known = groups.filter((group) => group.some((form) => index.df.has(form)));
   const groupWeight = (group) => Math.max(...group.map((form) => idf(index, form)));
   const totalWeight = known.reduce((sum, group) => sum + groupWeight(group), 0);
+  const unknownWeight = (groups.length - known.length) * Math.log(1 + (index.size + 0.5) / 0.5);
+  const queryWeight = totalWeight + unknownWeight;
 
   return index.docs.map((doc) => {
     let score = 0;
@@ -106,7 +129,13 @@ export const scoreChunks = (query, index) => {
       score += best * ((tf * (K1 + 1)) / (tf + K1 * (1 - B + (B * doc.length) / index.averageLength)));
       matchedWeight += best;
     }
-    return { chunk: doc.chunk, score, shared, coverage: totalWeight ? matchedWeight / totalWeight : 0 };
+    return {
+      chunk: doc.chunk,
+      score,
+      shared,
+      coverage: totalWeight ? matchedWeight / totalWeight : 0,
+      queryCoverage: queryWeight ? matchedWeight / queryWeight : 0,
+    };
   });
 };
 

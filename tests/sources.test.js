@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import Markdown from '../src/components/Markdown.jsx';
-import { findMessageSources } from '../src/lesson/sources.js';
+import { findMessageSources, findRelatedPassages } from '../src/lesson/sources.js';
 import { scoreSourceMatching } from '../eval/sources.js';
 
 const chunks = [
@@ -48,6 +48,38 @@ describe('findMessageSources', () => {
 
   it('ignores praise and filler words when matching', () => {
     expect(findMessageSources('Great, exactly right, well done, very good answer!', chunks, { candidateIds: ['c1', 'c2'] })).toEqual([]);
+  });
+});
+
+describe('findRelatedPassages', () => {
+  const history = [
+    { id: 'h1', label: 'Page 1', text: 'The storming of the Bastille happened on 14 July 1789, when crowds looked for gunpowder.' },
+    { id: 'h2', label: 'Page 2', text: 'During the Terror, Robespierre led the Committee of Public Safety and many were executed.' },
+    { id: 'h3', label: 'Page 3', text: 'Napoleon Bonaparte took power in 1799 and crowned himself emperor in 1804.' },
+  ];
+
+  it('finds a passage for a short question with one key word', () => {
+    expect(findRelatedPassages('Who was Robespierre?', history).map((chunk) => chunk.id)).toEqual(['h2']);
+  });
+
+  it('abstains when the question uses words the document never mentions', () => {
+    expect(findRelatedPassages('What happened in the Russian Revolution?', history)).toEqual([]);
+    expect(findRelatedPassages('How do black holes form?', history)).toEqual([]);
+    expect(findRelatedPassages('', history)).toEqual([]);
+  });
+
+  it('leaves out passages the tutor already has', () => {
+    expect(findRelatedPassages('When did Napoleon become emperor?', history, { exclude: ['h3'] })).toEqual([]);
+  });
+
+  it('meets the retrieval golden set targets for questions', async () => {
+    const { evaluateRetrieval } = await import('../eval/retrieval.js');
+    const result = evaluateRetrieval();
+    expect(result.question.unanswerableWithSourceShown).toBe(0);
+    expect(result.question.shownRecall).toBeGreaterThanOrEqual(0.75);
+    expect(result.question.shownPrecision).toBeGreaterThanOrEqual(0.8);
+    expect(result.tutor.unanswerableWithSourceShown).toBe(0);
+    expect(result.tutor.shownPrecision).toBeGreaterThanOrEqual(0.95);
   });
 });
 

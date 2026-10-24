@@ -7,6 +7,9 @@ const MIN_COVERAGE = 0.3;
 const RELATED_COVERAGE = 0.45;
 const SECOND_SOURCE_RATIO = 0.8;
 const SUBSTANTIVE_WORDS = 6;
+const QUESTION_COVERAGE = 0.3;
+const QUESTION_SECOND_RATIO = 0.9;
+const QUESTION_LIMIT = 2;
 
 export const selectPlanChunks = (chunks, budget = PLAN_CHAR_BUDGET) => {
   const total = chunks.reduce((sum, chunk) => sum + chunk.text.length, 0);
@@ -62,6 +65,21 @@ export const findMessageSources = (text, chunks, { candidateIds = null, stepIds 
     return stepIds.slice(0, 1).map((chunkId) => ({ chunkId, kind: 'step', score: 0 }));
   }
   return [];
+};
+
+export const findRelatedPassages = (text, chunks, { exclude = [], limit = QUESTION_LIMIT } = {}) => {
+  if (!text || !chunks.length) return [];
+  const skip = new Set(exclude);
+  const ranked = scoreChunks(text, indexFor(chunks))
+    .filter((match) => match.score > 0 && match.shared >= 1 && match.queryCoverage >= QUESTION_COVERAGE)
+    .sort((a, b) => b.score - a.score);
+  const best = ranked[0];
+  if (!best) return [];
+  return ranked
+    .filter((match, position) => position === 0 || match.score >= best.score * QUESTION_SECOND_RATIO)
+    .slice(0, limit)
+    .map((match) => match.chunk)
+    .filter((chunk) => !skip.has(chunk.id));
 };
 
 export const highlightPassage = (passage, message) => {
