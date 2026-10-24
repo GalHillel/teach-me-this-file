@@ -117,6 +117,31 @@
   padding: 0.2em 0;
 }
 
+.prose-tutor code,
+.prose-tutor pre,
+.prose-tutor .katex,
+.prose-tutor .katex-display {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.prose-tutor pre {
+  overflow-x: auto;
+  background: var(--color-paper);
+  border-radius: 6px;
+  padding: 0.6em 0.8em;
+}
+
+.prose-tutor pre code {
+  background: none;
+  padding: 0;
+}
+
+.prose-tutor a,
+.prose-tutor code {
+  overflow-wrap: anywhere;
+}
+
 .typing-dot {
   animation: typing 1.2s infinite ease-in-out;
 }
