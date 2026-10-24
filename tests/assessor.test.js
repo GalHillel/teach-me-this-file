@@ -88,7 +88,7 @@ describe('answers copied from the passage', () => {
   const sources = [{ text: 'Plants take in carbon dioxide from the air through small openings in their leaves called stomata, and water from the soil through their roots.' }];
 
   it('flags an answer that repeats the passage word for word, so the tutor asks for it in the student\'s own words', () => {
-    const copied = 'Plants take in carbon dioxide from the air through small openings in their leaves called stomata.';
+    const copied = 'Plants take in carbon dioxide from the air through small openings in their leaves called stomata, and water from the soil through their roots.';
     const result = normalizeAssessment({ verdict: 'correct', completeness: 1, confidence: 'high' }, copied, sources);
     expect(result).toMatchObject({ verdict: 'correct', issue: 'copied', checks: ['copied_from_source'] });
   });
@@ -97,6 +97,12 @@ describe('answers copied from the passage', () => {
     const paraphrase = 'They take in carbon dioxide from the air through the stomata in the leaves, and water from the soil through the roots.';
     expect(normalizeAssessment({ verdict: 'correct', completeness: 1 }, paraphrase, sources).issue).toBe('none');
     expect(copiedShare('CO2 from air, water from soil', sources)).toBe(0);
+  });
+
+  it('does not count reusing a phrase from a longer sentence as copying', () => {
+    const french = [{ text: 'Un objet flotte dans l\'eau si sa masse volumique est plus petite que celle de l\'eau, qui vaut 1 g/cm³.' }];
+    expect(copiedShare('Parce que sa masse volumique est plus petite que celle de l\'eau.', french)).toBe(0);
+    expect(copiedShare('Plants take in carbon dioxide from the air through small openings in their leaves called stomata.', sources)).toBe(0);
   });
 
   it('does not call a wrong answer copied', () => {

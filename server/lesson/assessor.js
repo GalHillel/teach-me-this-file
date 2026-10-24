@@ -12,8 +12,9 @@ const ISSUE_VERDICTS = {
   unjustified: new Set(['correct', 'partial']),
   copied: new Set(['correct', 'partial']),
 };
-const COPY_MIN_WORDS = 8;
-const COPY_SHARE = 0.6;
+const COPY_MIN_WORDS = 6;
+const COPY_SHARE = 0.7;
+const COPY_SENTENCE_SHARE = 0.8;
 const COPY_SCAN_WORDS = 120;
 const DEFAULT_COMPLETENESS = { correct: 1, partial: 0.5, incorrect: 0 };
 
@@ -36,17 +37,26 @@ const simplify = (value) =>
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim();
 
-export const copiedShare = (answer, sources) => {
-  const words = simplify(answer).split(' ').filter(Boolean).slice(0, COPY_SCAN_WORDS);
-  const text = ` ${sources.map((source) => simplify(source.text)).join(' | ')} `;
-  if (words.length < COPY_MIN_WORDS) return 0;
+const longestRun = (words, text) => {
   let longest = 0;
   for (let start = 0; start < words.length && words.length - start > longest; start += 1) {
     let end = start + longest + 1;
     while (end <= words.length && text.includes(` ${words.slice(start, end).join(' ')} `)) end += 1;
     longest = Math.max(longest, end - 1 - start);
   }
-  return longest >= COPY_MIN_WORDS ? longest / words.length : 0;
+  return longest;
+};
+
+export const copiedShare = (answer, sources) => {
+  const words = simplify(answer).split(' ').filter(Boolean).slice(0, COPY_SCAN_WORDS);
+  if (words.length < COPY_MIN_WORDS) return 0;
+  const sentences = sources.flatMap((source) => String(source.text).split(/(?<=[.!?\u3002])\s+|\n+/u)).map((sentence) => simplify(sentence)).filter((sentence) => sentence.split(' ').length >= COPY_MIN_WORDS);
+  let best = 0;
+  for (const sentence of sentences) {
+    const run = longestRun(words, ` ${sentence} `);
+    if (run >= COPY_SENTENCE_SHARE * sentence.split(' ').length) best = Math.max(best, run / words.length);
+  }
+  return best;
 };
 
 const lowerConfidence = (confidence) => CONFIDENCE[Math.max(0, CONFIDENCE.indexOf(confidence) - 1)];
