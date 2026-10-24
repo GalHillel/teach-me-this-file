@@ -3,7 +3,7 @@ import { findMessageSources } from '../src/lesson/sources.js';
 
 const golden = JSON.parse(readFileSync(new URL('./golden/sources.json', import.meta.url), 'utf8'));
 
-export const scoreSourceMatching = (match = (message, chunks) => findMessageSources(message, chunks, [])) => {
+export const scoreSourceMatching = (match = (message, chunks) => findMessageSources(message, chunks)) => {
   const rows = golden.cases.map((item) => {
     const chunks = golden.documents[item.doc];
     const matches = match(item.message, chunks).filter((source) => source.kind === 'based' || source.kind === 'match');
