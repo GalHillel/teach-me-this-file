@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { createLesson } from '../api/client.js';
 import { languageName, useI18n } from '../i18n/translate.js';
 import { selectPlanChunks } from '../lesson/sources.js';
+import { sampleFile } from '../samples/index.js';
 import FileDrop from './FileDrop.jsx';
 import Icon from './Icon.jsx';
 
@@ -90,6 +91,15 @@ export default function SetupScreen({
     }
   };
 
+  const chooseSample = (sample) => {
+    onFile(sampleFile(sample));
+    const preset = PRESETS.find((item) => item.language === sample.language && item.language === 'he');
+    if (preset) {
+      onTeacherPromptChange(preset.text);
+      onLessonLanguageChange(preset.language);
+    }
+  };
+
   const choosePreset = (preset) => {
     onTeacherPromptChange(preset.text);
     onLessonLanguageChange(preset.language);
@@ -104,7 +114,7 @@ export default function SetupScreen({
 
       <div className="mt-10 grid gap-10 lg:grid-cols-2 lg:gap-12">
         <Section number="1" title={t('setup.material')} hint={t('setup.materialHint')}>
-          <FileDrop upload={upload} onFile={onFile} onRemove={onRemoveFile} />
+          <FileDrop upload={upload} onFile={onFile} onRemove={onRemoveFile} onSample={chooseSample} />
           <p className="mt-3 flex gap-2 text-sm leading-relaxed text-muted">
             <Icon name="info" className="mt-0.5 size-4 shrink-0" />
             <span>{t('setup.privacy')}</span>
@@ -157,7 +167,7 @@ export default function SetupScreen({
         </Section>
       </div>
 
-      <div className="mt-10 flex flex-col gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="sticky bottom-0 z-10 -mx-4 mt-10 flex flex-col gap-3 border-t border-line bg-paper/95 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur sm:-mx-6 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="text-sm text-muted" aria-live="polite">
           {busy && t('setup.planning')}
           {!busy && needsKey && (

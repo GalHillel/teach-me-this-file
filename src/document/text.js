@@ -17,7 +17,7 @@ export const textToSections = (text) => {
   for (let start = 0; start < lines.length; start += LINES_PER_SECTION) {
     const slice = lines.slice(start, start + LINES_PER_SECTION);
     if (slice.join('').trim()) {
-      sections.push({ label: `Lines ${start + 1}–${start + slice.length}`, text: slice.join('\n') });
+      sections.push({ label: `Lines ${start + 1}–${start + slice.length}`, firstLine: start + 1, text: slice.join('\n') });
     }
   }
   return sections;

@@ -1,5 +1,5 @@
 import { localizeLabel, useI18n } from '../i18n/translate.js';
-import { highlightPassage } from '../lesson/sources.js';
+import { highlightPassage, readableText } from '../lesson/sources.js';
 import Dialog from './Dialog.jsx';
 
 const KINDS = new Set(['based', 'related', 'step']);
@@ -21,7 +21,7 @@ export default function SourcePanel({ selection, chunks, onClose }) {
           {chunk.section && <p className="text-sm font-medium" dir="auto">{t('label.section', { name: chunk.section })}</p>}
           <p className="text-sm text-muted">{t(`source.explain.${kind}`)}</p>
           <blockquote dir="auto" className="whitespace-pre-wrap rounded-lg border-s-4 border-margin bg-paper px-4 py-3 text-[15px] leading-relaxed">
-            {highlightPassage(chunk.text, selection.message.content).map((part) =>
+            {highlightPassage(readableText(chunk.text), selection.message.content).map((part) =>
               part.hit ? <mark key={part.key} className="marker">{part.text}</mark> : part.text,
             )}
           </blockquote>

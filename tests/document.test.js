@@ -152,6 +152,18 @@ describe('document structure', async () => {
     expect(chunks.map((chunk) => chunk.section)).toEqual(['Plants', 'Roots']);
   });
 
+  it('labels text passages with the lines they actually cover', () => {
+    const paragraph = (word) => Array(14).fill(`${word} carries water and minerals from the soil up to the leaves.`).join(' ');
+    const text = ['# Roots', paragraph('The root'), '', '', '', '## Stems', paragraph('The stem'), '', '## Leaves', 'Leaves make food.'].join('\n');
+    const chunks = buildChunks([{ label: 'Lines 41–50', firstLine: 41, text }]);
+    expect(chunks.map((chunk) => [chunk.label, chunk.section])).toEqual([
+      ['Lines 41–42', 'Roots'],
+      ['Lines 46–47', 'Stems'],
+      ['Lines 49–50', 'Leaves'],
+    ]);
+    expect(chunks[0].text).not.toMatch(/\n\n/);
+  });
+
   it('drops passages that repeat word for word and renumbers the rest', () => {
     const repeated = 'This page intentionally left blank for printing purposes in the original book.';
     const { chunks, duplicates } = dropDuplicateChunks([

@@ -148,6 +148,7 @@ const record = (screen, viewport, language, data, extra = {}) => results.push({ 
 
 const externalRequests = new Set();
 let keyboard = null;
+const features = [];
 let pdfStructure = null;
 let renamed = null;
 const server = await startServer();
@@ -297,6 +298,47 @@ try {
     return { skipVisible, skipFocusesAnswer, escapeStops: true, stepAfterStop };
   })().catch((error) => ({ error: error.message.split('\n')[0] }));
 
+  for (const [viewport, language, sampleIndex] of [[[1280, 800], 'en', 0], [[390, 844], 'he', 1]]) {
+    const { context, page } = await openApp(browser, viewport, language);
+    const result = { viewport: viewport.join('x'), language };
+    try {
+      await page.goto(base);
+      await page.waitForSelector('h1');
+      await page.locator('main div.flex-wrap button[lang]').nth(sampleIndex).click();
+      await page.waitForSelector('p.text-success', { timeout: 10000 });
+      result.sampleLoaded = await page.locator('p.text-success').innerText();
+      result.lessonLanguage = await page.locator('#lesson-language').inputValue();
+      await page.locator('main button.btn-primary').last().click();
+      await page.waitForSelector('[role=progressbar]', { timeout: 20000 });
+      await waitTutorDone(page, 0);
+      await page.locator('section button[aria-label]').filter({ has: page.locator('svg') }).first().click();
+      await page.waitForSelector('dialog[open] #document-search', { timeout: 5000 });
+      record('document-panel', viewport, language, await audit(page));
+      result.sectionsListed = await page.locator('dialog[open] li').count();
+      await page.locator('dialog[open] button[aria-pressed]').first().click();
+      result.conceptResults = await page.locator('dialog[open] li').count();
+      await page.locator('#document-search').fill(language === 'he' ? 'עננים' : 'chlorophyll');
+      result.searchResults = await page.locator('dialog[open] li').count();
+      result.highlighted = await page.locator('dialog[open] li mark').count();
+      const go = page.locator('dialog[open] li button.btn-secondary').first();
+      if (await go.count()) {
+        await go.click();
+        result.jumpedToStep = await page.locator('dialog[open]').count() === 0;
+      }
+      if (await page.locator('dialog[open]').count()) await page.locator('dialog[open] button[aria-label]').first().click();
+      await page.waitForFunction(() => !document.querySelector('dialog[open]'), null, { timeout: 3000 });
+      for (let turn = 0; turn < 4 && !(await page.locator('#summary-title').count()); turn += 1) await answer(page, 'Leaves take in carbon dioxide and water and make glucose.');
+      const download = page.waitForEvent('download', { timeout: 5000 });
+      await page.locator('section[aria-labelledby="summary-title"] button').filter({ hasText: language === 'he' ? 'הורדת סיכום' : 'Download notes' }).click();
+      const file = await download;
+      result.notesFile = file.suggestedFilename();
+    } catch (error) {
+      result.error = error.message.split('\n')[0].slice(0, 160);
+    }
+    features.push(result);
+    await context.close();
+  }
+
   const { context, page } = await openApp(browser, [1280, 800], 'en');
   await page.goto(base);
   await page.waitForSelector('h1');
@@ -314,6 +356,7 @@ const summary = {
   pdfStructure,
   renamedPdf: renamed,
   keyboard,
+  features,
   externalRequests: [...externalRequests],
   overflow: results.filter((row) => row.overflow > 0).map((row) => `${row.screen} ${row.viewport} ${row.language} +${row.overflow}px`),
   offscreen: results.filter((row) => row.offscreen.length).map((row) => `${row.screen} ${row.viewport} ${row.language}: ${row.offscreen.join(', ')}`),
@@ -338,5 +381,5 @@ print(JSON.stringify(summary, null, 2));
 if (reportPath) writeFileSync(reportPath, `${JSON.stringify({ summary, results }, null, 2)}\n`);
 
 const serious = summary.axe.filter((violation) => violation.impact === 'serious' || violation.impact === 'critical');
-const failed = !keyboard?.escapeStops || !keyboard?.skipFocusesAnswer || !pdfStructure || pdfStructure.headerLeft || pdfStructure.footerLeft || pdfStructure.sections.length < 3 || !summary.recheckShown || !summary.reviewCompleted || summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
+const failed = features.some((item) => item.error || !item.notesFile || !item.searchResults) || !keyboard?.escapeStops || !keyboard?.skipFocusesAnswer || !pdfStructure || pdfStructure.headerLeft || pdfStructure.footerLeft || pdfStructure.sections.length < 3 || !summary.recheckShown || !summary.reviewCompleted || summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
 if (strict && failed) process.exit(1);

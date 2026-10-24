@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import Markdown from '../src/components/Markdown.jsx';
-import { findMessageSources, findRelatedPassages } from '../src/lesson/sources.js';
+import { findMessageSources, findRelatedPassages, readableText, searchPassages } from '../src/lesson/sources.js';
 import { scoreSourceMatching } from '../eval/sources.js';
 
 const chunks = [
@@ -80,6 +80,22 @@ describe('findRelatedPassages', () => {
     expect(result.question.shownPrecision).toBeGreaterThanOrEqual(0.8);
     expect(result.tutor.unanswerableWithSourceShown).toBe(0);
     expect(result.tutor.shownPrecision).toBeGreaterThanOrEqual(0.95);
+  });
+});
+
+describe('document search', () => {
+  const chunks = [
+    { id: 'c1', label: 'Lines 1–3', text: '## Roots\n\nRoots take in water from the soil.' },
+    { id: 'c2', label: 'Lines 5–6', text: '## Leaves\nLeaves use light to make sugar.' },
+  ];
+
+  it('finds the passage that mentions the search words', () => {
+    expect(searchPassages('light sugar', chunks).map((chunk) => chunk.id)).toEqual(['c2']);
+  });
+
+  it('shows Markdown headings without the hash marks and keeps blank lines', () => {
+    expect(readableText(chunks[0].text)).toBe('Roots\n\nRoots take in water from the soil.');
+    expect(readableText('Use C# daily.\n#hashtag')).toBe('Use C# daily.\n#hashtag');
   });
 });
 

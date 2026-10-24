@@ -82,6 +82,17 @@ export const findRelatedPassages = (text, chunks, { exclude = [], limit = QUESTI
     .filter((chunk) => !skip.has(chunk.id));
 };
 
+export const searchPassages = (query, chunks, limit = 8) => {
+  if (!query.trim() || !chunks.length) return [];
+  return scoreChunks(query, indexFor(chunks))
+    .filter((match) => match.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((match) => match.chunk);
+};
+
+export const readableText = (text) => text.replace(/^#{1,6}[ \t]+(.+?)[ \t]*#*[ \t]*$/gm, '$1');
+
 export const highlightPassage = (passage, message) => {
   const terms = new Set(termGroups(message).flat());
   return passage.split(/([\p{L}\p{N}]+)/u).map((part, index) => {

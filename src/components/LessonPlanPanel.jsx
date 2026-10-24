@@ -72,7 +72,8 @@ export default function LessonPlanPanel({ plan, progress, onSelectStep }) {
                       {t('plan.buildsOn', { steps: step.prerequisites.map((id) => plan.steps.findIndex((item) => item.id === id) + 1).filter(Boolean).join(', ') })}
                     </span>
                   )}
-                  {active && state.attempts > 0 && (
+                  {active && state.phase === 'recheck' && <span className="mt-0.5 block text-xs text-muted">{t('plan.recheck')}</span>}
+                  {active && state.phase !== 'recheck' && state.attempts > 0 && (
                     <span className="mt-0.5 block text-xs text-muted">{t('plan.attempt', { count: state.attempts + 1 })}</span>
                   )}
                   {state.outcome && <span className="mt-0.5 block text-xs text-muted">{t(`outcome.${state.outcome}`)}</span>}

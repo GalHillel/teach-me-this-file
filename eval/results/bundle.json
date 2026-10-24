@@ -1,0 +1,19 @@
+{
+  "method": "vite build of commit 13d5def and of the current tree, gzip -9 of each file",
+  "before": {
+    "commit": "13d5def",
+    "entryJs": { "bytes": 289602, "gzip": 91287 },
+    "entryCss": { "bytes": 61191, "gzip": 14238 },
+    "lessonJs": { "bytes": 451918, "gzip": 133839 },
+    "lessonCss": null,
+    "fonts": "Google Fonts stylesheet and font files from fonts.googleapis.com and fonts.gstatic.com"
+  },
+  "after": {
+    "entryJs": { "bytes": 303409, "gzip": 95930 },
+    "entryCss": { "bytes": 43360, "gzip": 8324 },
+    "lessonJs": { "bytes": 460221, "gzip": 136079 },
+    "lessonCss": { "bytes": 29802, "gzip": 7909 },
+    "fonts": "self-hosted woff2 files, loaded per unicode range"
+  },
+  "firstScreenGzip": { "before": 105525, "after": 104254 }
+}

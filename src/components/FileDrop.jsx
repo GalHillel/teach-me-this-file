@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { ACCEPTED_EXTENSIONS, FILE_TYPES, MAX_FILE_BYTES, detectFileType, formatBytes } from '../document/extract.js';
 import { localizeLabel, useI18n } from '../i18n/translate.js';
+import { SAMPLES } from '../samples/index.js';
 import Icon from './Icon.jsx';
 
 const warningText = (warning, t) => {
@@ -56,7 +57,7 @@ function FileStatus({ upload }) {
   );
 }
 
-export default function FileDrop({ upload, onFile, onRemove }) {
+export default function FileDrop({ upload, onFile, onRemove, onSample }) {
   const { t } = useI18n();
   const inputRef = useRef(null);
   const [dragging, setDragging] = useState(false);
@@ -122,20 +123,39 @@ export default function FileDrop({ upload, onFile, onRemove }) {
   }
 
   return (
-    <div
-      {...dropProps}
-      className={`rounded-xl border-2 border-dashed transition-colors ${dragging ? 'border-pen bg-pen-soft' : 'border-line bg-surface'}`}
-    >
-      <button type="button" onClick={choose} className="flex w-full flex-col items-center gap-3 rounded-xl px-6 py-10 text-center">
-        <span className="grid size-12 place-items-center rounded-full bg-pen-soft text-pen">
-          <Icon name="upload" className="size-6" />
-        </span>
-        <span>
-          <span className="block font-medium">{dragging ? t('file.dropHere') : t('file.choose')}</span>
-          <span className="mt-1 block text-sm text-muted">{t('file.types', { size: formatBytes(MAX_FILE_BYTES) })}</span>
-        </span>
-      </button>
-      {input}
+    <div>
+      <div
+        {...dropProps}
+        className={`rounded-xl border-2 border-dashed transition-colors ${dragging ? 'border-pen bg-pen-soft' : 'border-line bg-surface'}`}
+      >
+        <button type="button" onClick={choose} className="flex w-full flex-col items-center gap-3 rounded-xl px-6 py-10 text-center">
+          <span className="grid size-12 place-items-center rounded-full bg-pen-soft text-pen">
+            <Icon name="upload" className="size-6" />
+          </span>
+          <span>
+            <span className="block font-medium">{dragging ? t('file.dropHere') : t('file.choose')}</span>
+            <span className="mt-1 block text-sm text-muted">{t('file.types', { size: formatBytes(MAX_FILE_BYTES) })}</span>
+          </span>
+        </button>
+        {input}
+      </div>
+      {onSample && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-sm text-muted">{t('file.noFile')}</span>
+          {SAMPLES.map((sample) => (
+            <button
+              key={sample.id}
+              type="button"
+              lang={sample.language}
+              dir="auto"
+              onClick={() => onSample(sample)}
+              className="min-h-9 rounded-full border border-line bg-surface px-3 py-1 text-sm hover:border-pen hover:text-pen"
+            >
+              {sample.title}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

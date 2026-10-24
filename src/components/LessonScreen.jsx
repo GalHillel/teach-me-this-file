@@ -5,6 +5,7 @@ import { useTutor } from '../lesson/useTutor.js';
 import ChatMessage from './ChatMessage.jsx';
 import Composer from './Composer.jsx';
 import Dialog from './Dialog.jsx';
+import DocumentPanel from './DocumentPanel.jsx';
 import Icon from './Icon.jsx';
 import LessonPlanPanel from './LessonPlanPanel.jsx';
 import SourcePanel from './SourcePanel.jsx';
@@ -87,7 +88,34 @@ const summaryText = (plan, summary, t) =>
       : [t('summary.allGood')]),
   ].join('\n');
 
-function CompletionCard({ plan, progress, busy, onReview, onNewLesson }) {
+const notesMarkdown = (plan, progress, messages, summary, t) => {
+  const lines = [`# ${plan.title}`, ''];
+  if (plan.objectives.length) lines.push(`## ${t('plan.goals')}`, ...plan.objectives.map((item) => `- ${item}`), '');
+  lines.push(`## ${t('plan.steps')}`);
+  plan.steps.forEach((step, index) => {
+    const outcome = progress.steps[index].outcome;
+    const result = progress.review?.results?.[index];
+    lines.push(`${index + 1}. ${step.title}${outcome ? ` (${t(`outcome.${outcome}`)}${result ? `; ${t(`reviewResult.${result}`)}` : ''})` : ''}`);
+  });
+  lines.push('', summary.review.length ? `## ${t('summary.review')}` : t('summary.allGood'));
+  summary.review.forEach((item) => lines.push(`- ${item.title}`));
+  lines.push('', `## ${t('lesson.chat')}`, '');
+  messages
+    .filter((message) => (message.role === 'tutor' || message.role === 'student') && message.content)
+    .forEach((message) => lines.push(`**${message.role === 'tutor' ? t('chat.tutor') : t('summary.you')}:** ${message.content}`, ''));
+  return lines.join('\n');
+};
+
+const downloadText = (name, text) => {
+  const url = URL.createObjectURL(new Blob([text], { type: 'text/markdown;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+function CompletionCard({ plan, progress, messages, busy, onReview, onNewLesson }) {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
   const summary = lessonSummary(plan, progress);
@@ -154,6 +182,10 @@ function CompletionCard({ plan, progress, busy, onReview, onNewLesson }) {
           <Icon name={copied ? 'check' : 'copy'} className="size-4" />
           {copied ? t('summary.copied') : t('summary.copy')}
         </button>
+        <button type="button" className="btn-secondary py-1.5" onClick={() => downloadText('lesson-notes.md', notesMarkdown(plan, progress, messages, summary, t))}>
+          <Icon name="download" className="size-4" />
+          {t('summary.download')}
+        </button>
         <button type="button" className="btn-ghost py-1.5" onClick={onNewLesson}>{t('summary.newLesson')}</button>
       </div>
       <p className="mt-3 text-xs text-muted">{t('summary.followUp')}</p>
@@ -208,6 +240,7 @@ export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLe
   const { t } = useI18n();
   const tutor = useTutor({ lesson, settings });
   const [planOpen, setPlanOpen] = useState(false);
+  const [documentOpen, setDocumentOpen] = useState(false);
   const [sourceSelection, setSourceSelection] = useState(null);
   const chunkLabels = useMemo(() => new Map(lesson.document.chunks.map((chunk) => [chunk.id, chunk.label])), [lesson.document.chunks]);
   const lastContent = tutor.messages.at(-1)?.content;
@@ -230,6 +263,7 @@ export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLe
 
   const showStep = useCallback((index) => {
     setPlanOpen(false);
+    setDocumentOpen(false);
     const target = scrollRef.current?.querySelector(`[data-step-index="${index}"]`);
     if (!target) return;
     setPinned(false);
@@ -254,7 +288,10 @@ export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLe
           <h1 className="min-w-0 truncate font-display text-base font-semibold lg:sr-only" dir="auto">{plan.title}</h1>
           <div className="flex items-center gap-2 lg:ms-auto">
             <StepCounter plan={plan} progress={progress} />
-            <button type="button" className="btn-ghost px-2 lg:hidden" onClick={() => setPlanOpen(true)} aria-label={t('lesson.showPlan')}>
+            <button type="button" className="btn-ghost min-h-10 px-2" onClick={() => setDocumentOpen(true)} aria-label={t('doc.title')} title={t('doc.title')}>
+              <Icon name="search" />
+            </button>
+            <button type="button" className="btn-ghost min-h-10 px-2 lg:hidden" onClick={() => setPlanOpen(true)} aria-label={t('lesson.showPlan')}>
               <Icon name="list" />
             </button>
           </div>
@@ -271,7 +308,7 @@ export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLe
                 <Fragment key={message.id}>
                   <ChatMessage message={message} chunkLabels={chunkLabels} onOpenSource={openSource} />
                   {completed && message.id === lastFinishId && (
-                    <CompletionCard plan={plan} progress={progress} busy={tutor.busy} onReview={tutor.review} onNewLesson={onNewLesson} />
+                    <CompletionCard plan={plan} progress={progress} messages={tutor.messages} busy={tutor.busy} onReview={tutor.review} onNewLesson={onNewLesson} />
                   )}
                 </Fragment>
               ))}
@@ -296,6 +333,15 @@ export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLe
       </Dialog>
 
       <SourcePanel selection={sourceSelection} chunks={lesson.document.chunks} onClose={() => setSourceSelection(null)} />
+
+      <DocumentPanel
+        open={documentOpen}
+        onClose={() => setDocumentOpen(false)}
+        document={lesson.document}
+        plan={plan}
+        progress={progress}
+        onShowStep={showStep}
+      />
     </div>
   );
 }

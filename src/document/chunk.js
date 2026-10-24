@@ -36,42 +36,60 @@ const splitLongLine = (line) => {
   return parts;
 };
 
+const numberedLines = (source) => {
+  const lines = [];
+  source.text.split(/\r\n?|\n/).forEach((raw, index) => {
+    const text = normalizeText(raw);
+    if (!text && (!lines.length || lines.at(-1).text === '')) return;
+    for (const part of splitLongLine(text)) lines.push({ text: part, line: source.firstLine + index });
+  });
+  return lines;
+};
+
+const sourceLines = (source) =>
+  Number.isInteger(source.firstLine)
+    ? numberedLines(source)
+    : normalizeText(source.text).split('\n').flatMap(splitLongLine).map((text) => ({ text, line: null }));
+
+const labelFor = (source, lines) => {
+  const numbers = lines.filter((entry) => entry.text && entry.line !== null).map((entry) => entry.line);
+  return numbers.length ? `Lines ${numbers[0]}–${numbers.at(-1)}` : source.label;
+};
+
 export const buildChunks = (sections) => {
   const chunks = [];
   let section = null;
-  const push = (text, label, chunkSection) => {
-    if (!text.trim()) return;
-    const chunk = { id: `c${chunks.length + 1}`, label, text: text.trim() };
+  const push = (lines, source, chunkSection) => {
+    const text = lines.map((entry) => entry.text).join('\n').trim();
+    if (!text) return;
+    const chunk = { id: `c${chunks.length + 1}`, label: labelFor(source, lines), text };
     if (chunkSection) chunk.section = chunkSection.slice(0, 120);
     chunks.push(chunk);
   };
 
   for (const source of sections) {
     const headings = source.headings?.length ? new Set(source.headings) : null;
-    const lines = normalizeText(source.text).split('\n').flatMap(splitLongLine);
-    let current = '';
+    let current = [];
+    let length = 0;
     let currentSection = section;
-    for (const line of lines) {
-      const heading = headingOf(line, headings);
+    const flush = () => {
+      push(current, source, currentSection);
+      current = [];
+      length = 0;
+      currentSection = section;
+    };
+    for (const entry of sourceLines(source)) {
+      const heading = headingOf(entry.text, headings);
       if (heading) {
-        push(current, source.label, currentSection);
-        current = '';
         section = heading;
-        currentSection = heading;
+        flush();
       }
-      if (current && current.length + line.length > MAX_CHUNK_CHARS) {
-        push(current, source.label, currentSection);
-        current = '';
-        currentSection = section;
-      }
-      current += current ? `\n${line}` : line;
-      if (current.length >= TARGET_CHUNK_CHARS && line === '') {
-        push(current, source.label, currentSection);
-        current = '';
-        currentSection = section;
-      }
+      if (length && length + entry.text.length > MAX_CHUNK_CHARS) flush();
+      current.push(entry);
+      length += entry.text.length + (current.length > 1 ? 1 : 0);
+      if (length >= TARGET_CHUNK_CHARS && entry.text === '') flush();
     }
-    push(current, source.label, currentSection);
+    flush();
   }
 
   return chunks;
