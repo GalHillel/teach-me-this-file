@@ -3,8 +3,10 @@ import { config } from './config.js';
 import { AppError, errorBody, toAppError } from './errors.js';
 import { createLessonPlan } from './lesson/planner.js';
 import { runTurn } from './lesson/tutor.js';
+import { count, metricsSnapshot } from './metrics.js';
 import { resolveProvider } from './providers/index.js';
 import { rateLimit } from './rateLimit.js';
+import { createServerKeyBudget, isSameOrigin } from './serverKey.js';
 import { openEventStream } from './sse.js';
 import { validatePlanRequest, validateTurnRequest } from './validation.js';
 
@@ -31,10 +33,10 @@ const requestLog = (req, res, next) => {
   next();
 };
 
-export const createApp = ({ providerFor = providerFrom } = {}) => {
+export const createApp = ({ providerFor = providerFrom, serverKeyBudget = createServerKeyBudget(config.serverKeyDailyLimit) } = {}) => {
   const app = express();
   app.disable('x-powered-by');
-  app.set('trust proxy', true);
+  app.set('trust proxy', 1);
   app.use(requestLog);
   app.use(express.json({ limit: '1mb' }));
   app.use((req, res, next) => {
@@ -44,27 +46,46 @@ export const createApp = ({ providerFor = providerFrom } = {}) => {
 
   const limiter = rateLimit({ perMinute: config.rateLimitPerMinute });
 
+  const providerForRequest = (req) => {
+    const { provider, usesServerKey } = providerFor(req);
+    if (usesServerKey) {
+      if (!isSameOrigin(req)) throw new AppError('server_key_restricted');
+      if (!serverKeyBudget.take()) throw new AppError('server_key_budget');
+    }
+    return provider;
+  };
+
   app.get('/api/health', (req, res) => {
-    res.json({ ok: true, serverKey: Boolean(config.serverApiKey) });
+    res.json({ ok: true, serverKey: Boolean(config.serverApiKey), metrics: metricsSnapshot() });
   });
 
   app.post('/api/lessons', limiter, async (req, res) => {
     const input = validatePlanRequest(req.body);
-    const provider = providerFor(req);
-    const lesson = await createLessonPlan({ provider, ...input, signal: abortOnClose(res) });
-    res.json({ ...lesson, provider: { name: provider.name, model: provider.model } });
+    const provider = providerForRequest(req);
+    const models = [];
+    let backup = false;
+    const onMeta = (meta) => {
+      models.push(meta.model);
+      backup ||= meta.backup;
+    };
+    const lesson = await createLessonPlan({ provider, ...input, signal: abortOnClose(res), onMeta });
+    res.json({ ...lesson, provider: { name: provider.name, models, backup } });
   });
 
   app.post('/api/turns', limiter, async (req, res) => {
     const input = validateTurnRequest(req.body);
-    const provider = providerFor(req);
+    const provider = providerForRequest(req);
     const signal = abortOnClose(res);
     const stream = openEventStream(res);
     try {
       await runTurn({ provider, input, signal, send: stream.send });
     } catch (error) {
-      if (!signal.aborted) {
+      if (signal.aborted) {
+        count('cancelledTurns');
+        console.log('turn cancelled by client');
+      } else {
         const appError = toAppError(error);
+        count('turnErrors');
         if (appError.code === 'internal') console.error(`turn failed: ${error?.message}`);
         stream.send('error', errorBody(appError).error);
       }

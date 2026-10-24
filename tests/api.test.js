@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../server/app.js';
+import { createServerKeyBudget } from '../server/serverKey.js';
 import { AppError } from '../server/errors.js';
 import { createProgress } from '../server/lesson/progress.js';
 import { createMockProvider } from '../server/providers/mock.js';
@@ -45,10 +46,9 @@ const parseEvents = (text) =>
       return { event: eventLine.slice(7), data: JSON.parse(dataLine.slice(6)) };
     });
 
-const mockApp = () => {
-  const provider = createMockProvider({ delayMs: 1 });
-  return createApp({ providerFor: () => provider });
-};
+const withProvider = (provider, usesServerKey = false) => () => ({ provider, usesServerKey });
+
+const mockApp = () => createApp({ providerFor: withProvider(createMockProvider({ delayMs: 1 })) });
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -107,7 +107,7 @@ describe('POST /api/turns', () => {
     expect(events.map((item) => item.event)).toContain('status');
     const progress = events.find((item) => item.event === 'progress').data;
     expect(progress.move).toBe('hint');
-    expect(progress.verdict).toBe('incorrect');
+    expect(progress.assessment).toMatchObject({ verdict: 'incorrect', confidence: 'high' });
     expect(progress.progress.currentStep).toBe(0);
     expect(progress.progress.steps[0].attempts).toBe(1);
   });
@@ -136,7 +136,7 @@ describe('POST /api/turns', () => {
         [Symbol.asyncIterator]: () => ({ next: () => Promise.reject(new AppError('invalid_key')) }),
       }),
     };
-    const app = createApp({ providerFor: () => failing });
+    const app = createApp({ providerFor: withProvider(failing) });
     const events = parseEvents((await request(app).post('/api/turns').send(turn())).text);
     expect(events.at(-1)).toEqual({
       event: 'error',
@@ -159,7 +159,7 @@ describe('POST /api/turns', () => {
         }
       },
     };
-    const server = createApp({ providerFor: () => slow }).listen(0);
+    const server = createApp({ providerFor: withProvider(slow) }).listen(0);
     const controller = new AbortController();
     const response = await fetch(`http://localhost:${server.address().port}/api/turns`, {
       method: 'POST',
@@ -173,6 +173,67 @@ describe('POST /api/turns', () => {
     await new Promise((resolve) => setTimeout(resolve, 100));
     expect(providerSignal.aborted).toBe(true);
     server.close();
+  });
+});
+
+describe('server key guard', () => {
+  const serverKeyApp = (limit = 5) => createApp({
+    providerFor: withProvider(createMockProvider({ delayMs: 1 }), true),
+    serverKeyBudget: createServerKeyBudget(limit),
+  });
+
+  it('refuses the server key for requests that do not come from the app', async () => {
+    const response = await request(serverKeyApp()).post('/api/lessons').send({ teacherPrompt: 'x', document });
+    expect(response.status).toBe(403);
+    expect(response.body.error.code).toBe('server_key_restricted');
+
+    const crossSite = await request(serverKeyApp()).post('/api/lessons').set('Sec-Fetch-Site', 'cross-site').send({ teacherPrompt: 'x', document });
+    expect(crossSite.status).toBe(403);
+  });
+
+  it('accepts same-origin browser requests', async () => {
+    const response = await request(serverKeyApp()).post('/api/lessons').set('Sec-Fetch-Site', 'same-origin').send({ teacherPrompt: 'x', document });
+    expect(response.status).toBe(200);
+  });
+
+  it('stops using the server key after the daily budget', async () => {
+    const app = serverKeyApp(1);
+    const first = await request(app).post('/api/lessons').set('Sec-Fetch-Site', 'same-origin').send({ teacherPrompt: 'x', document });
+    const second = await request(app).post('/api/lessons').set('Sec-Fetch-Site', 'same-origin').send({ teacherPrompt: 'x', document });
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(429);
+    expect(second.body.error.code).toBe('server_key_budget');
+  });
+
+  it('resets the budget on a new day', () => {
+    let day = new Date('2026-10-24T10:00:00Z');
+    const budget = createServerKeyBudget(1, () => day);
+    expect(budget.take()).toBe(true);
+    expect(budget.take()).toBe(false);
+    day = new Date('2026-10-25T00:00:01Z');
+    expect(budget.take()).toBe(true);
+  });
+});
+
+describe('model notices', () => {
+  it('tells the client once when a backup model answered', async () => {
+    const base = createMockProvider({ delayMs: 1 });
+    const backup = {
+      ...base,
+      generateJson: (options) => base.generateJson({ ...options, onMeta: () => options.onMeta?.({ model: 'lite', backup: true, fallbacks: 2 }) }),
+      streamText: (options) => base.streamText({ ...options, onMeta: () => options.onMeta?.({ model: 'lite', backup: true, fallbacks: 0 }) }),
+    };
+    const response = await request(createApp({ providerFor: withProvider(backup) }))
+      .post('/api/turns')
+      .send(turn({ kind: 'reply', studentMessage: 'The smallest unit of life', history: [{ role: 'tutor', content: 'What is a cell?' }] }));
+    const events = parseEvents(response.text);
+    expect(events.filter((item) => item.event === 'notice')).toEqual([{ event: 'notice', data: { code: 'backup_model', model: 'lite' } }]);
+    expect(events.at(-1).data).toMatchObject({ backup: true, models: ['lite', 'lite'] });
+  });
+
+  it('reports which model built the plan', async () => {
+    const response = await request(mockApp()).post('/api/lessons').send({ teacherPrompt: 'Teach 7th graders', document });
+    expect(response.body.provider).toEqual({ name: 'mock', models: ['mock'], backup: false });
   });
 });
 
