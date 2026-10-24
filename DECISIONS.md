@@ -1,127 +1,204 @@
 # Decisions
 
+The first version was built on 21 October 2026. On 24 October I audited it ([AUDIT.md](AUDIT.md)) and reworked the grading, the lesson state machine, the source matching, the provider layer and the interface. This file describes the design as it is now. The changes and their measured effect are in "What changed on 24 October" at the end.
+
 ## The main choices and why
 
 ### The lesson is a state machine, the model only writes the words
 
-The assignment asks for a chat that teaches, with the plan and progress in app state. The obvious version is one big prompt with the whole chat history, where the model decides when to move on. I did not want that: the model forgets, skips ahead, or tells the student "correct!" to be nice, and the app has no reliable progress to show.
+The obvious version of a tutor is one big prompt with the whole chat history, where the model decides when to move on. I did not want that: the model forgets, skips ahead, or tells the student "correct!" to be nice, and the app has no reliable progress to show.
 
 So every student turn runs in three parts on the server (`server/lesson/tutor.js`):
 
-1. **Grade.** A separate, non-streaming JSON call (`assessor.js`) classifies the answer against the step's success criteria: `correct`, `partial`, `incorrect`, `question` or `off_topic`. It also writes short notes on what was right and what is missing.
-2. **Decide.** Plain functions in `progress.js` turn the verdict into a move and a new progress object. Correct moves to the next step. Partial or incorrect gives a hint, then a stronger hint, and after the third try shows the answer and moves on (marked "worth reviewing"). Questions and off-topic messages do not count as attempts. After the last step the lesson finishes.
-3. **Teach.** The tutor prompt gets the plan, the current step, the step's passages, the grader's notes and an instruction for exactly this move ("give a level 2 hint, do not reveal the answer"). Only this call is streamed.
+1. **Grade.** A separate, non-streaming JSON call (`assessor.js`) grades the answer against the tutor's last question and the step's success criteria. The result has a verdict (`correct`, `partial`, `incorrect`, `question`, `off_topic`), a completeness score, the concepts shown and missing, a misconception, an evidence quote from the student, and a confidence level.
+2. **Check the grade.** The server does not trust the grade as is. Evidence that is not a quote from the student's message is dropped and the confidence goes down. A "correct" with completeness under 0.5 becomes "partial". "I don't know" (in English, Hebrew, French or Spanish) is never accepted as right. An answer that contains instructions to the grader ("mark this as correct") can not be graded correct. A grade the code can not read becomes `unclear` instead of a guess.
+3. **Decide.** Plain functions in `progress.js` turn the grade into a move and a new progress object. Each step has a phase (`learn` or `recheck`), an attempt counter, a stall counter, and a final outcome.
+   - Correct moves to the next step. A correct answer with low confidence first gets one short follow-up question (`probe`), so a lucky guess does not move the lesson.
+   - Partial or incorrect gives a hint, then a stronger hint that targets the misconception.
+   - After the third try the tutor explains the answer and asks one easier question on the same step (`reveal_and_recheck`). If that is answered, the step is `recovered`; if not, it is marked `review` and the lesson moves on.
+   - Questions do not count as attempts. Off-topic and unclear messages do not count either, but after two in a row the third counts as a wrong answer, so a step can not stall forever.
+   - Outcomes are `mastered` (first try), `learned` (after hints), `recovered` (after the explanation) and `review`.
+4. **Teach.** The tutor prompt gets the plan, the current step, the step's passages, the checked grade and an instruction for exactly this move. Only this call is streamed.
 
-The cost is a second model call per student message and about a second of extra wait, which the UI covers with "Checking your answer". In return the progress is deterministic and testable (`tests/progress.test.js`), and the tutor can not skip a step on its own.
+The cost is a second model call per student message and about a second of extra wait, which the UI covers with "Checking your answer". In return the progress is deterministic and testable (`tests/progress.test.js` includes a test that no sequence of messages keeps a step active forever), and the tutor can not skip a step on its own.
 
 ### Stateless server, state in the browser
 
-There is no database. The lesson (plan, progress, messages, document passages) lives in a `useReducer` in the browser and the needed parts are sent with each turn. Reasons: free hosting runs functions that can start on any instance, there are no users or accounts in scope, and it keeps the server simple. The server validates everything the client sends (`validation.js`), so a broken or edited state is rejected with a 400 rather than crashing the turn.
+There is no database. The lesson lives in a `useReducer` in the browser and the needed parts are sent with each turn. Free hosting runs functions that can start on any instance, there are no users or accounts in scope, and it keeps the server simple. The server validates everything the client sends (`validation.js`), including the phase, counters and outcome of every step, so a broken or edited state is rejected with a 400.
 
-The price: a reload ends the lesson, and a teacher can not see a student's session later. Saving lessons would be the first thing to add with a real product (see "4 more hours").
+The lesson is saved in `sessionStorage` after every finished turn: the plan and document once, the chat and progress per turn. A reload in the same tab restores it with a short notice. It is cleared by "New lesson" and when the tab closes. The API key is never saved; it stays in memory only.
 
 ### Progress commits only when a turn finishes
 
-The server sends the new progress as the first SSE event, but the client keeps it as pending and commits it on `done`. If the student presses Stop or the network drops, the pending progress is thrown away, the partial text stays visible and marked as stopped, and the lesson stays on the same step with the same attempt count. The next answer is graded again. This is the "transaction" behaviour that makes Stop safe (`chatReducer.js`, tested in `tests/chat.test.js`).
+The server sends the new progress as an SSE event, but the client keeps it as pending and commits it on `done`. If the student presses Stop or the network drops, the pending progress is thrown away, the partial text stays visible and marked as stopped, and the lesson stays on the same step with the same counters (`chatReducer.js`, tested in `tests/chat.test.js`).
 
 ### Reading files in the browser
 
-PDF (pdf.js), Word (mammoth) and text files are read in the browser, and only text goes to the server. Vercel functions accept request bodies up to 4.5 MB, and school PDFs are often bigger than that. Reading in the browser avoids the limit, gives instant feedback (page count, warnings, right-to-left detection) before any AI call, and the server never receives the file itself. The cost is a bigger front-end bundle, so the PDF and Word code is loaded only when such a file is picked, and the lesson screen (Markdown and KaTeX) is loaded only when a lesson starts.
+PDF (pdf.js), Word (mammoth) and text files are read in the browser, and only text goes to the server. Vercel functions accept request bodies up to 4.5 MB, and school PDFs are often bigger than that. Reading in the browser avoids the limit, gives instant feedback (page count, warnings, right-to-left detection, a warning for very short files) before any AI call, and the server never receives the file itself. The PDF and Word code is loaded only when such a file is picked, and the lesson screen only when a lesson starts.
 
-Text is split into passages of up to about 1,100 characters that keep their origin: `Page 4` for PDFs, `Section: <heading>` for Word, `Lines 41–80` for text files. Supported formats are PDF with a text layer, `.docx`, `.txt` and `.md`. I did not list `.doc`, `.pptx` or images because they would not work well, and the app says so rather than pretending.
+Text is split into passages of up to about 1,100 characters that keep their origin: `Page 4` for PDFs, `Section: <heading>` for Word, `Lines 41–80` for text files. Long documents: the planner sees up to about 60,000 characters sampled evenly, and each turn sends only the passages of the current and next step.
 
-Long documents: the planner sees up to about 60,000 characters, sampled evenly from start to end, and the prompt says it is a sample. Each turn then sends only the passages of the current and next step, so long files do not make turns slow or expensive.
+### Lesson plans adapt to the material and the time
+
+The planner classifies the document (concept, procedure, narrative, language, mixed) and picks an approach per step: a short explanation, a worked example, or practice. Procedures get a worked example before practice. Each step names a common mistake, which the grader and the hint prompt use. The number of steps follows the file length and the time in the teacher's prompt ("under 15 minutes" gives at most 6 steps; a 400-character file gives 2). The server drops steps with repeated check questions and warns when most steps are not linked to any passage.
 
 ### Sources are matched by the app, never written by the model
 
 I did not want the model to produce page numbers, because it would invent them. Instead:
 
-- The planner names passage ids (`c12`) for each step. The server keeps only ids that exist; if none are left, it finds the best passage by word overlap with the step's title, goal and concepts.
-- When a tutor message is complete, the browser ranks all passages by shared words (weighted by how rare each word is in the document) and links the best one or two.
-- If the tutor wrote in another language than the document (a French lesson on an English file), no words match. Then the source button shows the passage the step was planned from, and the panel says that this is a step source, not a direct match.
-- If neither exists, the message says there is no matching passage.
+- The planner names passage ids for each step. The server keeps only ids that exist, and finds passages by text when none are left.
+- When a tutor message is complete, the browser ranks passages with BM25 (k1 1.2, b 0.75), after dropping stopwords and classroom praise ("great", "exactly", "כל הכבוד"), with light Hebrew prefix handling (ו, ה, ב, ל, מ, ש, כ).
+- A passage counts as **based on** only if at least two key words match, it covers at least 30% of the message's key-word weight, and it belongs to the passages the tutor actually received for this turn. A second source is shown only if it scores at least 80% of the first.
+- A strong match outside those passages is shown as **related**, not as the basis.
+- If nothing matches (for example, a French lesson on an English file), a substantive message shows the step's own passage as **step material**, and the panel explains why. Short messages like "Well done!" show no source.
 
-The source panel shows the exact extracted text with its page or section label, and highlights the words it shares with the message.
+The source panel shows the exact extracted text with its label and highlights the shared key words. I measure this with a golden set of 39 messages over three documents in English, Hebrew and French (`eval/sources.js`), and a test fails if false matches or extra sources come back.
 
 ### Streaming with SSE over POST, and real cancellation
 
-`POST /api/turns` answers with `text/event-stream` and these events: `status` (grading or writing), `progress`, `delta`, `done` or `error`. I used fetch and a small SSE parser instead of `EventSource`, because `EventSource` can only send GET requests and the turn needs a JSON body. The server sends a heartbeat comment every 15 seconds so proxies do not close a quiet connection, and `X-Accel-Buffering: no` plus `Cache-Control: no-transform` so they do not buffer it.
+`POST /api/turns` answers with `text/event-stream`: `status` (grading or writing), `progress` (move, new progress, verdict and confidence), `notice` (for example, a backup model answered), `delta`, then `done` (models used, time to first token, total time) or `error`. I used fetch and a small SSE parser instead of `EventSource`, because `EventSource` only sends GET requests. A heartbeat comment every 15 seconds and `X-Accel-Buffering: no` keep proxies from closing or buffering the stream.
 
-Stop calls `AbortController.abort()` in the browser. The server sees the connection close and aborts its own `AbortController`, which is passed to the provider fetch, so the provider stops generating too. A test checks that the provider's signal is aborted when the client disconnects.
+Stop calls `AbortController.abort()` in the browser. The server sees the connection close and aborts its own controller, which is passed to the provider fetch, so the provider stops generating too.
 
 ### Provider layer
 
-Each provider is an object with two methods, `generateJson` and `streamText` (async generator). There are two real implementations: Gemini's REST API, and an OpenAI-compatible one that covers Groq and OpenRouter. I call the REST APIs with `fetch` instead of using SDKs: it is a few lines per provider, and it keeps the error handling and abort handling the same for all of them. Adding a provider means adding one file and one line in `providers/index.js`.
+Each provider is an object with `generateJson` and `streamText`. Gemini uses its REST API, and an OpenAI-compatible adapter covers Groq and OpenRouter. Plain `fetch`, no SDKs, so error and abort handling is the same for all of them.
 
-The default is Gemini Flash (`gemini-3.5-flash`): it has a free tier, a very large context window (useful for planning from long files), JSON output mode, good multilingual quality including Hebrew and French, and streaming. Groq's Llama 3.3 70B and OpenRouter's free Llama are there because reviewers may have those keys. Models are set by environment variables, so a newer model is a config change.
+What I learned from the real API shaped the Gemini adapter:
 
-Several things changed after testing against the real API:
-
-- **Grading stays on Flash.** My first live runs used Gemini 2.5 Flash for everything, and after a few dozen calls the key hit the free tier's daily limit for that model (the limit is counted per model). I moved grading to Flash-Lite to split the load across two quotas. It was faster, but it graded worse: it called on-topic answers "off topic" and sometimes marked a correct answer as partial, even after I tightened the grading prompt. A wrong verdict is worse than a slow one, because the code moves the lesson on the verdict, so grading went back to the main model list. Flash-Lite is now only a fallback.
-- **Newer default models, with fallbacks.** `gemini-2.5-flash-lite` answered 404 ("no longer available to new users") for a new key, `gemini-2.5-flash` had used its daily free quota, and the newest Flash models often answered 503 ("high demand"). The model setting is now an ordered list. The default is 3.5 Flash, and when a model is overloaded, does not answer within 25 seconds, is out of quota or unavailable, the server tries the next one. During my test window the larger Flash models often answered 503 or hung, while Flash-Lite answered in under a second, so Flash-Lite is the second choice. An invalid key does not fall back. The list is an environment variable, so reviewers can set the models their key has.
-- **No thinking settings.** Gemini Flash "thinks" before answering, which delays the first streamed words by a few seconds. I first set a thinking budget of 0 for the tutor reply, but the models disagree on this setting: 3.5 Flash-Lite rejected a budget of 0, and another model rejected the "minimal" level. Since the fallback list mixes models, I removed the setting and accept the delay, which the UI covers with "Checking your answer" and "Tutor is thinking".
-
-When the provider answers 429 with a short retry delay (up to 10 seconds), the server waits and retries the same model once. Longer waits, like a daily quota, go straight to the user as "quota reached".
+- **Two tiers of models.** The main list is `gemini-3.6-flash`, `gemini-3.8-flash`, `gemini-2.5-flash`. The backup list is `gemini-3.5-flash-lite`. In my 21 October tests Flash-Lite graded worse (it called on-topic answers "off topic"), so it is used only after the main models fail, and the UI then tells the student that a lighter model answered. Earlier the switch was silent. Both lists are environment variables.
+- **Cooldowns.** When a model answers 503, times out, hits a rate limit or a daily quota, it is skipped for a while (30 seconds to 15 minutes, an hour for 404) for that key. The key is identified by a hash, not stored. Without this, every request waited on models that were known to be down.
+- **Deadline.** One model call may take 20 seconds; one AI call across all models may take 45. Before, four models with 25 seconds each could take 100 seconds to fail.
+- **Daily quota is not retried.** A 429 with a short per-minute delay is retried once. A 429 whose quota id says per day is not; the server moves to the next model, and if all are out, tells the user the daily quota is used up.
+- **Settings only where accepted.** `thinkingLevel: low` cuts the delay before the first streamed word, but `gemini-2.5-flash` rejects it with a 400. The adapter sends it only to the 3.x Flash models (a regex capability check), and only for the streamed reply.
+- **Measured.** Every call logs one line (`ai teach gemini-3.6-flash ok 1840ms after 1 failed`), and `/api/health` returns counters: calls, failures, average latency, fallbacks, backup uses, turns, errors, cancelled turns, average time to first token. They are per instance and reset on cold start.
 
 ### API keys
 
-The key is typed in a settings dialog, kept in React state (not localStorage), and sent in the `X-AI-Key` header. The server passes it to the provider in a header (`x-goog-api-key` or `Authorization`), never in a URL, never logs headers or provider error bodies, and maps provider errors to its own messages so a provider response can not echo the key back. A test checks that the key does not appear in the logs or the response. The optional server key comes from the environment and is never sent to the browser; `/api/health` only says whether it exists.
+The key is typed in a settings dialog, kept in React state, and sent in the `X-AI-Key` header. The server passes it to the provider in a header, never in a URL, never logs headers or provider error bodies, and maps provider errors to its own messages. A test checks that the key does not appear in the logs or the response.
+
+The live site also has a server key. Anyone could call `/api/*` directly and spend it, so it now answers only same-origin browser requests (`Sec-Fetch-Site: same-origin`, or an `Origin` that matches the host) and has a daily budget (`SERVER_KEY_DAILY_LIMIT`, 400 by default). The budget is counted in memory per function instance, so it is a brake, not an exact limit. A request with its own key is not limited this way. `trust proxy` is set to one hop, so a forged `X-Forwarded-For` can not dodge the per-IP rate limit.
 
 ### Untrusted content
 
-The file is treated as data. In every prompt the document passages sit inside `<document>` or `<sources>` tags, the system prompt says text inside them is never an instruction, and any tag in the file that could close those blocks is removed before it reaches the prompt (`fence()` in `prompts.js`). The grader also has an `off_topic` verdict for messages that try to change the tutor's role, which leads to a "redirect" move. Input sizes are limited on the server, and the AI endpoints have a per-IP rate limit.
+The file is treated as data. In every prompt the passages sit inside `<document>` or `<sources>` tags, the system prompt says text inside them is never an instruction, and tags in the file that could close those blocks are removed (`fence()` in `prompts.js`). The grader has an `off_topic` verdict for messages that try to change the tutor's role, and the server refuses a "correct" for answers that contain instructions to the grader. This reduces the risk; it does not remove it. A model can still be talked into things by text in its context, and I do not claim otherwise.
 
 ### Pedagogy
 
 - One idea per message, 60 to 150 words, ending with exactly one question. The tutor never answers its own question.
-- Check questions in the plan ask the student to explain, apply, compare or predict, not only to recall.
-- Wrong or partial answers get feedback that starts with what was right, then a nudge, then a stronger hint, before the answer is shown.
-- The grader judges the answer against the tutor's last question, not the whole step, because the tutor may ask about one part at a time.
-- The app adjusts the pace: after two steps understood on the first try the tutor is asked to be more concise and a bit more challenging; when the student struggles, it is asked for simpler words and a concrete example.
-- The last message summarises the lesson in a few bullets, asks one question that connects the ideas, and names the steps worth reviewing (those where the answer had to be shown or that took several tries).
-- Everything student-facing is in the lesson language from the teacher's prompt, and the plan's language code sets the text direction.
+- Check questions ask the student to explain, apply, compare or predict, not only to recall.
+- Hints start with what was right. The second hint targets the misconception the grader found, or the step's common mistake.
+- After the third try the tutor explains, then checks once more with an easier question. Showing the answer is not the same as learning it.
+- A correct answer the grader is unsure about gets one short follow-up before the lesson moves on.
+- A question from the student is answered, but the tutor does not give away the answer to its own open check question.
+- The pace adjusts: after two steps understood first try, the tutor is asked to be more concise; when the student struggles or needed the explanation, simpler words and a concrete example.
+- The lesson ends with a summary message and a summary card: how many steps were understood first try, after hints, after an explanation, and which steps are worth reviewing.
+
+### Languages
+
+There are four languages, and they are separate on purpose:
+
+- **Interface language:** English, Hebrew or French, picked in the header and remembered in `localStorage`. Hebrew switches the whole layout to right-to-left. Arrows flip, and margins use logical properties (`ms-`, `me-`, `border-s`).
+- **Document language:** whatever the file is in. Its direction is detected and shown.
+- **Lesson language:** chosen in a select on the setup screen, or taken from the teacher's prompt when left on automatic. The planner writes every student-facing text in it, and the tutor always answers in it.
+- **Student language:** the student can answer in any language; the grader accepts answers in another language.
+
+Text the app stores (system notes, file warnings, errors) is stored as a code with parameters and translated when shown, so switching the interface language also changes notes written earlier in the lesson. A test checks that Hebrew and French cover every English key with the same placeholders.
 
 ### UX
 
-- The setup screen says what to do in two steps, shows how the file was read (pages, passages, warnings, right-to-left) before any AI call, and keeps the file and prompt when you go back to start a new lesson.
-- While waiting, the chat shows "Checking your answer" during grading and "Tutor is writing" once text streams. The send button turns into Stop.
-- Errors say what happened and what to do: a rejected key offers "Check the key", a quota error says to wait or use another key, and every recoverable error has "Try again", which repeats the same turn without duplicating the student's message.
-- Student answers get a small label (Correct, Partly right, Not yet) so the grading is visible, and the plan panel shows the outcome of each step.
-- On a phone the plan moves into a sheet behind a button, and the source panel opens from the bottom.
+- The setup screen shows how the file was read before any AI call, warns about short files, and says what leaves the browser.
+- Tutor messages carry a label for what the tutor is doing (New idea, Hint, Follow-up question, Explanation and one more check, Answer to your question, Lesson summary). Student answers show the verdict, and "not sure" when the grader's confidence is low.
+- Notes between messages mark step changes, a step marked for review, and a re-check.
+- Errors say what happened and what to do. Key, quota and demo-key errors offer "Check the key". "Try again" appears only for errors that a retry can fix, and repeats the same turn without duplicating the student's message.
+- Clicking a finished step in the plan scrolls to where it was taught.
+- On a phone the plan moves into a sheet and the source panel opens from the bottom.
 
 ## What I decided not to do
 
-- **No database or accounts.** Not needed to show the teaching, and it would add hosting and privacy work. The cost is that lessons are lost on reload.
-- **No OCR.** Doing it in the browser (Tesseract.js) is slow and large, and server-side OCR does not fit free hosting. The app detects pages without text and says so.
-- **No embeddings or vector search.** For one document, passage ranking by shared rare words is enough, costs nothing, works in any language without a model, and is easy to explain. It fails across languages, which is why there is the step-source fallback.
-- **No retrieval beyond the step's passages during a turn.** If the student asks about something in another part of the file, the tutor may not see it. A lookup per question would fix this (see below).
-- **No TypeScript, no state library, no UI kit.** The stack in the assignment is JavaScript, and the state is one reducer.
-- **No conversation memory beyond the last 12 messages.** The plan and progress carry what matters; older messages are dropped to keep requests small.
+- **No database or accounts.** Not needed to show the teaching. `sessionStorage` covers reloads in the same tab.
+- **No OCR.** Too slow and large in the browser, and server OCR does not fit free hosting. Pages without text are detected and reported.
+- **No embeddings or vector search.** For one document, BM25 is enough, costs nothing, runs in the browser in any language, and is measured. It fails across languages, which is why the step-material fallback exists. I would add embeddings if the golden set showed paraphrase misses mattered; today it has one.
+- **No retrieval beyond the step's passages during a turn.** A student question about another part of the file may get a weaker answer.
+- **No TypeScript, no state library, no UI kit, no i18n library.** The stack in the assignment is JavaScript; the translations are one file and a 20-line translator with plural rules from `Intl.PluralRules`.
 
 ## Weaknesses I know about
 
-- Grading depends on the model. A lenient or harsh grader moves the student too fast or keeps them stuck; after three tries the answer is shown, so a student can not be stuck forever.
-- When the server falls back to Flash-Lite, both grading and teaching get worse: in testing it called a full, on-topic answer "off topic" (which does not count as an attempt, so the student could stay on the step), gave away part of the answer in a first hint, and praised a partial answer before asking for the missing part. The progress rules still hold, because the code applies them, but the verdicts and wording can be off.
-- Two model calls per answer double the request count. Gemini's free tier has per-minute and per-day limits for each model; the fallback list and one automatic retry help, but a busy free key can still run out, and the app then says the quota was reached.
-- PDF text order can be wrong for multi-column layouts, tables and formulas, and some PDFs with custom font encodings produce garbled text. The app warns when it sees many unreadable characters but can not fix them.
-- Source matching is lexical: Hebrew prefixes (ו, ה, ב) and different word forms reduce matches, and a translated lesson always falls back to the step source.
-- A reload loses the lesson and the key.
-- The in-memory rate limit does not hold across serverless instances.
-- The prompt-injection defences reduce the risk but do not remove it; a model can still be talked into things by text in its context.
+- Grading still depends on the model. The server checks catch some bad grades (evidence not in the answer, "I don't know", instructions to the grader), not all of them.
+- When only the backup model answers, grading and wording get worse. The student now sees a notice, but the quality drop is real.
+- Two model calls per answer double the request count, and the free tier has per-minute and per-day limits per model.
+- The confidence level comes from the model. It is a signal, not a calibrated probability; the eval reports how often misses had low confidence.
+- PDF text order can be wrong for multi-column layouts, tables and formulas.
+- Source matching is lexical. A paraphrase with different words is missed, and a translated lesson always falls back to the step's passage.
+- The rate limit, the server-key budget, the cooldowns and the metrics are in memory per serverless instance.
+- Prompt-injection defences reduce the risk but do not remove it.
 
-## What I would do with 4 more hours
+## What I would do next
 
-1. Save the lesson to `localStorage` (without the key), so a reload or a phone switching apps does not end it.
-2. When the student asks a question, rank passages from the whole file for that question and give them to the tutor, so it can answer about any part of the file and the source button points there.
-3. A small evaluation set: five documents, ten scripted student answers each, run against the grader and checked automatically, so prompt changes can be measured instead of judged by eye.
-4. A teacher summary at the end: time spent, steps understood first try, steps that needed hints, the student's answers.
-5. Paste text as an alternative to uploading a file, and OCR through the vision model of the provider for scanned pages.
+1. When the student asks a question, rank passages from the whole file for that question and give them to the tutor.
+2. A teacher view at the end: time per step, the student's answers, and the grades with their evidence.
+3. Shared state for limits and metrics (a small KV store), so they hold across instances.
+4. Run the grading eval on every prompt change in CI, with a fixed key and model, and fail the build when false "correct" verdicts go up.
+5. Paste text as an alternative to uploading, and OCR through the provider's vision model.
 
 ## How I know it works
 
-Automated tests (`npm test`, 64 tests) cover extraction and chunking, passage ranking, the lesson state machine, plan validation, prompt fencing, the chat reducer (commit on done, stop, failure, retry history), the SSE parser, the provider adapters (stream parsing, error mapping, retry, model fallback), and the API routes with a mock provider (streaming, cancellation, validation, errors, rate limit, key not logged).
+### Automated tests
 
-The teaching behaviour was tested with real Gemini models on the live deployment, driving the live site in headless Chromium with scripted student answers:
+`npm test` runs 125 tests: extraction and chunking, BM25 source matching (including thresholds on the golden set), the lesson state machine (including a test that no sequence of messages keeps a step active), grade checks, plan validation and step sizing, prompt fencing, the chat reducer (commit on done, stop, failure, notices, resume), session storage (no key stored, broken storage), translations (every key in all three languages, same placeholders), the SSE parser, the provider adapters (fallback, cooldowns per key, daily quota, backup notice, thinkingLevel only where accepted), Markdown rendering of model output (no `javascript:` links, HTML escaped), and the API with a mock provider (streaming, cancellation, validation, server-key origin check and budget, `trust proxy`, rate limit, key not logged).
+
+### Golden sets
+
+**Source matching** (`node eval/sources.js`, 39 messages over English, Hebrew and French documents, no AI calls):
+
+| | Before | After |
+| --- | --- | --- |
+| Expected passage ranked first | 97% | 94% |
+| Expected passage shown at all | not measured | 97% |
+| Messages with no source that got one anyway | 1 | 0 |
+| Extra wrong sources | 21 | 1 |
+
+The drop in top-1 is one Hebrew message where two passages tie; the expected one is still shown as the second source. One English paraphrase with no shared key words is missed by both versions.
+
+**Grading** (`node eval/grading.js`, 43 student answers with expected verdicts, 10 of them written to be hard, real Gemini calls, 24 October, same key, run one after the other):
+
+| | Before (commit `3e9592c`) | After (commit `eb94efc`) |
+| --- | --- | --- |
+| Graded | 43 of 43 | 42 of 43 (one `provider_unavailable`) |
+| Verdict accepted | 42 (97.7%) | 40 (95.2%) |
+| Wrong or partial answers graded correct | 0 | 0 |
+| Median time | 1.7 s | 3.6 s |
+| Models that answered | mostly `gemini-3.5-flash-lite` (the log shows 429 on the main model for all 43) | `gemini-3.5-flash-lite` 26, `gemini-2.5-flash` 15, `gemini-3.8-flash` 1 |
+
+I do not read this as an improvement or a regression. The key's daily quota for the main model was used up before the runs, so both runs were graded mostly by backup models, not by the same model. The difference is two answers. The after run is slower because of the fallback chain, not the prompt. What the runs do show: no false "correct" in either version, and the two misses in the after run had high confidence, so the confidence level is not yet a useful signal. Results are in `eval/results/`.
+
+### Live checks, 24 October
+
+I deployed commit `eb94efc` to production and checked that the bundle served at https://teach-me-this-file.vercel.app matches my local build and that `/api/health` returns the new metrics. Then I drove the live site in headless Chromium with the site's own key. The main Gemini model was out of quota on that key, so lessons ran on fallback models.
+
+| # | Scenario | What happened | Result |
+| --- | --- | --- | --- |
+| 1 | Server key from outside the site | `curl -X POST /api/lessons` without a browser origin: 403 `server_key_restricted` | Pass |
+| 2 | Hebrew interface | `dir=rtl`, `lang=he`, Hebrew headings and buttons, still RTL after reload, no horizontal scroll | Pass |
+| 3 | English lesson from a 2-page PDF | Plan in 11.9 s, first message labelled "New idea" with "Based on: Page 1" | Pass |
+| 4 | Provider failure during a turn | "The AI provider is overloaded..." with "Try again"; the lesson state did not change | Pass |
+| 5 | Three wrong, on-topic answers | "Not yet" three times, two hints, then "Explanation and one more check" and the note "The tutor explained step 1. One more question to check it."; still step 1 | Pass |
+| 6 | Correct answer to the re-check | Moved to step 2; the summary later counted the step as "Understood after an explanation" | Pass |
+| 7 | Off-topic message | "Back to the lesson", not counted as an attempt | Pass |
+| 8 | Reload in the middle of a lesson | "The lesson was restored..." banner, same 4 messages, still "Step 2 of 3" | Pass |
+| 9 | Stop while the reply streams | "Stopped before the end", still "Step 2 of 2", input enabled; the next answer was graded and finished the lesson | Pass |
+| 10 | Finishing a lesson | "Lesson summary" label, "All steps done" note, and the summary card: "1 Understood first try, 1 Understood after an explanation, Worth reviewing ..." | Pass |
+| 11 | Hebrew lesson on a 390 px phone | Hebrew interface and lesson, tutor text right-to-left, a correct Hebrew answer moved to step 2, plan sheet in Hebrew, no horizontal scroll | Pass |
+| 12 | Short text file (311 characters) | 2-step plan, lesson finished in a few turns. The short-file warning is covered by a unit test; the browser script did not check that it appeared | Pass, warning not checked live |
+| 13 | Invalid key | "Could not plan the lesson. The AI provider rejected this API key..." with "Check the key" | Pass |
+| 14 | Slow fallback | One turn waited 21 s for the first word while a model hung until its 20 s timeout | Weakness, documented |
+| 15 | Backup-model banner | Covered by API and reducer tests; I did not capture the banner in a browser run | Not verified live |
+
+### First version, 21 October
+
+Automated tests at the time (64 tests) covered extraction and chunking, passage ranking, the lesson state machine, plan validation, prompt fencing, the chat reducer (commit on done, stop, failure, retry history), the SSE parser, the provider adapters (stream parsing, error mapping, retry, model fallback), and the API routes with a mock provider (streaming, cancellation, validation, errors, rate limit, key not logged).
+
+The teaching behaviour was first tested with real Gemini models on the live deployment, driving the live site in headless Chromium with scripted student answers:
 
 Runs on 21 October 2026. The server key's daily Flash quota ran out during testing, so the later runs used the Flash-Lite fallback; I note which model where it matters.
 
@@ -142,3 +219,17 @@ Runs on 21 October 2026. The server key's daily Flash quota ran out during testi
 | 13 | Grading on Flash-Lite | Full photosynthesis answer to a narrow question ("what liquid do roots drink?") | Correct or partial | Flash-Lite graded it "Off topic" twice, also after a prompt fix. I moved grading back to the main model list | Fail, changed design |
 
 Local checks with the mock provider (headless Chromium, 20 checks) cover what does not depend on the model: empty, damaged, scanned, Hebrew, Word, table and normal files; the full lesson flow; Stop during a stream; the source panel; finishing a lesson; the phone layout; and the error shown when the provider can not be reached.
+
+## What changed on 24 October
+
+| Change | Why | Measured effect |
+| --- | --- | --- |
+| Grade with completeness, concepts, misconception, evidence and confidence, checked on the server | A bare verdict could not tell a sure answer from a guess, and nothing checked the model's reasons | 10 unit tests. No false "correct" on the golden set before or after; the server checks did not fire in the live run |
+| Stall limit, explanation followed by a re-check, follow-up on unsure "correct" | A step could stall forever, and a shown answer was counted as done | 17 state-machine tests; re-check, recovery and off-topic paths seen live |
+| BM25 source matching with based / related / step labels | 21 wrong extra sources and a false match on the golden set | Extra sources 21 to 1, false matches 1 to 0, top-1 97% to 94% |
+| Model tiers, per-key cooldowns, deadline, no retry on daily quota, backup notice | Slow failures (up to about 100 s), repeated calls to models known to be out of quota, a silent switch to a weaker model | Covered by tests; live runs showed the fallback working when the main model was out of quota, and one 21 s wait |
+| `thinkingLevel` only where accepted | `gemini-2.5-flash` rejects it with a 400 | Covered by a test; not timed |
+| Server key: same origin and daily budget; `trust proxy` 1 | Anyone could spend the key through the API | Live: direct call gets 403 |
+| Interface in English, Hebrew and French; separate lesson language | English-only UI, implicit lesson language | Key-coverage test; Hebrew desktop and phone runs |
+| Lesson saved in `sessionStorage`; move labels; summary card; jump to a step | A reload ended the lesson; no way to see what the tutor was doing or what to review | Storage and reducer tests; reload and summary seen live |
+| Golden sets and eval runners | Prompt changes were judged by eye | `eval/` with results in `eval/results/` |
