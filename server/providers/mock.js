@@ -33,8 +33,10 @@ const mockPlan = (prompt) => {
 
 const mockAssessment = (prompt) => {
   const answer = between(prompt, 'student_message').toLowerCase();
-  const base = { conceptsShown: [], conceptsMissing: [], misconception: '', evidence: '', confidence: 'high' };
-  if (answer.includes('wrong') || answer.includes('no idea')) {
+  const base = { conceptsShown: [], conceptsMissing: [], misconception: '', evidence: '', confidence: 'high', issue: 'none' };
+  if (answer.includes('no idea')) return { ...base, verdict: 'incorrect', completeness: 0, issue: 'no_knowledge' };
+  if (answer.includes('other question')) return { ...base, verdict: 'incorrect', completeness: 0, issue: 'misread_question' };
+  if (answer.includes('wrong')) {
     return { ...base, verdict: 'incorrect', completeness: 0, conceptsMissing: ['the main point'], misconception: 'confused the idea' };
   }
   if (answer.includes('partly')) return { ...base, verdict: 'partial', completeness: 0.5, conceptsShown: ['part of it'], conceptsMissing: ['the rest'] };

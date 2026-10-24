@@ -1,11 +1,20 @@
+import { activeStepIndex } from '../../shared/lesson.js';
 import { AppError } from '../errors.js';
 import { ASSESS_SYSTEM, buildAssessPrompt } from './prompts.js';
 
 const VERDICTS = new Set(['correct', 'partial', 'incorrect', 'question', 'off_topic']);
 const CONFIDENCE = ['low', 'medium', 'high'];
+export const ISSUES = ['none', 'misread_question', 'hedged', 'no_knowledge', 'unjustified'];
+const ISSUE_VERDICTS = {
+  misread_question: new Set(['partial', 'incorrect', 'off_topic']),
+  hedged: new Set(['correct', 'partial']),
+  no_knowledge: new Set(['incorrect']),
+  unjustified: new Set(['correct', 'partial']),
+};
 const DEFAULT_COMPLETENESS = { correct: 1, partial: 0.5, incorrect: 0 };
 
 const DONT_KNOW = /^\s*(i\s*(really\s*)?(do\s*n[o']?t|dunno)\s*know|idk|no\s*idea|not\s*sure|\?+|לא\s*יודע(ת)?|אין\s*לי\s*מושג|je\s*ne\s*sais\s*pas|aucune\s*id[eé]e|no\s*s[eé])\s*[.!?]*\s*$/iu;
+const HEDGE = /(^|[\s,.;!?])(maybe|perhaps|i think|i guess|i'm not sure|im not sure|not sure|probably|אולי|נראה לי|אני חושב|אני חושבת|לא בטוח|לא בטוחה|peut-être|peut etre|je crois|je pense|pas sûr|pas sure|quizás|creo que)([\s,.;!?]|$)/iu;
 const GRADER_INSTRUCTION = /(\b(system|grader|developer)\s*:|\bmark (this|it|my answer) (as )?(correct|right)\b|\bignore (all |the |your |previous )*(rules|instructions)\b)/i;
 
 const text = (value, max) => (typeof value === 'string' ? value.trim().slice(0, max) : '');
@@ -27,6 +36,7 @@ const lowerConfidence = (confidence) => CONFIDENCE[Math.max(0, CONFIDENCE.indexO
 
 export const unclearAssessment = () => ({
   verdict: 'unclear',
+  issue: 'none',
   completeness: 0,
   conceptsShown: [],
   conceptsMissing: [],
@@ -69,8 +79,20 @@ export const normalizeAssessment = (raw, studentMessage) => {
     checks.push('instruction_in_answer');
   }
 
+  let issue = ISSUES.includes(raw?.issue) ? raw.issue : 'none';
+  if (checks.includes('student_said_dont_know') || (verdict === 'incorrect' && DONT_KNOW.test(studentMessage))) issue = 'no_knowledge';
+  if (issue === 'none' && verdict === 'correct' && HEDGE.test(studentMessage)) {
+    issue = 'hedged';
+    checks.push('hedge_in_answer');
+  }
+  if (issue !== 'none' && !ISSUE_VERDICTS[issue].has(verdict)) {
+    issue = 'none';
+    checks.push('issue_does_not_fit_verdict');
+  }
+
   return {
     verdict,
+    issue,
     completeness,
     conceptsShown: list(raw?.conceptsShown),
     conceptsMissing: list(raw?.conceptsMissing),
@@ -82,7 +104,7 @@ export const normalizeAssessment = (raw, studentMessage) => {
 };
 
 export const assessAnswer = async ({ provider, plan, progress, tutorQuestion, studentMessage, sources, signal, onMeta }) => {
-  const step = plan.steps[progress.currentStep];
+  const step = plan.steps[activeStepIndex(progress)];
   try {
     const raw = await provider.generateJson({
       task: 'assessment',

@@ -1,5 +1,5 @@
 import { AppError } from './errors.js';
-import { OUTCOMES as LESSON_OUTCOMES } from './lesson/progress.js';
+import { OUTCOMES as LESSON_OUTCOMES, REVIEW_RESULTS } from './lesson/progress.js';
 
 export const LIMITS = {
   teacherPrompt: 3000,
@@ -8,6 +8,7 @@ export const LIMITS = {
   planChunks: 400,
   planChars: 90000,
   turnSources: 6,
+  relatedSources: 3,
   history: 40,
   historyMessage: 6000,
   steps: 10,
@@ -100,6 +101,22 @@ const OUTCOMES = new Set([null, ...LESSON_OUTCOMES]);
 
 const count = (value, max) => (Number.isInteger(value) && value >= 0 ? Math.min(value, max) : 0);
 
+const review = (value, status, stepCount) => {
+  if (status !== 'reviewing' && (value === null || value === undefined)) return null;
+  if (!isObject(value)) fail('progress.review is not valid');
+  const queue = array(value.queue, 'progress.review.queue', stepCount);
+  if (!queue.length || queue.some((index) => !Number.isInteger(index) || index < 0 || index >= stepCount) || new Set(queue).size !== queue.length) {
+    fail('progress.review.queue is not valid');
+  }
+  if (!Number.isInteger(value.position) || value.position < 0 || value.position >= queue.length) fail('progress.review.position is out of range');
+  const results = isObject(value.results) ? value.results : {};
+  const cleanResults = Object.fromEntries(Object.entries(results).map(([key, result]) => {
+    if (!queue.includes(Number(key)) || !REVIEW_RESULTS.includes(result)) fail('progress.review.results is not valid');
+    return [Number(key), result];
+  }));
+  return { queue, position: value.position, results: cleanResults, stalls: count(value.stalls, 10) };
+};
+
 const progress = (value, stepCount) => {
   if (!isObject(value)) fail('missing progress');
   const steps = array(value.steps, 'progress.steps', LIMITS.steps);
@@ -107,10 +124,11 @@ const progress = (value, stepCount) => {
   if (!Number.isInteger(value.currentStep) || value.currentStep < 0 || value.currentStep >= stepCount) {
     fail('progress.currentStep is out of range');
   }
-  if (!['active', 'completed'].includes(value.status)) fail('progress.status is not valid');
+  if (!['active', 'completed', 'reviewing'].includes(value.status)) fail('progress.status is not valid');
   return {
     status: value.status,
     currentStep: value.currentStep,
+    review: review(value.review, value.status, stepCount),
     steps: steps.map((step) => {
       if (!isObject(step) || !STEP_STATUSES.has(step.status) || !OUTCOMES.has(step.outcome ?? null)) {
         fail('progress step is not valid');
@@ -135,20 +153,23 @@ const history = (value) =>
 
 export const validateTurnRequest = (body) => {
   if (!isObject(body)) fail('missing body');
-  if (!['start', 'reply'].includes(body.kind)) fail('kind must be start or reply');
+  if (!['start', 'reply', 'review'].includes(body.kind)) fail('kind must be start, reply or review');
   const lessonPlan = plan(body.plan);
+  const lessonProgress = progress(body.progress, lessonPlan.steps.length);
+  if (body.kind === 'review' && lessonProgress.status !== 'completed') fail('a review can only start after the lesson is complete');
   const sources = isObject(body.sources) ? body.sources : {};
 
   return {
     kind: body.kind,
     teacherPrompt: string(body.teacherPrompt, 'teacherPrompt', { max: LIMITS.teacherPrompt }),
     plan: lessonPlan,
-    progress: progress(body.progress, lessonPlan.steps.length),
+    progress: lessonProgress,
     history: history(body.history),
     studentMessage: body.kind === 'reply' ? string(body.studentMessage, 'studentMessage', { max: LIMITS.studentMessage }) : '',
     sources: {
       current: chunks(sources.current ?? [], 'sources.current', LIMITS.turnSources),
       next: chunks(sources.next ?? [], 'sources.next', LIMITS.turnSources),
+      related: chunks(sources.related ?? [], 'sources.related', LIMITS.relatedSources),
     },
   };
 };

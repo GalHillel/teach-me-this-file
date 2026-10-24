@@ -13,6 +13,7 @@ const MESSAGES = {
   too_many_requests: 'Too many requests from this browser. Wait a minute and try again.',
   server_key_restricted: 'The demo key on this server only works from this website. Add your own API key to use the API directly.',
   server_key_budget: 'The demo key on this server has reached its daily limit. Add your own API key in Settings to continue.',
+  unsafe_output: 'The tutor\'s answer was stopped because it started to reveal its instructions. Try again.',
   internal: 'Something went wrong on the server. Try again.',
 };
 
@@ -31,10 +32,11 @@ const STATUS = {
   too_many_requests: 429,
   server_key_restricted: 403,
   server_key_budget: 429,
+  unsafe_output: 502,
   internal: 500,
 };
 
-const RETRYABLE = new Set(['rate_limited', 'timeout', 'provider_unavailable', 'bad_response', 'too_many_requests', 'internal']);
+const RETRYABLE = new Set(['rate_limited', 'timeout', 'provider_unavailable', 'bad_response', 'too_many_requests', 'unsafe_output', 'internal']);
 
 export const FALLBACK_CODES = new Set(['provider_unavailable', 'timeout', 'quota_exhausted', 'rate_limited', 'model_unavailable']);
 

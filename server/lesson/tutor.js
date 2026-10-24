@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { AppError } from '../errors.js';
 import { count } from '../metrics.js';
 import { assessAnswer } from './assessor.js';
@@ -28,7 +29,31 @@ export const toProviderMessages = (history, studentMessage) => {
 const lastTutorMessage = (history) => [...history].reverse().find((message) => message.role === 'tutor')?.content ?? '';
 
 export const publicAssessment = (assessment) =>
-  assessment ? { verdict: assessment.verdict, confidence: assessment.confidence, checks: assessment.checks } : null;
+  assessment ? { verdict: assessment.verdict, confidence: assessment.confidence, issue: assessment.issue, checks: assessment.checks } : null;
+
+export const newCanary = () => `tmtf-${randomBytes(6).toString('hex')}`;
+
+export const guardStream = (canary, send) => {
+  let reply = '';
+  let sent = 0;
+  const holdBack = canary.length - 1;
+  return {
+    push(text) {
+      reply += text;
+      if (reply.includes(canary)) throw new AppError('unsafe_output');
+      const safeEnd = Math.max(sent, reply.length - holdBack);
+      if (safeEnd > sent) {
+        send(reply.slice(sent, safeEnd));
+        sent = safeEnd;
+      }
+    },
+    flush() {
+      if (reply.length > sent) send(reply.slice(sent));
+      sent = reply.length;
+      return reply;
+    },
+  };
+};
 
 export const runTurn = async ({ provider, input, signal, send }) => {
   const { kind, plan, teacherPrompt, history, studentMessage, sources } = input;
@@ -44,7 +69,7 @@ export const runTurn = async ({ provider, input, signal, send }) => {
   };
 
   let assessment = null;
-  if (kind === 'reply' && input.progress.status === 'active') {
+  if (kind === 'reply' && input.progress.status !== 'completed') {
     send('status', { phase: 'assessing' });
     assessment = await assessAnswer({
       provider,
@@ -62,24 +87,29 @@ export const runTurn = async ({ provider, input, signal, send }) => {
   send('progress', { move, progress, assessment: publicAssessment(assessment) });
   send('status', { phase: 'teaching' });
 
+  const canary = newCanary();
   const system = buildTutorSystem({
     plan,
     progress,
     teacherPrompt,
     sources: [...sources.current, ...sources.next],
+    relatedSources: sources.related,
+    canary,
     move,
     assessment,
     pace: lessonPace(progress),
     reviewTitles: stepsToReview(plan, progress),
   });
 
-  let reply = '';
   let firstTokenMs = null;
-  for await (const text of provider.streamText({ system, messages: toProviderMessages(history, studentMessage), signal, onMeta })) {
+  const guard = guardStream(canary, (text) => {
     if (firstTokenMs === null) firstTokenMs = Date.now() - started;
-    reply += text;
     send('delta', { text });
+  });
+  for await (const text of provider.streamText({ system, messages: toProviderMessages(history, studentMessage), signal, onMeta })) {
+    guard.push(text);
   }
+  const reply = guard.flush();
   if (!reply.trim()) throw new AppError('bad_response', 'The AI returned an empty answer. Try again.');
 
   const totalMs = Date.now() - started;
