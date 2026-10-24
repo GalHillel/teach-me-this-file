@@ -1,5 +1,6 @@
 import { directionForLanguage, rankChunks } from '../../shared/text.js';
 import { AppError } from '../errors.js';
+import { orderByPrerequisites } from './ordering.js';
 import { PLAN_SYSTEM, buildPlanPrompt } from './prompts.js';
 import { createProgress } from './progress.js';
 
@@ -45,31 +46,46 @@ const stepSources = (rawIds, step, chunks, validIds) => {
 export const validatePlan = (raw, chunks, { fallbackTitle, lessonLanguage = null, maxSteps = 8 }) => {
   const validIds = new Set(chunks.map((chunk) => chunk.id));
   const seenQuestions = new Set();
-  const steps = (Array.isArray(raw?.steps) ? raw.steps : [])
-    .map((item) => ({
-      title: text(item?.title, 120),
-      goal: text(item?.goal, 400),
-      keyConcepts: textList(item?.keyConcepts, 6, 80),
-      approach: APPROACHES.has(item?.approach) ? item.approach : 'explain',
-      checkQuestion: text(item?.checkQuestion, 400),
-      successCriteria: text(item?.successCriteria, 400),
-      commonMistake: text(item?.commonMistake, 300),
+  const candidates = (Array.isArray(raw?.steps) ? raw.steps : [])
+    .map((item, rawIndex) => ({
+      rawIndex,
+      rawPrerequisites: (Array.isArray(item?.prerequisites) ? item.prerequisites : []).map(Number).filter((number) => Number.isInteger(number)).map((number) => number - 1),
       rawSourceIds: item?.sourceIds,
+      step: {
+        title: text(item?.title, 120),
+        goal: text(item?.goal, 400),
+        keyConcepts: textList(item?.keyConcepts, 6, 80),
+        approach: APPROACHES.has(item?.approach) ? item.approach : 'explain',
+        checkQuestion: text(item?.checkQuestion, 400),
+        successCriteria: text(item?.successCriteria, 400),
+        commonMistake: text(item?.commonMistake, 300),
+      },
     }))
-    .filter((step) => {
+    .filter(({ step }) => {
       const key = step.checkQuestion.toLowerCase();
       if (!step.title || !step.checkQuestion || seenQuestions.has(key)) return false;
       seenQuestions.add(key);
       return true;
-    })
-    .slice(0, maxSteps)
-    .map(({ rawSourceIds, ...step }, index) => ({
-      id: `s${index + 1}`,
+    });
+
+  const position = new Map(candidates.map((candidate, index) => [candidate.rawIndex, index]));
+  const { order, brokenEdges } = orderByPrerequisites(candidates.length, (index) =>
+    candidates[index].rawPrerequisites.map((rawIndex) => position.get(rawIndex)).filter((other) => other !== undefined));
+  const kept = order.slice(0, maxSteps);
+  const idOf = new Map(kept.map((candidateIndex, index) => [candidateIndex, `s${index + 1}`]));
+
+  const steps = kept.map((candidateIndex, index) => {
+    const { step, rawSourceIds, rawPrerequisites } = candidates[candidateIndex];
+    const id = `s${index + 1}`;
+    return {
+      id,
       ...step,
       goal: step.goal || step.title,
       successCriteria: step.successCriteria || step.goal || step.title,
+      prerequisites: [...new Set(rawPrerequisites.map((other) => idOf.get(position.get(other))).filter((other) => other && other !== id))],
       sourceIds: stepSources(rawSourceIds, step, chunks, validIds),
-    }));
+    };
+  });
 
   if (steps.length === 0) throw new AppError('bad_response', 'The AI did not return a usable lesson plan. Try again.');
 
@@ -79,6 +95,7 @@ export const validatePlan = (raw, chunks, { fallbackTitle, lessonLanguage = null
   const warnings = [];
   if (ungrounded > 0 && ungrounded >= steps.length / 2) warnings.push('mostly_ungrounded');
   else if (ungrounded > 0) warnings.push('some_ungrounded');
+  if (brokenEdges.length) warnings.push('prerequisite_cycle');
 
   return {
     title: text(raw.title, 120, fallbackTitle),

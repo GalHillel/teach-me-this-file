@@ -67,6 +67,11 @@ export default function LessonPlanPanel({ plan, progress, onSelectStep }) {
                 <StepMarker state={state} index={index} />
                 <span className="min-w-0 text-start">
                   <span dir="auto" className={`block text-sm leading-snug ${state.status === 'pending' ? 'text-muted' : 'font-medium text-ink'}`}>{step.title}</span>
+                  {step.prerequisites?.length > 0 && (
+                    <span className="mt-0.5 block text-xs text-muted">
+                      {t('plan.buildsOn', { steps: step.prerequisites.map((id) => plan.steps.findIndex((item) => item.id === id) + 1).filter(Boolean).join(', ') })}
+                    </span>
+                  )}
                   {active && state.attempts > 0 && (
                     <span className="mt-0.5 block text-xs text-muted">{t('plan.attempt', { count: state.attempts + 1 })}</span>
                   )}

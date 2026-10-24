@@ -83,8 +83,10 @@ const plan = (value) => {
     objectives: stringList(value.objectives, 'plan.objectives'),
     steps: steps.map((step, index) => {
       if (!isObject(step)) fail(`plan.steps[${index}] is not valid`);
+      const stepId = typeof step.id === 'string' ? step.id.slice(0, 10) : `s${index + 1}`;
       const field = (key) => string(step[key] ?? '', `plan.steps[${index}].${key}`, { max: 500, required: false });
       return {
+        id: stepId,
         title: field('title'),
         goal: field('goal'),
         keyConcepts: stringList(step.keyConcepts, `plan.steps[${index}].keyConcepts`),
@@ -92,6 +94,7 @@ const plan = (value) => {
         checkQuestion: field('checkQuestion'),
         successCriteria: field('successCriteria'),
         commonMistake: field('commonMistake'),
+        prerequisites: array(step.prerequisites ?? [], `plan.steps[${index}].prerequisites`, LIMITS.steps).map((id) => string(id, `plan.steps[${index}].prerequisites`, { max: 10 })),
       };
     }),
   };

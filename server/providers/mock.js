@@ -25,6 +25,7 @@ const mockPlan = (prompt) => {
       keyConcepts: [`concept ${index + 1}`],
       checkQuestion: `What is idea ${index + 1} about?`,
       successCriteria: 'Mentions the main point.',
+      prerequisites: index ? [index] : [],
       sourceIds: ids.slice(index, index + 1),
     })),
     notes: '',

@@ -24,6 +24,7 @@ Rules:
 - The teacher's instructions between <teacher_instructions> tags set the audience, style, length and goals. Follow them unless they ask for something unsafe or unrelated to teaching this document.
 - Base every step on the document. Do not add topics the document does not cover, except short background the audience needs to follow it. Such a background step has no passage ids.
 - Order the steps so each one builds on the previous ones: basic ideas and vocabulary first, then how they connect, then applying them.
+- For each step, list in "prerequisites" the numbers (1, 2, 3...) of the earlier steps it really depends on. Leave it empty when a step stands on its own.
 - Each step teaches one idea and has one check question. Prefer questions that make the student think (explain, apply, compare, predict) over pure recall, answerable in one or two sentences by the audience.
 - Choose how each step is taught ("approach"):
   - "explain": a short explanation with one example, then a question. Good for concepts and facts.
@@ -52,6 +53,7 @@ Return only JSON with this shape:
       "checkQuestion": "one question that checks understanding of this step",
       "successCriteria": "what a correct answer must contain",
       "commonMistake": "a typical wrong idea about this step",
+      "prerequisites": [1],
       "sourceIds": ["c1"]
     }
   ],
@@ -269,6 +271,7 @@ Key concepts: ${step.keyConcepts.map(fence).join(', ')}
 Check question idea: ${fence(step.checkQuestion)}
 Success criteria: ${fence(step.successCriteria)}
 Common mistake to watch for: ${fence(step.commonMistake || 'none listed')}
+Builds on: ${(step.prerequisites ?? []).map((id) => plan.steps.find((item) => item.id === id)?.title).filter(Boolean).map(fence).join('; ') || 'nothing earlier'}
 Attempts on this step: ${state.attempts}
 
 <sources>

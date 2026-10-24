@@ -89,6 +89,8 @@ const en = {
   'plan.goToStep': 'Show where step {count} started in the chat',
   'plan.warning.mostly_ungrounded': 'Most steps could not be linked to a passage in the file. The tutor may rely on general knowledge.',
   'plan.warning.some_ungrounded': 'Some steps could not be linked to a passage in the file.',
+  'plan.warning.prerequisite_cycle': 'Some steps depended on each other in a loop. The app chose an order; check that it makes sense.',
+  'plan.buildsOn': 'Builds on step {steps}',
 
   'outcome.mastered': 'Understood first try',
   'outcome.learned': 'Understood after hints',
@@ -305,6 +307,8 @@ const he = {
   'plan.goToStep': 'מעבר לתחילת צעד {count} בשיחה',
   'plan.warning.mostly_ungrounded': 'רוב הצעדים לא קושרו לקטע בקובץ. המורה עלול להסתמך על ידע כללי.',
   'plan.warning.some_ungrounded': 'חלק מהצעדים לא קושרו לקטע בקובץ.',
+  'plan.warning.prerequisite_cycle': 'חלק מהצעדים היו תלויים זה בזה במעגל. האפליקציה בחרה סדר; כדאי לבדוק שהוא הגיוני.',
+  'plan.buildsOn': 'נשען על צעד {steps}',
 
   'outcome.mastered': 'הובן מהניסיון הראשון',
   'outcome.learned': 'הובן אחרי רמזים',
@@ -521,6 +525,8 @@ const fr = {
   'plan.goToStep': 'Afficher le début de l\'étape {count} dans la discussion',
   'plan.warning.mostly_ungrounded': 'La plupart des étapes n\'ont pas pu être reliées à un passage du fichier. Le tuteur risque de s\'appuyer sur des connaissances générales.',
   'plan.warning.some_ungrounded': 'Certaines étapes n\'ont pas pu être reliées à un passage du fichier.',
+  'plan.warning.prerequisite_cycle': 'Certaines étapes dépendaient les unes des autres en boucle. L\'application a choisi un ordre ; vérifiez qu\'il est logique.',
+  'plan.buildsOn': 'S\'appuie sur l\'étape {steps}',
 
   'outcome.mastered': 'Compris du premier coup',
   'outcome.learned': 'Compris après des indices',
