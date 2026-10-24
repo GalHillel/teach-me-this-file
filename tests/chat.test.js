@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readEvents } from '../src/api/sse.js';
-import { chatReducer, historyFor, initChat } from '../src/lesson/chatReducer.js';
-import { findMessageSources, highlightPassage, selectPlanChunks } from '../src/lesson/sources.js';
+import { chatReducer, historyFor, initChat, lessonSummary } from '../src/lesson/chatReducer.js';
+import { highlightPassage, selectPlanChunks } from '../src/lesson/sources.js';
 
 const chunks = [
   { id: 'c1', label: 'Page 1', text: 'Mitochondria release energy from glucose through cellular respiration.' },
@@ -38,7 +38,7 @@ const run = (actions) => actions.reduce(chatReducer, initChat({ plan, progress, 
 const answerTurn = [
   { type: 'turn_started', tutorId: 't1', student: { id: 's1', content: 'They release energy' } },
   { type: 'phase', phase: 'assessing' },
-  { type: 'progress', move: 'advance', progress: advanced, verdict: 'correct' },
+  { type: 'progress', move: 'advance', progress: advanced, assessment: { verdict: 'correct', confidence: 'high', checks: [] } },
   { type: 'delta', text: 'Right! Now, chloroplasts capture sunlight ' },
   { type: 'delta', text: 'to make glucose. What do they need?' },
 ];
@@ -53,9 +53,40 @@ describe('chat reducer', () => {
     expect(state.progress).toBe(advanced);
     expect(state.turn.status).toBe('idle');
     expect(state.messages.map((message) => message.role)).toEqual(['student', 'system', 'tutor']);
-    expect(state.messages[0].verdict).toBe('correct');
-    expect(state.messages[1].content).toMatch(/Step 1 done/);
-    expect(state.messages[2]).toMatchObject({ status: 'done', stepIndex: 1, sources: [{ chunkId: 'c2', kind: 'match' }] });
+    expect(state.messages[0].assessment.verdict).toBe('correct');
+    expect(state.messages[1].note).toEqual({ code: 'step_done', step: 1, next: 'Photosynthesis' });
+    expect(state.messages[2]).toMatchObject({ status: 'done', stepIndex: 1, move: 'advance', sources: [{ chunkId: 'c2', kind: 'based' }] });
+  });
+
+  it('adds a re-check note and no step change after an explanation', () => {
+    const recheck = { ...progress, steps: [{ ...progress.steps[0], phase: 'recheck', attempts: 3 }, progress.steps[1]] };
+    const state = run([
+      { type: 'turn_started', tutorId: 't1', student: { id: 's1', content: 'No idea' } },
+      { type: 'progress', move: 'reveal_and_recheck', progress: recheck, assessment: { verdict: 'incorrect', confidence: 'high', checks: [] } },
+      { type: 'delta', text: 'Mitochondria release energy from glucose. Can you say it in your own words?' },
+      { type: 'done' },
+    ]);
+    expect(state.progress.currentStep).toBe(0);
+    expect(state.messages.find((message) => message.role === 'system').note).toMatchObject({ code: 'recheck', step: 1 });
+    expect(state.messages.at(-1).sources[0]).toMatchObject({ chunkId: 'c1', kind: 'based' });
+  });
+
+  it('keeps a backup-model notice until it is dismissed', () => {
+    const state = run([{ type: 'notice', notice: { code: 'backup_model', model: 'lite' } }]);
+    expect(state.notice).toEqual({ code: 'backup_model', model: 'lite' });
+    expect(chatReducer(state, { type: 'dismiss_notice' }).notice).toBe(null);
+  });
+
+  it('shows the notice when the plan itself came from a backup model', () => {
+    const state = initChat({ plan, progress, document: { chunks }, provider: { name: 'gemini', models: ['lite'], backup: true } });
+    expect(state.notice).toEqual({ code: 'backup_model', model: 'lite' });
+  });
+
+  it('resumes a saved conversation', () => {
+    const resume = { progress: advanced, messages: [{ id: 't0', role: 'tutor', content: 'Hi', status: 'done', sources: [] }], notice: null };
+    const state = initChat({ plan, progress, document: { chunks }, resume });
+    expect(state).toMatchObject({ progress: advanced, restored: true });
+    expect(state.messages).toHaveLength(1);
   });
 
   it('keeps the old progress and the partial text when stopped', () => {
@@ -63,7 +94,7 @@ describe('chat reducer', () => {
     expect(state.progress).toBe(progress);
     expect(state.turn.status).toBe('idle');
     expect(state.messages[1]).toMatchObject({ role: 'tutor', status: 'stopped' });
-    expect(state.messages[0].verdict).toBeUndefined();
+    expect(state.messages[0].assessment).toBeUndefined();
   });
 
   it('removes an empty tutor message when stopped before any text', () => {
@@ -89,12 +120,22 @@ describe('chat reducer', () => {
   });
 });
 
-describe('sources', () => {
-  it('falls back to the step passage when wording does not match', () => {
-    expect(findMessageSources('Les mitochondries libèrent de l\'énergie.', chunks, ['c1'])).toEqual([{ chunkId: 'c1', kind: 'step' }]);
-    expect(findMessageSources('Unrelated text here.', chunks, [])).toEqual([]);
+describe('lesson summary', () => {
+  it('counts outcomes and lists steps worth reviewing', () => {
+    const finished = {
+      status: 'completed',
+      currentStep: 1,
+      steps: [{ status: 'done', outcome: 'recovered' }, { status: 'done', outcome: 'mastered' }],
+    };
+    expect(lessonSummary(plan, finished)).toEqual({
+      counts: { mastered: 1, learned: 0, recovered: 1, review: 0 },
+      review: ['Respiration'],
+      total: 2,
+    });
   });
+});
 
+describe('sources', () => {
   it('highlights words shared with the message', () => {
     const parts = highlightPassage('Chloroplasts capture sunlight.', 'They capture sunlight');
     expect(parts.filter((part) => part.hit).map((part) => part.text)).toEqual(['capture', 'sunlight']);

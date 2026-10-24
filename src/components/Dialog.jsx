@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
+import { useI18n } from '../i18n/translate.js';
 import Icon from './Icon.jsx';
 
 export default function Dialog({ open, onClose, title, children, variant = 'center', labelId }) {
+  const { t } = useI18n();
   const ref = useRef(null);
 
   useEffect(() => {
@@ -26,7 +28,7 @@ export default function Dialog({ open, onClose, title, children, variant = 'cent
       <div className="flex h-full max-h-[inherit] flex-col">
         <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-4">
           <h2 id={labelId} className="font-display text-lg font-semibold">{title}</h2>
-          <button type="button" onClick={onClose} className="btn-ghost -me-2 px-2" aria-label="Close">
+          <button type="button" onClick={onClose} className="btn-ghost -me-2 px-2" aria-label={t('dialog.close')}>
             <Icon name="close" />
           </button>
         </div>

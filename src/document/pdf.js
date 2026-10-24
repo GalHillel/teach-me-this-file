@@ -57,7 +57,7 @@ export const extractPdf = async (file, onProgress) => {
 
   const warnings = [];
   if (totalPages > MAX_PDF_PAGES) {
-    warnings.push(`Only the first ${MAX_PDF_PAGES} of ${totalPages} pages were read.`);
+    warnings.push({ code: 'pages_limit', params: { max: MAX_PDF_PAGES, total: totalPages } });
   }
   if (sections.length === 0) {
     throw new ExtractionError(
@@ -66,9 +66,7 @@ export const extractPdf = async (file, onProgress) => {
     );
   }
   if (emptyPages.length > 0) {
-    warnings.push(
-      `${emptyPages.length} page${emptyPages.length > 1 ? 's' : ''} had no selectable text (scanned images or diagrams) and ${emptyPages.length > 1 ? 'were' : 'was'} skipped: ${formatPages(emptyPages)}.`,
-    );
+    warnings.push({ code: 'empty_pages', params: { count: emptyPages.length, pages: formatPages(emptyPages) } });
   }
 
   return { sections, pageCount: totalPages, warnings };
@@ -76,5 +74,5 @@ export const extractPdf = async (file, onProgress) => {
 
 const formatPages = (pages) => {
   const shown = pages.slice(0, 8).join(', ');
-  return pages.length > 8 ? `${shown} and ${pages.length - 8} more` : shown;
+  return pages.length > 8 ? `${shown} (+${pages.length - 8})` : shown;
 };

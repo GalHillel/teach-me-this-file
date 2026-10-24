@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useI18n } from '../i18n/translate.js';
+import { lessonSummary } from '../lesson/chatReducer.js';
 import { useTutor } from '../lesson/useTutor.js';
 import ChatMessage from './ChatMessage.jsx';
 import Composer from './Composer.jsx';
@@ -7,13 +9,25 @@ import Icon from './Icon.jsx';
 import LessonPlanPanel from './LessonPlanPanel.jsx';
 import SourcePanel from './SourcePanel.jsx';
 
-const PHASE_LABELS = {
-  waiting: 'Tutor is thinking',
-  assessing: 'Checking your answer',
-  teaching: 'Tutor is writing',
+const PHASE_KEYS = {
+  waiting: 'lesson.thinking',
+  assessing: 'lesson.assessing',
+  teaching: 'lesson.writing',
+};
+
+const FINISH_MOVES = new Set(['finish', 'review_and_finish']);
+
+const KEY_ERRORS = ['missing_key', 'invalid_key', 'unknown_provider', 'server_key_restricted', 'server_key_budget', 'quota_exhausted'];
+
+const OUTCOME_STYLES = {
+  mastered: 'bg-success',
+  learned: 'bg-success/60',
+  recovered: 'bg-marker',
+  review: 'bg-danger/70',
 };
 
 function TypingIndicator({ phase }) {
+  const { t } = useI18n();
   return (
     <div className="flex items-center gap-2 text-sm text-muted" role="status">
       <span className="flex gap-1" aria-hidden="true">
@@ -21,44 +35,124 @@ function TypingIndicator({ phase }) {
         <span className="typing-dot size-1.5 rounded-full bg-pen" />
         <span className="typing-dot size-1.5 rounded-full bg-pen" />
       </span>
-      {PHASE_LABELS[phase]}
+      {t(PHASE_KEYS[phase] ?? 'lesson.thinking')}
+    </div>
+  );
+}
+
+function Banner({ children, onDismiss, tone = 'info' }) {
+  const { t } = useI18n();
+  return (
+    <div className={`flex items-start gap-2 rounded-xl px-4 py-3 text-sm ${tone === 'warning' ? 'bg-marker-soft text-ink' : 'bg-pen-soft text-ink'}`} role="status">
+      <Icon name={tone === 'warning' ? 'alert' : 'info'} className="mt-0.5 size-4 shrink-0 text-muted" />
+      <span className="flex-1">{children}</span>
+      <button type="button" onClick={onDismiss} className="-m-1 rounded p-1 text-muted hover:text-ink" aria-label={t('lesson.dismiss')}>
+        <Icon name="close" className="size-4" />
+      </button>
     </div>
   );
 }
 
 function ErrorNotice({ failed, onRetry, onDismiss, onOpenSettings }) {
-  const keyProblem = ['missing_key', 'invalid_key', 'unknown_provider'].includes(failed.code);
+  const { t } = useI18n();
+  const keyProblem = KEY_ERRORS.includes(failed.code);
   return (
     <div className="rounded-xl border border-danger/30 bg-danger-soft px-4 py-3" role="alert">
       <p className="flex gap-2 text-sm text-danger">
         <Icon name="alert" className="mt-0.5 size-4 shrink-0" />
-        <span>The tutor could not answer. {failed.message}</span>
+        <span>{t('lesson.couldNotAnswer')} {t(`errors.${failed.code}`, {}, failed.message)}</span>
       </p>
       <div className="mt-2.5 flex flex-wrap gap-2">
-        {keyProblem && <button type="button" className="btn-secondary py-1.5" onClick={onOpenSettings}>Check the key</button>}
-        <button type="button" className="btn-secondary py-1.5" onClick={onRetry}>
-          <Icon name="retry" className="size-4" />
-          Try again
-        </button>
-        <button type="button" className="btn-ghost py-1.5" onClick={onDismiss}>Dismiss</button>
+        {keyProblem && <button type="button" className="btn-secondary py-1.5" onClick={onOpenSettings}>{t('setup.checkKey')}</button>}
+        {failed.retryable && (
+          <button type="button" className="btn-secondary py-1.5" onClick={onRetry}>
+            <Icon name="retry" className="size-4" />
+            {t('setup.tryAgain')}
+          </button>
+        )}
+        <button type="button" className="btn-ghost py-1.5" onClick={onDismiss}>{t('lesson.dismiss')}</button>
       </div>
     </div>
   );
 }
 
+const summaryText = (plan, summary, t) =>
+  [
+    plan.title,
+    '',
+    ...plan.steps.map((step, index) => `${index + 1}. ${step.title}`),
+    '',
+    ...(summary.review.length ? [`${t('summary.review')}:`, ...summary.review.map((title) => `- ${title}`)] : [t('summary.allGood')]),
+  ].join('\n');
+
+function CompletionCard({ plan, progress, onNewLesson }) {
+  const { t } = useI18n();
+  const [copied, setCopied] = useState(false);
+  const summary = lessonSummary(plan, progress);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(summaryText(plan, summary, t));
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return (
+    <section className="rounded-2xl border border-line bg-paper px-5 py-5" aria-labelledby="summary-title">
+      <h2 id="summary-title" className="font-display text-lg font-semibold">{t('summary.title')}</h2>
+      <p className="mt-1 text-sm text-muted">{t('summary.intro', { total: summary.total, title: plan.title })}</p>
+
+      <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+        {Object.entries(summary.counts).filter(([, count]) => count > 0).map(([outcome, count]) => (
+          <li key={outcome} className="flex items-center gap-2 text-sm">
+            <span className={`size-2.5 rounded-full ${OUTCOME_STYLES[outcome]}`} aria-hidden="true" />
+            <span className="font-medium tabular-nums">{count}</span>
+            <span className="text-muted">{t(`outcome.${outcome}`)}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-4">
+        {summary.review.length > 0 ? (
+          <>
+            <h3 className="text-sm font-semibold">{t('summary.review')}</h3>
+            <ul className="mt-1.5 space-y-1 text-sm">
+              {summary.review.map((title) => <li key={title} dir="auto">{title}</li>)}
+            </ul>
+          </>
+        ) : (
+          <p className="text-sm">{t('summary.allGood')}</p>
+        )}
+      </div>
+
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        <button type="button" className="btn-secondary py-1.5" onClick={copy}>
+          <Icon name={copied ? 'check' : 'copy'} className="size-4" />
+          {copied ? t('summary.copied') : t('summary.copy')}
+        </button>
+        <button type="button" className="btn-ghost py-1.5" onClick={onNewLesson}>{t('summary.newLesson')}</button>
+      </div>
+      <p className="mt-3 text-xs text-muted">{t('summary.followUp')}</p>
+    </section>
+  );
+}
+
 function StepCounter({ plan, progress }) {
+  const { t } = useI18n();
   const completed = progress.status === 'completed';
   const done = progress.steps.filter((step) => step.status === 'done').length;
   return (
     <div className="flex items-center gap-3">
       <span className="whitespace-nowrap text-sm font-medium tabular-nums">
-        {completed ? 'Lesson complete' : `Step ${progress.currentStep + 1} of ${plan.steps.length}`}
+        {completed ? t('lesson.complete') : t('lesson.stepOf', { current: progress.currentStep + 1, total: plan.steps.length })}
       </span>
-      <div className="flex h-2 w-24 gap-0.5 sm:w-36" role="progressbar" aria-label="Lesson progress" aria-valuemin={0} aria-valuemax={plan.steps.length} aria-valuenow={done}>
+      <div className="flex h-2 w-24 gap-0.5 sm:w-36" role="progressbar" aria-label={t('lesson.progress')} aria-valuemin={0} aria-valuemax={plan.steps.length} aria-valuenow={done}>
         {progress.steps.map((step, index) => (
           <span
             key={plan.steps[index].id}
-            className={`flex-1 rounded-full ${step.status === 'done' ? (step.outcome === 'revealed' ? 'bg-amber-400' : 'bg-success') : step.status === 'active' && !completed ? 'bg-pen' : 'bg-line'}`}
+            className={`flex-1 rounded-full ${step.status === 'done' ? OUTCOME_STYLES[step.outcome] ?? 'bg-success' : step.status === 'active' && !completed ? 'bg-pen' : 'bg-line'}`}
           />
         ))}
       </div>
@@ -84,35 +178,46 @@ const useStickToBottom = (dependency) => {
     setPinned(true);
   }, []);
 
-  return { ref, pinned, onScroll, jump };
+  return { ref, pinned, setPinned, onScroll, jump };
 };
 
-export default function LessonScreen({ lesson, settings, onOpenSettings }) {
+export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLesson }) {
+  const { t } = useI18n();
   const tutor = useTutor({ lesson, settings });
   const [planOpen, setPlanOpen] = useState(false);
   const [sourceSelection, setSourceSelection] = useState(null);
   const chunkLabels = useMemo(() => new Map(lesson.document.chunks.map((chunk) => [chunk.id, chunk.label])), [lesson.document.chunks]);
   const lastContent = tutor.messages.at(-1)?.content;
-  const { ref: scrollRef, pinned, onScroll, jump } = useStickToBottom(`${tutor.messages.length}:${lastContent?.length}:${tutor.turn.status}`);
+  const { ref: scrollRef, pinned, setPinned, onScroll, jump } = useStickToBottom(`${tutor.messages.length}:${lastContent?.length}:${tutor.turn.status}`);
   const openSource = useCallback((message, source) => setSourceSelection({ message, source, documentName: lesson.document.name }), [lesson.document.name]);
   const { plan, progress } = tutor;
   const showTyping = tutor.busy && !tutor.messages.some((message) => message.status === 'streaming');
+  const completed = progress.status === 'completed';
+
+  const showStep = useCallback((index) => {
+    setPlanOpen(false);
+    const target = scrollRef.current?.querySelector(`[data-step-index="${index}"]`);
+    if (!target) return;
+    setPinned(false);
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    target.focus?.({ preventScroll: true });
+  }, [scrollRef, setPinned]);
 
   return (
     <div className="grid min-h-0 flex-1 lg:grid-cols-[19rem_1fr]">
-      <aside className="hidden min-h-0 overflow-y-auto border-e border-line bg-surface px-5 py-6 lg:block" aria-label="Lesson plan">
+      <aside className="hidden min-h-0 overflow-y-auto border-e border-line bg-surface px-5 py-6 lg:block" aria-label={t('lesson.plan')}>
         <h2 className="font-display text-xl font-semibold leading-snug" dir="auto">{plan.title}</h2>
         <div className="mt-4">
-          <LessonPlanPanel plan={plan} progress={progress} />
+          <LessonPlanPanel plan={plan} progress={progress} onSelectStep={showStep} />
         </div>
       </aside>
 
-      <section className="flex min-h-0 flex-col" aria-label="Lesson chat">
+      <section className="flex min-h-0 flex-col" aria-label={t('lesson.chat')}>
         <div className="flex items-center justify-between gap-3 border-b border-line bg-surface/80 px-4 py-2.5 backdrop-blur sm:px-6">
           <h1 className="min-w-0 truncate font-display text-base font-semibold lg:sr-only" dir="auto">{plan.title}</h1>
           <div className="flex items-center gap-2 lg:ms-auto">
             <StepCounter plan={plan} progress={progress} />
-            <button type="button" className="btn-ghost px-2 lg:hidden" onClick={() => setPlanOpen(true)} aria-label="Show the lesson plan">
+            <button type="button" className="btn-ghost px-2 lg:hidden" onClick={() => setPlanOpen(true)} aria-label={t('lesson.showPlan')}>
               <Icon name="list" />
             </button>
           </div>
@@ -121,8 +226,17 @@ export default function LessonScreen({ lesson, settings, onOpenSettings }) {
         <div className="relative min-h-0 flex-1">
           <div ref={scrollRef} onScroll={onScroll} className="h-full overflow-y-auto bg-surface">
             <div className="mx-auto flex min-h-full max-w-3xl flex-col gap-6 px-4 py-6 sm:border-s-2 sm:border-margin/50 sm:px-8">
+              {tutor.restored && <Banner onDismiss={tutor.dismissRestored}>{t('lesson.restored')}</Banner>}
+              {tutor.notice?.code === 'backup_model' && (
+                <Banner tone="warning" onDismiss={tutor.dismissNotice}>{t('lesson.backupModel', { model: tutor.notice.model })}</Banner>
+              )}
               {tutor.messages.map((message) => (
-                <ChatMessage key={message.id} message={message} chunkLabels={chunkLabels} onOpenSource={openSource} />
+                <Fragment key={message.id}>
+                  <ChatMessage message={message} chunkLabels={chunkLabels} onOpenSource={openSource} />
+                  {completed && message.status === 'done' && FINISH_MOVES.has(message.move) && (
+                    <CompletionCard plan={plan} progress={progress} onNewLesson={onNewLesson} />
+                  )}
+                </Fragment>
               ))}
               {showTyping && <TypingIndicator phase={tutor.turn.status} />}
               {tutor.failed && (
@@ -132,16 +246,16 @@ export default function LessonScreen({ lesson, settings, onOpenSettings }) {
           </div>
           {!pinned && (
             <button type="button" onClick={jump} className="btn-secondary absolute bottom-4 left-1/2 -translate-x-1/2 py-1.5 shadow-md">
-              Jump to latest
+              {t('lesson.jumpLatest')}
             </button>
           )}
         </div>
 
-        <Composer busy={tutor.busy} completed={progress.status === 'completed'} onSend={tutor.send} onStop={tutor.stop} />
+        <Composer busy={tutor.busy} completed={completed} onSend={tutor.send} onStop={tutor.stop} />
       </section>
 
       <Dialog open={planOpen} onClose={() => setPlanOpen(false)} title={plan.title} variant="side" labelId="plan-title">
-        <LessonPlanPanel plan={plan} progress={progress} />
+        <LessonPlanPanel plan={plan} progress={progress} onSelectStep={showStep} />
       </Dialog>
 
       <SourcePanel selection={sourceSelection} chunks={lesson.document.chunks} onClose={() => setSourceSelection(null)} />

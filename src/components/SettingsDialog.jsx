@@ -1,13 +1,14 @@
 import { useState } from 'react';
+import { useI18n } from '../i18n/translate.js';
 import Dialog from './Dialog.jsx';
 import Icon from './Icon.jsx';
 
 const PROVIDERS = [
-  { value: 'auto', label: 'Detect from key' },
+  { value: 'auto', labelKey: 'settings.auto' },
   { value: 'gemini', label: 'Google AI Studio (Gemini)' },
   { value: 'groq', label: 'Groq' },
   { value: 'openrouter', label: 'OpenRouter' },
-  ...(import.meta.env.DEV ? [{ value: 'mock', label: 'Mock (local testing only)' }] : []),
+  ...(import.meta.env.DEV ? [{ value: 'mock', labelKey: 'settings.mock' }] : []),
 ];
 
 const detectProvider = (key) => {
@@ -18,6 +19,7 @@ const detectProvider = (key) => {
 };
 
 function SettingsForm({ settings, serverKey, onSave }) {
+  const { t } = useI18n();
   const [apiKey, setApiKey] = useState(settings.apiKey);
   const [provider, setProvider] = useState(settings.provider);
   const [visible, setVisible] = useState(false);
@@ -32,7 +34,7 @@ function SettingsForm({ settings, serverKey, onSave }) {
       }}
     >
       <div>
-        <label htmlFor="api-key" className="mb-1.5 block text-sm font-medium">API key</label>
+        <label htmlFor="api-key" className="mb-1.5 block text-sm font-medium">{t('settings.key')}</label>
         <div className="relative">
           <input
             id="api-key"
@@ -41,7 +43,7 @@ function SettingsForm({ settings, serverKey, onSave }) {
             spellCheck="false"
             value={apiKey}
             onChange={(event) => setApiKey(event.target.value)}
-            placeholder="Paste a Gemini, Groq or OpenRouter key"
+            placeholder={t('settings.placeholder')}
             className="field pe-11 font-mono text-sm"
             aria-describedby="api-key-help"
           />
@@ -49,45 +51,46 @@ function SettingsForm({ settings, serverKey, onSave }) {
             type="button"
             onClick={() => setVisible(!visible)}
             className="absolute inset-y-0 end-0 grid w-11 place-items-center text-muted hover:text-ink"
-            aria-label={visible ? 'Hide key' : 'Show key'}
+            aria-label={visible ? t('settings.hide') : t('settings.show')}
           >
             <Icon name={visible ? 'eyeOff' : 'eye'} className="size-4.5" />
           </button>
         </div>
         <p id="api-key-help" className="mt-1.5 text-sm text-muted">
           {apiKey.trim() && provider === 'auto'
-            ? detected ? `Looks like a ${detected} key.` : 'Unknown key format. Pick the provider below.'
-            : 'Free keys: aistudio.google.com/apikey (Gemini), console.groq.com, openrouter.ai.'}
+            ? detected ? t('settings.looksLike', { provider: detected }) : t('settings.unknownFormat')
+            : t('settings.freeKeys')}
         </p>
       </div>
 
       <div>
-        <label htmlFor="provider" className="mb-1.5 block text-sm font-medium">Provider</label>
+        <label htmlFor="provider" className="mb-1.5 block text-sm font-medium">{t('settings.provider')}</label>
         <select id="provider" value={provider} onChange={(event) => setProvider(event.target.value)} className="field">
           {PROVIDERS.map((option) => (
-            <option key={option.value} value={option.value}>{option.label}</option>
+            <option key={option.value} value={option.value}>{option.labelKey ? t(option.labelKey) : option.label}</option>
           ))}
         </select>
       </div>
 
       <p className="rounded-lg bg-pen-soft px-3.5 py-3 text-sm leading-relaxed text-ink">
-        The key stays in this tab&apos;s memory and is cleared when you close or reload it. It is sent to this app&apos;s server with each request, passed to the provider, and never stored or logged.
-        {serverKey && ' This server also has its own key, so you can leave the field empty.'}
+        {t('settings.privacy')}
+        {serverKey && ` ${t('settings.serverKey')}`}
       </p>
 
       <div className="flex justify-end gap-2">
         {apiKey && (
-          <button type="button" className="btn-ghost" onClick={() => setApiKey('')}>Clear key</button>
+          <button type="button" className="btn-ghost" onClick={() => setApiKey('')}>{t('settings.clear')}</button>
         )}
-        <button type="submit" className="btn-primary">Save</button>
+        <button type="submit" className="btn-primary">{t('settings.save')}</button>
       </div>
     </form>
   );
 }
 
 export default function SettingsDialog({ open, onClose, settings, serverKey, onSave }) {
+  const { t } = useI18n();
   return (
-    <Dialog open={open} onClose={onClose} title="AI settings" labelId="settings-title">
+    <Dialog open={open} onClose={onClose} title={t('settings.title')} labelId="settings-title">
       <SettingsForm
         settings={settings}
         serverKey={serverKey}

@@ -1,17 +1,14 @@
+import { languageName, useI18n } from '../i18n/translate.js';
 import Icon from './Icon.jsx';
 
-const OUTCOME_LABELS = {
-  mastered: 'Understood first try',
-  learned: 'Understood after hints',
-  revealed: 'Answer shown, worth reviewing',
-};
+const NEEDS_REVIEW = new Set(['recovered', 'review']);
 
 function StepMarker({ state, index }) {
   if (state.status === 'done') {
-    const revealed = state.outcome === 'revealed';
+    const review = NEEDS_REVIEW.has(state.outcome);
     return (
-      <span className={`grid size-6 shrink-0 place-items-center rounded-full ${revealed ? 'bg-marker text-ink' : 'bg-success text-white'}`}>
-        {revealed ? <span className="text-xs font-semibold">!</span> : <Icon name="check" className="size-3.5" />}
+      <span className={`grid size-6 shrink-0 place-items-center rounded-full ${review ? 'bg-marker text-ink' : 'bg-success text-white'}`}>
+        {review ? <span className="text-xs font-semibold">!</span> : <Icon name="check" className="size-3.5" />}
       </span>
     );
   }
@@ -22,25 +19,36 @@ function StepMarker({ state, index }) {
   );
 }
 
-export default function LessonPlanPanel({ plan, progress }) {
+export default function LessonPlanPanel({ plan, progress, onSelectStep }) {
+  const { t, language } = useI18n();
   const done = progress.steps.filter((step) => step.status === 'done').length;
   return (
-    <div dir={plan.direction} className="space-y-6">
-      <div>
-        <p className="text-sm text-muted" dir="ltr">
-          {plan.audience ? `${plan.audience}, ` : ''}about {plan.durationMinutes} min
+    <div className="space-y-6">
+      <div className="space-y-1 text-sm text-muted">
+        <p>
+          {plan.audience && <bdi>{plan.audience}</bdi>}
+          {plan.audience ? ', ' : ''}
+          {t('plan.minutes', { minutes: plan.durationMinutes })}
         </p>
-        <p className="mt-1 text-sm text-muted" dir="ltr">{done} of {plan.steps.length} steps done</p>
+        <p>{t('plan.language', { language: languageName(plan.languageCode, language) })}</p>
+        <p>{t('plan.done', { done, total: plan.steps.length })}</p>
       </div>
+
+      {(plan.warnings ?? []).map((warning) => (
+        <p key={warning} className="flex gap-2 rounded-lg bg-marker-soft px-3 py-2 text-sm">
+          <Icon name="alert" className="mt-0.5 size-4 shrink-0 text-muted" />
+          <span>{t(`plan.warning.${warning}`)}</span>
+        </p>
+      ))}
 
       {plan.objectives.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold" dir="ltr">Learning goals</h3>
+          <h3 className="text-sm font-semibold">{t('plan.goals')}</h3>
           <ul className="mt-2 space-y-1.5 text-sm text-muted">
             {plan.objectives.map((objective) => (
               <li key={objective} className="flex gap-2">
                 <span className="mt-2 size-1 shrink-0 rounded-full bg-muted" aria-hidden="true" />
-                <span>{objective}</span>
+                <span dir="auto">{objective}</span>
               </li>
             ))}
           </ul>
@@ -48,21 +56,38 @@ export default function LessonPlanPanel({ plan, progress }) {
       )}
 
       <div>
-        <h3 className="text-sm font-semibold" dir="ltr">Steps</h3>
+        <h3 className="text-sm font-semibold">{t('plan.steps')}</h3>
         <ol className="mt-3 space-y-1">
           {plan.steps.map((step, index) => {
             const state = progress.steps[index];
             const active = state.status === 'active' && progress.status === 'active';
-            return (
-              <li key={step.id} aria-current={active ? 'step' : undefined} className={`flex gap-3 rounded-lg px-2 py-2 ${active ? 'bg-marker-soft' : ''}`}>
+            const reachable = state.status !== 'pending' && onSelectStep;
+            const content = (
+              <>
                 <StepMarker state={state} index={index} />
-                <div className="min-w-0">
-                  <p className={`text-sm leading-snug ${state.status === 'pending' ? 'text-muted' : 'font-medium text-ink'}`}>{step.title}</p>
+                <span className="min-w-0 text-start">
+                  <span dir="auto" className={`block text-sm leading-snug ${state.status === 'pending' ? 'text-muted' : 'font-medium text-ink'}`}>{step.title}</span>
                   {active && state.attempts > 0 && (
-                    <p className="mt-0.5 text-xs text-muted" dir="ltr">Attempt {state.attempts + 1}</p>
+                    <span className="mt-0.5 block text-xs text-muted">{t('plan.attempt', { count: state.attempts + 1 })}</span>
                   )}
-                  {state.outcome && <p className="mt-0.5 text-xs text-muted" dir="ltr">{OUTCOME_LABELS[state.outcome]}</p>}
-                </div>
+                  {state.outcome && <span className="mt-0.5 block text-xs text-muted">{t(`outcome.${state.outcome}`)}</span>}
+                </span>
+              </>
+            );
+            return (
+              <li key={step.id} aria-current={active ? 'step' : undefined}>
+                {reachable ? (
+                  <button
+                    type="button"
+                    onClick={() => onSelectStep(index)}
+                    title={t('plan.goToStep', { count: index + 1 })}
+                    className={`flex w-full gap-3 rounded-lg px-2 py-2 hover:bg-rule ${active ? 'bg-marker-soft' : ''}`}
+                  >
+                    {content}
+                  </button>
+                ) : (
+                  <div className="flex gap-3 rounded-lg px-2 py-2">{content}</div>
+                )}
               </li>
             );
           })}

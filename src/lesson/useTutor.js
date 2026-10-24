@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { streamTurn } from '../api/client.js';
-import { chatReducer, historyFor, initChat } from './chatReducer.js';
+import { chatReducer, historyFor, initChat, savedChat } from './chatReducer.js';
 import { chunksById } from './sources.js';
+import { saveChat, saveLesson } from './storage.js';
 
 let nextId = 0;
 const newId = (prefix) => `${prefix}-${Date.now().toString(36)}-${(nextId += 1)}`;
@@ -19,6 +20,15 @@ export const useTutor = ({ lesson, settings }) => {
   useEffect(() => {
     stateRef.current = state;
   });
+
+  useEffect(() => {
+    saveLesson(lesson);
+  }, [lesson]);
+
+  const idle = state.turn.status === 'idle';
+  useEffect(() => {
+    if (idle && state.messages.length > 0) saveChat(lesson.id, savedChat(state));
+  }, [idle, lesson.id, state]);
 
   const runTurn = useCallback(
     async ({ kind, studentMessage = '', retryStudentId = null }) => {
@@ -51,6 +61,7 @@ export const useTutor = ({ lesson, settings }) => {
           onEvent: (event, data) => {
             if (event === 'status') dispatch({ type: 'phase', phase: data.phase });
             if (event === 'progress') dispatch({ type: 'progress', ...data });
+            if (event === 'notice') dispatch({ type: 'notice', notice: data });
             if (event === 'delta') dispatch({ type: 'delta', text: data.text });
             if (event === 'done') dispatch({ type: 'done' });
           },
@@ -59,7 +70,7 @@ export const useTutor = ({ lesson, settings }) => {
         if (error.name === 'AbortError') {
           dispatch({ type: 'stopped' });
         } else {
-          dispatch({ type: 'failed', failed: { kind, studentMessage, studentId, code: error.code, message: error.message, retryable: error.retryable } });
+          dispatch({ type: 'failed', failed: { kind, studentMessage, studentId, code: error.code, message: error.message, retryable: error.retryable !== false } });
         }
       } finally {
         controllerRef.current = null;
@@ -78,6 +89,8 @@ export const useTutor = ({ lesson, settings }) => {
   }, [runTurn]);
 
   const dismissError = useCallback(() => dispatch({ type: 'dismiss_error' }), []);
+  const dismissNotice = useCallback(() => dispatch({ type: 'dismiss_notice' }), []);
+  const dismissRestored = useCallback(() => dispatch({ type: 'dismiss_restored' }), []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -88,5 +101,5 @@ export const useTutor = ({ lesson, settings }) => {
 
   useEffect(() => () => controllerRef.current?.abort(), []);
 
-  return { ...state, busy: state.turn.status !== 'idle', send, stop, retry, dismissError };
+  return { ...state, busy: state.turn.status !== 'idle', send, stop, retry, dismissError, dismissNotice, dismissRestored };
 };

@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
+import { useI18n } from '../i18n/translate.js';
 import Icon from './Icon.jsx';
 
 const MAX_LENGTH = 2000;
 
 export default function Composer({ busy, completed, onSend, onStop }) {
+  const { t } = useI18n();
   const [text, setText] = useState('');
   const inputRef = useRef(null);
 
@@ -33,7 +35,7 @@ export default function Composer({ busy, completed, onSend, onStop }) {
       }}
     >
       <div className="mx-auto flex max-w-3xl items-end gap-2">
-        <label htmlFor="answer" className="sr-only">Your answer</label>
+        <label htmlFor="answer" className="sr-only">{t('composer.label')}</label>
         <textarea
           id="answer"
           ref={inputRef}
@@ -48,20 +50,20 @@ export default function Composer({ busy, completed, onSend, onStop }) {
               submit();
             }
           }}
-          placeholder={completed ? 'Ask a follow-up question' : 'Type your answer'}
+          placeholder={completed ? t('composer.followUp') : t('composer.placeholder')}
           className="field min-h-11 resize-none py-2.5 leading-normal"
         />
         {busy ? (
-          <button type="button" onClick={onStop} className="btn-secondary size-11 shrink-0 p-0 text-danger" aria-label="Stop the response">
+          <button type="button" onClick={onStop} className="btn-secondary size-11 shrink-0 p-0 text-danger" aria-label={t('composer.stop')}>
             <Icon name="stop" className="size-4.5" />
           </button>
         ) : (
-          <button type="submit" disabled={!text.trim()} className="btn-primary size-11 shrink-0 p-0" aria-label="Send">
+          <button type="submit" disabled={!text.trim()} className="btn-primary size-11 shrink-0 p-0" aria-label={t('composer.send')}>
             <Icon name="send" className="size-5" />
           </button>
         )}
       </div>
-      <p className="mx-auto mt-1.5 hidden max-w-3xl text-xs text-muted sm:block">Enter to send, Shift + Enter for a new line.</p>
+      <p className="mx-auto mt-1.5 hidden max-w-3xl text-xs text-muted sm:block">{t('composer.hint')}</p>
     </form>
   );
 }

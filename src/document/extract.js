@@ -4,6 +4,7 @@ import { ExtractionError, unreadableRatio } from './errors.js';
 
 export const MAX_FILE_BYTES = 25 * 1024 * 1024;
 export const MAX_DOCUMENT_CHARS = 600_000;
+export const SHORT_DOCUMENT_CHARS = 400;
 
 export const FILE_TYPES = {
   pdf: { label: 'PDF', extensions: ['pdf'], load: () => import('./pdf.js').then((module) => module.extractPdf) },
@@ -21,13 +22,14 @@ export const detectFileType = (fileName) => {
 export const validateFile = (file) => {
   const type = detectFileType(file.name);
   if (!type) {
-    throw new ExtractionError('unsupported', `"${file.name}" is not supported. Upload a PDF, Word (.docx) or text (.txt, .md) file.`);
+    throw new ExtractionError('unsupported', `"${file.name}" is not supported. Upload a PDF, Word (.docx) or text (.txt, .md) file.`, { name: file.name });
   }
   if (file.size === 0) {
     throw new ExtractionError('empty', 'This file is empty.');
   }
   if (file.size > MAX_FILE_BYTES) {
-    throw new ExtractionError('too_large', `This file is ${formatBytes(file.size)}. The limit is ${formatBytes(MAX_FILE_BYTES)}.`);
+    const params = { size: formatBytes(file.size), limit: formatBytes(MAX_FILE_BYTES) };
+    throw new ExtractionError('too_large', `This file is ${params.size}. The limit is ${params.limit}.`, params);
   }
   return type;
 };
@@ -52,12 +54,15 @@ export const prepareDocument = ({ file, type, sections, pageCount, warnings }) =
   const { kept, total } = limitChunks(chunks);
   const notes = [...warnings];
   if (kept.length < chunks.length) {
-    notes.push(`The document is very long. Only the first ${kept.length} of ${chunks.length} passages are used (up to "${kept.at(-1).label}").`);
+    notes.push({ code: 'long', params: { kept: kept.length, total: chunks.length, label: kept.at(-1).label } });
   }
 
   const sample = kept.slice(0, 20).map((chunk) => chunk.text).join('\n');
   if (unreadableRatio(sample) > 0.05) {
-    notes.push('Part of the text uses a font that could not be decoded, so some characters may be missing or wrong.');
+    notes.push({ code: 'font', params: {} });
+  }
+  if (total < SHORT_DOCUMENT_CHARS) {
+    notes.push({ code: 'short', params: { count: total } });
   }
 
   return {

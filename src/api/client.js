@@ -22,7 +22,7 @@ const readError = async (response) => {
     const body = await response.json();
     return toApiError(body.error);
   } catch {
-    if (response.status === 413) return new ApiError('invalid_request', 'The file is too large to send to the server.', false);
+    if (response.status === 413) return new ApiError('too_large', 'The file is too large to send to the server.', false);
     return new ApiError('internal', `The server answered with an error (${response.status}). Try again.`);
   }
 };
@@ -48,8 +48,9 @@ export const fetchHealth = async () => {
   }
 };
 
-export const createLesson = async ({ settings, teacherPrompt, document, signal }) => {
-  const response = await send('/api/lessons', { settings, body: { teacherPrompt, document }, signal });
+export const createLesson = async ({ settings, teacherPrompt, lessonLanguage, document, signal }) => {
+  const body = lessonLanguage ? { teacherPrompt, lessonLanguage, document } : { teacherPrompt, document };
+  const response = await send('/api/lessons', { settings, body, signal });
   return response.json();
 };
 
@@ -64,7 +65,7 @@ export const streamTurn = async ({ settings, body, signal, onEvent }) => {
     }
   } catch (error) {
     if (error.name === 'AbortError' || error instanceof ApiError) throw error;
-    throw new ApiError('network', 'The connection was interrupted. Try again.');
+    throw new ApiError('interrupted', 'The connection was interrupted. Try again.');
   }
-  if (!finished) throw new ApiError('network', 'The answer was cut off before it finished. Try again.');
+  if (!finished) throw new ApiError('cut_off', 'The answer was cut off before it finished. Try again.');
 };

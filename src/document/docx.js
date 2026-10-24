@@ -49,6 +49,6 @@ export const extractDocx = async (file) => {
     throw new ExtractionError('empty', 'This Word file has no readable text.');
   }
 
-  const warnings = hasImages ? ['Images in the document are not read. Text inside images will be missing from the lesson.'] : [];
+  const warnings = hasImages ? [{ code: 'images', params: {} }] : [];
   return { sections, pageCount: null, warnings };
 };

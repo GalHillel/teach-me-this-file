@@ -77,6 +77,17 @@ describe('file validation', () => {
     expect(document.chunks[0].label).toBe('Lines 1–2');
   });
 
+  it('warns about very short documents with a code the UI can translate', () => {
+    const document = prepareDocument({
+      file: fakeFile('short.txt', 40),
+      type: 'txt',
+      sections: [{ label: 'Lines 1–1', text: 'Water boils at 100 degrees.' }],
+      pageCount: null,
+      warnings: [{ code: 'images', params: {} }],
+    });
+    expect(document.warnings).toEqual([{ code: 'images', params: {} }, { code: 'short', params: { count: 27 } }]);
+  });
+
   it('refuses documents with no text', () => {
     expect(() => prepareDocument({ file: fakeFile('a.txt', 3), type: 'txt', sections: [], pageCount: null, warnings: [] }))
       .toThrow(expect.objectContaining({ code: 'empty' }));
