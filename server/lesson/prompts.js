@@ -179,6 +179,7 @@ const reteachInstruction = (intervention, requested) => {
 const PROBE = {
   hedged: 'The answer has the right idea, but the student sounds unsure. Ask one short follow-up that lets them show they understand: why it is so, or the same idea in a tiny new example.',
   unjustified: 'The student gave the right result without the reasoning the question asked for. Ask them in one short question to explain why.',
+  copied: 'The answer repeats the wording of the document. Without saying it is right yet, ask them to say it in their own words or to apply it to a tiny new example.',
   none: 'The answer looks right, but it is not clear the student understands it. Ask one short follow-up: why it is so, or the same idea applied to a tiny new example.',
 };
 

@@ -82,6 +82,9 @@
       ],
       "tags": [
         "correct"
+      ],
+      "issue": [
+        "none"
       ]
     },
     {
@@ -94,6 +97,9 @@
       "tags": [
         "correct",
         "paraphrase"
+      ],
+      "issue": [
+        "none"
       ]
     },
     {
@@ -106,6 +112,9 @@
       "tags": [
         "correct",
         "typos"
+      ],
+      "issue": [
+        "none"
       ]
     },
     {
@@ -118,6 +127,9 @@
       "tags": [
         "correct",
         "short"
+      ],
+      "issue": [
+        "none"
       ]
     },
     {
@@ -130,6 +142,9 @@
       "tags": [
         "correct",
         "long"
+      ],
+      "issue": [
+        "none"
       ]
     },
     {
@@ -152,6 +167,10 @@
       ],
       "tags": [
         "partial"
+      ],
+      "issue": [
+        "hedged",
+        "none"
       ]
     },
     {
@@ -163,6 +182,9 @@
       ],
       "tags": [
         "incorrect"
+      ],
+      "issue": [
+        "none"
       ]
     },
     {
@@ -174,6 +196,9 @@
       ],
       "tags": [
         "incorrect"
+      ],
+      "issue": [
+        "no_knowledge"
       ]
     },
     {
@@ -246,6 +271,10 @@
       ],
       "tags": [
         "sub-question"
+      ],
+      "issue": [
+        "misread_question",
+        "none"
       ]
     },
     {
@@ -281,6 +310,9 @@
       "tags": [
         "correct",
         "paraphrase"
+      ],
+      "issue": [
+        "none"
       ]
     },
     {
@@ -293,6 +325,9 @@
       "tags": [
         "correct",
         "math"
+      ],
+      "issue": [
+        "none"
       ]
     },
     {
@@ -330,6 +365,9 @@
       "tags": [
         "math",
         "incorrect"
+      ],
+      "issue": [
+        "none"
       ]
     },
     {
@@ -343,6 +381,10 @@
         "math",
         "partial",
         "short"
+      ],
+      "issue": [
+        "unjustified",
+        "none"
       ]
     },
     {
@@ -355,6 +397,9 @@
       "tags": [
         "correct",
         "he"
+      ],
+      "issue": [
+        "none"
       ]
     },
     {
@@ -393,6 +438,9 @@
       "tags": [
         "incorrect",
         "he"
+      ],
+      "issue": [
+        "none"
       ]
     },
     {
@@ -417,6 +465,9 @@
       "tags": [
         "correct",
         "fr"
+      ],
+      "issue": [
+        "none"
       ]
     },
     {
@@ -442,6 +493,9 @@
       "tags": [
         "incorrect",
         "fr"
+      ],
+      "issue": [
+        "none"
       ]
     },
     {
@@ -519,6 +573,9 @@
       "tags": [
         "hard",
         "correct"
+      ],
+      "issue": [
+        "hedged"
       ]
     },
     {
@@ -599,6 +656,134 @@
       "tags": [
         "hard",
         "sub-question"
+      ],
+      "issue": [
+        "misread_question",
+        "none"
+      ]
+    },
+    {
+      "id": "en-copied-source",
+      "step": "inputs-en",
+      "tutorQuestion": "In your own words, what does a plant take in to make its food, and where from?",
+      "student": "Plants take in carbon dioxide from the air through small openings in their leaves called stomata, and water from the soil through their roots.",
+      "accept": [
+        "correct",
+        "partial"
+      ],
+      "issue": [
+        "copied"
+      ],
+      "tags": [
+        "copied"
+      ]
+    },
+    {
+      "id": "en-misread-outputs",
+      "step": "inputs-en",
+      "student": "They make glucose and give out oxygen.",
+      "accept": [
+        "incorrect",
+        "partial"
+      ],
+      "issue": [
+        "misread_question"
+      ],
+      "tags": [
+        "misread"
+      ]
+    },
+    {
+      "id": "math-unjustified-sinks",
+      "step": "density-math-en",
+      "tutorQuestion": "The object has a density of 3 g/cm3. Does it sink or float in water, and why?",
+      "student": "It sinks.",
+      "accept": [
+        "partial",
+        "correct"
+      ],
+      "issue": [
+        "unjustified"
+      ],
+      "tags": [
+        "unjustified"
+      ]
+    },
+    {
+      "id": "he-hedged-correct",
+      "step": "evaporation-he",
+      "student": "אולי המים מתאדים והופכים לאדים שעולים לאוויר? לא בטוחה",
+      "accept": [
+        "correct",
+        "partial"
+      ],
+      "issue": [
+        "hedged"
+      ],
+      "tags": [
+        "hedged",
+        "he"
+      ]
+    },
+    {
+      "id": "fr-dont-know",
+      "step": "floating-fr",
+      "student": "Je ne sais pas.",
+      "accept": [
+        "incorrect"
+      ],
+      "issue": [
+        "no_knowledge"
+      ],
+      "tags": [
+        "no_knowledge",
+        "fr"
+      ]
+    },
+    {
+      "id": "en-wrong-meaning",
+      "step": "green-en",
+      "student": "Because chlorophyll reflects all the light, so we see every colour mixed as green.",
+      "accept": [
+        "incorrect",
+        "partial"
+      ],
+      "tags": [
+        "misconception"
+      ]
+    },
+    {
+      "id": "he-copied-source",
+      "step": "evaporation-he",
+      "tutorQuestion": "במילים שלך: מה קורה למים כשהשמש מחממת אותם?",
+      "student": "השמש מחממת את המים בים ובאגמים, והמים מתאדים והופכים לאדי מים.",
+      "accept": [
+        "correct",
+        "partial"
+      ],
+      "issue": [
+        "copied"
+      ],
+      "tags": [
+        "copied",
+        "he"
+      ]
+    },
+    {
+      "id": "fr-misread",
+      "step": "floating-fr",
+      "student": "La masse volumique se calcule en divisant la masse par le volume.",
+      "accept": [
+        "incorrect",
+        "partial"
+      ],
+      "issue": [
+        "misread_question",
+        "none"
+      ],
+      "tags": [
+        "misread",
+        "fr"
       ]
     }
   ]

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { assessAnswer, normalizeAssessment } from '../server/lesson/assessor.js';
+import { assessAnswer, copiedShare, normalizeAssessment } from '../server/lesson/assessor.js';
 import { AppError } from '../server/errors.js';
 
 const graded = (overrides) => ({
@@ -81,6 +81,27 @@ describe('normalizeAssessment', () => {
   it('clamps completeness and fills defaults', () => {
     expect(normalizeAssessment({ verdict: 'partial', completeness: 7 }, 'x')).toMatchObject({ completeness: 1, confidence: 'medium' });
     expect(normalizeAssessment({ verdict: 'incorrect' }, 'x').completeness).toBe(0);
+  });
+});
+
+describe('answers copied from the passage', () => {
+  const sources = [{ text: 'Plants take in carbon dioxide from the air through small openings in their leaves called stomata, and water from the soil through their roots.' }];
+
+  it('flags an answer that repeats the passage word for word, so the tutor asks for it in the student\'s own words', () => {
+    const copied = 'Plants take in carbon dioxide from the air through small openings in their leaves called stomata.';
+    const result = normalizeAssessment({ verdict: 'correct', completeness: 1, confidence: 'high' }, copied, sources);
+    expect(result).toMatchObject({ verdict: 'correct', issue: 'copied', checks: ['copied_from_source'] });
+  });
+
+  it('leaves paraphrases and short answers alone', () => {
+    const paraphrase = 'They take in carbon dioxide from the air through the stomata in the leaves, and water from the soil through the roots.';
+    expect(normalizeAssessment({ verdict: 'correct', completeness: 1 }, paraphrase, sources).issue).toBe('none');
+    expect(copiedShare('CO2 from air, water from soil', sources)).toBe(0);
+  });
+
+  it('does not call a wrong answer copied', () => {
+    const copiedButOffQuestion = 'Plants take in carbon dioxide from the air through small openings in their leaves called stomata.';
+    expect(normalizeAssessment({ verdict: 'incorrect', completeness: 0 }, copiedButOffQuestion, sources).issue).toBe('none');
   });
 });
 

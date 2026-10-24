@@ -4,13 +4,17 @@ import { ASSESS_SYSTEM, buildAssessPrompt } from './prompts.js';
 
 const VERDICTS = new Set(['correct', 'partial', 'incorrect', 'question', 'off_topic']);
 const CONFIDENCE = ['low', 'medium', 'high'];
-export const ISSUES = ['none', 'misread_question', 'hedged', 'no_knowledge', 'unjustified'];
+export const ISSUES = ['none', 'misread_question', 'hedged', 'no_knowledge', 'unjustified', 'copied'];
 const ISSUE_VERDICTS = {
   misread_question: new Set(['partial', 'incorrect', 'off_topic']),
   hedged: new Set(['correct', 'partial']),
   no_knowledge: new Set(['incorrect']),
   unjustified: new Set(['correct', 'partial']),
+  copied: new Set(['correct', 'partial']),
 };
+const COPY_MIN_WORDS = 8;
+const COPY_SHARE = 0.6;
+const COPY_SCAN_WORDS = 120;
 const DEFAULT_COMPLETENESS = { correct: 1, partial: 0.5, incorrect: 0 };
 
 const DONT_KNOW = /^\s*(i\s*(really\s*)?(do\s*n[o']?t|dunno)\s*know|idk|no\s*idea|not\s*sure|\?+|לא\s*יודע(ת)?|אין\s*לי\s*מושג|je\s*ne\s*sais\s*pas|aucune\s*id[eé]e|no\s*s[eé])\s*[.!?]*\s*$/iu;
@@ -32,6 +36,19 @@ const simplify = (value) =>
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim();
 
+export const copiedShare = (answer, sources) => {
+  const words = simplify(answer).split(' ').filter(Boolean).slice(0, COPY_SCAN_WORDS);
+  const text = ` ${sources.map((source) => simplify(source.text)).join(' | ')} `;
+  if (words.length < COPY_MIN_WORDS) return 0;
+  let longest = 0;
+  for (let start = 0; start < words.length && words.length - start > longest; start += 1) {
+    let end = start + longest + 1;
+    while (end <= words.length && text.includes(` ${words.slice(start, end).join(' ')} `)) end += 1;
+    longest = Math.max(longest, end - 1 - start);
+  }
+  return longest >= COPY_MIN_WORDS ? longest / words.length : 0;
+};
+
 const lowerConfidence = (confidence) => CONFIDENCE[Math.max(0, CONFIDENCE.indexOf(confidence) - 1)];
 
 export const unclearAssessment = () => ({
@@ -46,7 +63,7 @@ export const unclearAssessment = () => ({
   checks: ['no_usable_grade'],
 });
 
-export const normalizeAssessment = (raw, studentMessage) => {
+export const normalizeAssessment = (raw, studentMessage, sources = []) => {
   const verdictText = String(raw?.verdict ?? '').toLowerCase().trim();
   if (!VERDICTS.has(verdictText)) return unclearAssessment();
 
@@ -85,6 +102,10 @@ export const normalizeAssessment = (raw, studentMessage) => {
     issue = 'hedged';
     checks.push('hedge_in_answer');
   }
+  if (issue === 'none' && (verdict === 'correct' || verdict === 'partial') && copiedShare(studentMessage, sources) >= COPY_SHARE) {
+    issue = 'copied';
+    checks.push('copied_from_source');
+  }
   if (issue !== 'none' && !ISSUE_VERDICTS[issue].has(verdict)) {
     issue = 'none';
     checks.push('issue_does_not_fit_verdict');
@@ -113,7 +134,7 @@ export const assessAnswer = async ({ provider, plan, progress, tutorQuestion, st
       signal,
       onMeta,
     });
-    return normalizeAssessment(raw, studentMessage);
+    return normalizeAssessment(raw, studentMessage, sources);
   } catch (error) {
     if (error instanceof AppError && error.code === 'bad_response') return unclearAssessment();
     throw error;

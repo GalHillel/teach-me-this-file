@@ -12,7 +12,7 @@ export const REVIEW_KINDS = ['final', 'practice'];
 export const REVISITS = ['pass', 'fail'];
 
 const ANSWER_VERDICTS = new Set(['correct', 'partial', 'incorrect']);
-const PROBE_ISSUES = new Set(['hedged', 'unjustified']);
+const PROBE_ISSUES = new Set(['hedged', 'unjustified', 'copied']);
 
 export const newStepState = (status) => ({
   status,

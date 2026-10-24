@@ -39,6 +39,19 @@ const summarize = (rows) => {
     medianMs: graded.map((row) => row.ms).sort((a, b) => a - b)[Math.floor(graded.length / 2)] ?? null,
     lowConfidenceOnMiss: share(graded.filter((row) => !row.ok), (row) => row.assessment.confidence === 'low'),
     lowConfidenceOnHit: share(graded.filter((row) => row.ok), (row) => row.assessment.confidence === 'low'),
+    issueAccuracy: share(graded.filter((row) => row.expectedIssue), (row) => row.expectedIssue.includes(row.assessment.issue)),
+    issues: Object.fromEntries(['misread_question', 'hedged', 'no_knowledge', 'unjustified', 'copied'].map((issue) => {
+      const expected = graded.filter((row) => row.expectedIssue?.length === 1 && row.expectedIssue[0] === issue);
+      const predicted = graded.filter((row) => row.expectedIssue && row.assessment.issue === issue);
+      return [issue, {
+        expected: expected.length,
+        recall: share(expected, (row) => row.assessment.issue === issue),
+        predicted: predicted.length,
+        precision: share(predicted, (row) => row.expectedIssue.includes(issue)),
+      }];
+    })),
+    misconceptionNamed: share(graded.filter((row) => row.tags?.includes('misconception')), (row) => Boolean(row.assessment.misconception)),
+    correctMarkedWrong: share(expectsCorrect, (row) => row.verdict === 'incorrect'),
     backupAnswers: graded.filter((row) => row.backup).length,
     models: graded.reduce((all, row) => ({ ...all, [row.model]: (all[row.model] ?? 0) + 1 }), {}),
   };
@@ -64,9 +77,9 @@ const run = async () => {
           meta = value;
         },
       });
-      const row = { id: item.id, accept: item.accept, tags: item.tags, verdict: assessment.verdict, ok: item.accept.includes(assessment.verdict), ms: Date.now() - started, model: meta.model, backup: meta.backup, assessment };
+      const row = { id: item.id, accept: item.accept, expectedIssue: item.issue ?? null, tags: item.tags, verdict: assessment.verdict, ok: item.accept.includes(assessment.verdict), ms: Date.now() - started, model: meta.model, backup: meta.backup, assessment };
       rows.push(row);
-      console.log(`${row.ok ? 'ok  ' : 'MISS'} ${item.id.padEnd(36)} ${row.verdict.padEnd(10)} want ${item.accept.join('|')} ${row.ms}ms ${row.model}`);
+      console.log(`${row.ok ? 'ok  ' : 'MISS'} ${item.id.padEnd(36)} ${row.verdict.padEnd(10)} want ${item.accept.join('|')} issue=${assessment.issue}${item.issue ? ` want ${item.issue.join('|')}` : ''} ${row.ms}ms ${row.model}`);
     } catch (error) {
       rows.push({ id: item.id, accept: item.accept, tags: item.tags, error: error.code ?? error.message, ms: Date.now() - started });
       console.log(`ERR  ${item.id.padEnd(36)} ${error.code ?? error.message}`);
