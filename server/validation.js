@@ -1,4 +1,5 @@
 import { AppError } from './errors.js';
+import { OUTCOMES as LESSON_OUTCOMES } from './lesson/progress.js';
 
 export const LIMITS = {
   teacherPrompt: 3000,
@@ -11,6 +12,8 @@ export const LIMITS = {
   historyMessage: 6000,
   steps: 10,
 };
+
+const APPROACHES = new Set(['explain', 'worked_example', 'practice']);
 
 const fail = (detail) => {
   throw new AppError('invalid_request', `The request was not valid: ${detail}.`);
@@ -49,9 +52,12 @@ export const validatePlanRequest = (body) => {
   const totalChars = documentChunks.reduce((sum, chunk) => sum + chunk.text.length, 0);
   if (totalChars > LIMITS.planChars) fail('the document excerpt is too long');
   const totalChunks = Number.isInteger(body.document.totalChunks) ? body.document.totalChunks : documentChunks.length;
+  const lessonLanguage = body.lessonLanguage ? string(body.lessonLanguage, 'lessonLanguage', { max: 12 }) : null;
+  if (lessonLanguage && !/^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/i.test(lessonLanguage)) fail('lessonLanguage is not a language code');
 
   return {
     teacherPrompt,
+    lessonLanguage: lessonLanguage?.toLowerCase() ?? null,
     document: {
       name: string(body.document.name, 'document.name', { max: 200 }),
       chunks: documentChunks,
@@ -79,15 +85,20 @@ const plan = (value) => {
         title: field('title'),
         goal: field('goal'),
         keyConcepts: stringList(step.keyConcepts, `plan.steps[${index}].keyConcepts`),
+        approach: APPROACHES.has(step.approach) ? step.approach : 'explain',
         checkQuestion: field('checkQuestion'),
         successCriteria: field('successCriteria'),
+        commonMistake: field('commonMistake'),
       };
     }),
   };
 };
 
 const STEP_STATUSES = new Set(['pending', 'active', 'done']);
-const OUTCOMES = new Set([null, 'mastered', 'learned', 'revealed']);
+const PHASES = new Set(['learn', 'recheck']);
+const OUTCOMES = new Set([null, ...LESSON_OUTCOMES]);
+
+const count = (value, max) => (Number.isInteger(value) && value >= 0 ? Math.min(value, max) : 0);
 
 const progress = (value, stepCount) => {
   if (!isObject(value)) fail('missing progress');
@@ -104,8 +115,14 @@ const progress = (value, stepCount) => {
       if (!isObject(step) || !STEP_STATUSES.has(step.status) || !OUTCOMES.has(step.outcome ?? null)) {
         fail('progress step is not valid');
       }
-      const attempts = Number.isInteger(step.attempts) && step.attempts >= 0 ? Math.min(step.attempts, 10) : 0;
-      return { status: step.status, attempts, outcome: step.outcome ?? null };
+      return {
+        status: step.status,
+        phase: PHASES.has(step.phase) ? step.phase : 'learn',
+        attempts: count(step.attempts, 10),
+        stalls: count(step.stalls, 10),
+        probed: step.probed === true,
+        outcome: step.outcome ?? null,
+      };
     }),
   };
 };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validatePlan } from '../server/lesson/planner.js';
+import { maxStepsFor, minutesFromPrompt, validatePlan } from '../server/lesson/planner.js';
 import { buildPlanPrompt, buildTutorSystem, fence } from '../server/lesson/prompts.js';
 import { createProgress } from '../server/lesson/progress.js';
 
@@ -23,7 +23,7 @@ const rawPlan = {
 
 describe('validatePlan', () => {
   it('cleans the plan and keeps only real source ids', () => {
-    const plan = validatePlan(rawPlan, chunks, 'file');
+    const plan = validatePlan(rawPlan, chunks, { fallbackTitle: 'file' });
     expect(plan.languageCode).toBe('he');
     expect(plan.direction).toBe('rtl');
     expect(plan.durationMinutes).toBe(90);
@@ -33,19 +33,68 @@ describe('validatePlan', () => {
   });
 
   it('finds sources by text when the model gives none', () => {
-    const plan = validatePlan(rawPlan, chunks, 'file');
+    const plan = validatePlan(rawPlan, chunks, { fallbackTitle: 'file' });
     expect(plan.steps[1].sourceIds).toEqual(['c2']);
   });
 
   it('rejects a plan without usable steps', () => {
-    expect(() => validatePlan({ steps: [{ title: 'x' }] }, chunks, 'file')).toThrow(expect.objectContaining({ code: 'bad_response' }));
-    expect(() => validatePlan(null, chunks, 'file')).toThrow();
+    expect(() => validatePlan({ steps: [{ title: 'x' }] }, chunks, { fallbackTitle: 'file' })).toThrow(expect.objectContaining({ code: 'bad_response' }));
+    expect(() => validatePlan(null, chunks, { fallbackTitle: 'file' })).toThrow();
   });
 
   it('falls back to the file name and English', () => {
-    const plan = validatePlan({ steps: rawPlan.steps, languageCode: 'not a code!' }, chunks, 'biology');
+    const plan = validatePlan({ steps: rawPlan.steps, languageCode: 'not a code!' }, chunks, { fallbackTitle: 'biology' });
     expect(plan.title).toBe('biology');
     expect(plan.languageCode).toBe('en');
+  });
+});
+
+describe('plan shape', () => {
+  it('uses the lesson language chosen in the UI over the model guess', () => {
+    const plan = validatePlan(rawPlan, chunks, { fallbackTitle: 'file', lessonLanguage: 'fr' });
+    expect(plan).toMatchObject({ languageCode: 'fr', direction: 'ltr' });
+  });
+
+  it('keeps known approaches and drops unknown ones', () => {
+    const steps = [
+      { title: 'A', checkQuestion: 'Q1?', approach: 'worked_example', commonMistake: 'Mixes up mass and weight' },
+      { title: 'B', checkQuestion: 'Q2?', approach: 'lecture' },
+    ];
+    const plan = validatePlan({ steps, contentType: 'procedure' }, chunks, { fallbackTitle: 'f' });
+    expect(plan.contentType).toBe('procedure');
+    expect(plan.steps.map((step) => step.approach)).toEqual(['worked_example', 'explain']);
+    expect(plan.steps[0].commonMistake).toBe('Mixes up mass and weight');
+    expect(validatePlan({ steps, contentType: 'poem' }, chunks, { fallbackTitle: 'f' }).contentType).toBe('mixed');
+  });
+
+  it('drops steps that repeat a check question and respects the step limit', () => {
+    const steps = ['Q1?', 'q1?', 'Q2?', 'Q3?'].map((checkQuestion, index) => ({ title: `T${index}`, checkQuestion }));
+    const plan = validatePlan({ steps }, chunks, { fallbackTitle: 'f', maxSteps: 2 });
+    expect(plan.steps.map((step) => step.checkQuestion)).toEqual(['Q1?', 'Q2?']);
+  });
+
+  it('warns when steps are not grounded in the file', () => {
+    const steps = [
+      { title: 'Magma', checkQuestion: 'Where does magma come from?', sourceIds: ['c1'] },
+      { title: 'Medieval poetry', checkQuestion: 'Who wrote sonnets?' },
+    ];
+    expect(validatePlan({ steps }, chunks, { fallbackTitle: 'f' }).warnings).toEqual(['mostly_ungrounded']);
+    expect(validatePlan(rawPlan, chunks, { fallbackTitle: 'f' }).warnings).toEqual([]);
+  });
+
+  it('reads the lesson length from the teacher prompt', () => {
+    expect(minutesFromPrompt('Keep it under 15 minutes')).toBe(15);
+    expect(minutesFromPrompt('עד 20 דקות')).toBe(20);
+    expect(minutesFromPrompt('about 10 min')).toBe(10);
+    expect(minutesFromPrompt('no time given')).toBe(null);
+    expect(minutesFromPrompt('1 minute')).toBe(null);
+  });
+
+  it('scales the number of steps to the file length and the time', () => {
+    expect(maxStepsFor({ documentChars: 400, minutes: null })).toBe(2);
+    expect(maxStepsFor({ documentChars: 20000, minutes: null })).toBe(8);
+    expect(maxStepsFor({ documentChars: 20000, minutes: 10 })).toBe(4);
+    expect(maxStepsFor({ documentChars: 20000, minutes: 3 })).toBe(2);
   });
 });
 
@@ -63,7 +112,7 @@ describe('prompts treat the document as data', () => {
   });
 
   it('puts sources inside the sources block of the tutor prompt', () => {
-    const plan = validatePlan(rawPlan, chunks, 'file');
+    const plan = validatePlan(rawPlan, chunks, { fallbackTitle: 'file' });
     const system = buildTutorSystem({
       plan,
       progress: createProgress(plan),

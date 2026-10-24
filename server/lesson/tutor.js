@@ -1,4 +1,5 @@
 import { AppError } from '../errors.js';
+import { count } from '../metrics.js';
 import { assessAnswer } from './assessor.js';
 import { lessonPace, planMove, stepsToReview } from './progress.js';
 import { buildTutorSystem } from './prompts.js';
@@ -26,8 +27,21 @@ export const toProviderMessages = (history, studentMessage) => {
 
 const lastTutorMessage = (history) => [...history].reverse().find((message) => message.role === 'tutor')?.content ?? '';
 
+export const publicAssessment = (assessment) =>
+  assessment ? { verdict: assessment.verdict, confidence: assessment.confidence, checks: assessment.checks } : null;
+
 export const runTurn = async ({ provider, input, signal, send }) => {
   const { kind, plan, teacherPrompt, history, studentMessage, sources } = input;
+  const started = Date.now();
+  const models = [];
+  let warnedBackup = false;
+  const onMeta = (meta) => {
+    models.push(meta.model);
+    if (meta.backup && !warnedBackup) {
+      warnedBackup = true;
+      send('notice', { code: 'backup_model', model: meta.model });
+    }
+  };
 
   let assessment = null;
   if (kind === 'reply' && input.progress.status === 'active') {
@@ -40,11 +54,12 @@ export const runTurn = async ({ provider, input, signal, send }) => {
       studentMessage,
       sources: sources.current,
       signal,
+      onMeta,
     });
   }
 
-  const { move, progress } = planMove(input.progress, { kind, verdict: assessment?.verdict });
-  send('progress', { move, progress, verdict: assessment?.verdict ?? null });
+  const { move, progress } = planMove(input.progress, { kind, assessment });
+  send('progress', { move, progress, assessment: publicAssessment(assessment) });
   send('status', { phase: 'teaching' });
 
   const system = buildTutorSystem({
@@ -59,10 +74,20 @@ export const runTurn = async ({ provider, input, signal, send }) => {
   });
 
   let reply = '';
-  for await (const text of provider.streamText({ system, messages: toProviderMessages(history, studentMessage), signal })) {
+  let firstTokenMs = null;
+  for await (const text of provider.streamText({ system, messages: toProviderMessages(history, studentMessage), signal, onMeta })) {
+    if (firstTokenMs === null) firstTokenMs = Date.now() - started;
     reply += text;
     send('delta', { text });
   }
   if (!reply.trim()) throw new AppError('bad_response', 'The AI returned an empty answer. Try again.');
-  send('done', {});
+
+  const totalMs = Date.now() - started;
+  count('turns');
+  if (firstTokenMs !== null) {
+    count('firstTokenMs', firstTokenMs);
+    count('firstTokenCount');
+  }
+  console.log(`turn ${kind} move=${move} verdict=${assessment?.verdict ?? '-'} first=${firstTokenMs}ms total=${totalMs}ms models=${models.join(',')}`);
+  send('done', { move, models, backup: warnedBackup, firstTokenMs, totalMs });
 };

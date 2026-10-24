@@ -37,16 +37,21 @@ const summarize = (rows) => {
     correctRecognised: share(expectsCorrect, (row) => row.verdict === 'correct'),
     partialRecognised: share(expectsPartial, (row) => row.ok),
     medianMs: graded.map((row) => row.ms).sort((a, b) => a - b)[Math.floor(graded.length / 2)] ?? null,
+    lowConfidenceOnMiss: share(graded.filter((row) => !row.ok), (row) => row.assessment.confidence === 'low'),
+    lowConfidenceOnHit: share(graded.filter((row) => row.ok), (row) => row.assessment.confidence === 'low'),
+    backupAnswers: graded.filter((row) => row.backup).length,
+    models: graded.reduce((all, row) => ({ ...all, [row.model]: (all[row.model] ?? 0) + 1 }), {}),
   };
 };
 
 const run = async () => {
-  const provider = resolveProvider({ apiKey: process.env.EVAL_API_KEY || '', provider: process.env.EVAL_PROVIDER || '' });
+  const { provider } = resolveProvider({ apiKey: process.env.EVAL_API_KEY || '', provider: process.env.EVAL_PROVIDER || '' });
   const rows = [];
   for (const item of golden.cases) {
     if (only && !only.includes(item.id)) continue;
     const { plan, sources } = lessonFor(item.step);
     const started = Date.now();
+    let meta = { model: provider.model, backup: false };
     try {
       const assessment = await assessAnswer({
         provider,
@@ -55,10 +60,13 @@ const run = async () => {
         tutorQuestion: item.tutorQuestion ?? plan.steps[0].checkQuestion,
         studentMessage: item.student,
         sources,
+        onMeta: (value) => {
+          meta = value;
+        },
       });
-      const row = { id: item.id, accept: item.accept, tags: item.tags, verdict: assessment.verdict, ok: item.accept.includes(assessment.verdict), ms: Date.now() - started, model: assessment.model ?? provider.model, assessment };
+      const row = { id: item.id, accept: item.accept, tags: item.tags, verdict: assessment.verdict, ok: item.accept.includes(assessment.verdict), ms: Date.now() - started, model: meta.model, backup: meta.backup, assessment };
       rows.push(row);
-      console.log(`${row.ok ? 'ok  ' : 'MISS'} ${item.id.padEnd(36)} ${row.verdict.padEnd(10)} want ${item.accept.join('|')} ${row.ms}ms`);
+      console.log(`${row.ok ? 'ok  ' : 'MISS'} ${item.id.padEnd(36)} ${row.verdict.padEnd(10)} want ${item.accept.join('|')} ${row.ms}ms ${row.model}`);
     } catch (error) {
       rows.push({ id: item.id, accept: item.accept, tags: item.tags, error: error.code ?? error.message, ms: Date.now() - started });
       console.log(`ERR  ${item.id.padEnd(36)} ${error.code ?? error.message}`);
