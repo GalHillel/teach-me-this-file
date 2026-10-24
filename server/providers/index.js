@@ -14,22 +14,29 @@ export const detectProvider = (apiKey) => {
 };
 
 const createProvider = (name, apiKey) => {
-  const model = config.models[name];
-  if (name === 'gemini') return createGeminiProvider({ apiKey, models: model });
-  return createOpenAiCompatibleProvider({ name, apiKey, model });
+  if (name === 'gemini') {
+    return createGeminiProvider({
+      apiKey,
+      models: config.models.gemini,
+      backupModels: config.models.geminiBackup,
+      timeoutMs: config.providerTimeoutMs,
+      deadlineMs: config.providerDeadlineMs,
+    });
+  }
+  return createOpenAiCompatibleProvider({ name, apiKey, model: config.models[name] });
 };
 
 export const resolveProvider = ({ apiKey: userKey = '', provider: requested = '' }) => {
   const choice = requested.trim().toLowerCase();
-  if (choice === 'mock' && config.allowMockProvider) return createMockProvider();
+  if (choice === 'mock' && config.allowMockProvider) return { provider: createMockProvider(), usesServerKey: false };
 
-  const usingServerKey = !userKey.trim();
-  const apiKey = usingServerKey ? config.serverApiKey : userKey.trim();
+  const usesServerKey = !userKey.trim();
+  const apiKey = usesServerKey ? config.serverApiKey : userKey.trim();
   if (!apiKey) throw new AppError('missing_key');
 
   const explicit = PROVIDER_NAMES.includes(choice) ? choice : null;
-  const name = explicit ?? (usingServerKey && PROVIDER_NAMES.includes(config.serverProvider) ? config.serverProvider : detectProvider(apiKey));
+  const name = explicit ?? (usesServerKey && PROVIDER_NAMES.includes(config.serverProvider) ? config.serverProvider : detectProvider(apiKey));
   if (!name) throw new AppError('unknown_provider');
 
-  return createProvider(name, apiKey);
+  return { provider: createProvider(name, apiKey), usesServerKey };
 };

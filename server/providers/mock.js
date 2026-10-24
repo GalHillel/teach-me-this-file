@@ -11,7 +11,7 @@ const between = (text, tag) => text.split(`<${tag}>`)[1]?.split(`</${tag}>`)[0]?
 
 const mockPlan = (prompt) => {
   const ids = [...prompt.matchAll(/\[(c\d+) \|/g)].map((match) => match[1]);
-  const hebrew = /[֐-׿]/.test(between(prompt, 'teacher_instructions'));
+  const hebrew = /[\u0590-\u05FF]/.test(between(prompt, 'teacher_instructions'));
   return {
     title: 'Mock lesson',
     languageCode: hebrew ? 'he' : 'en',
@@ -33,27 +33,30 @@ const mockPlan = (prompt) => {
 
 const mockAssessment = (prompt) => {
   const answer = between(prompt, 'student_message').toLowerCase();
+  const base = { conceptsShown: [], conceptsMissing: [], misconception: '', evidence: '', confidence: 'high' };
   if (answer.includes('wrong') || answer.includes('no idea')) {
-    return { verdict: 'incorrect', understood: '', missing: 'the main point', misconception: 'confused the idea' };
+    return { ...base, verdict: 'incorrect', completeness: 0, conceptsMissing: ['the main point'], misconception: 'confused the idea' };
   }
-  if (answer.includes('partly')) return { verdict: 'partial', understood: 'part of it', missing: 'the rest', misconception: '' };
-  if (answer.endsWith('?')) return { verdict: 'question', understood: '', missing: '', misconception: '' };
-  return { verdict: 'correct', understood: 'the main point', missing: '', misconception: '' };
+  if (answer.includes('partly')) return { ...base, verdict: 'partial', completeness: 0.5, conceptsShown: ['part of it'], conceptsMissing: ['the rest'] };
+  if (answer.includes('off topic')) return { ...base, verdict: 'off_topic', completeness: 0 };
+  if (answer.endsWith('?')) return { ...base, verdict: 'question', completeness: 0 };
+  return { ...base, verdict: 'correct', completeness: 1, conceptsShown: ['the main point'], confidence: answer.includes('maybe') ? 'low' : 'high' };
 };
 
 export const createMockProvider = ({ delayMs = 40 } = {}) => ({
   name: 'mock',
   model: 'mock',
 
-  async generateJson({ task, prompt, signal }) {
+  async generateJson({ task, prompt, signal, onMeta }) {
     await wait(delayMs * 5, signal);
+    onMeta?.({ model: 'mock', backup: false, fallbacks: 0 });
     return task === 'plan' ? mockPlan(prompt) : mockAssessment(prompt);
   },
 
-  async *streamText({ system, signal }) {
+  async *streamText({ system, signal, onMeta }) {
+    onMeta?.({ model: 'mock', backup: false, fallbacks: 0 });
     const source = between(system, 'sources').split('\n').find((line) => line && !line.startsWith('[')) ?? '';
-    const move = system.split('What to do now:')[1]?.trim().split('\n')[0] ?? '';
-    const reply = `(Mock tutor, ${move.slice(0, 60)}) The source says: ${source.slice(0, 220)} What do you think this means?`;
+    const reply = `Mock tutor reply. The source says: ${source.slice(0, 220)} What do you think this means?`;
     for (const word of reply.split(/(?<= )/)) {
       await wait(delayMs, signal);
       yield word;

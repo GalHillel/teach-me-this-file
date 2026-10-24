@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createGeminiProvider } from '../server/providers/gemini.js';
+import { createGeminiProvider, supportsThinkingLevel } from '../server/providers/gemini.js';
 import { detectProvider, resolveProvider } from '../server/providers/index.js';
+import { resetModelHealth } from '../server/providers/modelHealth.js';
 import { createOpenAiCompatibleProvider } from '../server/providers/openaiCompatible.js';
 
 const sseResponse = (events) =>
@@ -14,7 +15,13 @@ const collect = async (iterator) => {
   return text;
 };
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+  resetModelHealth();
+});
+
+const modelOf = (url) => url.split('/models/')[1].split(':')[0];
+const jsonAnswer = (value) => Response.json({ candidates: [{ content: { parts: [{ text: JSON.stringify(value) }] } }] });
 
 describe('provider selection', () => {
   it('detects the provider from the key prefix', () => {
@@ -25,7 +32,7 @@ describe('provider selection', () => {
   });
 
   it('lets the user pick a provider for an unknown key format', () => {
-    expect(resolveProvider({ apiKey: 'custom-key', provider: 'groq' }).name).toBe('groq');
+    expect(resolveProvider({ apiKey: 'custom-key', provider: 'groq' })).toMatchObject({ provider: { name: 'groq' }, usesServerKey: false });
   });
 });
 
@@ -83,7 +90,72 @@ describe('Gemini model fallback', () => {
       .mockResolvedValueOnce(Response.json({ candidates: [{ content: { parts: [{ text: '{"ok":true}' }] } }] }));
     const provider = createGeminiProvider({ apiKey: 'AIzaTest', models: ['a', 'b', 'c'] });
     expect(await provider.generateJson({ task: 'plan', system: 's', prompt: 'p' })).toEqual({ ok: true });
-    expect(fetch.mock.calls.map(([url]) => url.split('/models/')[1].split(':')[0])).toEqual(['a', 'b', 'c']);
+    expect(fetch.mock.calls.map(([url]) => modelOf(url))).toEqual(['a', 'b', 'c']);
+  });
+
+  it('skips a model that just failed on the next request', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response('{"error":{"status":"UNAVAILABLE"}}', { status: 503 }))
+      .mockResolvedValueOnce(jsonAnswer({ ok: 1 }))
+      .mockResolvedValueOnce(jsonAnswer({ ok: 2 }));
+    const provider = createGeminiProvider({ apiKey: 'AIzaCooldown', models: ['a', 'b'] });
+    await provider.generateJson({ system: 's', prompt: 'p' });
+    expect(await provider.generateJson({ system: 's', prompt: 'p' })).toEqual({ ok: 2 });
+    expect(fetch.mock.calls.map(([url]) => modelOf(url))).toEqual(['a', 'b', 'b']);
+  });
+
+  it('keeps cooldowns separate for different keys', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response('{"error":{"status":"UNAVAILABLE"}}', { status: 503 }))
+      .mockResolvedValueOnce(jsonAnswer({ ok: 1 }))
+      .mockResolvedValueOnce(jsonAnswer({ ok: 2 }));
+    await createGeminiProvider({ apiKey: 'AIzaFirst', models: ['a', 'b'] }).generateJson({ system: 's', prompt: 'p' });
+    await createGeminiProvider({ apiKey: 'AIzaSecond', models: ['a', 'b'] }).generateJson({ system: 's', prompt: 'p' });
+    expect(fetch.mock.calls.map(([url]) => modelOf(url))).toEqual(['a', 'b', 'a']);
+  });
+
+  it('does not retry a used-up daily quota and moves to the next model', async () => {
+    const daily = '{"error":{"status":"RESOURCE_EXHAUSTED","details":[{"violations":[{"quotaId":"GenerateRequestsPerDayPerProjectPerModel-FreeTier"}]},{"retryDelay":"1s"}]}}';
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(daily, { status: 429 }))
+      .mockResolvedValueOnce(jsonAnswer({ ok: true }));
+    const provider = createGeminiProvider({ apiKey: 'AIzaDaily', models: ['a', 'b'] });
+    expect(await provider.generateJson({ system: 's', prompt: 'p' })).toEqual({ ok: true });
+    expect(fetch.mock.calls.map(([url]) => modelOf(url))).toEqual(['a', 'b']);
+  });
+
+  it('reports the daily quota when every model is used up', async () => {
+    const daily = '{"error":{"details":[{"violations":[{"quotaId":"GenerateRequestsPerDayPerProjectPerModel"}]}]}}';
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => new Response(daily, { status: 429 }));
+    const provider = createGeminiProvider({ apiKey: 'AIzaDailyAll', models: ['a'], backupModels: ['lite'] });
+    await expect(provider.generateJson({ system: 's', prompt: 'p' })).rejects.toMatchObject({ code: 'quota_exhausted' });
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('marks answers from a backup model', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response('{"error":{"status":"UNAVAILABLE"}}', { status: 503 }))
+      .mockResolvedValueOnce(jsonAnswer({ ok: true }));
+    const meta = [];
+    const provider = createGeminiProvider({ apiKey: 'AIzaBackup', models: ['main'], backupModels: ['lite'] });
+    await provider.generateJson({ system: 's', prompt: 'p', onMeta: (item) => meta.push(item) });
+    expect(meta).toEqual([{ model: 'lite', backup: true, fallbacks: 1 }]);
+  });
+
+  it('sends thinkingLevel only to models that accept it', async () => {
+    expect(supportsThinkingLevel('gemini-3.6-flash')).toBe(true);
+    expect(supportsThinkingLevel('gemini-3.5-flash-lite')).toBe(true);
+    expect(supportsThinkingLevel('gemini-2.5-flash')).toBe(false);
+    expect(supportsThinkingLevel('gemini-3-pro')).toBe(false);
+
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response('{"error":{"status":"UNAVAILABLE"}}', { status: 503 }))
+      .mockResolvedValueOnce(sseResponse([{ candidates: [{ content: { parts: [{ text: 'Hi' }] } }] }]));
+    const provider = createGeminiProvider({ apiKey: 'AIzaThinking', models: ['gemini-3.6-flash', 'gemini-2.5-flash'] });
+    await collect(provider.streamText({ system: 's', messages: [{ role: 'user', content: 'hi' }] }));
+    const configs = fetch.mock.calls.map(([, options]) => JSON.parse(options.body).generationConfig);
+    expect(configs[0].thinkingConfig).toEqual({ thinkingLevel: 'low' });
+    expect(configs[1].thinkingConfig).toBeUndefined();
   });
 
   it('does not fall back when the key is invalid', async () => {

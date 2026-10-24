@@ -1,7 +1,6 @@
-import { config } from '../config.js';
 import { AppError, providerError } from '../errors.js';
 
-const MAX_RETRY_WAIT_MS = 10000;
+const MAX_RETRY_WAIT_MS = 8000;
 
 const retryDelayMs = (response, detail) => {
   const header = Number(response.headers.get('retry-after'));
@@ -19,8 +18,8 @@ const wait = (ms, signal) =>
     }, { once: true });
   });
 
-const send = async (url, { headers, body, signal }) => {
-  const timeout = AbortSignal.timeout(config.providerTimeoutMs);
+const send = async (url, { headers, body, signal, timeoutMs }) => {
+  const timeout = AbortSignal.timeout(timeoutMs);
   try {
     return await fetch(url, {
       method: 'POST',
@@ -39,16 +38,13 @@ export const postJson = async (url, options) => {
   let response = await send(url, options);
   if (response.status === 429) {
     const detail = await response.text().catch(() => '');
+    const error = providerError(429, detail);
     const delay = retryDelayMs(response, detail);
-    if (delay > MAX_RETRY_WAIT_MS) {
-      console.log(`provider ${new URL(url).pathname} 429`);
-      throw providerError(429, detail);
-    }
+    if (error.code === 'quota_exhausted' || delay > MAX_RETRY_WAIT_MS) throw error;
     await wait(delay, options.signal);
     response = await send(url, options);
   }
   if (!response.ok) {
-    console.log(`provider ${new URL(url).pathname} ${response.status}`);
     throw providerError(response.status, await response.text().catch(() => ''));
   }
   return response;
