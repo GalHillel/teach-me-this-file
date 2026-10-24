@@ -1,0 +1,40 @@
+ok   en-1       expected=c1 found=c1 extra=1
+ok   en-2       expected=c2 found=c2
+ok   en-3       expected=c3 found=c3 extra=1
+ok   en-4       expected=c4 found=c4 extra=1
+ok   en-5       expected=c5 found=c5 extra=1
+ok   en-6       expected=c6 found=c6 extra=1
+ok   en-7       expected=c7 found=c7 extra=1
+ok   en-8       expected=c8 found=c8 extra=1
+FAIL en-none-1  expected=- found=c1
+ok   he-1       expected=c1 found=c1
+ok   he-2       expected=c2 found=c2
+ok   he-3       expected=c3 found=c3
+ok   he-4       expected=c4 found=c4
+ok   he-5       expected=c5 found=c5
+ok   he-6       expected=c6 found=c6
+ok   he-none-1  expected=- found=-
+ok   fr-1       expected=c1 found=c1 extra=1
+ok   fr-2       expected=c2 found=c2 extra=1
+ok   fr-3       expected=c3 found=c3 extra=1
+ok   fr-4       expected=c4 found=c4 extra=1
+ok   fr-5       expected=c5 found=c5 extra=1
+ok   fr-6       expected=c6 found=c6 extra=1
+ok   fr-none-1  expected=- found=-
+ok   cross-1    expected=- found=-
+ok   en-9       expected=c5 found=c5 extra=1
+ok   en-10      expected=c3 found=c3 extra=1
+ok   en-11      expected=c7 found=c7 extra=1
+ok   en-12      expected=c8 found=c8 extra=1
+ok   en-13      expected=c6 found=c6 extra=1
+ok   en-none-2  expected=- found=-
+ok   en-none-3  expected=- found=-
+FAIL he-7       expected=c2 found=-
+ok   he-8       expected=c4 found=c4
+ok   he-9       expected=c5 found=c5
+ok   he-none-2  expected=- found=-
+ok   fr-7       expected=c4 found=c4 extra=1
+ok   fr-8       expected=c6 found=c6 extra=1
+ok   fr-9       expected=c5 found=c5 extra=1
+ok   fr-none-2  expected=- found=-
+cases=39 top1=97% wrong=0 missed=1 falseMatches=1 extraSources=21 accuracy=95%

@@ -1,0 +1,346 @@
+{
+  "documents": {
+    "biology-en": [
+      {
+        "id": "c1",
+        "label": "Page 1",
+        "text": "Photosynthesis is the process plants use to make their own food. Plants take in carbon dioxide from the air through small openings in their leaves called stomata, and water from the soil through their roots."
+      },
+      {
+        "id": "c2",
+        "label": "Page 1",
+        "text": "Inside the leaf cells are chloroplasts. Chloroplasts contain a green pigment called chlorophyll, which absorbs energy from sunlight. Chlorophyll absorbs mostly red and blue light and reflects green light, which is why leaves look green."
+      },
+      {
+        "id": "c3",
+        "label": "Page 2",
+        "text": "Using the energy from light, the plant turns carbon dioxide and water into glucose, a type of sugar, and oxygen. The plant uses glucose for energy and to grow. Oxygen is released into the air through the stomata."
+      },
+      {
+        "id": "c4",
+        "label": "Page 2",
+        "text": "The word equation is: carbon dioxide + water -> glucose + oxygen. Without photosynthesis there would be almost no oxygen in the air for animals to breathe."
+      },
+      {
+        "id": "c5",
+        "label": "Page 3",
+        "text": "Cellular respiration is the opposite process. Cells in plants and animals break down glucose with oxygen to release energy, and they give off carbon dioxide and water as waste."
+      },
+      {
+        "id": "c6",
+        "label": "Page 3",
+        "text": "The nucleus is the control centre of the cell. It holds the genetic material, DNA, which carries the instructions the cell needs to grow and divide."
+      },
+      {
+        "id": "c7",
+        "label": "Page 4",
+        "text": "The cell membrane is a thin layer around the cell. It controls which substances can enter and leave the cell, so it lets useful materials in and keeps harmful ones out."
+      },
+      {
+        "id": "c8",
+        "label": "Page 4",
+        "text": "Plant cells also have a rigid cell wall made of cellulose outside the membrane. The wall gives the cell its shape and stops it from bursting when it takes in a lot of water."
+      }
+    ],
+    "water-he": [
+      {
+        "id": "c1",
+        "label": "Page 1",
+        "text": "מחזור המים הוא התנועה המתמדת של המים בין האוקיינוסים, האוויר והיבשה. השמש מחממת את המים בים ובאגמים, והמים מתאדים והופכים לאדי מים."
+      },
+      {
+        "id": "c2",
+        "label": "Page 1",
+        "text": "כאשר אדי המים עולים גבוה ומתקררים, הם מתעבים לטיפות קטנות ויוצרים עננים. תהליך זה נקרא עיבוי."
+      },
+      {
+        "id": "c3",
+        "label": "Page 2",
+        "text": "כאשר הטיפות בענן מתחברות ונעשות כבדות, הן נופלות לארץ כמשקעים: גשם, שלג או ברד."
+      },
+      {
+        "id": "c4",
+        "label": "Page 2",
+        "text": "המים שנופלים זורמים לנחלים ולנהרות, או מחלחלים לאדמה ויוצרים מי תהום. בסוף הם חוזרים לים, והמחזור מתחיל מחדש."
+      },
+      {
+        "id": "c5",
+        "label": "Page 3",
+        "text": "צמחים משתתפים במחזור המים: הם שואבים מים מהקרקע בעזרת השורשים ומשחררים אדי מים דרך העלים. תהליך זה נקרא דיות."
+      },
+      {
+        "id": "c6",
+        "label": "Page 3",
+        "text": "בישראל רוב הגשם יורד בחורף. מי הגשם ממלאים את הכנרת ואת מאגרי מי התהום, ולכן שנה שחונה פוגעת באספקת המים."
+      }
+    ],
+    "density-fr": [
+      {
+        "id": "c1",
+        "label": "Page 1",
+        "text": "La masse volumique indique quelle quantité de matière se trouve dans un volume donné. On la calcule avec la formule ρ = m / V, où m est la masse en grammes et V le volume en centimètres cubes."
+      },
+      {
+        "id": "c2",
+        "label": "Page 1",
+        "text": "Un objet flotte dans l'eau si sa masse volumique est plus petite que celle de l'eau, qui vaut 1 g/cm³. S'il est plus dense que l'eau, il coule."
+      },
+      {
+        "id": "c3",
+        "label": "Page 2",
+        "text": "Le bois de pin a une masse volumique d'environ 0,5 g/cm³ : il flotte. Le fer a une masse volumique de 7,9 g/cm³ : il coule."
+      },
+      {
+        "id": "c4",
+        "label": "Page 2",
+        "text": "Un bateau en acier flotte malgré tout, car sa coque contient beaucoup d'air. La masse volumique moyenne du bateau, acier et air ensemble, reste plus faible que celle de l'eau."
+      },
+      {
+        "id": "c5",
+        "label": "Page 3",
+        "text": "L'eau salée de la mer est plus dense que l'eau douce. C'est pourquoi on flotte plus facilement dans la mer Morte que dans une piscine."
+      },
+      {
+        "id": "c6",
+        "label": "Page 3",
+        "text": "Pour mesurer le volume d'un objet irrégulier, on le plonge dans une éprouvette graduée remplie d'eau et on lit de combien le niveau de l'eau monte."
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "en-1",
+      "doc": "biology-en",
+      "expected": "c1",
+      "message": "Great start! Plants can't go to the store, so they make their own food. They need two ingredients: they take in carbon dioxide through tiny openings in the leaves called stomata, and they soak up water from the soil with their roots. Which part of the plant do you think takes in the water?"
+    },
+    {
+      "id": "en-2",
+      "doc": "biology-en",
+      "expected": "c2",
+      "message": "Inside each leaf cell there are tiny green parts called chloroplasts. They are full of chlorophyll, a pigment that catches the energy in sunlight. It absorbs red and blue light but bounces green light back to our eyes. So why do you think leaves look green?"
+    },
+    {
+      "id": "en-3",
+      "doc": "biology-en",
+      "expected": "c3",
+      "message": "Exactly. With the energy from light, the plant turns carbon dioxide and water into glucose, which is a kind of sugar, and it releases oxygen. What do you think the plant does with the glucose it makes?"
+    },
+    {
+      "id": "en-4",
+      "doc": "biology-en",
+      "expected": "c4",
+      "message": "We can write the whole process as a word equation: carbon dioxide + water -> glucose + oxygen. Why would animals have trouble breathing if plants stopped doing this?"
+    },
+    {
+      "id": "en-5",
+      "doc": "biology-en",
+      "expected": "c5",
+      "message": "Now let's look at the reverse. In cellular respiration, cells break down glucose using oxygen to release energy, and they give off carbon dioxide and water. How is this the opposite of photosynthesis?"
+    },
+    {
+      "id": "en-6",
+      "doc": "biology-en",
+      "expected": "c6",
+      "message": "Think of the nucleus as the cell's control room. It keeps the DNA, the instructions the cell follows to grow and divide. What would happen to a cell without its nucleus?"
+    },
+    {
+      "id": "en-7",
+      "doc": "biology-en",
+      "expected": "c7",
+      "message": "The membrane works like a security guard at a gate: it decides which substances can come in and which can go out. Can you give an example of something useful it should let in?"
+    },
+    {
+      "id": "en-8",
+      "doc": "biology-en",
+      "expected": "c8",
+      "message": "Plant cells have one extra layer that animal cells don't: a stiff wall made of cellulose. It keeps the cell's shape and stops it from bursting when it fills with water. Why might a plant need that more than an animal?"
+    },
+    {
+      "id": "en-none-1",
+      "doc": "biology-en",
+      "expected": null,
+      "message": "Nice work, you're doing really well! Take a breath, and when you're ready, tell me in your own words what you remember so far."
+    },
+    {
+      "id": "he-1",
+      "doc": "water-he",
+      "expected": "c1",
+      "message": "נתחיל מהשמש: היא מחממת את המים בים ובאגמים, והמים מתאדים והופכים לאדי מים שעולים לאוויר. מה לדעתך יקרה לאדי המים כשהם יעלו גבוה?"
+    },
+    {
+      "id": "he-2",
+      "doc": "water-he",
+      "expected": "c2",
+      "message": "נכון! למעלה קר, ולכן אדי המים מתקררים ומתעבים לטיפות קטנטנות שיוצרות עננים. לתהליך הזה קוראים עיבוי. איפה עוד ראית עיבוי בחיי היומיום?"
+    },
+    {
+      "id": "he-3",
+      "doc": "water-he",
+      "expected": "c3",
+      "message": "כשהטיפות בענן מתחברות והופכות לכבדות, הן כבר לא יכולות להישאר באוויר ונופלות לארץ כמשקעים, כמו גשם, שלג או ברד. למה לפעמים יורד שלג ולא גשם?"
+    },
+    {
+      "id": "he-4",
+      "doc": "water-he",
+      "expected": "c4",
+      "message": "אחרי שהגשם נופל, חלק מהמים זורמים לנחלים ולנהרות, וחלק מחלחלים לאדמה והופכים למי תהום. לאן בסוף כל המים האלה חוזרים?"
+    },
+    {
+      "id": "he-5",
+      "doc": "water-he",
+      "expected": "c5",
+      "message": "גם לצמחים יש תפקיד: הם שואבים מים מהקרקע דרך השורשים ומשחררים אדי מים דרך העלים. התהליך הזה נקרא דיות. איך לדעתך יער גדול משפיע על הלחות באוויר?"
+    },
+    {
+      "id": "he-6",
+      "doc": "water-he",
+      "expected": "c6",
+      "message": "בישראל רוב הגשם יורד בחורף, והוא ממלא את הכנרת ואת מי התהום. מה לדעתך קורה לאספקת המים בשנה שחונה?"
+    },
+    {
+      "id": "he-none-1",
+      "doc": "water-he",
+      "expected": null,
+      "message": "כל הכבוד על ההתמדה! בוא נעצור רגע. ספר לי במילים שלך מה הדבר הכי מעניין שלמדת עד עכשיו."
+    },
+    {
+      "id": "fr-1",
+      "doc": "density-fr",
+      "expected": "c1",
+      "message": "La masse volumique nous dit combien de matière est tassée dans un volume. On la calcule avec ρ = m / V : la masse en grammes divisée par le volume en centimètres cubes. Que vaut ρ pour 20 g dans 10 cm³ ?"
+    },
+    {
+      "id": "fr-2",
+      "doc": "density-fr",
+      "expected": "c2",
+      "message": "Un objet flotte si sa masse volumique est plus petite que celle de l'eau, 1 g/cm³. S'il est plus dense, il coule. D'après toi, que se passe-t-il pour un objet de 3 g/cm³ ?"
+    },
+    {
+      "id": "fr-3",
+      "doc": "density-fr",
+      "expected": "c3",
+      "message": "Comparons deux matériaux : le bois de pin, environ 0,5 g/cm³, flotte, alors que le fer, 7,9 g/cm³, coule. Pourquoi le pin flotte-t-il ?"
+    },
+    {
+      "id": "fr-4",
+      "doc": "density-fr",
+      "expected": "c4",
+      "message": "Mais alors, pourquoi un énorme bateau en acier flotte-t-il ? Sa coque est pleine d'air, donc la masse volumique moyenne du bateau reste plus faible que celle de l'eau. Que se passerait-il si la coque se remplissait d'eau ?"
+    },
+    {
+      "id": "fr-5",
+      "doc": "density-fr",
+      "expected": "c5",
+      "message": "L'eau de mer, salée, est plus dense que l'eau douce. C'est pour ça qu'on flotte si facilement dans la mer Morte. Dans quelle eau un œuf a-t-il le plus de chances de flotter ?"
+    },
+    {
+      "id": "fr-6",
+      "doc": "density-fr",
+      "expected": "c6",
+      "message": "Pour un objet à la forme irrégulière, comme un caillou, on le plonge dans une éprouvette graduée remplie d'eau et on regarde de combien le niveau monte. Pourquoi cette montée donne-t-elle le volume ?"
+    },
+    {
+      "id": "fr-none-1",
+      "doc": "density-fr",
+      "expected": null,
+      "message": "Très bien, continue comme ça ! Prends ton temps et dis-moi ce que tu as retenu jusqu'ici."
+    },
+    {
+      "id": "cross-1",
+      "doc": "biology-en",
+      "expected": null,
+      "message": "Les plantes fabriquent leur propre nourriture grâce à la lumière du soleil. À ton avis, de quoi ont-elles besoin pour cela ?"
+    },
+    {
+      "id": "en-9",
+      "doc": "biology-en",
+      "expected": "c5",
+      "message": "Not quite. That's what happens when cells release energy: they use oxygen to break the sugar down, and carbon dioxide comes out as waste. Is that making food, or using it?"
+    },
+    {
+      "id": "en-10",
+      "doc": "biology-en",
+      "expected": "c3",
+      "message": "You're close! The sugar the leaf builds is called glucose, and the plant uses it to get energy and to grow. What gas leaves the leaf at the same time?"
+    },
+    {
+      "id": "en-11",
+      "doc": "biology-en",
+      "expected": "c7",
+      "message": "Good thinking about protection. Which part of the cell decides what gets in and what stays out?"
+    },
+    {
+      "id": "en-12",
+      "doc": "biology-en",
+      "expected": "c8",
+      "message": "Imagine a balloon inside a cardboard box. The balloon is the membrane and the box is the wall made of cellulose. What does the box do when the balloon fills up with water?"
+    },
+    {
+      "id": "en-13",
+      "doc": "biology-en",
+      "expected": "c6",
+      "message": "Right, the DNA is kept there. What instructions do you think it gives the cell?"
+    },
+    {
+      "id": "en-none-2",
+      "doc": "biology-en",
+      "expected": null,
+      "message": "That's a great question! Let's think about it together step by step. What do you already know?"
+    },
+    {
+      "id": "en-none-3",
+      "doc": "biology-en",
+      "expected": null,
+      "message": "Correct! You got it on your first try. Let's move on to the next idea."
+    },
+    {
+      "id": "he-7",
+      "doc": "water-he",
+      "expected": "c2",
+      "message": "כמעט! כשהאדים מגיעים לגובה הם מתקררים, ומה שקורה אז נקרא עיבוי. מה נוצר מהטיפות הקטנות?"
+    },
+    {
+      "id": "he-8",
+      "doc": "water-he",
+      "expected": "c4",
+      "message": "נכון שהגשם נעלם מהרחוב, אבל לאן? חלק נכנס לאדמה ונהיה מי תהום. מה קורה לשאר המים?"
+    },
+    {
+      "id": "he-9",
+      "doc": "water-he",
+      "expected": "c5",
+      "message": "העלים של העץ משחררים אדים כל הזמן, והשורשים מושכים מים מהקרקע. איך קוראים לזה?"
+    },
+    {
+      "id": "he-none-2",
+      "doc": "water-he",
+      "expected": null,
+      "message": "שאלה מצוינת! בוא נחשוב על זה ביחד. מה אתה כבר יודע?"
+    },
+    {
+      "id": "fr-7",
+      "doc": "density-fr",
+      "expected": "c4",
+      "message": "Presque ! L'acier est lourd, mais pense à tout l'air dans la coque. Qu'est-ce que ça change pour la masse volumique moyenne ?"
+    },
+    {
+      "id": "fr-8",
+      "doc": "density-fr",
+      "expected": "c6",
+      "message": "Bonne idée de mesurer ! Mais un caillou n'est pas un cube. Comment pourrais-tu utiliser une éprouvette graduée et de l'eau ?"
+    },
+    {
+      "id": "fr-9",
+      "doc": "density-fr",
+      "expected": "c5",
+      "message": "Oui, le sel rend l'eau plus dense. Pourquoi est-ce plus facile de flotter dans la mer Morte ?"
+    },
+    {
+      "id": "fr-none-2",
+      "doc": "density-fr",
+      "expected": null,
+      "message": "Bravo, c'est exactement ça ! On passe à l'idée suivante."
+    }
+  ]
+}
