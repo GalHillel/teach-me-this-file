@@ -21,6 +21,8 @@ const createProvider = (name, apiKey) => {
       backupModels: config.models.geminiBackup,
       timeoutMs: config.providerTimeoutMs,
       deadlineMs: config.providerDeadlineMs,
+      planTimeoutMs: config.planTimeoutMs,
+      planDeadlineMs: config.planDeadlineMs,
     });
   }
   return createOpenAiCompatibleProvider({ name, apiKey, model: config.models[name] });

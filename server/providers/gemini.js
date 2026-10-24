@@ -35,7 +35,7 @@ const orderByHealth = (tiers, scope) => {
   return healthy.length ? healthy : tiers;
 };
 
-export const createGeminiProvider = ({ apiKey, models, backupModels = [], timeoutMs = 20000, deadlineMs = 45000 }) => {
+export const createGeminiProvider = ({ apiKey, models, backupModels = [], timeoutMs = 15000, deadlineMs = 40000, planTimeoutMs = 35000, planDeadlineMs = 75000 }) => {
   const scope = healthScope(apiKey);
   const tiers = [
     ...models.map((model) => ({ model, backup: false })),
@@ -43,7 +43,9 @@ export const createGeminiProvider = ({ apiKey, models, backupModels = [], timeou
   ];
 
   const call = async ({ task, method, bodyFor, signal, onMeta }) => {
-    const deadline = Date.now() + deadlineMs;
+    const planning = task === 'plan';
+    const attemptMs = planning ? planTimeoutMs : timeoutMs;
+    const deadline = Date.now() + (planning ? planDeadlineMs : deadlineMs);
     let lastError = null;
     let failures = 0;
     for (const tier of orderByHealth(tiers, scope)) {
@@ -55,7 +57,7 @@ export const createGeminiProvider = ({ apiKey, models, backupModels = [], timeou
           headers: { 'x-goog-api-key': apiKey },
           body: bodyFor(tier.model),
           signal,
-          timeoutMs: Math.min(timeoutMs, remaining),
+          timeoutMs: Math.min(attemptMs, remaining),
         });
         const ms = Date.now() - started;
         count('aiCalls');

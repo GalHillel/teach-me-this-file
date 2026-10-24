@@ -56,12 +56,13 @@ export const createMockProvider = ({ delayMs = 40 } = {}) => ({
     return task === 'plan' ? mockPlan(prompt) : mockAssessment(prompt);
   },
 
-  async *streamText({ system, signal, onMeta }) {
+  async *streamText({ system, messages = [], signal, onMeta }) {
     onMeta?.({ model: 'mock', backup: false, fallbacks: 0 });
+    const slow = /slowly/i.test(messages.at(-1)?.content ?? '');
     const source = between(system, 'sources').split('\n').find((line) => line && !line.startsWith('[')) ?? '';
     const reply = `Mock tutor reply. The source says: ${source.slice(0, 220)} What do you think this means?`;
     for (const word of reply.split(/(?<= )/)) {
-      await wait(delayMs, signal);
+      await wait(slow ? delayMs * 40 : delayMs, signal);
       yield word;
     }
   },

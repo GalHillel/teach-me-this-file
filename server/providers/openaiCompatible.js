@@ -16,7 +16,7 @@ export const createOpenAiCompatibleProvider = ({ name, apiKey, model }) => {
         headers: { authorization: `Bearer ${apiKey}` },
         body: { model, ...body },
         signal,
-        timeoutMs: config.providerTimeoutMs,
+        timeoutMs: task === 'plan' ? config.planTimeoutMs : config.providerTimeoutMs,
       });
       count('aiCalls');
       count('aiLatencyMs', Date.now() - started);

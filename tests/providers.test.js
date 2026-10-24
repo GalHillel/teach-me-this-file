@@ -189,3 +189,18 @@ describe('OpenAI-compatible provider', () => {
     await expect(provider.generateJson({ system: 's', prompt: 'p' })).rejects.toMatchObject({ code: 'invalid_key' });
   });
 });
+
+describe('timeouts per task', () => {
+  it('gives planning a longer attempt timeout than a lesson turn', async () => {
+    const seen = [];
+    vi.spyOn(AbortSignal, 'timeout').mockImplementation((ms) => {
+      seen.push(ms);
+      return new AbortController().signal;
+    });
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => jsonAnswer({ ok: true }));
+    const provider = createGeminiProvider({ apiKey: 'AIzaTimeouts', models: ['a'], timeoutMs: 12000, planTimeoutMs: 35000 });
+    await provider.generateJson({ task: 'plan', system: 's', prompt: 'p' });
+    await provider.generateJson({ task: 'assessment', system: 's', prompt: 'p' });
+    expect(seen).toEqual([35000, 12000]);
+  });
+});
