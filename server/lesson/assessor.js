@@ -1,4 +1,4 @@
-import { activeStepIndex } from '../../shared/lesson.js';
+import { assessedStepIndex } from '../../shared/lesson.js';
 import { AppError } from '../errors.js';
 import { ASSESS_SYSTEM, buildAssessPrompt } from './prompts.js';
 
@@ -104,7 +104,7 @@ export const normalizeAssessment = (raw, studentMessage) => {
 };
 
 export const assessAnswer = async ({ provider, plan, progress, tutorQuestion, studentMessage, sources, signal, onMeta }) => {
-  const step = plan.steps[activeStepIndex(progress)];
+  const step = plan.steps[assessedStepIndex(progress)];
   try {
     const raw = await provider.generateJson({
       task: 'assessment',

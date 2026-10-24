@@ -1,8 +1,9 @@
 import { randomBytes } from 'node:crypto';
+import { verifyCitations } from '../../shared/citations.js';
 import { AppError } from '../errors.js';
-import { count } from '../metrics.js';
+import { count, recordFirstToken } from '../metrics.js';
 import { assessAnswer } from './assessor.js';
-import { lessonPace, planMove, stepsToReview } from './progress.js';
+import { lessonPace, planMove } from './progress.js';
 import { buildTutorSystem } from './prompts.js';
 
 const HISTORY_LIMIT = 12;
@@ -29,7 +30,17 @@ export const toProviderMessages = (history, studentMessage) => {
 const lastTutorMessage = (history) => [...history].reverse().find((message) => message.role === 'tutor')?.content ?? '';
 
 export const publicAssessment = (assessment) =>
-  assessment ? { verdict: assessment.verdict, confidence: assessment.confidence, issue: assessment.issue, checks: assessment.checks } : null;
+  assessment
+    ? {
+      verdict: assessment.verdict,
+      confidence: assessment.confidence,
+      issue: assessment.issue,
+      checks: assessment.checks,
+      conceptsShown: assessment.conceptsShown,
+      conceptsMissing: assessment.conceptsMissing,
+      misconception: assessment.misconception,
+    }
+    : null;
 
 export const newCanary = () => `tmtf-${randomBytes(6).toString('hex')}`;
 
@@ -86,8 +97,8 @@ export const runTurn = async ({ provider, input, signal, send }) => {
     });
   }
 
-  const { move, progress } = planMove(input.progress, { kind, assessment });
-  send('progress', { move, progress, assessment: publicAssessment(assessment) });
+  const { move, progress, intervention, prerequisite, requested } = planMove(input.progress, { kind, assessment, plan });
+  send('progress', { move, progress, assessment: publicAssessment(assessment), intervention });
   send('status', { phase: 'teaching' });
 
   const canary = newCanary();
@@ -101,7 +112,9 @@ export const runTurn = async ({ provider, input, signal, send }) => {
     move,
     assessment,
     pace: lessonPace(progress),
-    reviewTitles: stepsToReview(plan, progress),
+    intervention,
+    requested: Boolean(requested),
+    prerequisite,
   });
 
   let firstTokenMs = null;
@@ -115,12 +128,12 @@ export const runTurn = async ({ provider, input, signal, send }) => {
   const reply = guard.flush();
   if (!reply.trim()) throw new AppError('bad_response', 'The AI returned an empty answer. Try again.');
 
+  const citations = verifyCitations(reply, [...sources.current, ...sources.next, ...sources.related]);
   const totalMs = Date.now() - started;
   count('turns');
-  if (firstTokenMs !== null) {
-    count('firstTokenMs', firstTokenMs);
-    count('firstTokenCount');
-  }
-  console.log(`turn ${kind} move=${move} verdict=${assessment?.verdict ?? '-'} first=${firstTokenMs}ms total=${totalMs}ms models=${models.join(',')}`);
-  send('done', { move, models, backup: warnedBackup, firstTokenMs, totalMs });
+  if (firstTokenMs !== null) recordFirstToken(firstTokenMs);
+  if (citations.cited.length) count('citedTurns');
+  if (citations.invalid.length) count('invalidCitations', citations.invalid.length);
+  console.log(`turn ${kind} move=${move}${intervention ? `/${intervention}` : ''} verdict=${assessment?.verdict ?? '-'} cited=${citations.cited.length} invalid=${citations.invalid.length} first=${firstTokenMs}ms total=${totalMs}ms models=${models.join(',')}`);
+  send('done', { move, models, backup: warnedBackup, firstTokenMs, totalMs, citations });
 };

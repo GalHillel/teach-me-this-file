@@ -249,6 +249,31 @@ describe('tutor prompt contents', () => {
     expect(seen.system).toContain('Use them only to answer a question the student asked');
   });
 
+  it('tells the tutor which help to give and to cite passage ids', async () => {
+    const { seen, provider } = capture();
+    const progress = createProgress(plan);
+    await request(createApp({ providerFor: withProvider(provider) })).post('/api/turns').send(turn({ kind: 'hint', progress }));
+    expect(seen.system).toContain('The student asked for a hint before answering');
+    expect(seen.system).toContain('guiding question');
+    expect(seen.system).toContain('put the passage id in square brackets');
+  });
+
+  it('describes the earlier step during a prerequisite check, and the final check rules', async () => {
+    const twoSteps = { ...plan, steps: [{ ...plan.steps[0], id: 's1' }, { ...plan.steps[1], id: 's2', prerequisites: ['s1'] }] };
+    const atStep2 = { ...createProgress(twoSteps), currentStep: 1 };
+    atStep2.steps = [{ ...atStep2.steps[0], status: 'done', outcome: 'mastered' }, { ...atStep2.steps[1], status: 'active', attempts: 1, detour: 0, used: ['prerequisite'] }];
+    const detour = capture();
+    await request(createApp({ providerFor: withProvider(detour.provider) })).post('/api/turns').send(turn({ kind: 'reply', plan: twoSteps, progress: atStep2, studentMessage: 'something about cells' }));
+    expect(detour.seen.system).toContain('quick check on the earlier idea');
+
+    const finalCheck = { ...atStep2, status: 'reviewing', steps: atStep2.steps.map((step) => ({ ...step, status: 'done', outcome: 'mastered', detour: null })), review: { kind: 'final', queue: [0, 1], position: 0, results: {}, stalls: 0 } };
+    const final = capture();
+    await request(createApp({ providerFor: withProvider(final.provider) })).post('/api/turns').send(turn({ kind: 'reply', plan: twoSteps, progress: finalCheck, studentMessage: 'The cell is the smallest unit of life' }));
+    expect(final.seen.system).toContain('This is the final check');
+    expect(final.seen.system).toContain('give no hints');
+    expect(final.seen.system).toContain('Step being checked in the final check');
+  });
+
   it('puts a fresh confidential marker in every tutor prompt', async () => {
     const first = capture();
     const second = capture();
@@ -257,6 +282,47 @@ describe('tutor prompt contents', () => {
     const marker = (system) => system.match(/tmtf-[0-9a-f]{12}/)?.[0];
     expect(marker(first.seen.system)).toBeTruthy();
     expect(marker(first.seen.system)).not.toBe(marker(second.seen.system));
+  });
+});
+
+describe('teaching flow over the API', () => {
+  it('sends the chosen help, the cited passages and a final check after the last step', async () => {
+    const app = mockApp();
+    const hint = await request(app).post('/api/turns').send(turn({ kind: 'hint' }));
+    const hintEvents = parseEvents(hint.text);
+    expect(hintEvents.find((item) => item.event === 'progress').data).toMatchObject({ move: 'hint', intervention: 'nudge' });
+    expect(hintEvents.find((item) => item.event === 'done').data.citations).toMatchObject({ cited: ['c1'], invalid: [] });
+
+    const lastStep = { ...createProgress(plan), currentStep: 1 };
+    lastStep.steps = [{ ...lastStep.steps[0], status: 'done', outcome: 'mastered' }, { ...lastStep.steps[1], status: 'active' }];
+    const finish = await request(app).post('/api/turns').send(turn({ kind: 'reply', progress: lastStep, studentMessage: 'It controls the cell', history: [{ role: 'tutor', content: 'What does the nucleus do?' }] }));
+    const progress = parseEvents(finish.text).find((item) => item.event === 'progress').data;
+    expect(progress.move).toBe('final_check_start');
+    expect(progress.progress).toMatchObject({ status: 'reviewing', review: { kind: 'final', position: 0 } });
+
+    const skipped = await request(app).post('/api/turns').send(turn({ kind: 'skip_final', progress: progress.progress }));
+    expect(parseEvents(skipped.text).find((item) => item.event === 'progress').data).toMatchObject({ move: 'finish_skipped', progress: { status: 'completed', final: { skipped: true } } });
+  });
+
+  it('flags a quote that is not in the file', async () => {
+    const response = await request(mockApp()).post('/api/turns').send(turn({ kind: 'reply', studentMessage: 'please give a fake quote', history: [{ role: 'tutor', content: 'What is a cell?' }] }));
+    const done = parseEvents(response.text).find((item) => item.event === 'done').data;
+    expect(done.citations.quotes).toEqual([{ text: 'the moon is made of green cheese', chunkId: null }]);
+  });
+
+  it('rejects edited states with an impossible detour, unknown help, or a final check on an open lesson', async () => {
+    const fresh = createProgress(plan);
+    const forged = [
+      { ...fresh, steps: [{ ...fresh.steps[0], detour: 1 }, fresh.steps[1]] },
+      { ...fresh, steps: [{ ...fresh.steps[0], used: ['bribe'] }, fresh.steps[1]] },
+      { ...fresh, review: { kind: 'final', queue: [0], position: 0, results: {}, stalls: 0 } },
+      { ...fresh, final: { results: { 0: 'pass' }, skipped: false } },
+      { ...fresh, steps: [{ ...fresh.steps[0], revisit: 'pass' }, fresh.steps[1]] },
+    ];
+    for (const progress of forged) {
+      const response = await request(mockApp()).post('/api/turns').send(turn({ kind: 'reply', studentMessage: 'x', progress }));
+      expect(response.status).toBe(400);
+    }
   });
 });
 

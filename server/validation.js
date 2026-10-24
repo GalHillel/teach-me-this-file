@@ -1,5 +1,6 @@
 import { AppError } from './errors.js';
-import { OUTCOMES as LESSON_OUTCOMES, REVIEW_RESULTS } from './lesson/progress.js';
+import { OUTCOMES as LESSON_OUTCOMES, REVIEW_KINDS, REVIEW_RESULTS, REVISITS } from './lesson/progress.js';
+import { INTERVENTIONS } from './lesson/policy.js';
 
 export const LIMITS = {
   teacherPrompt: 3000,
@@ -15,6 +16,7 @@ export const LIMITS = {
 };
 
 const APPROACHES = new Set(['explain', 'worked_example', 'practice']);
+const TURN_KINDS = ['start', 'reply', 'review', 'hint', 'explain', 'skip_final'];
 
 const fail = (detail) => {
   throw new AppError('invalid_request', `The request was not valid: ${detail}.`);
@@ -110,12 +112,24 @@ const count = (value, max, name) => {
   return value;
 };
 
-const checkConsistency = ({ status, currentStep, steps }) => {
+const checkConsistency = ({ status, currentStep, steps, review: round, final }) => {
   steps.forEach((step, index) => {
     if ((step.status === 'done') !== (step.outcome !== null)) fail('progress step outcome does not match its status');
     const expected = status !== 'active' ? 'done' : index < currentStep ? 'done' : index === currentStep ? 'active' : 'pending';
     if (step.status !== expected) fail('progress steps do not match the current step');
+    if (step.detour !== null && (step.status !== 'active' || step.detour >= index || steps[step.detour].status !== 'done')) fail('progress step detour is not valid');
+    if (step.revisit !== null && step.status !== 'done') fail('progress step revisit is not valid');
   });
+  if (final && status === 'active') fail('progress.final is not valid before the lesson ends');
+  if (round?.kind === 'final' && (status !== 'reviewing' || final)) fail('progress.review is not a valid final check');
+};
+
+const results = (value, allowed, name) => {
+  const entries = isObject(value) ? Object.entries(value) : [];
+  return Object.fromEntries(entries.map(([key, result]) => {
+    if (!allowed(Number(key)) || !REVIEW_RESULTS.includes(result)) fail(`${name} is not valid`);
+    return [Number(key), result];
+  }));
 };
 
 const review = (value, status, stepCount) => {
@@ -126,12 +140,30 @@ const review = (value, status, stepCount) => {
     fail('progress.review.queue is not valid');
   }
   if (!Number.isInteger(value.position) || value.position < 0 || value.position >= queue.length) fail('progress.review.position is out of range');
-  const results = isObject(value.results) ? value.results : {};
-  const cleanResults = Object.fromEntries(Object.entries(results).map(([key, result]) => {
-    if (!queue.includes(Number(key)) || !REVIEW_RESULTS.includes(result)) fail('progress.review.results is not valid');
-    return [Number(key), result];
-  }));
-  return { queue, position: value.position, results: cleanResults, stalls: count(value.stalls, 10, 'progress.review.stalls') };
+  const kind = value.kind ?? 'practice';
+  if (!REVIEW_KINDS.includes(kind)) fail('progress.review.kind is not valid');
+  return {
+    kind,
+    queue,
+    position: value.position,
+    results: results(value.results, (index) => queue.includes(index), 'progress.review.results'),
+    stalls: count(value.stalls, 10, 'progress.review.stalls'),
+  };
+};
+
+const final = (value, stepCount) => {
+  if (value === null || value === undefined) return null;
+  if (!isObject(value)) fail('progress.final is not valid');
+  return {
+    results: results(value.results, (index) => Number.isInteger(index) && index >= 0 && index < stepCount, 'progress.final.results'),
+    skipped: value.skipped === true,
+  };
+};
+
+const used = (value) => {
+  const list = array(value ?? [], 'progress step used', 8);
+  if (list.some((item) => !INTERVENTIONS.includes(item))) fail('progress step used is not valid');
+  return list;
 };
 
 const progress = (value, stepCount) => {
@@ -146,10 +178,15 @@ const progress = (value, stepCount) => {
     status: value.status,
     currentStep: value.currentStep,
     review: review(value.review, value.status, stepCount),
+    final: final(value.final, stepCount),
     steps: steps.map((step) => {
       if (!isObject(step) || !STEP_STATUSES.has(step.status) || !OUTCOMES.has(step.outcome ?? null) || !PHASES.has(step.phase ?? 'learn')) {
         fail('progress step is not valid');
       }
+      const detour = step.detour ?? null;
+      if (detour !== null && (!Number.isInteger(detour) || detour < 0 || detour >= stepCount)) fail('progress step detour is out of range');
+      const revisit = step.revisit ?? null;
+      if (revisit !== null && !REVISITS.includes(revisit)) fail('progress step revisit is not valid');
       return {
         status: step.status,
         phase: step.phase ?? 'learn',
@@ -157,6 +194,10 @@ const progress = (value, stepCount) => {
         stalls: count(step.stalls, 10, 'progress step stalls'),
         probed: step.probed === true,
         outcome: step.outcome ?? null,
+        hints: count(step.hints, 10, 'progress step hints'),
+        used: used(step.used),
+        detour,
+        revisit,
       };
     }),
   };
@@ -172,7 +213,7 @@ const history = (value) =>
 
 export const validateTurnRequest = (body) => {
   if (!isObject(body)) fail('missing body');
-  if (!['start', 'reply', 'review'].includes(body.kind)) fail('kind must be start, reply or review');
+  if (!TURN_KINDS.includes(body.kind)) fail(`kind must be one of ${TURN_KINDS.join(', ')}`);
   const lessonPlan = plan(body.plan);
   const lessonProgress = progress(body.progress, lessonPlan.steps.length);
   if (body.kind === 'review' && lessonProgress.status !== 'completed') fail('a review can only start after the lesson is complete');

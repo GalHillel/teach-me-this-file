@@ -1,4 +1,4 @@
-import { activeStepIndex, reviewQueue } from '../../shared/lesson.js';
+import { LEVELS, activeStepIndex, reviewQueue, reviewSchedule, stepEvidence } from '../../shared/lesson.js';
 import { findMessageSources } from './sources.js';
 
 const IDLE_TURN = { status: 'idle', tutorId: null, studentId: null, pending: null, relatedIds: [] };
@@ -36,25 +36,58 @@ const transitionNote = (move, previous, next, plan) => {
     const results = Object.values(next.review.results);
     return { code: 'review_done', passed: results.filter((result) => result === 'pass').length, total: next.review.queue.length };
   }
+  if (move === 'final_check_start') return { code: 'final_start', total: next.review.queue.length };
+  if (move === 'final_next') {
+    const index = activeStepIndex(previous);
+    return { code: 'final_item', step: index + 1, result: next.review.results[index] };
+  }
+  if (move === 'final_finish') {
+    const results = Object.values(next.final.results);
+    return { code: 'final_done', passed: results.filter((result) => result === 'pass').length, total: results.length };
+  }
+  if (move === 'finish_skipped') return { code: 'final_skipped' };
+  if (move === 'prerequisite_check') {
+    const detour = next.steps[next.currentStep].detour;
+    return { code: 'detour', step: detour + 1, next: plan.steps[detour]?.title ?? '' };
+  }
+  if (move === 'resume' || move === 'resume_after_reteach') {
+    const detour = previous.steps[previous.currentStep].detour;
+    return { code: move === 'resume' ? 'detour_pass' : 'detour_fail', step: detour + 1, next: plan.steps[next.currentStep]?.title ?? '' };
+  }
   const code = NOTE_FOR_MOVE[move];
   if (!code) return null;
   return { code, step: previous.currentStep + 1, next: plan.steps[next.currentStep]?.title ?? '' };
 };
 
+const citedSources = (citations, chunks) => {
+  const ids = new Map(chunks.map((chunk) => [chunk.id.toLowerCase(), chunk.id]));
+  return (citations?.cited ?? []).map((id) => ids.get(id)).filter(Boolean).slice(0, 3).map((chunkId) => ({ chunkId, kind: 'cited' }));
+};
+
 const sourceIdsOf = (plan, indexes) => [...new Set(indexes.flatMap((index) => plan.steps[index]?.sourceIds ?? []))];
 
-const commitTurn = (state) => {
+const commitTurn = (state, citations = null) => {
   const { tutorId, studentId, pending } = state.turn;
   const progress = pending?.progress ?? state.progress;
   const tutor = state.messages.find((message) => message.id === tutorId);
   const before = activeStepIndex(state.progress);
   const stepIndex = activeStepIndex(progress);
-  const sources = findMessageSources(tutor.content, state.chunks, {
-    candidateIds: [...sourceIdsOf(state.plan, [before, before + 1, stepIndex]), ...state.turn.relatedIds],
-    stepIds: sourceIdsOf(state.plan, [stepIndex]),
-  });
+  const cited = citedSources(citations, state.chunks);
+  const sources = cited.length
+    ? cited
+    : findMessageSources(tutor.content, state.chunks, {
+      candidateIds: [...sourceIdsOf(state.plan, [before, before + 1, stepIndex]), ...state.turn.relatedIds],
+      stepIds: sourceIdsOf(state.plan, [stepIndex]),
+    });
 
-  let messages = updateMessage(state.messages, tutorId, { status: 'done', sources, stepIndex, move: pending?.move ?? null });
+  let messages = updateMessage(state.messages, tutorId, {
+    status: 'done',
+    sources,
+    stepIndex,
+    move: pending?.move ?? null,
+    intervention: pending?.intervention ?? null,
+    citations: citations ? { cited: citations.cited ?? [], quotes: citations.quotes ?? [] } : null,
+  });
   if (studentId && pending?.assessment) {
     messages = updateMessage(messages, studentId, { assessment: pending.assessment });
   }
@@ -87,7 +120,7 @@ export const chatReducer = (state, action) => {
     case 'turn_started': {
       if (state.turn.status !== 'idle') return state;
       const messages = [...state.messages];
-      if (action.student) messages.push({ id: action.student.id, role: 'student', content: action.student.content });
+      if (action.student) messages.push({ id: action.student.id, role: 'student', content: action.student.content, ...(action.student.request ? { request: action.student.request } : {}) });
       messages.push({ id: action.tutorId, role: 'tutor', content: '', status: 'pending', sources: [] });
       return {
         ...state,
@@ -100,7 +133,7 @@ export const chatReducer = (state, action) => {
     case 'phase':
       return { ...state, turn: { ...state.turn, status: action.phase } };
     case 'progress':
-      return { ...state, turn: { ...state.turn, pending: { move: action.move, progress: action.progress, assessment: action.assessment ?? null } } };
+      return { ...state, turn: { ...state.turn, pending: { move: action.move, progress: action.progress, assessment: action.assessment ?? null, intervention: action.intervention ?? null } } };
     case 'notice':
       return { ...state, notice: action.notice };
     case 'delta': {
@@ -112,7 +145,7 @@ export const chatReducer = (state, action) => {
       };
     }
     case 'done':
-      return commitTurn(state);
+      return commitTurn(state, action.citations ?? null);
     case 'stopped':
       return endInterruptedTurn(state, null);
     case 'failed':
@@ -138,16 +171,20 @@ export const historyFor = (messages, excludeId) =>
     .slice(-20);
 
 export const lessonSummary = (plan, progress) => {
-  const counts = { mastered: 0, learned: 0, recovered: 0, review: 0 };
-  progress.steps.forEach((step) => {
-    if (step.outcome) counts[step.outcome] += 1;
-  });
-  const queue = progress.review?.queue ?? reviewQueue(progress);
-  const results = progress.review?.results ?? {};
+  const steps = plan.steps.map((step, index) => ({ index, title: step.title, ...stepEvidence(progress, index) }));
+  const groups = Object.fromEntries(LEVELS.map((level) => [level, steps.filter((step) => step.level === level)]));
+  const finalResults = Object.values(progress.final?.results ?? {});
+  const practising = progress.review?.kind === 'practice';
+  const practice = practising ? progress.review.queue : reviewQueue(progress);
   return {
-    counts,
-    review: queue.map((index) => ({ index, title: plan.steps[index].title, result: results[index] ?? null })),
-    reviewed: Boolean(progress.review) && progress.status === 'completed',
+    steps,
+    groups,
+    final: progress.final
+      ? { skipped: progress.final.skipped, passed: finalResults.filter((result) => result === 'pass').length, total: finalResults.length }
+      : null,
+    practice: practice.map((index) => ({ index, title: plan.steps[index].title, result: practising ? progress.review.results[index] ?? null : null })),
+    practiced: practising && progress.status === 'completed',
+    schedule: reviewSchedule(progress).map((item) => ({ ...item, title: plan.steps[item.index].title })),
     total: plan.steps.length,
   };
 };

@@ -7,6 +7,8 @@ import { chatReducer, initChat } from '../src/lesson/chatReducer.js';
 
 const VERDICTS = ['correct', 'partial', 'incorrect', 'question', 'off_topic', 'unclear'];
 const MAX_REPLIES_PER_STEP = (MAX_ATTEMPTS + 2) * (STALL_LIMIT + 1);
+const MAX_REPLIES_WITH_DETOUR = MAX_REPLIES_PER_STEP + STALL_LIMIT + 1;
+const WORDS = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot'];
 
 const planOf = (length) => ({
   title: 'Lesson',
@@ -14,25 +16,43 @@ const planOf = (length) => ({
   audience: 'Students',
   style: '',
   objectives: [],
-  steps: Array.from({ length }, (_, index) => ({ title: `Step ${index + 1}`, goal: 'g', keyConcepts: [], checkQuestion: `Q${index}?`, successCriteria: 's', commonMistake: '', sourceIds: [] })),
+  steps: Array.from({ length }, (_, index) => ({
+    id: `s${index + 1}`,
+    title: `Step ${index + 1}`,
+    goal: 'g',
+    keyConcepts: [`${WORDS[index]} idea`],
+    checkQuestion: `Q${index}?`,
+    successCriteria: 's',
+    commonMistake: '',
+    prerequisites: index ? [`s${index}`] : [],
+    sourceIds: [],
+  })),
+});
+
+const assessmentArb = fc.record({
+  verdict: fc.constantFrom(...VERDICTS),
+  confidence: fc.constantFrom('low', 'medium', 'high'),
+  issue: fc.constantFrom(...ISSUES),
+  conceptsMissing: fc.constantFrom([], ['alpha idea'], ['bravo idea'], ['something else']),
+  misconception: fc.constantFrom('', 'a wrong idea'),
 });
 
 const eventArb = fc.oneof(
-  { weight: 12, arbitrary: fc.record({ kind: fc.constant('reply'), verdict: fc.constantFrom(...VERDICTS), confidence: fc.constantFrom('low', 'medium', 'high'), issue: fc.constantFrom(...ISSUES) }) },
-  { weight: 1, arbitrary: fc.constant({ kind: 'review' }) },
+  { weight: 12, arbitrary: assessmentArb.map((assessment) => ({ kind: 'reply', assessment })) },
+  { weight: 1, arbitrary: fc.constantFrom({ kind: 'review' }, { kind: 'hint' }, { kind: 'explain' }, { kind: 'skip_final' }) },
 );
 
-const apply = (progress, event) => planMove(progress, event.kind === 'review' ? { kind: 'review' } : { kind: 'reply', assessment: event });
+const apply = (plan, progress, event) => planMove(progress, { kind: event.kind, assessment: event.assessment ?? null, plan });
 
 describe('lesson state machine properties', () => {
-  it('keeps its invariants for any plan and any sequence of graded messages', () => {
+  it('keeps its invariants for any plan and any sequence of graded messages and requests', () => {
     fc.assert(fc.property(fc.integer({ min: 1, max: 6 }), fc.array(eventArb, { maxLength: 120 }), (length, events) => {
       const plan = planOf(length);
       let progress = createProgress(plan);
       const outcomesSet = new Map();
       for (const event of events) {
         const before = progress;
-        const result = apply(progress, event);
+        const result = apply(plan, progress, event);
         progress = result.progress;
 
         expect(progress.currentStep).toBeGreaterThanOrEqual(before.currentStep);
@@ -40,6 +60,12 @@ describe('lesson state machine properties', () => {
         progress.steps.forEach((step, index) => {
           expect(step.attempts).toBeLessThanOrEqual(MAX_ATTEMPTS);
           expect(step.stalls).toBeLessThanOrEqual(STALL_LIMIT);
+          expect(step.used.length).toBeLessThanOrEqual(8);
+          if (step.detour !== null) {
+            expect(step.status).toBe('active');
+            expect(step.detour).toBeLessThan(index);
+            expect(progress.steps[step.detour].status).toBe('done');
+          }
           if (index < progress.currentStep) expect(step).toMatchObject({ status: 'done' });
           if (index > progress.currentStep) expect(step).toMatchObject({ status: 'pending', outcome: null });
           if (step.outcome) {
@@ -52,6 +78,10 @@ describe('lesson state machine properties', () => {
           expect(progress.review.queue).toContain(activeStepIndex(progress));
           expect(progress.review.stalls).toBeLessThanOrEqual(STALL_LIMIT);
         }
+        if (before.status === 'reviewing' && before.review.kind === 'final' && progress.status === 'completed') {
+          expect(progress.final).not.toBe(null);
+        }
+        if (result.intervention) expect(progress.steps[activeStepIndex(before)].used.at(-1)).toBe(result.intervention);
         if (before.status === 'active' && progress.status === 'active') {
           expect(['advance', 'review_and_advance'].includes(result.move)).toBe(progress.currentStep === before.currentStep + 1);
         }
@@ -59,18 +89,36 @@ describe('lesson state machine properties', () => {
     }), { numRuns: 400 });
   });
 
-  it('always ends a step within a bounded number of non-question replies', () => {
-    const reply = fc.record({ verdict: fc.constantFrom('correct', 'partial', 'incorrect', 'off_topic', 'unclear'), confidence: fc.constantFrom('low', 'medium', 'high'), issue: fc.constantFrom(...ISSUES) });
-    fc.assert(fc.property(fc.array(fc.oneof(reply, fc.constant({ verdict: 'question', confidence: 'high', issue: 'none' })), { minLength: 200, maxLength: 200 }), (events) => {
-      let progress = createProgress(planOf(1));
+  const replyArb = assessmentArb.filter((assessment) => assessment.verdict !== 'question');
+  const questionArb = fc.constant({ verdict: 'question', confidence: 'high', issue: 'none', conceptsMissing: [], misconception: '' });
+
+  it('always ends a step without prerequisites within 15 non-question replies', () => {
+    fc.assert(fc.property(fc.array(fc.oneof(replyArb, questionArb), { minLength: 200, maxLength: 200 }), (events) => {
+      const plan = planOf(1);
+      let progress = createProgress(plan);
       let countedReplies = 0;
-      for (const event of events) {
-        progress = planMove(progress, { kind: 'reply', assessment: event }).progress;
-        if (event.verdict !== 'question') countedReplies += 1;
-        if (progress.status === 'completed') break;
+      for (const assessment of events) {
+        progress = apply(plan, progress, { kind: 'reply', assessment }).progress;
+        if (assessment.verdict !== 'question') countedReplies += 1;
+        if (progress.steps[0].status === 'done') break;
         expect(countedReplies).toBeLessThan(MAX_REPLIES_PER_STEP);
       }
-      if (events.filter((event) => event.verdict !== 'question').length >= MAX_REPLIES_PER_STEP) expect(progress.status).toBe('completed');
+      if (events.filter((event) => event.verdict !== 'question').length >= MAX_REPLIES_PER_STEP) expect(progress.steps[0].status).toBe('done');
+    }), { numRuns: 400 });
+  });
+
+  it('ends a step that can go back to a prerequisite within 18 non-question replies', () => {
+    fc.assert(fc.property(fc.array(fc.oneof(replyArb, questionArb), { minLength: 200, maxLength: 200 }), (events) => {
+      const plan = planOf(2);
+      let progress = apply(plan, createProgress(plan), { kind: 'reply', assessment: { verdict: 'correct', confidence: 'high', issue: 'none', conceptsMissing: [], misconception: '' } }).progress;
+      let countedReplies = 0;
+      for (const assessment of events) {
+        progress = apply(plan, progress, { kind: 'reply', assessment }).progress;
+        if (assessment.verdict !== 'question') countedReplies += 1;
+        if (progress.steps[1].status === 'done') break;
+        expect(countedReplies).toBeLessThan(MAX_REPLIES_WITH_DETOUR);
+      }
+      if (events.filter((event) => event.verdict !== 'question').length >= MAX_REPLIES_WITH_DETOUR) expect(progress.steps[1].status).toBe('done');
     }), { numRuns: 400 });
   });
 
@@ -79,7 +127,7 @@ describe('lesson state machine properties', () => {
       const plan = planOf(length);
       let progress = createProgress(plan);
       for (const event of events) {
-        progress = apply(progress, event).progress;
+        progress = apply(plan, progress, event).progress;
         const body = { kind: 'reply', teacherPrompt: 'Teach', plan, progress, history: [], studentMessage: 'answer', sources: {} };
         expect(validateTurnRequest(JSON.parse(JSON.stringify(body))).progress).toEqual(JSON.parse(JSON.stringify(progress)));
       }

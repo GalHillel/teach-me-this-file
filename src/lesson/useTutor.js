@@ -13,12 +13,16 @@ const stepSources = (state, index) => {
   return step ? chunksById(state.chunks, step.sourceIds) : [];
 };
 
+const REQUESTS = new Set(['hint', 'explain', 'skip_final']);
+
 const stepsForTurn = (progress, kind) => {
   if (kind === 'review') return reviewQueue(progress).slice(0, 2);
   if (progress.status === 'reviewing') {
     const { queue, position } = progress.review;
     return [queue[position], queue[position + 1]];
   }
+  const detour = progress.steps[progress.currentStep]?.detour;
+  if (Number.isInteger(detour)) return [detour, progress.currentStep];
   return [activeStepIndex(progress), progress.currentStep + 1];
 };
 
@@ -47,7 +51,10 @@ export const useTutor = ({ lesson, settings }) => {
       controllerRef.current = controller;
 
       const current = stateRef.current;
-      const student = kind === 'reply' && !retryStudentId ? { id: newId('student'), content: studentMessage } : null;
+      const asks = kind === 'reply' || REQUESTS.has(kind);
+      const student = asks && !retryStudentId && studentMessage
+        ? { id: newId('student'), content: studentMessage, ...(REQUESTS.has(kind) ? { request: kind } : {}) }
+        : null;
       const studentId = student?.id ?? retryStudentId;
       const history = historyFor(current.messages, studentId);
       const tutorId = newId('tutor');
@@ -69,15 +76,15 @@ export const useTutor = ({ lesson, settings }) => {
             plan: current.plan,
             progress: current.progress,
             history,
-            studentMessage,
+            studentMessage: kind === 'reply' ? studentMessage : '',
             sources: { current: currentSources, next: nextSources, related },
           },
           onEvent: (event, data) => {
             if (event === 'status') dispatch({ type: 'phase', phase: data.phase, tutorId });
             if (event === 'progress') dispatch({ type: 'progress', ...data, tutorId });
+            if (event === 'done') dispatch({ type: 'done', citations: data.citations ?? null, tutorId });
             if (event === 'notice') dispatch({ type: 'notice', notice: data, tutorId });
             if (event === 'delta') dispatch({ type: 'delta', text: data.text, tutorId });
-            if (event === 'done') dispatch({ type: 'done', tutorId });
           },
         });
       } catch (error) {
@@ -103,6 +110,7 @@ export const useTutor = ({ lesson, settings }) => {
   }, [runTurn]);
 
   const review = useCallback(() => runTurn({ kind: 'review' }), [runTurn]);
+  const ask = useCallback((kind, label) => runTurn({ kind, studentMessage: label }), [runTurn]);
   const dismissError = useCallback(() => dispatch({ type: 'dismiss_error' }), []);
   const dismissNotice = useCallback(() => dispatch({ type: 'dismiss_notice' }), []);
   const dismissRestored = useCallback(() => dispatch({ type: 'dismiss_restored' }), []);
@@ -116,5 +124,5 @@ export const useTutor = ({ lesson, settings }) => {
 
   useEffect(() => () => controllerRef.current?.abort(), []);
 
-  return { ...state, busy: state.turn.status !== 'idle', send, stop, retry, review, dismissError, dismissNotice, dismissRestored };
+  return { ...state, busy: state.turn.status !== 'idle', send, stop, retry, review, ask, dismissError, dismissNotice, dismissRestored };
 };

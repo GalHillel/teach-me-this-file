@@ -1,4 +1,5 @@
-import { NEEDS_REVIEW, activeStepIndex, reviewQueue } from '../../shared/lesson.js';
+import { NEEDS_REVIEW, activeStepIndex, finalCheckQueue, inFinalCheck, reviewQueue } from '../../shared/lesson.js';
+import { chooseIntervention, findPrerequisiteGap, remember } from './policy.js';
 
 export { NEEDS_REVIEW, activeStepIndex, reviewQueue };
 
@@ -7,28 +8,51 @@ export const STALL_LIMIT = 2;
 
 export const OUTCOMES = ['mastered', 'learned', 'recovered', 'review'];
 export const REVIEW_RESULTS = ['pass', 'fail'];
+export const REVIEW_KINDS = ['final', 'practice'];
+export const REVISITS = ['pass', 'fail'];
 
 const ANSWER_VERDICTS = new Set(['correct', 'partial', 'incorrect']);
 const PROBE_ISSUES = new Set(['hedged', 'unjustified']);
 
-export const newStepState = (status) => ({ status, phase: 'learn', attempts: 0, stalls: 0, probed: false, outcome: null });
+export const newStepState = (status) => ({
+  status,
+  phase: 'learn',
+  attempts: 0,
+  stalls: 0,
+  probed: false,
+  outcome: null,
+  hints: 0,
+  used: [],
+  detour: null,
+  revisit: null,
+});
 
 export const createProgress = (plan) => ({
   status: 'active',
   currentStep: 0,
   steps: plan.steps.map((_, index) => newStepState(index === 0 ? 'active' : 'pending')),
   review: null,
+  final: null,
 });
 
-const updateCurrent = (progress, change) => ({
+const result = (move, progress, extra = {}) => ({ move, progress, intervention: null, prerequisite: null, ...extra });
+
+const updateStep = (progress, index, change) => ({
   ...progress,
-  steps: progress.steps.map((step, index) => (index === progress.currentStep ? { ...step, ...change } : step)),
+  steps: progress.steps.map((step, position) => (position === index ? { ...step, ...change } : step)),
 });
 
-const completeCurrent = (progress, outcome) => {
-  const done = updateCurrent(progress, { status: 'done', phase: 'learn', stalls: 0, outcome });
+const updateCurrent = (progress, change) => updateStep(progress, progress.currentStep, change);
+
+const startFinalCheck = (plan, progress) => {
+  const queue = finalCheckQueue(plan, progress);
+  return { ...progress, status: 'reviewing', review: { kind: 'final', queue, position: 0, results: {}, stalls: 0 } };
+};
+
+const completeCurrent = (plan, progress, outcome) => {
+  const done = updateCurrent(progress, { status: 'done', phase: 'learn', stalls: 0, detour: null, outcome });
   if (progress.currentStep === progress.steps.length - 1) {
-    return { progress: { ...done, status: 'completed' }, last: true };
+    return { progress: startFinalCheck(plan, done), last: true };
   }
   const next = progress.currentStep + 1;
   return {
@@ -41,32 +65,44 @@ const completeCurrent = (progress, outcome) => {
   };
 };
 
-const answerOutcome = (step) => (step.attempts === 0 ? 'mastered' : 'learned');
+const answerOutcome = (step) => (step.attempts === 0 && step.hints === 0 ? 'mastered' : 'learned');
 
-const wrongAnswer = (progress, step, issue) => {
+const wrongAnswer = (plan, progress, step, assessment) => {
   const attempts = step.attempts + 1;
-  if (attempts < MAX_ATTEMPTS) {
-    return { move: issue === 'no_knowledge' ? 'reteach' : 'hint', progress: updateCurrent(progress, { attempts, stalls: 0 }) };
+  if (attempts >= MAX_ATTEMPTS) {
+    return result('reveal_and_recheck', updateCurrent(progress, { attempts, stalls: 0, phase: 'recheck', used: remember(step.used, 'guided_solution') }), { intervention: 'guided_solution' });
   }
-  return { move: 'reveal_and_recheck', progress: updateCurrent(progress, { attempts, stalls: 0, phase: 'recheck' }) };
+  const counted = updateCurrent(progress, { attempts, stalls: 0 });
+  const gap = step.phase === 'learn' ? findPrerequisiteGap({ plan, progress: counted, stepIndex: progress.currentStep, assessment }) : null;
+  if (gap) {
+    return result('prerequisite_check', updateCurrent(counted, { detour: gap.index, used: remember(step.used, 'prerequisite') }), {
+      intervention: 'prerequisite',
+      prerequisite: gap,
+    });
+  }
+  const intervention = chooseIntervention({ situation: 'wrong', assessment, state: { ...step, attempts } });
+  const move = assessment?.issue === 'no_knowledge' ? 'reteach' : 'hint';
+  return result(move, updateCurrent(counted, { used: remember(step.used, intervention) }), { intervention });
 };
 
-const handleAnswer = (progress, step, { verdict, confidence, issue }) => {
+const handleAnswer = (plan, progress, step, assessment) => {
+  const { verdict, confidence, issue } = assessment;
   if (step.phase === 'recheck') {
-    const result = completeCurrent(progress, verdict === 'correct' ? 'recovered' : 'review');
-    if (verdict === 'correct') return { move: result.last ? 'finish' : 'advance', progress: result.progress };
-    return { move: result.last ? 'review_and_finish' : 'review_and_advance', progress: result.progress };
+    const outcome = verdict === 'correct' ? 'recovered' : 'review';
+    const done = completeCurrent(plan, progress, outcome);
+    if (done.last) return result('final_check_start', done.progress);
+    return result(verdict === 'correct' ? 'advance' : 'review_and_advance', done.progress);
   }
 
   if (verdict === 'correct') {
     if ((confidence === 'low' || PROBE_ISSUES.has(issue)) && !step.probed) {
-      return { move: 'probe', progress: updateCurrent(progress, { probed: true, stalls: 0 }) };
+      return result('probe', updateCurrent(progress, { probed: true, stalls: 0 }));
     }
-    const result = completeCurrent(progress, answerOutcome(step));
-    return { move: result.last ? 'finish' : 'advance', progress: result.progress };
+    const done = completeCurrent(plan, progress, answerOutcome(step));
+    return result(done.last ? 'final_check_start' : 'advance', done.progress);
   }
 
-  return wrongAnswer(progress, step, issue);
+  return wrongAnswer(plan, progress, step, assessment);
 };
 
 const nonAnswerMove = (verdict, issue) => {
@@ -76,66 +112,110 @@ const nonAnswerMove = (verdict, issue) => {
 
 const isNonAnswer = (verdict, issue) => !ANSWER_VERDICTS.has(verdict) || (issue === 'misread_question' && verdict !== 'correct');
 
-const startReview = (progress) => {
-  const queue = reviewQueue(progress);
-  if (!queue.length) return { move: 'free_chat', progress };
-  return { move: 'review_question', progress: { ...progress, status: 'reviewing', review: { queue, position: 0, results: {}, stalls: 0 } } };
+const endDetour = (progress, step, outcome) => {
+  const withRevisit = outcome ? updateStep(progress, step.detour, { revisit: outcome }) : progress;
+  return updateCurrent(withRevisit, { detour: null, stalls: 0 });
 };
+
+const planDetourMove = (progress, step, grade) => {
+  if (grade.verdict === 'question') return result('answer_question', progress);
+  if (isNonAnswer(grade.verdict, grade.issue)) {
+    const stalls = step.stalls + 1;
+    if (stalls > STALL_LIMIT) return result('resume_after_reteach', endDetour(progress, step, 'fail'));
+    return result(nonAnswerMove(grade.verdict, grade.issue), updateCurrent(progress, { stalls }));
+  }
+  if (grade.verdict === 'correct') return result('resume', endDetour(progress, step, 'pass'));
+  return result('resume_after_reteach', endDetour(progress, step, 'fail'));
+};
+
+const startPractice = (progress) => {
+  const queue = reviewQueue(progress);
+  if (!queue.length) return result('free_chat', progress);
+  return result('review_question', { ...progress, status: 'reviewing', review: { kind: 'practice', queue, position: 0, results: {}, stalls: 0 } });
+};
+
+const finishFinal = (progress, results, skipped = false) => ({
+  ...progress,
+  status: 'completed',
+  review: null,
+  final: { results, skipped },
+});
 
 const reviewAnswer = (progress, verdict) => {
   const { review } = progress;
   const index = review.queue[review.position];
   const results = { ...review.results, [index]: verdict === 'correct' ? 'pass' : 'fail' };
   const position = review.position + 1;
-  if (position >= review.queue.length) {
-    return { move: 'review_finish', progress: { ...progress, status: 'completed', review: { ...review, position: review.queue.length - 1, results, stalls: 0 } } };
+  if (review.kind === 'final') {
+    if (position >= review.queue.length) return result('final_finish', finishFinal(progress, results));
+    return result('final_next', { ...progress, review: { ...review, position, results, stalls: 0 } });
   }
-  return { move: 'review_next', progress: { ...progress, review: { ...review, position, results, stalls: 0 } } };
+  if (position >= review.queue.length) {
+    return result('review_finish', { ...progress, status: 'completed', review: { ...review, position: review.queue.length - 1, results, stalls: 0 } });
+  }
+  return result('review_next', { ...progress, review: { ...review, position, results, stalls: 0 } });
 };
 
 const planReviewMove = (progress, { verdict, issue }) => {
-  if (verdict === 'question') return { move: 'answer_question', progress };
+  if (verdict === 'question') return result('answer_question', progress);
   if (isNonAnswer(verdict, issue)) {
     const stalls = progress.review.stalls + 1;
     if (stalls > STALL_LIMIT) return reviewAnswer(progress, 'incorrect');
-    return { move: nonAnswerMove(verdict, issue), progress: { ...progress, review: { ...progress.review, stalls } } };
+    return result(nonAnswerMove(verdict, issue), { ...progress, review: { ...progress.review, stalls } });
   }
   return reviewAnswer(progress, verdict);
 };
 
-export const planMove = (progress, { kind, assessment = null }) => {
-  if (kind === 'start') return { move: 'introduce', progress };
-  if (kind === 'review') return progress.status === 'completed' ? startReview(progress) : { move: 'clarify', progress };
+const helpRequest = (progress, kind) => {
+  if (progress.status !== 'active') return result('clarify', progress);
+  const step = progress.steps[progress.currentStep];
+  if (Number.isInteger(step.detour)) return result('clarify', progress);
+  const situation = kind === 'hint' ? 'hint_request' : 'explain_request';
+  const intervention = chooseIntervention({ situation, state: step });
+  const next = updateCurrent(progress, { hints: Math.min(step.hints + 1, 10), used: remember(step.used, intervention) });
+  return result(kind === 'hint' ? 'hint' : 'reteach', next, { intervention, requested: true });
+};
+
+export const planMove = (progress, { kind, assessment = null, plan }) => {
+  if (kind === 'start') return result('introduce', progress);
+  if (kind === 'review') return progress.status === 'completed' ? startPractice(progress) : result('clarify', progress);
+  if (kind === 'hint' || kind === 'explain') return helpRequest(progress, kind);
+  if (kind === 'skip_final') {
+    return inFinalCheck(progress) ? result('finish_skipped', finishFinal(progress, progress.review.results, true)) : result('clarify', progress);
+  }
 
   const grade = {
     verdict: assessment?.verdict ?? 'unclear',
     confidence: assessment?.confidence ?? 'medium',
     issue: assessment?.issue ?? 'none',
+    misconception: assessment?.misconception ?? '',
+    conceptsMissing: assessment?.conceptsMissing ?? [],
   };
 
   if (progress.status === 'reviewing') return planReviewMove(progress, grade);
-  if (progress.status === 'completed') return { move: 'free_chat', progress };
+  if (progress.status === 'completed') return result('free_chat', progress);
 
   const step = progress.steps[progress.currentStep];
+  if (Number.isInteger(step.detour)) return planDetourMove(progress, step, grade);
 
-  if (grade.verdict === 'question') return { move: 'answer_question', progress };
+  if (grade.verdict === 'question') return result('answer_question', progress);
 
   if (isNonAnswer(grade.verdict, grade.issue)) {
     const stalls = step.stalls + 1;
     if (stalls > STALL_LIMIT) {
-      return handleAnswer(updateCurrent(progress, { stalls: 0 }), { ...step, stalls: 0 }, { verdict: 'incorrect', confidence: 'high', issue: 'none' });
+      return handleAnswer(plan, updateCurrent(progress, { stalls: 0 }), { ...step, stalls: 0 }, { verdict: 'incorrect', confidence: 'high', issue: 'none' });
     }
-    return { move: nonAnswerMove(grade.verdict, grade.issue), progress: updateCurrent(progress, { stalls }) };
+    return result(nonAnswerMove(grade.verdict, grade.issue), updateCurrent(progress, { stalls }));
   }
 
-  return handleAnswer(progress, step, grade);
+  return handleAnswer(plan, progress, step, grade);
 };
 
 export const lessonPace = (progress) => {
   const current = progress.steps[activeStepIndex(progress)];
   const finished = progress.steps.filter((step) => step.status === 'done');
   const lastTwo = finished.slice(-2);
-  if (current.attempts >= 1 || NEEDS_REVIEW.has(lastTwo.at(-1)?.outcome)) return 'slower';
+  if (current.attempts >= 1 || current.hints >= 2 || NEEDS_REVIEW.has(lastTwo.at(-1)?.outcome)) return 'slower';
   if (lastTwo.length === 2 && lastTwo.every((step) => step.outcome === 'mastered')) return 'faster';
   return 'normal';
 };

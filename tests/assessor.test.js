@@ -85,13 +85,27 @@ describe('normalizeAssessment', () => {
 });
 
 describe('assessAnswer', () => {
-  const plan = { title: 'Plants', steps: [{ title: 'Inputs', goal: 'g', keyConcepts: [], checkQuestion: 'q', successCriteria: 's' }] };
-  const progress = { currentStep: 0 };
+  const plan = {
+    title: 'Plants',
+    steps: [
+      { title: 'Inputs', goal: 'Name what goes into the leaf', keyConcepts: [], checkQuestion: 'q', successCriteria: 's' },
+      { title: 'Outputs', goal: 'Name what comes out', keyConcepts: [], checkQuestion: 'q2', successCriteria: 's2' },
+    ],
+  };
+  const progress = { status: 'active', currentStep: 0, steps: [{ status: 'active', detour: null }, { status: 'pending', detour: null }] };
 
   it('treats an unusable model answer as unclear rather than failing the turn', async () => {
     const provider = { generateJson: async () => { throw new AppError('bad_response'); } };
     const result = await assessAnswer({ provider, plan, progress, tutorQuestion: 'q', studentMessage: 'a', sources: [] });
     expect(result.verdict).toBe('unclear');
+  });
+
+  it('grades a prerequisite check against the earlier step', async () => {
+    let prompt = '';
+    const provider = { generateJson: async (request) => { prompt = request.prompt; return { verdict: 'correct', completeness: 1 }; } };
+    const detour = { status: 'active', currentStep: 1, steps: [{ status: 'done', detour: null }, { status: 'active', detour: 0 }] };
+    await assessAnswer({ provider, plan, progress: detour, tutorQuestion: 'q', studentMessage: 'carbon dioxide and water', sources: [] });
+    expect(prompt).toContain('Step goal: Name what goes into the leaf');
   });
 
   it('passes other provider errors through', async () => {

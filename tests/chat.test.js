@@ -136,32 +136,65 @@ describe('chat reducer', () => {
 });
 
 describe('lesson summary', () => {
-  it('counts outcomes and lists steps worth reviewing', () => {
+  it('groups steps by what was shown, with the final check, practice list and review schedule', () => {
     const finished = {
       status: 'completed',
       currentStep: 1,
-      steps: [{ status: 'done', outcome: 'recovered', attempts: 3 }, { status: 'done', outcome: 'mastered', attempts: 0 }],
+      steps: [{ status: 'done', outcome: 'recovered', attempts: 3, hints: 0 }, { status: 'done', outcome: 'mastered', attempts: 0, hints: 0 }],
       review: null,
+      final: { results: { 0: 'fail', 1: 'pass' }, skipped: false },
     };
-    expect(lessonSummary(plan, finished)).toEqual({
-      counts: { mastered: 1, learned: 0, recovered: 1, review: 0 },
-      review: [{ index: 0, title: 'Respiration', result: null }],
-      reviewed: false,
-      total: 2,
+    const summary = lessonSummary(plan, finished);
+    expect(summary.steps.map((step) => [step.title, step.level])).toEqual([['Respiration', 'needs_practice'], ['Photosynthesis', 'applied']]);
+    expect(summary.groups.applied.map((step) => step.index)).toEqual([1]);
+    expect(summary.final).toEqual({ skipped: false, passed: 1, total: 2 });
+    expect(summary.practice).toEqual([{ index: 0, title: 'Respiration', result: null }]);
+    expect(summary.practiced).toBe(false);
+    expect(summary.schedule.map((item) => [item.title, item.days])).toEqual([['Respiration', 1], ['Photosynthesis', 14]]);
+  });
+
+  it('shows practice results once the practice round is over', () => {
+    const practised = {
+      status: 'completed',
+      currentStep: 1,
+      steps: [{ status: 'done', outcome: 'recovered', attempts: 3, hints: 0 }, { status: 'done', outcome: 'learned', attempts: 2, hints: 0 }],
+      review: { kind: 'practice', queue: [0, 1], position: 1, results: { 0: 'pass', 1: 'fail' }, stalls: 0 },
+      final: { results: {}, skipped: true },
+    };
+    expect(lessonSummary(plan, practised)).toMatchObject({
+      practiced: true,
+      practice: [{ index: 0, result: 'pass' }, { index: 1, result: 'fail' }],
+      final: { skipped: true, total: 0 },
     });
   });
 
-  it('shows review results once the review round is over', () => {
-    const reviewed = {
-      status: 'completed',
-      currentStep: 1,
-      steps: [{ status: 'done', outcome: 'recovered', attempts: 3 }, { status: 'done', outcome: 'learned', attempts: 2 }],
-      review: { queue: [0, 1], position: 1, results: { 0: 'pass', 1: 'fail' }, stalls: 0 },
-    };
-    expect(lessonSummary(plan, reviewed)).toMatchObject({
-      reviewed: true,
-      review: [{ index: 0, result: 'pass' }, { index: 1, result: 'fail' }],
-    });
+  it('uses the passages the tutor cited, and drops the guess when it cited something', () => {
+    let state = initChat({ plan, progress, document: { chunks } });
+    state = chatReducer(state, { type: 'turn_started', tutorId: 't1' });
+    state = chatReducer(state, { type: 'progress', move: 'introduce', progress, tutorId: 't1' });
+    state = chatReducer(state, { type: 'delta', text: 'Chloroplasts capture sunlight [c2]. What do mitochondria do?', tutorId: 't1' });
+    state = chatReducer(state, { type: 'done', tutorId: 't1', citations: { cited: ['c2'], invalid: ['c9'], quotes: [{ text: 'made of cheese', chunkId: null }] } });
+    expect(state.messages.at(-1)).toMatchObject({ sources: [{ chunkId: 'c2', kind: 'cited' }], citations: { cited: ['c2'], quotes: [{ chunkId: null }] } });
+  });
+
+  it('notes a check of an earlier step and the return to the current one', () => {
+    const lessonPlan = { steps: [{ title: 'Inputs', sourceIds: ['c1'] }, { title: 'Outputs', sourceIds: ['c2'] }] };
+    const atStep2 = { status: 'active', currentStep: 1, steps: [{ status: 'done', outcome: 'mastered', detour: null }, { status: 'active', outcome: null, detour: null }], review: null, final: null };
+    const detour = { ...atStep2, steps: [atStep2.steps[0], { ...atStep2.steps[1], detour: 0 }] };
+    let state = initChat({ plan: lessonPlan, progress: atStep2, document: { chunks } });
+    state = chatReducer(state, { type: 'turn_started', tutorId: 't1', student: { id: 's1', content: 'no' } });
+    state = chatReducer(state, { type: 'progress', move: 'prerequisite_check', progress: detour, tutorId: 't1' });
+    state = chatReducer(state, { type: 'delta', text: 'Quick check first.', tutorId: 't1' });
+    state = chatReducer(state, { type: 'done', tutorId: 't1' });
+    expect(state.messages.find((message) => message.role === 'system').note).toEqual({ code: 'detour', step: 1, next: 'Inputs' });
+    expect(state.messages.at(-1).stepIndex).toBe(1);
+  });
+
+  it('keeps a help request as a student message that is sent as history', () => {
+    let state = initChat({ plan, progress, document: { chunks } });
+    state = chatReducer(state, { type: 'turn_started', tutorId: 't1', student: { id: 's1', content: 'Can I have a hint?', request: 'hint' } });
+    expect(state.messages[0]).toMatchObject({ role: 'student', request: 'hint' });
+    expect(historyFor(state.messages, null)).toEqual([{ role: 'student', content: 'Can I have a hint?' }]);
   });
 
   it('adds review notes as codes the interface translates', () => {
