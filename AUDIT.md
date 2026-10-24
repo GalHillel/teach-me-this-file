@@ -83,7 +83,7 @@ The reviewer also confirmed: the review round, stall handling and outcomes in th
 
 ## Requirements matrix
 
-Status after the upgrade. "Live" refers to the browser runs against production on 24 October, listed in [DECISIONS.md](DECISIONS.md#live-checks-24-october).
+Status after the upgrade. "Live" refers to the browser runs against production on 24 October, listed in [DECISIONS.md](DECISIONS.md#live-checks-24-october-morning).
 
 | Requirement | Implementation | Test | Status |
 | --- | --- | --- | --- |
@@ -106,4 +106,9 @@ Status after the upgrade. "Live" refers to the browser runs against production o
 | Lesson survives a reload | `storage.js`, `useTutor.js` | storage and reducer tests; live | Done |
 | Lesson end has value: summary and review list | `CompletionCard`, `lessonSummary` | reducer test; live | Done |
 | Golden data and eval with real metrics | `eval/` | runs recorded in `eval/results/` | Done |
-| Production matches `main` | manual deploy per commit | served bundle compared with the build | Done by hand; automatic deploy needs the Git connection (finding 12) |
+| Responsive from 320 to 2560 px, landscape, right-to-left | layout fixes in `LessonScreen`, `Dialog`, `SetupScreen` | `npm run test:e2e` (15 sizes, English and Hebrew, mock) | Done |
+| Accessibility checks | skip link, Esc to stop, live log, focusable dialog body, 24 px targets | axe-core in the harness (automated rules only, no screen reader test) | Done for automated checks |
+| Student questions answered from the whole file | `findRelatedPassages`, `sources.related` | `tests/sources.test.js`, `eval/retrieval.js`; live | Done |
+| Grade issue and review round | `assessor.js`, `progress.js` | assessor, state-machine and property tests; harness; issues seen live | Done; review round not run live |
+| Security headers and no third-party requests | `vercel.json`, self-hosted fonts | harness; live headers | Done |
+| Production matches `main` | manual deploy per commit | served bundle compared with the build; `1f2dc5e` checked on 24 October, evening | Done by hand; automatic deploy needs the Git connection (finding 12) |
