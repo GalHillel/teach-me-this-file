@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-24T18:06:03.873Z",
+  "tutor": {
+    "queries": 33,
+    "mrr": 1,
+    "recallAt1": 0.964,
+    "recallAt3": 1,
+    "shownPrecision": 1,
+    "shownRecall": 0.967,
+    "answerableWithNothingShown": 0,
+    "unanswerableWithSourceShown": 0,
+    "unanswerable": 5
+  },
+  "question": {
+    "queries": 31,
+    "mrr": 0.873,
+    "recallAt1": 0.759,
+    "recallAt3": 0.944,
+    "shownPrecision": 0.818,
+    "shownRecall": 0.6,
+    "answerableWithNothingShown": 10,
+    "unanswerableWithSourceShown": 0,
+    "unanswerable": 4
+  },
+  "all": {
+    "queries": 64,
+    "mrr": 0.938,
+    "recallAt1": 0.864,
+    "recallAt3": 0.973,
+    "shownPrecision": 0.922,
+    "shownRecall": 0.783,
+    "answerableWithNothingShown": 10,
+    "unanswerableWithSourceShown": 0,
+    "unanswerable": 9
+  }
+}

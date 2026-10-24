@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-24",
+  "commit": "13d5def",
+  "summary": {
+    "checks": 128,
+    "overflow": [],
+    "offscreen": [
+      "plan-dialog 320x640 he: button[סגירה], button[Idea 1\nהובן אחרי רמזים], button[2\nIdea 2]",
+      "source-dialog 320x640 he: button[סגירה]"
+    ],
+    "smallTargets": [],
+    "tinyText": [],
+    "axe": [
+      {
+        "id": "scrollable-region-focusable",
+        "impact": "serious",
+        "screens": 4,
+        "sample": "dialog[aria-labelledby=\"source-title\"] > .max-h-\\[inherit\\].h-full.flex-col > .py-5.overflow-y-auto.min-h-0",
+        "where": "source-dialog 320x640 en"
+      }
+    ],
+    "lessonCompleted": true,
+    "lessonRestored": true,
+    "pageErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ],
+    "blocked": [
+      "320x640 en open plan sheet: locator.click: Timeout 3000ms exceeded."
+    ]
+  }
+}

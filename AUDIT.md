@@ -32,6 +32,31 @@ Checked and fine:
 - **Double send:** guarded by the controller ref.
 - **Stop:** aborts the provider fetch. A test checks the signal.
 
+## Second audit, 24 October, evening
+
+I re-audited production (`13d5def`) without relying on the earlier report. Baseline numbers are in `eval/results/*-baseline.*` and in the browser harness report (`tests/e2e/ui.mjs`, production build with the mock provider, 15 viewports, English and Hebrew, axe-core).
+
+| # | Sev. | Area | Problem | Evidence | Plan | Verification | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 16 | High | Responsive | At 320 px the lesson toolbar overflows and the "Show the lesson plan" button sits under the progress bar and header, so it can not be tapped. | Harness: click blocked, element intercepted by the progress bar. | Let the toolbar wrap; shrink the progress bar on narrow screens. | Harness at 320 to 2560 px | Open |
+| 17 | High | RTL | In Hebrew on a phone, the side sheets (plan, source) render partly off-screen; the close button is unreachable. | Harness: `button[סגירה]` off-screen at 320 px, Hebrew. | Position the sheet with logical properties and full width on small screens. | Harness, Hebrew | Open |
+| 18 | Medium | Accessibility | The scrolling body of dialogs can not receive keyboard focus (axe `scrollable-region-focusable`, serious). | axe on 4 screens. | Make the scroll region focusable and labelled. | axe in the harness | Open |
+| 19 | Medium | Robustness | A late `delta` or `done` event after Stop crashes the chat reducer. The current client stops reading on abort, so this is latent. | Reproduced in a test: `Cannot read properties of undefined (reading 'id')`. | Ignore stream events when no turn is open; property tests over event orders. | Reducer property tests | Open |
+| 20 | Medium | Retrieval | Short student questions find no passage: 10 of 27 answerable questions show nothing, because a match needs two shared words. During a turn the tutor only sees the current and next step's passages, so questions about other parts of the file get weak answers. | `eval/retrieval.js` baseline: question recall of shown sources 0.60, MRR 0.87. | A question retriever over the whole file with its own abstention rule, sent with the turn. Tune on English documents, report Hebrew and French as held out. | Retrieval eval, API test | Open |
+| 21 | Medium | Documents | PDF headers and footers that repeat on every page become part of every passage, and headings are not kept, so passages have no section. | Code review of `pdf.js` and `chunk.js`. | Drop lines that repeat on most pages; detect headings and keep a section per passage. | Unit tests with fixtures | Open |
+| 22 | Medium | Teaching | The planner's step order is trusted as is. There are no prerequisites and no check for cycles. | `validatePlan` keeps the model's order. | Ask for prerequisites, validate them, order steps topologically with document order as the tie-break, break cycles deterministically. | Unit and property tests | Open |
+| 23 | Medium | Teaching | The grade can not tell a misread question, a hedged right answer, real lack of knowledge, or a right answer without the reasoning that was asked for. All become a hint. | Assessment schema. | An `issue` field with a closed set of values and a matching move for each. | Assessor and state-machine tests, grading eval | Open |
+| 24 | Medium | Teaching | Steps marked for review are listed at the end, but there is no way to practise them. | Completion card. | A review round over the weak steps, driven by the same state machine. | State-machine and reducer tests, browser run | Open |
+| 25 | Medium | Security | No security headers: no CSP, `X-Content-Type-Options`, `Referrer-Policy` or `frame-ancestors`. | Production response headers. | Headers in `vercel.json`, checked by the harness, which serves the same headers. | Harness, live headers | Open |
+| 26 | Medium | Security | `body-parser` (through Express) has a high-severity advisory (denial of service on trailing bytes); the fix is a patch release. | `npm audit`. | `npm audit fix` without breaking upgrades. | `npm audit` | Open |
+| 27 | Low | Security | KaTeX has low-severity advisories; `npm audit` suggests a "fix" that is a large downgrade. KaTeX runs with `trust: false`, so `\href` and similar are disabled. | `npm audit`. | Keep the current version, document the reason. | Review | Open |
+| 28 | Medium | Privacy | Fonts load from Google Fonts, so every visitor's browser contacts Google, and a strict CSP has to allow it. | `index.html`. | Self-host the fonts from npm packages. | Harness: no external requests | Open |
+| 29 | Medium | Reliability | One model call may wait 20 s before falling back; a live turn waited 21 s for its first word. | Live check 14 on 24 October. | Shorter per-call timeouts for grading and teaching, kept configurable. | Provider tests | Open |
+| 30 | Medium | Security | Nothing checks the tutor's output for leaked instructions. | Code review. | A per-request canary in the system prompt; a reply that contains it is stopped and replaced by an error. | API test | Open |
+| 31 | Low | RTL | In right-to-left lessons, code and formulas inherit the paragraph direction. | `index.css`. | Isolate code, `pre` and KaTeX as left-to-right. | Visual check in the harness | Open |
+| 32 | Low | Performance | The KaTeX stylesheet loads on the setup screen. | `main.jsx` imports it. | Load it with the lesson screen. | Build output | Open |
+| 33 | Low | Keyboard | Esc does not stop a streaming reply; there is no skip link to the answer box. | Manual check. | Esc to stop; a skip link. | Harness | Open |
+
 ## Requirements matrix
 
 Status after the upgrade. "Live" refers to the browser runs against production on 24 October, listed in [DECISIONS.md](DECISIONS.md#live-checks-24-october).

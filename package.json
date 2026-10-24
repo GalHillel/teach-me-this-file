@@ -15,7 +15,11 @@
     "start": "node server/index.js",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "vite build && node tests/e2e/ui.mjs --strict",
+    "eval:retrieval": "node eval/retrieval.js",
+    "eval:sources": "node eval/sources.js",
+    "bench": "node eval/bench.js"
   },
   "dependencies": {
     "express": "^5.3.0",
@@ -33,10 +37,12 @@
     "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-react": "^6.1.2",
+    "axe-core": "^4.14.0",
     "concurrently": "^10.0.6",
     "eslint": "^10.13.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
+    "fast-check": "^4.10.2",
     "globals": "^17.13.0",
     "supertest": "^7.3.1",
     "tailwindcss": "^4.3.3",
