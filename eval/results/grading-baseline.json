@@ -1,0 +1,6 @@
+{
+  "label": "baseline",
+  "date": "2026-10-24T13:01:12.011Z",
+  "note": "Grader at commit 35b9e91 (the deployed version). Model list started with gemini-3.5-flash; 27 of 33 calls fell back after 429 or 503 on that model, mostly to gemini-3.5-flash-lite. Covers the first 33 cases only; the 10 hard cases were added after this run.",
+  "summary": { "cases": 33, "errors": 0, "accuracy": 1, "falseCorrect": 0, "correctRecognised": 1, "partialRecognised": 1, "medianMs": 1056 }
+}
