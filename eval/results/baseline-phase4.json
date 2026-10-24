@@ -1,0 +1,74 @@
+{
+  "commit": "20f5b13",
+  "date": "2026-10-24T22:59:01.363Z",
+  "unitTests": {
+    "passed": 187,
+    "failed": 0
+  },
+  "lint": "clean",
+  "typecheck": "none (JavaScript project)",
+  "bundleGzipBytes": {
+    "entryJs": 96309,
+    "entryCss": 8331,
+    "lessonJs": 136042,
+    "lessonCss": 7909
+  },
+  "load": {
+    "fcp": 2424,
+    "lcp": 2424,
+    "domContentLoaded": 2166
+  },
+  "loadTransferredKilobytesUncompressed": 430,
+  "browserHarness": {
+    "checks": 155,
+    "axe": 0,
+    "overflow": 0,
+    "offscreen": 0,
+    "pageErrors": 0,
+    "externalRequests": 0
+  },
+  "retrieval": {
+    "question": {
+      "queries": 31,
+      "mrr": 0.873,
+      "recallAt1": 0.759,
+      "recallAt3": 0.944,
+      "shownPrecision": 0.857,
+      "shownRecall": 0.8,
+      "answerableWithNothingShown": 3,
+      "unanswerableWithSourceShown": 0,
+      "unanswerable": 4
+    },
+    "tutor": {
+      "queries": 33,
+      "mrr": 1,
+      "recallAt1": 0.964,
+      "recallAt3": 1,
+      "shownPrecision": 1,
+      "shownRecall": 0.967,
+      "answerableWithNothingShown": 0,
+      "unanswerableWithSourceShown": 0,
+      "unanswerable": 5
+    }
+  },
+  "benchLargeDocMs": {
+    "characters": 345791,
+    "chunks": 768,
+    "chunkMs": 5.36,
+    "indexMs": 31.29,
+    "scorePerQueryMs": 3.34,
+    "sourcesPerMessageMs": 3.764
+  },
+  "liveTurns24Oct": {
+    "averageFirstTokenMs": 5699,
+    "turns": 53,
+    "turnErrors": 7,
+    "model": "mostly gemini-3.5-flash-lite (main model out of quota)"
+  },
+  "engine": {
+    "interventions": "hint (two strengths), reteach, rephrase, probe, reveal_and_recheck",
+    "learnerModel": "step outcome only (mastered, learned, recovered, review)",
+    "finalAssessment": "none; optional practice round over weak steps",
+    "citations": "matched after the reply by BM25; the model does not cite"
+  }
+}
