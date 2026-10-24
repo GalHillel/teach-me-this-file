@@ -18,6 +18,7 @@ export default function SourcePanel({ selection, chunks, onClose }) {
     >
       {chunk && (
         <div className="space-y-4">
+          {chunk.section && <p className="text-sm font-medium" dir="auto">{t('label.section', { name: chunk.section })}</p>}
           <p className="text-sm text-muted">{t(`source.explain.${kind}`)}</p>
           <blockquote dir="auto" className="whitespace-pre-wrap rounded-lg border-s-4 border-margin bg-paper px-4 py-3 text-[15px] leading-relaxed">
             {highlightPassage(chunk.text, selection.message.content).map((part) =>

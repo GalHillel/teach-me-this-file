@@ -1,17 +1,13 @@
 import * as pdfjs from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { ExtractionError } from './errors.js';
+import { markPdfHeadings, pageLines, pagesToSections, stripRepeatedLines } from './structure.js';
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
 export const MAX_PDF_PAGES = 300;
 const MIN_PAGE_CHARS = 25;
 
-const pageText = (items) =>
-  items
-    .map((item) => (item.hasEOL ? `${item.str}\n` : item.str))
-    .join('')
-    .replace(/[ \t]+\n/g, '\n');
 
 const openPdf = async (data) => {
   const task = pdfjs.getDocument({
@@ -35,18 +31,18 @@ export const extractPdf = async (file, onProgress) => {
   const { task, pdf } = await openPdf(new Uint8Array(await file.arrayBuffer()));
   const totalPages = pdf.numPages;
   const pageCount = Math.min(totalPages, MAX_PDF_PAGES);
-  const sections = [];
+  const pages = [];
   const emptyPages = [];
 
   try {
     for (let number = 1; number <= pageCount; number += 1) {
       const page = await pdf.getPage(number);
       const content = await page.getTextContent();
-      const text = pageText(content.items);
-      if (text.replace(/\s/g, '').length < MIN_PAGE_CHARS) {
+      const lines = pageLines(content.items);
+      if (lines.map((line) => line.text).join('').replace(/\s/g, '').length < MIN_PAGE_CHARS) {
         emptyPages.push(number);
       } else {
-        sections.push({ label: `Page ${number}`, text });
+        pages.push({ label: `Page ${number}`, lines });
       }
       page.cleanup();
       onProgress?.(number / pageCount);
@@ -55,6 +51,8 @@ export const extractPdf = async (file, onProgress) => {
     await task.destroy();
   }
 
+  const { pages: cleaned, removed } = stripRepeatedLines(pages);
+  const sections = pagesToSections(markPdfHeadings(cleaned));
   const warnings = [];
   if (totalPages > MAX_PDF_PAGES) {
     warnings.push({ code: 'pages_limit', params: { max: MAX_PDF_PAGES, total: totalPages } });
@@ -69,7 +67,7 @@ export const extractPdf = async (file, onProgress) => {
     warnings.push({ code: 'empty_pages', params: { count: emptyPages.length, pages: formatPages(emptyPages) } });
   }
 
-  return { sections, pageCount: totalPages, warnings };
+  return { sections, pageCount: totalPages, warnings, removedLines: removed };
 };
 
 const formatPages = (pages) => {

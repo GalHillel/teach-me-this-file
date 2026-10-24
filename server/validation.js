@@ -38,11 +38,13 @@ const array = (value, name, max) => {
 const chunks = (value, name, max) =>
   array(value, name, max).map((chunk, index) => {
     if (!isObject(chunk)) fail(`${name}[${index}] is not valid`);
-    return {
+    const clean = {
       id: string(chunk.id, `${name}[${index}].id`, { max: 20 }),
       label: string(chunk.label, `${name}[${index}].label`, { max: 120 }),
       text: string(chunk.text, `${name}[${index}].text`, { max: LIMITS.chunkText }),
     };
+    if (chunk.section !== undefined) clean.section = string(chunk.section, `${name}[${index}].section`, { max: 120, required: false });
+    return clean;
   });
 
 export const validatePlanRequest = (body) => {

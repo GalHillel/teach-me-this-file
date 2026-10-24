@@ -1,6 +1,7 @@
 import { detectDirection } from '../../shared/text.js';
 import { buildChunks } from './chunk.js';
 import { ExtractionError, unreadableRatio } from './errors.js';
+import { checkSignature, dropDuplicateChunks } from './structure.js';
 
 export const MAX_FILE_BYTES = 25 * 1024 * 1024;
 export const MAX_DOCUMENT_CHARS = 600_000;
@@ -45,8 +46,8 @@ const limitChunks = (chunks) => {
   return { kept, total };
 };
 
-export const prepareDocument = ({ file, type, sections, pageCount, warnings }) => {
-  const chunks = buildChunks(sections);
+export const prepareDocument = ({ file, type, sections, pageCount, warnings, removedLines = 0 }) => {
+  const { chunks, duplicates } = dropDuplicateChunks(buildChunks(sections));
   if (chunks.length === 0) {
     throw new ExtractionError('empty', 'No readable text was found in this file.');
   }
@@ -73,15 +74,29 @@ export const prepareDocument = ({ file, type, sections, pageCount, warnings }) =
     chunks: kept,
     charCount: total,
     direction: detectDirection(sample),
+    sectionCount: new Set(kept.map((chunk) => chunk.section).filter(Boolean)).size,
+    cleanup: { removedLines, duplicates },
     warnings: notes,
   };
 };
 
+const SIGNATURE_ERRORS = {
+  pdf: 'This file is named .pdf but is not a PDF.',
+  docx: 'This file is named .docx but is not a Word document. Old .doc files are not supported.',
+  txt: 'This file is named as text but contains binary data.',
+};
+
+export const verifySignature = async (file, type) => {
+  const head = new Uint8Array(await file.slice(0, 4096).arrayBuffer());
+  if (!checkSignature(head, type)) throw new ExtractionError(type === 'txt' ? 'unsupported' : 'corrupt', SIGNATURE_ERRORS[type], { name: file.name });
+};
+
 export const extractDocument = async (file, onProgress) => {
   const type = validateFile(file);
+  await verifySignature(file, type);
   const extract = await FILE_TYPES[type].load();
-  const { sections, pageCount, warnings } = await extract(file, onProgress);
-  return prepareDocument({ file, type, sections, pageCount, warnings });
+  const { sections, pageCount, warnings, removedLines } = await extract(file, onProgress);
+  return prepareDocument({ file, type, sections, pageCount, warnings, removedLines });
 };
 
 export const formatBytes = (bytes) => {

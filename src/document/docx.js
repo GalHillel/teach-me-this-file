@@ -25,7 +25,7 @@ export const htmlToSections = (html) => {
     if (/^h[1-6]$/i.test(element.tagName)) {
       if (current.text.trim()) sections.push(current);
       const heading = cellText(element).slice(0, 80);
-      current = { label: heading ? `Section: ${heading}` : 'Section', text: `${heading}\n` };
+      current = { label: heading ? `Section: ${heading}` : 'Section', text: `${heading}\n`, headings: heading ? [heading] : [] };
       continue;
     }
     const text = blockText(element);

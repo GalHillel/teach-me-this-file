@@ -93,3 +93,98 @@ describe('file validation', () => {
       .toThrow(expect.objectContaining({ code: 'empty' }));
   });
 });
+
+describe('document structure', async () => {
+  const { checkSignature, dropDuplicateChunks, markPdfHeadings, pageLines, pagesToSections, stripRepeatedLines } = await import('../src/document/structure.js');
+
+  const page = (number, body) => ({
+    label: `Page ${number}`,
+    lines: [
+      { text: 'Biology 7 - Chapter 3', size: 9 },
+      ...body.map((text) => ({ text, size: 11 })),
+      { text: `Page ${number} of 12`, size: 9 },
+    ],
+  });
+
+  it('removes running headers and footers that repeat on most pages, ignoring page numbers', () => {
+    const pages = [page(1, ['Cells are alive.']), page(2, ['Cells divide.']), page(3, ['Cells use energy.']), page(4, ['Cells have DNA.'])];
+    const { pages: cleaned, removed } = stripRepeatedLines(pages);
+    expect(removed).toBe(8);
+    expect(cleaned.map((item) => item.lines.map((line) => line.text))).toEqual([['Cells are alive.'], ['Cells divide.'], ['Cells use energy.'], ['Cells have DNA.']]);
+  });
+
+  it('keeps edge lines that do not repeat and leaves short documents alone', () => {
+    const pages = [page(1, ['A']), page(2, ['B'])];
+    expect(stripRepeatedLines(pages).removed).toBe(0);
+    const mixed = [
+      { label: 'Page 1', lines: [{ text: 'Introduction' }, { text: 'Text one.' }] },
+      { label: 'Page 2', lines: [{ text: 'Methods' }, { text: 'Text two.' }] },
+      { label: 'Page 3', lines: [{ text: 'Results' }, { text: 'Text three.' }] },
+    ];
+    expect(stripRepeatedLines(mixed).removed).toBe(0);
+  });
+
+  it('marks larger, short lines without final punctuation as PDF headings', () => {
+    const pages = markPdfHeadings([{ label: 'Page 1', lines: [
+      { text: 'The water cycle', size: 16 },
+      { text: 'Water evaporates when the sun heats it, and it rises as vapour into the air above.', size: 11 },
+      { text: 'Big text that ends with a full stop.', size: 16 },
+      { text: 'Condensation', size: 14 },
+    ] }]);
+    expect(pages[0].lines.map((line) => line.heading)).toEqual([true, false, false, true]);
+    expect(pagesToSections(pages)[0].headings).toEqual(['The water cycle', 'Condensation']);
+  });
+
+  it('starts a new passage at each heading and keeps the section across pages', () => {
+    const chunks = buildChunks([
+      { label: 'Page 1', text: 'The water cycle\nWater evaporates.\nCondensation\nVapour cools into droplets.', headings: ['The water cycle', 'Condensation'] },
+      { label: 'Page 2', text: 'Clouds form from the droplets.' },
+    ]);
+    expect(chunks.map((chunk) => [chunk.label, chunk.section, chunk.text.split('\n')[0]])).toEqual([
+      ['Page 1', 'The water cycle', 'The water cycle'],
+      ['Page 1', 'Condensation', 'Condensation'],
+      ['Page 2', 'Condensation', 'Clouds form from the droplets.'],
+    ]);
+  });
+
+  it('reads Markdown headings in text files', () => {
+    const chunks = buildChunks([{ label: 'Lines 1–4', text: '# Plants\nPlants make food.\n## Roots\nRoots take in water.' }]);
+    expect(chunks.map((chunk) => chunk.section)).toEqual(['Plants', 'Roots']);
+  });
+
+  it('drops passages that repeat word for word and renumbers the rest', () => {
+    const repeated = 'This page intentionally left blank for printing purposes in the original book.';
+    const { chunks, duplicates } = dropDuplicateChunks([
+      { id: 'c1', label: 'Page 1', text: repeated },
+      { id: 'c2', label: 'Page 2', text: 'Real content about cells and energy in living things.' },
+      { id: 'c3', label: 'Page 3', text: repeated },
+      { id: 'c4', label: 'Page 4', text: 'Short' },
+      { id: 'c5', label: 'Page 5', text: 'Short' },
+    ]);
+    expect(duplicates).toBe(1);
+    expect(chunks.map((chunk) => `${chunk.id}:${chunk.label}`)).toEqual(['c1:Page 1', 'c2:Page 2', 'c3:Page 4', 'c4:Page 5']);
+  });
+
+  it('checks file signatures so a renamed file gets a clear error', () => {
+    const bytes = (text) => new TextEncoder().encode(text);
+    expect(checkSignature(bytes('%PDF-1.7\n...'), 'pdf')).toBe(true);
+    expect(checkSignature(bytes('<html>not a pdf</html>'), 'pdf')).toBe(false);
+    expect(checkSignature(new Uint8Array([0x50, 0x4b, 0x03, 0x04, 1, 2]), 'docx')).toBe(true);
+    expect(checkSignature(new Uint8Array([0xd0, 0xcf, 0x11, 0xe0]), 'docx')).toBe(false);
+    expect(checkSignature(bytes('plain text'), 'txt')).toBe(true);
+    expect(checkSignature(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0, 0, 0, 13]), 'txt')).toBe(false);
+  });
+
+  it('decodes UTF-16 text files with a byte order mark', () => {
+    const utf16 = new Uint8Array([0xff, 0xfe, 0xe9, 0x05, 0xdc, 0x05]);
+    expect(decodeText(utf16.buffer)).toBe('של');
+  });
+
+  it('groups PDF text items into lines with their font size', () => {
+    expect(pageLines([
+      { str: 'Title', height: 18, hasEOL: true },
+      { str: 'Body ', height: 11 },
+      { str: 'text', height: 11, hasEOL: true },
+    ])).toEqual([{ text: 'Title', size: 18 }, { text: 'Body text', size: 11 }]);
+  });
+});

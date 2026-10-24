@@ -5,7 +5,7 @@ const RESERVED_TAGS = /<\s*\/?\s*(document|teacher_instructions|sources|student_
 export const fence = (text) => String(text ?? '').replace(RESERVED_TAGS, '[tag removed]');
 
 export const formatPassages = (chunks) =>
-  chunks.map((chunk) => `[${chunk.id} | ${fence(chunk.label)}]\n${fence(chunk.text)}`).join('\n\n');
+  chunks.map((chunk) => `[${chunk.id} | ${fence(chunk.label)}${chunk.section ? ` | ${fence(chunk.section)}` : ''}]\n${fence(chunk.text)}`).join('\n\n');
 
 const languageNames = new Intl.DisplayNames(['en'], { type: 'language' });
 

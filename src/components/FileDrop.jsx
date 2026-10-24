@@ -35,6 +35,7 @@ function FileStatus({ upload }) {
   const parts = [
     document.pageCount ? t('file.pages', { count: document.pageCount }) : null,
     t('file.passages', { count: document.chunks.length }),
+    document.sectionCount ? t('file.sections', { count: document.sectionCount }) : null,
     t('file.chars', { count: number.format(document.charCount) }),
     document.direction === 'rtl' ? t('file.rtl') : null,
   ].filter(Boolean);

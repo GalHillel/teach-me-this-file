@@ -142,6 +142,8 @@ const startLesson = async (page) => {
 const results = [];
 const record = (screen, viewport, language, data, extra = {}) => results.push({ screen, viewport: viewport.join('x'), language, ...data, ...extra });
 
+let pdfStructure = null;
+let renamed = null;
 const server = await startServer();
 const base = `http://localhost:${server.address().port}`;
 const browser = await chromium.launch();
@@ -224,6 +226,52 @@ try {
     }
   }
 
+  pdfStructure = await (async () => {
+    const maker = await browser.newPage();
+    const paragraph = (topic) => `<p>${Array.from({ length: 7 }, (_, i) => `${topic} sentence ${i + 1} explains one more detail about how living cells work and why it matters for the body.`).join(' ')}</p>`;
+    await maker.setContent(`<html><body style="font-family: sans-serif; font-size: 12px">
+      <h1 style="font-size: 26px">Cell Respiration</h1>${paragraph('Respiration')}${paragraph('Glucose')}
+      <h2 style="font-size: 20px; page-break-before: always">Photosynthesis</h2>${paragraph('Chloroplast')}${paragraph('Light')}
+      <h2 style="font-size: 20px; page-break-before: always">Cell Division</h2>${paragraph('Mitosis')}${paragraph('DNA')}
+    </body></html>`);
+    const pdf = await maker.pdf({
+      format: 'A5',
+      displayHeaderFooter: true,
+      headerTemplate: '<div style="font-size: 8px; width: 100%; text-align: center">Biology Handbook - Grade 9</div>',
+      footerTemplate: '<div style="font-size: 8px; width: 100%; text-align: center">Page <span class="pageNumber"></span> of <span class="totalPages"></span></div>',
+      margin: { top: '2cm', bottom: '2cm', left: '1.5cm', right: '1.5cm' },
+    });
+    await maker.close();
+    const { context, page } = await openApp(browser, [1280, 800], 'en');
+    await page.goto(base);
+    await page.waitForSelector('h1');
+    await page.locator('input[type=file]').setInputFiles({ name: 'biology.pdf', mimeType: 'application/pdf', buffer: pdf });
+    await page.waitForSelector('p.text-success', { timeout: 20000 });
+    const status = await page.locator('p.text-success').innerText();
+    await page.locator('main button.btn-primary').last().click();
+    await page.waitForSelector('[role=progressbar]', { timeout: 20000 });
+    const chunks = await page.evaluate(() => JSON.parse(sessionStorage.getItem('tmtf.lesson')).lesson.document.chunks);
+    await context.close();
+    return {
+      status,
+      chunks: chunks.length,
+      sections: [...new Set(chunks.map((chunk) => chunk.section).filter(Boolean))],
+      headerLeft: chunks.some((chunk) => chunk.text.includes('Biology Handbook')),
+      footerLeft: chunks.some((chunk) => /Page \d+ of \d+/.test(chunk.text)),
+    };
+  })();
+
+  renamed = await (async () => {
+    const { context, page } = await openApp(browser, [1280, 800], 'en');
+    await page.goto(base);
+    await page.waitForSelector('h1');
+    await page.locator('input[type=file]').setInputFiles({ name: 'fake.pdf', mimeType: 'application/pdf', buffer: Buffer.from('<html>this is not a pdf</html>') });
+    await page.waitForSelector('[role=alert]', { timeout: 10000 });
+    const text = await page.locator('[role=alert]').innerText();
+    await context.close();
+    return text;
+  })();
+
   const { context, page } = await openApp(browser, [1280, 800], 'en');
   await page.goto(base);
   await page.waitForSelector('h1');
@@ -238,6 +286,8 @@ try {
 
 const summary = {
   checks: results.length,
+  pdfStructure,
+  renamedPdf: renamed,
   overflow: results.filter((row) => row.overflow > 0).map((row) => `${row.screen} ${row.viewport} ${row.language} +${row.overflow}px`),
   offscreen: results.filter((row) => row.offscreen.length).map((row) => `${row.screen} ${row.viewport} ${row.language}: ${row.offscreen.join(', ')}`),
   smallTargets: [...new Set(results.flatMap((row) => row.smallTargets.map((item) => `${row.screen}: ${item}`)))],
@@ -261,5 +311,5 @@ print(JSON.stringify(summary, null, 2));
 if (reportPath) writeFileSync(reportPath, `${JSON.stringify({ summary, results }, null, 2)}\n`);
 
 const serious = summary.axe.filter((violation) => violation.impact === 'serious' || violation.impact === 'critical');
-const failed = !summary.recheckShown || !summary.reviewCompleted || summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
+const failed = !pdfStructure || pdfStructure.headerLeft || pdfStructure.footerLeft || pdfStructure.sections.length < 3 || !summary.recheckShown || !summary.reviewCompleted || summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
 if (strict && failed) process.exit(1);

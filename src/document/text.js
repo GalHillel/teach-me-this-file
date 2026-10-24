@@ -3,6 +3,9 @@ import { ExtractionError, unreadableRatio } from './errors.js';
 const LINES_PER_SECTION = 40;
 
 export const decodeText = (buffer) => {
+  const head = new Uint8Array(buffer.slice(0, 2));
+  if (head[0] === 0xff && head[1] === 0xfe) return new TextDecoder('utf-16le').decode(buffer).replace(/^\uFEFF/, '');
+  if (head[0] === 0xfe && head[1] === 0xff) return new TextDecoder('utf-16be').decode(buffer).replace(/^\uFEFF/, '');
   const utf8 = new TextDecoder('utf-8').decode(buffer).replace(/^\uFEFF/, '');
   if (unreadableRatio(utf8) < 0.01) return utf8;
   return new TextDecoder('windows-1255').decode(buffer);

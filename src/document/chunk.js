@@ -1,3 +1,5 @@
+import { headingOf } from './structure.js';
+
 const MAX_CHUNK_CHARS = 1100;
 const TARGET_CHUNK_CHARS = 700;
 
@@ -36,25 +38,40 @@ const splitLongLine = (line) => {
 
 export const buildChunks = (sections) => {
   const chunks = [];
-  const push = (text, label) => {
-    if (text.trim()) chunks.push({ id: `c${chunks.length + 1}`, label, text: text.trim() });
+  let section = null;
+  const push = (text, label, chunkSection) => {
+    if (!text.trim()) return;
+    const chunk = { id: `c${chunks.length + 1}`, label, text: text.trim() };
+    if (chunkSection) chunk.section = chunkSection.slice(0, 120);
+    chunks.push(chunk);
   };
 
-  for (const section of sections) {
-    const lines = normalizeText(section.text).split('\n').flatMap(splitLongLine);
+  for (const source of sections) {
+    const headings = source.headings?.length ? new Set(source.headings) : null;
+    const lines = normalizeText(source.text).split('\n').flatMap(splitLongLine);
     let current = '';
+    let currentSection = section;
     for (const line of lines) {
-      if (current && current.length + line.length > MAX_CHUNK_CHARS) {
-        push(current, section.label);
+      const heading = headingOf(line, headings);
+      if (heading) {
+        push(current, source.label, currentSection);
         current = '';
+        section = heading;
+        currentSection = heading;
+      }
+      if (current && current.length + line.length > MAX_CHUNK_CHARS) {
+        push(current, source.label, currentSection);
+        current = '';
+        currentSection = section;
       }
       current += current ? `\n${line}` : line;
       if (current.length >= TARGET_CHUNK_CHARS && line === '') {
-        push(current, section.label);
+        push(current, source.label, currentSection);
         current = '';
+        currentSection = section;
       }
     }
-    push(current, section.label);
+    push(current, source.label, currentSection);
   }
 
   return chunks;
