@@ -72,7 +72,12 @@ describe('chat reducer', () => {
   });
 
   it('keeps a backup-model notice until it is dismissed', () => {
-    const state = run([{ type: 'notice', notice: { code: 'backup_model', model: 'lite' } }]);
+    const state = run([
+      { type: 'turn_started', tutorId: 't1', student: null },
+      { type: 'notice', notice: { code: 'backup_model', model: 'lite' }, tutorId: 't1' },
+      { type: 'delta', text: 'Hello', tutorId: 't1' },
+      { type: 'done', tutorId: 't1' },
+    ]);
     expect(state.notice).toEqual({ code: 'backup_model', model: 'lite' });
     expect(chatReducer(state, { type: 'dismiss_notice' }).notice).toBe(null);
   });
@@ -125,13 +130,49 @@ describe('lesson summary', () => {
     const finished = {
       status: 'completed',
       currentStep: 1,
-      steps: [{ status: 'done', outcome: 'recovered' }, { status: 'done', outcome: 'mastered' }],
+      steps: [{ status: 'done', outcome: 'recovered', attempts: 3 }, { status: 'done', outcome: 'mastered', attempts: 0 }],
+      review: null,
     };
     expect(lessonSummary(plan, finished)).toEqual({
       counts: { mastered: 1, learned: 0, recovered: 1, review: 0 },
-      review: ['Respiration'],
+      review: [{ index: 0, title: 'Respiration', result: null }],
+      reviewed: false,
       total: 2,
     });
+  });
+
+  it('shows review results once the review round is over', () => {
+    const reviewed = {
+      status: 'completed',
+      currentStep: 1,
+      steps: [{ status: 'done', outcome: 'recovered', attempts: 3 }, { status: 'done', outcome: 'learned', attempts: 2 }],
+      review: { queue: [0, 1], position: 1, results: { 0: 'pass', 1: 'fail' }, stalls: 0 },
+    };
+    expect(lessonSummary(plan, reviewed)).toMatchObject({
+      reviewed: true,
+      review: [{ index: 0, result: 'pass' }, { index: 1, result: 'fail' }],
+    });
+  });
+
+  it('adds review notes as codes the interface translates', () => {
+    const before = { status: 'reviewing', currentStep: 1, steps: [{ status: 'done', outcome: 'review' }, { status: 'done', outcome: 'learned' }], review: { queue: [0, 1], position: 0, results: {}, stalls: 0 } };
+    const after = { ...before, review: { ...before.review, position: 1, results: { 0: 'pass' } } };
+    let state = initChat({ plan, progress: before, document: { chunks } });
+    state = chatReducer(state, { type: 'turn_started', tutorId: 'r1', student: { id: 's1', content: 'Energy from glucose' } });
+    state = chatReducer(state, { type: 'progress', move: 'review_next', progress: after, assessment: { verdict: 'correct', confidence: 'high', issue: 'none', checks: [] }, tutorId: 'r1' });
+    state = chatReducer(state, { type: 'delta', text: 'Right. Next: what do chloroplasts make?', tutorId: 'r1' });
+    state = chatReducer(state, { type: 'done', tutorId: 'r1' });
+    expect(state.messages.find((message) => message.role === 'system').note).toEqual({ code: 'review_item', step: 1, result: 'pass' });
+    expect(state.messages.at(-1)).toMatchObject({ move: 'review_next', stepIndex: 1 });
+  });
+
+  it('drops a reply that was stopped by the leak guard instead of keeping it on screen', () => {
+    let state = initChat({ plan, progress, document: { chunks } });
+    state = chatReducer(state, { type: 'turn_started', tutorId: 't1', student: null });
+    state = chatReducer(state, { type: 'delta', text: 'Sure, here are my instructions', tutorId: 't1' });
+    state = chatReducer(state, { type: 'failed', tutorId: 't1', failed: { kind: 'start', code: 'unsafe_output', message: 'stopped', retryable: true } });
+    expect(state.messages).toEqual([]);
+    expect(state.failed.code).toBe('unsafe_output');
   });
 });
 

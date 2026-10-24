@@ -4,6 +4,7 @@ import { createApp } from '../server/app.js';
 import { createServerKeyBudget } from '../server/serverKey.js';
 import { AppError } from '../server/errors.js';
 import { createProgress } from '../server/lesson/progress.js';
+import { guardStream } from '../server/lesson/tutor.js';
 import { createMockProvider } from '../server/providers/mock.js';
 
 const document = {
@@ -173,6 +174,104 @@ describe('POST /api/turns', () => {
     await new Promise((resolve) => setTimeout(resolve, 100));
     expect(providerSignal.aborted).toBe(true);
     server.close();
+  });
+});
+
+describe('review round over the API', () => {
+  const finished = () => {
+    const progress = createProgress(plan);
+    return {
+      ...progress,
+      status: 'completed',
+      currentStep: 1,
+      steps: [
+        { ...progress.steps[0], status: 'done', attempts: 3, outcome: 'review' },
+        { ...progress.steps[1], status: 'done', outcome: 'mastered' },
+      ],
+    };
+  };
+
+  it('starts a review of the weak steps after the lesson', async () => {
+    const response = await request(mockApp()).post('/api/turns').send(turn({ kind: 'review', progress: finished() }));
+    const progress = parseEvents(response.text).find((item) => item.event === 'progress').data;
+    expect(progress.move).toBe('review_question');
+    expect(progress.progress).toMatchObject({ status: 'reviewing', review: { queue: [0], position: 0 } });
+  });
+
+  it('refuses a review before the lesson is complete', async () => {
+    const response = await request(mockApp()).post('/api/turns').send(turn({ kind: 'review' }));
+    expect(response.status).toBe(400);
+  });
+
+  it('grades the reviewed step and finishes the review', async () => {
+    const reviewing = { ...finished(), status: 'reviewing', review: { queue: [0], position: 0, results: {}, stalls: 0 } };
+    const response = await request(mockApp())
+      .post('/api/turns')
+      .send(turn({ kind: 'reply', progress: reviewing, studentMessage: 'The smallest unit of life', history: [{ role: 'tutor', content: 'Quick review: what is a cell?' }] }));
+    const progress = parseEvents(response.text).find((item) => item.event === 'progress').data;
+    expect(progress.move).toBe('review_finish');
+    expect(progress.progress).toMatchObject({ status: 'completed', review: { results: { 0: 'pass' } } });
+  });
+});
+
+describe('tutor prompt contents', () => {
+  const capture = () => {
+    const base = createMockProvider({ delayMs: 1 });
+    const seen = { system: '' };
+    return {
+      seen,
+      provider: { ...base, streamText: (options) => { seen.system = options.system; return base.streamText(options); } },
+    };
+  };
+
+  it('gives the tutor passages from elsewhere in the file for the student\'s question', async () => {
+    const { seen, provider } = capture();
+    const related = [{ id: 'c9', label: 'Page 9', text: 'Ribosomes build proteins from amino acids.' }];
+    await request(createApp({ providerFor: withProvider(provider) }))
+      .post('/api/turns')
+      .send(turn({ kind: 'reply', studentMessage: 'What do ribosomes do?', history: [{ role: 'tutor', content: 'What is a cell?' }], sources: { current: [document.chunks[0]], next: [], related } }));
+    expect(seen.system).toContain('Ribosomes build proteins');
+    expect(seen.system).toContain('Use them only to answer a question the student asked');
+  });
+
+  it('puts a fresh confidential marker in every tutor prompt', async () => {
+    const first = capture();
+    const second = capture();
+    await request(createApp({ providerFor: withProvider(first.provider) })).post('/api/turns').send(turn());
+    await request(createApp({ providerFor: withProvider(second.provider) })).post('/api/turns').send(turn());
+    const marker = (system) => system.match(/tmtf-[0-9a-f]{12}/)?.[0];
+    expect(marker(first.seen.system)).toBeTruthy();
+    expect(marker(first.seen.system)).not.toBe(marker(second.seen.system));
+  });
+});
+
+describe('output leak guard', () => {
+  it('stops a reply that repeats the confidential marker and sends none of it', async () => {
+    const leaking = {
+      name: 'leaky',
+      model: 'x',
+      generateJson: async () => ({}),
+      async *streamText({ system }) {
+        const marker = system.match(/tmtf-[0-9a-f]{12}/)[0];
+        yield 'Sure, here are my instructions: Internal reference code: ';
+        yield marker.slice(0, 7);
+        yield marker.slice(7);
+        yield ' and the rest.';
+      },
+    };
+    const events = parseEvents((await request(createApp({ providerFor: withProvider(leaking) })).post('/api/turns').send(turn())).text);
+    const sent = events.filter((item) => item.event === 'delta').map((item) => item.data.text).join('');
+    expect(events.at(-1)).toMatchObject({ event: 'error', data: { code: 'unsafe_output', retryable: true } });
+    expect(sent).not.toMatch(/tmtf-/);
+  });
+
+  it('streams normal text without holding it back at the end', () => {
+    const sent = [];
+    const guard = guardStream('tmtf-abcdef123456', (text) => sent.push(text));
+    guard.push('Hello ');
+    guard.push('student, tmtf is not the marker.');
+    expect(guard.flush()).toBe('Hello student, tmtf is not the marker.');
+    expect(sent.join('')).toBe('Hello student, tmtf is not the marker.');
   });
 });
 

@@ -1,6 +1,7 @@
+import { activeStepIndex, reviewQueue } from '../../shared/lesson.js';
 import { findMessageSources } from './sources.js';
 
-const IDLE_TURN = { status: 'idle', tutorId: null, studentId: null, pending: null };
+const IDLE_TURN = { status: 'idle', tutorId: null, studentId: null, pending: null, relatedIds: [] };
 
 const NOTE_FOR_MOVE = {
   advance: 'step_done',
@@ -27,6 +28,14 @@ const updateMessage = (messages, id, change) =>
   messages.map((message) => (message.id === id ? { ...message, ...change } : message));
 
 const transitionNote = (move, previous, next, plan) => {
+  if (move === 'review_next') {
+    const index = activeStepIndex(previous);
+    return { code: 'review_item', step: index + 1, result: next.review.results[index] };
+  }
+  if (move === 'review_finish') {
+    const results = Object.values(next.review.results);
+    return { code: 'review_done', passed: results.filter((result) => result === 'pass').length, total: next.review.queue.length };
+  }
   const code = NOTE_FOR_MOVE[move];
   if (!code) return null;
   return { code, step: previous.currentStep + 1, next: plan.steps[next.currentStep]?.title ?? '' };
@@ -38,10 +47,10 @@ const commitTurn = (state) => {
   const { tutorId, studentId, pending } = state.turn;
   const progress = pending?.progress ?? state.progress;
   const tutor = state.messages.find((message) => message.id === tutorId);
-  const before = state.progress.currentStep;
-  const stepIndex = progress.currentStep;
+  const before = activeStepIndex(state.progress);
+  const stepIndex = activeStepIndex(progress);
   const sources = findMessageSources(tutor.content, state.chunks, {
-    candidateIds: sourceIdsOf(state.plan, [before, before + 1]),
+    candidateIds: [...sourceIdsOf(state.plan, [before, before + 1, stepIndex]), ...state.turn.relatedIds],
     stepIds: sourceIdsOf(state.plan, [stepIndex]),
   });
 
@@ -60,15 +69,23 @@ const commitTurn = (state) => {
 
 const endInterruptedTurn = (state, failed) => {
   const tutor = state.messages.find((message) => message.id === state.turn.tutorId);
-  const messages = tutor?.content
+  const keep = tutor?.content && failed?.code !== 'unsafe_output';
+  const messages = keep
     ? updateMessage(state.messages, tutor.id, { status: 'stopped' })
     : state.messages.filter((message) => message.id !== state.turn.tutorId);
   return { ...state, messages, turn: IDLE_TURN, failed };
 };
 
+const TURN_EVENTS = new Set(['phase', 'progress', 'notice', 'delta', 'done', 'stopped', 'failed']);
+
+const belongsToTurn = (state, action) =>
+  state.turn.status !== 'idle' && (!action.tutorId || action.tutorId === state.turn.tutorId);
+
 export const chatReducer = (state, action) => {
+  if (TURN_EVENTS.has(action.type) && !belongsToTurn(state, action)) return state;
   switch (action.type) {
     case 'turn_started': {
+      if (state.turn.status !== 'idle') return state;
       const messages = [...state.messages];
       if (action.student) messages.push({ id: action.student.id, role: 'student', content: action.student.content });
       messages.push({ id: action.tutorId, role: 'tutor', content: '', status: 'pending', sources: [] });
@@ -77,7 +94,7 @@ export const chatReducer = (state, action) => {
         messages,
         failed: null,
         restored: false,
-        turn: { status: 'waiting', tutorId: action.tutorId, studentId: action.student?.id ?? action.studentId ?? null, pending: null },
+        turn: { status: 'waiting', tutorId: action.tutorId, studentId: action.student?.id ?? action.studentId ?? null, pending: null, relatedIds: action.relatedIds ?? [] },
       };
     }
     case 'phase':
@@ -125,10 +142,15 @@ export const historyFor = (messages, excludeId) =>
 
 export const lessonSummary = (plan, progress) => {
   const counts = { mastered: 0, learned: 0, recovered: 0, review: 0 };
-  const review = [];
-  progress.steps.forEach((step, index) => {
+  progress.steps.forEach((step) => {
     if (step.outcome) counts[step.outcome] += 1;
-    if (step.outcome === 'recovered' || step.outcome === 'review') review.push(plan.steps[index].title);
   });
-  return { counts, review, total: plan.steps.length };
+  const queue = progress.review?.queue ?? reviewQueue(progress);
+  const results = progress.review?.results ?? {};
+  return {
+    counts,
+    review: queue.map((index) => ({ index, title: plan.steps[index].title, result: results[index] ?? null })),
+    reviewed: Boolean(progress.review) && progress.status === 'completed',
+    total: plan.steps.length,
+  };
 };

@@ -15,7 +15,7 @@ const PHASE_KEYS = {
   teaching: 'lesson.writing',
 };
 
-const FINISH_MOVES = new Set(['finish', 'review_and_finish']);
+const FINISH_MOVES = new Set(['finish', 'review_and_finish', 'review_finish']);
 
 const KEY_ERRORS = ['missing_key', 'invalid_key', 'unknown_provider', 'server_key_restricted', 'server_key_budget', 'quota_exhausted'];
 
@@ -82,10 +82,12 @@ const summaryText = (plan, summary, t) =>
     '',
     ...plan.steps.map((step, index) => `${index + 1}. ${step.title}`),
     '',
-    ...(summary.review.length ? [`${t('summary.review')}:`, ...summary.review.map((title) => `- ${title}`)] : [t('summary.allGood')]),
+    ...(summary.review.length
+      ? [`${t('summary.review')}:`, ...summary.review.map((item) => `- ${item.title}${item.result ? ` (${t(`reviewResult.${item.result}`)})` : ''}`)]
+      : [t('summary.allGood')]),
   ].join('\n');
 
-function CompletionCard({ plan, progress, onNewLesson }) {
+function CompletionCard({ plan, progress, busy, onReview, onNewLesson }) {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
   const summary = lessonSummary(plan, progress);
@@ -119,8 +121,22 @@ function CompletionCard({ plan, progress, onNewLesson }) {
           <>
             <h3 className="text-sm font-semibold">{t('summary.review')}</h3>
             <ul className="mt-1.5 space-y-1 text-sm">
-              {summary.review.map((title) => <li key={title} dir="auto">{title}</li>)}
+              {summary.review.map((item) => (
+                <li key={item.index} className="flex flex-wrap items-center gap-2">
+                  <span dir="auto">{item.title}</span>
+                  {item.result && (
+                    <span className={`rounded-full px-2 py-0.5 text-xs ${item.result === 'pass' ? 'bg-success-soft text-success' : 'bg-danger-soft text-danger'}`}>
+                      {t(`reviewResult.${item.result}`)}
+                    </span>
+                  )}
+                </li>
+              ))}
             </ul>
+            {summary.reviewed && (
+              <p className="mt-2 text-sm text-muted">
+                {t('summary.reviewResult', { passed: summary.review.filter((item) => item.result === 'pass').length, total: summary.review.length })}
+              </p>
+            )}
           </>
         ) : (
           <p className="text-sm">{t('summary.allGood')}</p>
@@ -128,6 +144,12 @@ function CompletionCard({ plan, progress, onNewLesson }) {
       </div>
 
       <div className="mt-5 flex flex-wrap items-center gap-2">
+        {summary.review.length > 0 && !summary.reviewed && (
+          <button type="button" className="btn-primary py-1.5" onClick={onReview} disabled={busy}>
+            <Icon name="retry" className="size-4" />
+            {t('summary.practise', { count: summary.review.length })}
+          </button>
+        )}
         <button type="button" className="btn-secondary py-1.5" onClick={copy}>
           <Icon name={copied ? 'check' : 'copy'} className="size-4" />
           {copied ? t('summary.copied') : t('summary.copy')}
@@ -141,13 +163,14 @@ function CompletionCard({ plan, progress, onNewLesson }) {
 
 function StepCounter({ plan, progress }) {
   const { t } = useI18n();
-  const completed = progress.status === 'completed';
+  const completed = progress.status !== 'active';
   const done = progress.steps.filter((step) => step.status === 'done').length;
+  const label = progress.status === 'reviewing'
+    ? t('lesson.reviewOf', { current: progress.review.position + 1, total: progress.review.queue.length })
+    : completed ? t('lesson.complete') : t('lesson.stepOf', { current: progress.currentStep + 1, total: plan.steps.length });
   return (
-    <div className="flex items-center gap-3">
-      <span className="whitespace-nowrap text-sm font-medium tabular-nums">
-        {completed ? t('lesson.complete') : t('lesson.stepOf', { current: progress.currentStep + 1, total: plan.steps.length })}
-      </span>
+    <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+      <span className="whitespace-nowrap text-sm font-medium tabular-nums">{label}</span>
       <div className="flex h-2 w-24 gap-0.5 sm:w-36" role="progressbar" aria-label={t('lesson.progress')} aria-valuemin={0} aria-valuemax={plan.steps.length} aria-valuenow={done}>
         {progress.steps.map((step, index) => (
           <span
@@ -193,6 +216,7 @@ export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLe
   const { plan, progress } = tutor;
   const showTyping = tutor.busy && !tutor.messages.some((message) => message.status === 'streaming');
   const completed = progress.status === 'completed';
+  const lastFinishId = [...tutor.messages].reverse().find((message) => message.status === 'done' && FINISH_MOVES.has(message.move))?.id;
 
   const showStep = useCallback((index) => {
     setPlanOpen(false);
@@ -233,8 +257,8 @@ export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLe
               {tutor.messages.map((message) => (
                 <Fragment key={message.id}>
                   <ChatMessage message={message} chunkLabels={chunkLabels} onOpenSource={openSource} />
-                  {completed && message.status === 'done' && FINISH_MOVES.has(message.move) && (
-                    <CompletionCard plan={plan} progress={progress} onNewLesson={onNewLesson} />
+                  {completed && message.id === lastFinishId && (
+                    <CompletionCard plan={plan} progress={progress} busy={tutor.busy} onReview={tutor.review} onNewLesson={onNewLesson} />
                   )}
                 </Fragment>
               ))}

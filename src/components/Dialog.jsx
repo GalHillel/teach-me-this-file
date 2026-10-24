@@ -14,7 +14,7 @@ export default function Dialog({ open, onClose, title, children, variant = 'cent
 
   const placement = {
     center: 'm-auto w-[min(32rem,calc(100vw-2rem))] rounded-2xl',
-    side: 'my-0 ms-auto me-0 h-dvh max-h-dvh w-[min(30rem,100vw)] sm:rounded-s-2xl max-sm:mt-auto max-sm:h-[75dvh] max-sm:w-screen max-sm:max-w-none max-sm:rounded-t-2xl',
+    side: 'my-0 ms-auto me-0 h-dvh max-h-dvh w-[min(30rem,100%)] sm:rounded-s-2xl max-sm:mt-auto max-sm:h-[80dvh] max-sm:w-full max-sm:max-w-full max-sm:rounded-t-2xl',
   }[variant];
 
   return (
@@ -32,7 +32,9 @@ export default function Dialog({ open, onClose, title, children, variant = 'cent
             <Icon name="close" />
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">{open && children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] focus-visible:outline-offset-[-2px]" tabIndex={0} role="region" aria-labelledby={labelId}>
+          {open && children}
+        </div>
       </div>
     </dialog>
   );

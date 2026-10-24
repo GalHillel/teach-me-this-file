@@ -60,7 +60,7 @@ export default function LessonPlanPanel({ plan, progress, onSelectStep }) {
         <ol className="mt-3 space-y-1">
           {plan.steps.map((step, index) => {
             const state = progress.steps[index];
-            const active = state.status === 'active' && progress.status === 'active';
+            const active = (state.status === 'active' && progress.status === 'active') || (progress.status === 'reviewing' && progress.review.queue[progress.review.position] === index);
             const reachable = state.status !== 'pending' && onSelectStep;
             const content = (
               <>
@@ -71,6 +71,9 @@ export default function LessonPlanPanel({ plan, progress, onSelectStep }) {
                     <span className="mt-0.5 block text-xs text-muted">{t('plan.attempt', { count: state.attempts + 1 })}</span>
                   )}
                   {state.outcome && <span className="mt-0.5 block text-xs text-muted">{t(`outcome.${state.outcome}`)}</span>}
+                  {progress.review?.results?.[index] && (
+                    <span className="mt-0.5 block text-xs text-muted">{t('plan.reviewed', { result: t(`reviewResult.${progress.review.results[index]}`) })}</span>
+                  )}
                 </span>
               </>
             );

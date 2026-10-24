@@ -176,8 +176,11 @@ try {
       await startLesson(page);
       record('lesson-start', viewport, language, await audit(page));
       await answer(page, 'I think it is wrong');
+      await answer(page, 'Still wrong, sorry');
+      await answer(page, 'Wrong again');
+      const recheckShown = await page.locator('[role=note]').count() > 0;
       await answer(page, 'Plants use light to make glucose from carbon dioxide and water.');
-      record('lesson-progress', viewport, language, await audit(page));
+      record('lesson-progress', viewport, language, await audit(page), { recheckShown });
 
       const planButton = page.locator('section button.btn-ghost.lg\\:hidden');
       if (await planButton.isVisible()) {
@@ -199,9 +202,18 @@ try {
       }
       record('lesson-complete', viewport, language, await audit(page), {
         completed: Boolean(await page.locator('#summary-title').count()),
-        errors: [...errors],
-        blocked,
       });
+
+      let reviewed = false;
+      await step('practise weak steps', async () => {
+        await page.locator('section[aria-labelledby="summary-title"] button.btn-primary').click({ timeout: 3000 });
+        await waitTutorDone(page, (await page.locator('article').count()) - 1);
+        await page.waitForFunction(() => document.querySelector('[role=progressbar]')?.previousElementSibling?.textContent.match(/\d/), null, { timeout: 5000 });
+        record('review', viewport, language, await audit(page));
+        await answer(page, 'Leaves take in carbon dioxide and roots take in water to make glucose.');
+        reviewed = await page.locator('section[aria-labelledby="summary-title"] .rounded-full.bg-success-soft').count() > 0;
+      });
+      record('review-done', viewport, language, await audit(page), { reviewed, errors: [...errors], blocked });
 
       await page.reload();
       await page.waitForSelector('article');
@@ -239,6 +251,8 @@ const summary = {
     }, {})),
   lessonCompleted: results.filter((row) => row.screen === 'lesson-complete').every((row) => row.completed),
   lessonRestored: results.filter((row) => row.screen === 'lesson-restored').every((row) => row.restored),
+  recheckShown: results.filter((row) => row.screen === 'lesson-progress').every((row) => row.recheckShown),
+  reviewCompleted: results.filter((row) => row.screen === 'review-done').every((row) => row.reviewed),
   pageErrors: [...new Set(results.flatMap((row) => row.errors ?? []))],
   blocked: results.flatMap((row) => (row.blocked ?? []).map((item) => `${row.viewport} ${row.language} ${item}`)),
 };
@@ -247,5 +261,5 @@ print(JSON.stringify(summary, null, 2));
 if (reportPath) writeFileSync(reportPath, `${JSON.stringify({ summary, results }, null, 2)}\n`);
 
 const serious = summary.axe.filter((violation) => violation.impact === 'serious' || violation.impact === 'critical');
-const failed = summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
+const failed = !summary.recheckShown || !summary.reviewCompleted || summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
 if (strict && failed) process.exit(1);

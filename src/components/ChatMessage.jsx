@@ -14,6 +14,11 @@ const VERDICT_STYLES = {
 
 const MOVE_STYLES = {
   hint: 'bg-marker-soft text-ink',
+  reteach: 'bg-marker-soft text-ink',
+  rephrase: 'bg-pen-soft text-pen',
+  review_question: 'bg-pen-soft text-pen',
+  review_next: 'bg-pen-soft text-pen',
+  review_finish: 'bg-success-soft text-success',
   probe: 'bg-pen-soft text-pen',
   reveal_and_recheck: 'bg-marker-soft text-ink',
   finish: 'bg-success-soft text-success',
@@ -58,7 +63,7 @@ function SystemNote({ note }) {
     <div className="flex items-center gap-3 py-1 text-xs text-muted" role="note">
       <span className="h-px flex-1 bg-line" />
       <span className="max-w-[80%] text-center">
-        {t(`note.${note.code}`, { step: note.step, next: `\u2068${note.next}\u2069` })}
+        {t(note.code === 'review_item' ? `note.review_item_${note.result}` : `note.${note.code}`, { ...note, next: `\u2068${note.next ?? ''}\u2069` })}
       </span>
       <span className="h-px flex-1 bg-line" />
     </div>
