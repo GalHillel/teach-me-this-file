@@ -79,6 +79,7 @@ const en = {
   'lesson.restored': 'The lesson was restored after the page reloaded.',
   'lesson.backupModel': 'The main AI models were busy, so a lighter backup model ({model}) answered. Explanations and grading may be less accurate.',
   'lesson.dismiss': 'Dismiss',
+  'lesson.skipToAnswer': 'Skip to the answer box',
 
   'plan.minutes': 'about {minutes} min',
   'plan.done': '{done} of {total} steps done',
@@ -153,7 +154,7 @@ const en = {
   'composer.followUp': 'Ask a follow-up question',
   'composer.stop': 'Stop the response',
   'composer.send': 'Send',
-  'composer.hint': 'Enter to send, Shift + Enter for a new line.',
+  'composer.hint': 'Enter to send, Shift + Enter for a new line, Esc to stop the tutor.',
 
   'source.title': 'Source: {label}',
   'source.titlePlain': 'Source',
@@ -297,6 +298,7 @@ const he = {
   'lesson.restored': 'השיעור שוחזר אחרי טעינה מחדש של הדף.',
   'lesson.backupModel': 'המודלים הראשיים היו עמוסים, ולכן ענה מודל גיבוי קל יותר ({model}). ההסברים והבדיקה עלולים להיות פחות מדויקים.',
   'lesson.dismiss': 'סגירה',
+  'lesson.skipToAnswer': 'דילוג לתיבת התשובה',
 
   'plan.minutes': 'כ-{minutes} דקות',
   'plan.done': '{done} מתוך {total} צעדים הושלמו',
@@ -371,7 +373,7 @@ const he = {
   'composer.followUp': 'אפשר לשאול שאלת המשך',
   'composer.stop': 'עצירת התשובה',
   'composer.send': 'שליחה',
-  'composer.hint': 'Enter לשליחה, Shift + Enter לשורה חדשה.',
+  'composer.hint': 'Enter לשליחה, Shift + Enter לשורה חדשה, Esc לעצירת המורה.',
 
   'source.title': 'מקור: {label}',
   'source.titlePlain': 'מקור',
@@ -515,6 +517,7 @@ const fr = {
   'lesson.restored': 'La leçon a été restaurée après le rechargement de la page.',
   'lesson.backupModel': 'Les modèles principaux étaient occupés ; un modèle de secours plus léger ({model}) a répondu. Les explications et la correction peuvent être moins précises.',
   'lesson.dismiss': 'Fermer',
+  'lesson.skipToAnswer': 'Aller à la zone de réponse',
 
   'plan.minutes': 'environ {minutes} min',
   'plan.done': '{done} étapes terminées sur {total}',
@@ -589,7 +592,7 @@ const fr = {
   'composer.followUp': 'Posez une question complémentaire',
   'composer.stop': 'Arrêter la réponse',
   'composer.send': 'Envoyer',
-  'composer.hint': 'Entrée pour envoyer, Maj + Entrée pour aller à la ligne.',
+  'composer.hint': 'Entrée pour envoyer, Maj + Entrée pour aller à la ligne, Échap pour arrêter le tuteur.',
 
   'source.title': 'Source : {label}',
   'source.titlePlain': 'Source',

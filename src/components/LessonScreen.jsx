@@ -218,6 +218,16 @@ export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLe
   const completed = progress.status === 'completed';
   const lastFinishId = [...tutor.messages].reverse().find((message) => message.status === 'done' && FINISH_MOVES.has(message.move))?.id;
 
+  const { busy, stop } = tutor;
+  useEffect(() => {
+    if (!busy) return undefined;
+    const onKey = (event) => {
+      if (event.key === 'Escape' && !document.querySelector('dialog[open]')) stop();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [busy, stop]);
+
   const showStep = useCallback((index) => {
     setPlanOpen(false);
     const target = scrollRef.current?.querySelector(`[data-step-index="${index}"]`);
@@ -236,7 +246,10 @@ export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLe
         </div>
       </aside>
 
-      <section className="flex min-h-0 flex-col" aria-label={t('lesson.chat')}>
+      <section className="relative flex min-h-0 flex-col" aria-label={t('lesson.chat')}>
+        <a href="#answer" className="sr-only z-10 rounded-lg bg-surface px-3 py-2 text-sm font-medium text-pen shadow focus:not-sr-only focus:absolute focus:start-3 focus:top-3">
+          {t('lesson.skipToAnswer')}
+        </a>
         <div className="flex items-center justify-between gap-3 border-b border-line bg-surface/80 px-4 py-2.5 backdrop-blur sm:px-6">
           <h1 className="min-w-0 truncate font-display text-base font-semibold lg:sr-only" dir="auto">{plan.title}</h1>
           <div className="flex items-center gap-2 lg:ms-auto">
@@ -249,7 +262,7 @@ export default function LessonScreen({ lesson, settings, onOpenSettings, onNewLe
 
         <div className="relative min-h-0 flex-1">
           <div ref={scrollRef} onScroll={onScroll} className="h-full overflow-y-auto bg-surface">
-            <div className="mx-auto flex min-h-full max-w-3xl flex-col gap-6 px-4 py-6 sm:border-s-2 sm:border-margin/50 sm:px-8">
+            <div className="mx-auto flex min-h-full max-w-3xl flex-col gap-6 px-4 py-6 sm:border-s-2 sm:border-margin/50 sm:px-8" role="log" aria-live="polite" aria-relevant="additions" aria-label={t('lesson.chat')}>
               {tutor.restored && <Banner onDismiss={tutor.dismissRestored}>{t('lesson.restored')}</Banner>}
               {tutor.notice?.code === 'backup_model' && (
                 <Banner tone="warning" onDismiss={tutor.dismissNotice}>{t('lesson.backupModel', { model: tutor.notice.model })}</Banner>

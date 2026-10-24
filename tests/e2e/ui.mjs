@@ -106,6 +106,10 @@ const openApp = async (browser, viewport, language) => {
   await context.addInitScript((code) => localStorage.setItem('tmtf.uiLanguage', code), language);
   const page = await context.newPage();
   const errors = [];
+  page.on('request', (request) => {
+    const host = new URL(request.url()).hostname;
+    if (host !== 'localhost' && !request.url().startsWith('data:') && !request.url().startsWith('blob:')) externalRequests.add(host);
+  });
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => {
     if (message.type() === 'error') errors.push(message.text());
@@ -142,6 +146,8 @@ const startLesson = async (page) => {
 const results = [];
 const record = (screen, viewport, language, data, extra = {}) => results.push({ screen, viewport: viewport.join('x'), language, ...data, ...extra });
 
+const externalRequests = new Set();
+let keyboard = null;
 let pdfStructure = null;
 let renamed = null;
 const server = await startServer();
@@ -272,6 +278,25 @@ try {
     return text;
   })();
 
+  keyboard = await (async () => {
+    const { context, page } = await openApp(browser, [1280, 800], 'en');
+    await page.goto(base);
+    await page.waitForSelector('h1');
+    await startLesson(page);
+    await page.locator('a[href="#answer"]').focus();
+    const skipVisible = await page.locator('a[href="#answer"]').evaluate((element) => element.getBoundingClientRect().width > 20);
+    await page.keyboard.press('Enter');
+    const skipFocusesAnswer = await page.evaluate(() => document.activeElement?.id === 'answer');
+    await page.locator('#answer').fill('Please explain slowly with an example');
+    await page.locator('#answer').press('Enter');
+    await page.waitForSelector('.streaming-caret', { timeout: 10000 });
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => document.body.innerText.includes('Stopped before the end'), null, { timeout: 5000 });
+    const stepAfterStop = await page.locator('[role=progressbar]').evaluate((element) => element.previousElementSibling.innerText);
+    await context.close();
+    return { skipVisible, skipFocusesAnswer, escapeStops: true, stepAfterStop };
+  })().catch((error) => ({ error: error.message.split('\n')[0] }));
+
   const { context, page } = await openApp(browser, [1280, 800], 'en');
   await page.goto(base);
   await page.waitForSelector('h1');
@@ -288,6 +313,8 @@ const summary = {
   checks: results.length,
   pdfStructure,
   renamedPdf: renamed,
+  keyboard,
+  externalRequests: [...externalRequests],
   overflow: results.filter((row) => row.overflow > 0).map((row) => `${row.screen} ${row.viewport} ${row.language} +${row.overflow}px`),
   offscreen: results.filter((row) => row.offscreen.length).map((row) => `${row.screen} ${row.viewport} ${row.language}: ${row.offscreen.join(', ')}`),
   smallTargets: [...new Set(results.flatMap((row) => row.smallTargets.map((item) => `${row.screen}: ${item}`)))],
@@ -311,5 +338,5 @@ print(JSON.stringify(summary, null, 2));
 if (reportPath) writeFileSync(reportPath, `${JSON.stringify({ summary, results }, null, 2)}\n`);
 
 const serious = summary.axe.filter((violation) => violation.impact === 'serious' || violation.impact === 'critical');
-const failed = !pdfStructure || pdfStructure.headerLeft || pdfStructure.footerLeft || pdfStructure.sections.length < 3 || !summary.recheckShown || !summary.reviewCompleted || summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
+const failed = !keyboard?.escapeStops || !keyboard?.skipFocusesAnswer || !pdfStructure || pdfStructure.headerLeft || pdfStructure.footerLeft || pdfStructure.sections.length < 3 || !summary.recheckShown || !summary.reviewCompleted || summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
 if (strict && failed) process.exit(1);
