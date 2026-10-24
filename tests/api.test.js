@@ -254,6 +254,12 @@ describe('API key handling', () => {
   });
 });
 
+describe('proxy headers', () => {
+  it('trusts only the first proxy hop for the client address', () => {
+    expect(createApp().get('trust proxy')).toBe(1);
+  });
+});
+
 describe('rate limiting', () => {
   it('limits bursts of requests from one client', async () => {
     const app = mockApp();
