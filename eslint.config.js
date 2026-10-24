@@ -25,7 +25,7 @@ export default [
     },
   },
   {
-    files: ['server/**/*.js', 'shared/**/*.js', 'api/**/*.js', 'tests/**/*.js', '*.config.js'],
+    files: ['server/**/*.js', 'shared/**/*.js', 'api/**/*.js', 'tests/**/*.js', 'eval/**/*.js', '*.config.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
