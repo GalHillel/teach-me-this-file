@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { verifyCitations } from '../../shared/citations.js';
+import { stripCitations, verifyCitations } from '../../shared/citations.js';
 import { AppError } from '../errors.js';
 import { count, recordFirstToken } from '../metrics.js';
 import { assessAnswer } from './assessor.js';
@@ -11,7 +11,7 @@ const HISTORY_LIMIT = 12;
 export const toProviderMessages = (history, studentMessage) => {
   const recent = history.slice(-HISTORY_LIMIT).map((message) => ({
     role: message.role === 'tutor' ? 'assistant' : 'user',
-    content: message.content,
+    content: message.role === 'tutor' ? stripCitations(message.content, () => false).replace(/ +([.,;:!?])/g, '$1') : message.content,
   }));
   const all = [{ role: 'user', content: 'Start the lesson.' }, ...recent];
   if (studentMessage) all.push({ role: 'user', content: studentMessage });

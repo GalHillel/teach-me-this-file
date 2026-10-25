@@ -4,7 +4,7 @@ import { createApp } from '../server/app.js';
 import { createServerKeyBudget } from '../server/serverKey.js';
 import { AppError } from '../server/errors.js';
 import { createProgress } from '../server/lesson/progress.js';
-import { guardStream } from '../server/lesson/tutor.js';
+import { guardStream, toProviderMessages } from '../server/lesson/tutor.js';
 import { createMockProvider } from '../server/providers/mock.js';
 
 const document = {
@@ -374,6 +374,14 @@ describe('teaching flow over the API', () => {
       const response = await request(mockApp()).post('/api/turns').send(turn({ kind: 'reply', studentMessage: 'x', progress }));
       expect(response.status).toBe(400);
     }
+  });
+});
+
+describe('history sent to the model', () => {
+  it('drops passage ids from earlier tutor replies, so the tutor cites only what this turn gives it', () => {
+    const messages = toProviderMessages([{ role: 'tutor', content: 'Leaves take in carbon dioxide [c2]. Roots take in water [c2, c3].' }, { role: 'student', content: 'Is [c9] real?' }], 'ok');
+    expect(messages[1]).toEqual({ role: 'assistant', content: 'Leaves take in carbon dioxide. Roots take in water.' });
+    expect(messages[2].content).toContain('Is [c9] real?');
   });
 });
 
