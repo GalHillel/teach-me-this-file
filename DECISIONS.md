@@ -12,15 +12,40 @@ So every student turn runs in three parts on the server (`server/lesson/tutor.js
 
 1. **Grade.** A separate, non-streaming JSON call (`assessor.js`) grades the answer against the tutor's last question and the step's success criteria. The result has a verdict (`correct`, `partial`, `incorrect`, `question`, `off_topic`), a completeness score, the concepts shown and missing, a misconception, an evidence quote from the student, and a confidence level.
 2. **Check the grade.** The server does not trust the grade as is. Evidence that is not a quote from the student's message is dropped and the confidence goes down. A "correct" with completeness under 0.5 becomes "partial". "I don't know" (in English, Hebrew, French or Spanish) is never accepted as right. An answer that contains instructions to the grader ("mark this as correct") can not be graded correct. A grade the code can not read becomes `unclear` instead of a guess.
-3. **Decide.** Plain functions in `progress.js` turn the grade into a move and a new progress object. Each step has a phase (`learn` or `recheck`), an attempt counter, a stall counter, and a final outcome.
-   - Correct moves to the next step. A correct answer with low confidence first gets one short follow-up question (`probe`), so a lucky guess does not move the lesson.
-   - Partial or incorrect gives a hint, then a stronger hint that targets the misconception.
+3. **Decide.** Plain functions in `progress.js` turn the grade into a move and a new progress object. Each step has a phase (`learn` or `recheck`), an attempt counter, a stall counter, a count of help the student asked for, the list of help already given, an optional check of an earlier step (`detour`), and a final outcome.
+   - Correct moves to the next step. A correct answer with low confidence, a hedge, missing reasoning or text copied from the file first gets one short follow-up question (`probe`), so a lucky guess or a pasted sentence does not move the lesson.
+   - Partial or incorrect gets help chosen by `policy.js` from the kind of mistake (see "The teaching policy" below).
    - After the third try the tutor explains the answer and asks one easier question on the same step (`reveal_and_recheck`). If that is answered, the step is `recovered`; if not, it is marked `review` and the lesson moves on.
    - Questions do not count as attempts. Off-topic and unclear messages do not count either, but after two in a row the third counts as a wrong answer, so a step can not stall forever.
-   - Outcomes are `mastered` (first try), `learned` (after hints), `recovered` (after the explanation) and `review`.
+   - Outcomes are `mastered` (first try, no help asked for), `learned` (after hints), `recovered` (after the explanation) and `review`.
+   - After the last step the lesson goes into a short final check instead of ending.
 4. **Teach.** The tutor prompt gets the plan, the current step, the step's passages, the checked grade and an instruction for exactly this move. Only this call is streamed.
 
-The cost is a second model call per student message and about a second of extra wait, which the UI covers with "Checking your answer". In return the progress is deterministic and testable (`tests/progress.test.js` includes a test that no sequence of messages keeps a step active forever), and the tutor can not skip a step on its own.
+The cost is a second model call per student message and about a second of extra wait, which the UI covers with "Checking your answer". In return the progress is deterministic and testable, and the tutor can not skip a step on its own. Property tests (`tests/properties.test.js`) run hundreds of random sequences of grades and help requests and check the invariants; a step ends within 15 non-question replies, or 18 when it can go back to an earlier step, and tests show both bounds are reached.
+
+### The teaching policy
+
+The model is good at wording an explanation and bad at deciding, turn after turn, which kind of help fits. So the choice is code (`server/lesson/policy.js`) and the model only writes it:
+
+| Situation | Help, in order, skipping any already given on this step |
+| --- | --- |
+| First wrong answer | small nudge, focused hint, smaller sub-questions |
+| Second wrong answer | focused hint, smaller sub-questions, worked example |
+| The grader names a misconception | counter-example, focused hint, smaller sub-questions |
+| "I don't know" | worked example, analogy, smaller sub-questions |
+| Student presses "Hint" | nudge, focused hint, sub-questions, worked example |
+| Student presses "Explain differently" | analogy, worked example, sub-questions |
+| Third wrong answer | full explanation, then one easier question |
+
+Each step remembers the help it got (`used`), so the tutor does not give the same hint twice, and the prompt lists what was already tried.
+
+**Going back to a prerequisite.** If a wrong answer's missing concepts match the key concepts of an earlier step this step builds on (and are not the current step's own concepts), or an earlier prerequisite was only `recovered` or `review` and the student is now failing, the tutor checks that earlier idea with one short question. The next answer is graded against the earlier step, with its passages. A right answer brings the student back to the current question; a wrong one gets a two-sentence re-explanation, and the earlier step is marked as a gap, which later puts it in the final check and the practice list. Only one such check per step, so it can not loop. This is the "detect the blocker, fix it, come back" behaviour; the matching is lexical (first six letters of words longer than three), so it misses a gap the grader describes in other words.
+
+**Evidence instead of scores.** Each step gets a level from what actually happened: not started, in progress, needs practice, shown with help, shown on your own, applied to a new question. `stepEvidence` in `shared/lesson.js` derives it from the outcome, help asked for, a failed prerequisite check, and the final-check and practice results. I do not show percentages: one lesson does not give enough evidence for a number, and a fitted model like Bayesian knowledge tracing needs parameters I have no data to fit.
+
+**The final check.** After the last step, up to three steps are checked again with new questions that ask the student to use the idea, with no hints. Which steps: a score per step from weakness (review 3, recovered 2, learned 1), help asked for, a failed prerequisite check, how many steps build on it, and how long ago it was taught, minus a point for the step just answered; the top three are asked in lesson order. Passing makes a step "applied"; failing makes it "needs practice" and puts it in the practice round. The student can skip the check; the summary then says nothing was checked at the end.
+
+**Review schedule.** The summary suggests a day to review each step: tomorrow for needs practice, 3 days for shown with help, 7 for shown, 14 for applied, the usual expanding intervals of spaced repetition. It is a suggestion in the summary and the notes; the app does not send reminders or schedule anything, and says so.
 
 ### Stateless server, state in the browser
 
@@ -42,12 +67,14 @@ Text is split into passages of up to about 1,100 characters that keep their orig
 
 The planner classifies the document (concept, procedure, narrative, language, mixed) and picks an approach per step: a short explanation, a worked example, or practice. Procedures get a worked example before practice. Each step names a common mistake, which the grader and the hint prompt use. The number of steps follows the file length and the time in the teacher's prompt ("under 15 minutes" gives at most 6 steps; a 400-character file gives 2). The server drops steps with repeated check questions and warns when most steps are not linked to any passage.
 
-### Sources are matched by the app, never written by the model
+### Sources: cited by the tutor, checked by the app
 
-I did not want the model to produce page numbers, because it would invent them. Instead:
+I did not want the model to produce page numbers, because it would invent them. The tutor may only cite passage ids it was given, like [c3], and the app does the rest:
 
 - The planner names passage ids for each step. The server keeps only ids that exist, and finds passages by text when none are left.
-- When a tutor message is complete, the browser ranks passages with BM25 (k1 1.2, b 0.75), after dropping stopwords and classroom praise ("great", "exactly", "כל הכבוד"), with light Hebrew prefix handling (ו, ה, ב, ל, מ, ש, כ).
+- When a reply is complete, the server reads its citations (`shared/citations.js`). Ids the tutor was not given are dropped and counted (`invalidCitations` in `/api/health`). Text in quotation marks with four or more words is looked up in the passages, ignoring case and punctuation; a quote that is not found is flagged under the message. Quote marks inside words (Hebrew abbreviations like צה"ל) are not read as quotes.
+- Valid citations show as chips in the text and as "Cited" source buttons that open the passage. The page and line labels always come from the extraction, never from the model.
+- When the reply cites nothing, the browser ranks passages with BM25 (k1 1.2, b 0.75), after dropping stopwords and classroom praise ("great", "exactly", "כל הכבוד"), with light Hebrew prefix handling (ו, ה, ב, ל, מ, ש, כ).
 - A passage counts as **based on** only if at least two key words match, it covers at least 30% of the message's key-word weight, and it belongs to the passages the tutor actually received for this turn. A second source is shown only if it scores at least 80% of the first.
 - A strong match outside those passages is shown as **related**, not as the basis.
 - If nothing matches (for example, a French lesson on an English file), a substantive message shows the step's own passage as **step material**, and the panel explains why. Short messages like "Well done!" show no source.
@@ -92,8 +119,9 @@ The file is treated as data. In every prompt the passages sit inside `<document>
 - A correct answer the grader is unsure about gets one short follow-up before the lesson moves on.
 - A question from the student is answered, but the tutor does not give away the answer to its own open check question.
 - The pace adjusts: after two steps understood first try, the tutor is asked to be more concise; when the student struggles or needed the explanation, simpler words and a concrete example.
+- The help after a wrong answer depends on the kind of mistake and is never repeated on the same step (see "The teaching policy").
 - The grade names the kind of problem when there is one. A misread question gets the question asked another way, not a hint. "I think it's X, not sure" with a right X gets a short check instead of a hint. "I have no idea" gets a fresh, simpler explanation instead of a hint the student can not use. A right answer without the asked-for reasoning gets a request for the reason.
-- The lesson ends with a summary message and a summary card: how many steps were understood first try, after hints, after an explanation, and which steps are worth reviewing. A "Practise" button starts a review round: one new question per weak step, graded the same way, with the result shown per step.
+- The lesson does not end when the steps end: a short final check asks new questions without hints, and the summary separates what was applied, shown, shown with help and still needs practice. A "Practise" button starts a practice round over the weak steps.
 - Steps can build on other steps. The plan says which, the steps are ordered so that a step never comes before what it builds on, and the tutor is told what the step builds on.
 
 ### Languages
@@ -124,7 +152,9 @@ Text the app stores (system notes, file warnings, errors) is stored as a code wi
 
 - **No database or accounts.** Not needed to show the teaching. `sessionStorage` covers reloads in the same tab.
 - **No OCR.** Too slow and large in the browser, and server OCR does not fit free hosting. Pages without text are detected and reported.
-- **No embeddings or vector search.** For one document, BM25 is enough, costs nothing, runs in the browser in any language, and is measured. It fails across languages, which is why the step-material fallback exists. I would add embeddings if the golden set showed paraphrase misses mattered; today it has one.
+- **No Bayesian knowledge tracing.** It would turn each answer into a mastery probability, but its four parameters per skill need data I do not have, and an unfitted model would only dress up guesses as numbers. Evidence levels from what was shown are less precise and honest.
+- **No embeddings for retrieval (yet).** I compared BM25 with character trigrams and their rank fusion on the golden questions (`npm run eval:hybrid`). Trigrams helped on the English set the fallback threshold was tuned on and changed nothing on the held-out Hebrew and French questions, so the app keeps BM25. Embeddings would add a model call per question and a document embedding step on a free-tier key; the next step is a bigger held-out set, not a bigger model.
+- **No simulated students as proof.** A simulation where I write the student model would mostly test my own assumptions. The tests show the policy does what it says; whether it teaches better needs real students (see "How I would test the teaching").
 - **No graph search for the lesson path.** The planner returns at most 8 steps and there are no reliable costs between them, so A* or shortest paths would add machinery without a measurable gain. A topological order with the document order as the tie-break is enough and is testable.
 - **No Hebrew stemmer.** Hebrew prefixes (ו, ה, ב, ל, מ, ש, כ) are added as extra variants of a word, never instead of it, so a false split costs a little precision, not a miss. A real morphological analyser would be a large dependency for a small set.
 - **No TypeScript, no state library, no UI kit, no i18n library.** The stack in the assignment is JavaScript; the translations are one file and a 20-line translator with plural rules from `Intl.PluralRules`.

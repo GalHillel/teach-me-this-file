@@ -15,12 +15,17 @@ I built it as a home assignment for an AI Engineer role. The reasoning behind th
 - Clear messages for files the app cannot use: empty, damaged, password protected, scanned PDFs without a text layer (no OCR), unsupported types, files over 25 MB, and files whose content does not match their name (a renamed image is not read as a PDF).
 - The teacher prompt sets age, style, length and goals. The lesson language is a separate choice (or taken from the prompt). Three editable examples are included, one in Hebrew.
 - The server builds a structured lesson plan: objectives, the content type, 2 to 8 steps sized to the file and the time, and per step an approach (explanation, worked example or practice), a check question, success criteria, a common mistake, the steps it builds on, and the passages it is based on. Steps are put in an order where each comes after the steps it builds on.
-- Each student answer is graded first: verdict, completeness, concepts shown and missing, misconception, what kind of problem it is (misread the question, unsure, does not know, right without the reasoning), an evidence quote and a confidence level. The server checks the grade, then decides the next move in code: hint, stronger hint, the question asked another way, a fresh explanation, a follow-up when the grader is unsure, an explanation followed by one more check after three tries, the next step, or a summary at the end.
+- Each student answer is graded first: verdict, completeness, concepts shown and missing, misconception, what kind of problem it is (misread the question, unsure, does not know, right without the reasoning, copied from the file), an evidence quote and a confidence level. The server checks the grade, then decides the next move in code.
+- The help after a wrong answer depends on the mistake: a small nudge first, then a focused hint, a counter-example when the grader names a misconception, smaller sub-questions, a worked example or an analogy when the student does not know, and the full explanation with one more check after three tries. The tutor never repeats help it already gave on the step.
+- When the missing ideas belong to an earlier step, or an earlier step was weak, the tutor checks that step first with one short question, grades the answer against it, and comes back to the current question. A failed check marks the earlier step for practice.
+- "Hint" and "Explain differently" buttons let the student ask for help before answering. A right answer after help counts as shown with help, not as understood on the first try.
+- After the last step comes a short final check: up to three steps, chosen by how weak they were, how many steps build on them and how long ago they were taught, each with a new question that asks the student to use the idea, answered without hints. It can be skipped.
 - Tutor answers stream token by token. Stop cancels the request on the server and the provider, keeps the partial text, and leaves the lesson state unchanged.
-- "Step 3 of 7" progress, a lesson plan panel with the outcome of each step, labels for what the tutor is doing (hint, follow-up, explanation, summary), and a summary card at the end with the steps worth reviewing. From the card the student can practise those steps in a short review round and download the lesson notes as Markdown.
+- Progress shows what was shown for each step, not a percentage: applied to a new question, shown on your own, shown with help, or needs practice, with the reasons (first try, hints, full explanation, final check). The summary groups the steps this way, suggests when to review each one (1, 3, 7 or 14 days), offers a practice round for the weak ones, and downloads the notes as Markdown.
+- A learning map shows the steps and which ones build on which, and marks each key concept as found in the file or not found in it.
 - The student can ask a question at any point. The app finds the passages of the whole file that answer it and sends them with the turn, so the tutor can answer from the file without losing its place in the lesson.
 - A search panel lists the lesson's key concepts and the file's sections, highlights matches, and says which step teaches each passage.
-- A source button under tutor messages opens the exact passage from the file, labelled "based on", "related" or "step material", with the shared words highlighted.
+- The tutor cites the passages it uses, like [c3]. The server keeps only citations of passages the tutor was actually given and checks quoted text against the file; citations show as chips that open the passage, and a quote that is not in the file is flagged under the message. When the tutor cites nothing, the app falls back to matching the message to passages ("based on", "related" or "step material").
 - The interface is in English, Hebrew or French, with a right-to-left layout for Hebrew. Lessons and documents can be right-to-left too.
 - The lesson survives a reload in the same tab. The API key does not; it stays in memory only.
 - If the main AI models are busy and a lighter backup model answers, the app says so.
@@ -65,8 +70,10 @@ server/
   lesson/tutor.js            one turn: grade, decide, stream
   providers/                 Gemini (model tiers, cooldowns), OpenAI-compatible (Groq, OpenRouter), mock
   lesson/ordering.js         prerequisite ordering of plan steps
+  lesson/policy.js           which help to give, and when to check an earlier step
 shared/text.js               tokenizer, stopwords, BM25 ranking, text direction
-shared/lesson.js             lesson helpers used by both server and browser
+shared/lesson.js             evidence levels, final-check selection, review schedule (server and browser)
+shared/citations.js          reads and checks the tutor's citations and quotes
 src/
   App.jsx                    screens, settings, file reading
   api/                       fetch client and SSE reader
@@ -134,6 +141,8 @@ npm run test:e2e      # builds, then runs the browser harness with the mock prov
 npm run eval:sources  # source matching on the golden set, no AI calls
 npm run eval:retrieval
 npm run bench         # chunking, indexing and scoring times on synthetic documents
+npm run eval:hybrid   # BM25 against character trigrams and their fusion, tuned on English, held out on Hebrew and French
+npm run eval:load     # first-screen load time under CPU and network throttling
 EVAL_API_KEY=your-key EVAL_LABEL=mine node eval/grading.js # grading on 43 golden answers, real model calls
 ```
 

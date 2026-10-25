@@ -1,0 +1,53 @@
+{
+ "model": "gemini-3.5-flash-lite",
+ "old": {
+  "cases": 51,
+  "verdictOk": 49,
+  "falseCorrect": "0/29",
+  "correctMarkedWrong": "0/15",
+  "issueOk": "24/26",
+  "copied": "0/2 found, 0 flagged",
+  "misconceptionNamed": "7/7",
+  "medianMs": 1400
+ },
+ "new": {
+  "cases": 51,
+  "verdictOk": 49,
+  "falseCorrect": "0/29",
+  "correctMarkedWrong": "0/15",
+  "issueOk": "26/26",
+  "copied": "2/2 found, 2 flagged",
+  "misconceptionNamed": "7/7",
+  "medianMs": 710
+ },
+ "diffs": [
+  [
+   "en-contradiction",
+   "partial/none",
+   "incorrect/none",
+   "partial|incorrect/"
+  ],
+  [
+   "en-copied-source",
+   "correct/none",
+   "correct/copied",
+   "correct|partial/copied"
+  ],
+  [
+   "he-copied-source",
+   "correct/none",
+   "correct/copied",
+   "correct|partial/copied"
+  ]
+ ],
+ "misses": {
+  "old": [
+   "en-sub-question-extra",
+   "hard-whole-process-to-sub-question"
+  ],
+  "new": [
+   "en-sub-question-extra",
+   "hard-whole-process-to-sub-question"
+  ]
+ }
+}
