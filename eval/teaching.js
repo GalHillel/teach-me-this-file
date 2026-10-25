@@ -1,4 +1,6 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { assessAnswer } from '../server/lesson/assessor.js';
 import { runTurn, toProviderMessages } from '../server/lesson/tutor.js';
 import { resolveProvider } from '../server/providers/index.js';
@@ -7,8 +9,10 @@ import {
   ACTION_OF_MOVE, checkEnd, supportProblems, checkTurn, citationSupport, labelGrade, loadLessons, loadScenarios, openingMessage,
   planOf, plainSystem, policyRun, readTag, startProgress, summarize, verifyReply,
 } from './teaching-lib.js';
+import { latestRuns, readRun, runMeta, sameVersion, summarizeRun, turnRecord } from './teaching-store.js';
 
 const arg = (name, fallback) => process.argv.find((item) => item.startsWith(`--${name}=`))?.slice(name.length + 3) ?? fallback;
+const flag = (name) => process.argv.includes(`--${name}`);
 const mode = arg('mode', 'policy');
 const split = arg('split', 'dev');
 const systems = arg('systems', mode === 'policy' ? 'engine,naive' : 'engine').split(',');
@@ -84,20 +88,26 @@ const engineTurn = async ({ lesson, plan, progress, history, turn }) => {
     verdict: update.assessment?.verdict ?? null,
     issue: update.assessment?.issue ?? null,
     misconception: update.assessment?.misconception ?? '',
+    assessment: update.assessment,
     progress: update.progress,
+    sourcesGiven: { current: sources.current.map((chunk) => chunk.id), related: sources.related.map((chunk) => chunk.id) },
     text,
     citations: done.citations,
     support: citationSupport(text, given),
     models: done.models,
+    firstTokenMs: done.firstTokenMs,
+    totalMs: done.totalMs,
   };
 };
 
 const plainTurn = async ({ lesson, plan, scenario, history, turn }) => {
   const system = plainSystem({ lesson, plan, scenario });
   let reply = '';
+  const models = [];
+  const started = Date.now();
   await withRetry(async () => {
     reply = '';
-    for await (const text of provider.streamText({ system, messages: toProviderMessages(history, turn.student) })) reply += text;
+    for await (const text of provider.streamText({ system, messages: toProviderMessages(history, turn.student), onMeta: (meta) => models.push(meta.model) })) reply += text;
   });
   calls += 1;
   const tag = readTag(reply);
@@ -112,6 +122,8 @@ const plainTurn = async ({ lesson, plan, scenario, history, turn }) => {
     tagMissing: !tag.action,
     citations: verifyReply(tag.text, lesson.chunks),
     support: citationSupport(tag.text, lesson.chunks),
+    models,
+    totalMs: Date.now() - started,
   };
 };
 
@@ -122,23 +134,26 @@ const gradeVariant = async ({ lesson, plan, scenario, student, system }) => {
   const progress = startProgress(plan, scenario);
   const sources = turnSources({ plan, chunks: lesson.chunks, progress }, 'reply', student);
   currentLabel = scenario.label;
-  const assessment = await withRetry(() => assessAnswer({ provider, plan, progress, tutorQuestion: history[0].content, studentMessage: student, sources: sources.current }));
+  const models = [];
+  const assessment = await withRetry(() => assessAnswer({ provider, plan, progress, tutorQuestion: history[0].content, studentMessage: student, sources: sources.current, related: sources.related, onMeta: (meta) => models.push(meta.model) }));
   calls += 1;
-  return { verdict: assessment.verdict, issue: assessment.issue };
+  return { verdict: assessment.verdict, issue: assessment.issue, checks: assessment.checks, models };
 };
 
-const modelScenario = async (scenario, system) => {
+const modelScenario = async (scenario, system, partial) => {
   const lesson = lessons[scenario.lesson];
   const plan = planOf(lesson);
   if (scenario.variants) {
-    const verdicts = [];
+    const rows = [];
     for (const student of scenario.variants) {
       const row = await gradeVariant({ lesson, plan, scenario, student, system });
-      verdicts.push(row.verdict);
+      rows.push({ student, ...row });
+      partial.push(rows.at(-1));
       await wait(pauseMs);
     }
+    const verdicts = rows.map((row) => row.verdict);
     const consistent = new Set(verdicts).size === 1 && verdicts[0] === scenario.label.verdict;
-    return { id: scenario.id, category: scenario.category, variants: scenario.variants.length, verdicts, consistent, passed: consistent, turns: [] };
+    return { id: scenario.id, category: scenario.category, variants: rows, verdicts, consistent, passed: consistent, turns: [] };
   }
   let progress = startProgress(plan, scenario);
   const history = [{ role: 'tutor', content: openingMessage(plan, scenario.at ?? 0) }];
@@ -154,12 +169,21 @@ const modelScenario = async (scenario, system) => {
     previousHelp = ['hint', 'explain', 'probe'].includes(row.action) ? row.text : null;
     history.push({ role: 'student', content: turn.student }, { role: 'tutor', content: row.text });
     rows.push({ turn, ...row });
+    partial.push(turnRecord({ turn, ...row }));
     console.log(`${row.failures.length ? 'FAIL' : 'ok  '} ${system} ${scenario.id} ${row.verdict ?? '-'} ${row.action}${row.intervention ? `/${row.intervention}` : ''}${row.failures.length ? ` (${row.failures.join('; ')})` : ''}`);
     await wait(pauseMs);
   }
-  const endFailures = system === 'engine' ? checkEnd(scenario, system, progress) : null;
-  const support = system === 'engine' ? supportProblems(rows) : null;
-  return { id: scenario.id, category: scenario.category, turns: rows, endFailures, supportProblems: support, passed: rows.every((row) => !row.failures.length) && !(endFailures ?? []).length && !(support ?? []).length };
+  const endFailures = system === 'plain' ? null : checkEnd(scenario, system, progress);
+  const support = system === 'plain' ? null : supportProblems(rows);
+  return {
+    id: scenario.id,
+    category: scenario.category,
+    turns: rows,
+    endFailures,
+    supportProblems: support,
+    endState: { status: progress.status, currentStep: progress.currentStep, final: progress.final ?? null },
+    passed: rows.every((row) => !row.failures.length) && !(endFailures ?? []).length && !(support ?? []).length,
+  };
 };
 
 const policyScenario = (scenario, system) => {
@@ -176,25 +200,66 @@ const policyScenario = (scenario, system) => {
   return { id: scenario.id, category: scenario.category, turns: rows, endFailures, supportProblems: support, passed: rows.every((row) => !row.failures.length) && !endFailures.length && !(support ?? []).length };
 };
 
-const results = {};
-for (const system of systems) {
-  const runs = [];
-  for (const scenario of selected) {
-    if (stopped) break;
-    try {
-      const run = mode === 'policy' ? policyScenario(scenario, system) : await modelScenario(scenario, system);
-      if (run) runs.push(run);
-    } catch (error) {
-      console.log(`ERR  ${system} ${scenario.id} ${error.code ?? error.message}`);
-      runs.push({ id: scenario.id, category: scenario.category, error: error.code ?? error.message, turns: [], passed: false });
+const runPolicy = () => {
+  const results = {};
+  for (const system of systems) {
+    const runs = selected.map((scenario) => policyScenario(scenario, system)).filter(Boolean);
+    results[system] = { summary: summarize(runs), runs };
+    console.log(`${system}: ${JSON.stringify({ ...results[system].summary, failures: results[system].summary.failures.length })}`);
+  }
+  if (arg('out', '') === 'none') return;
+  mkdirSync(new URL('./results/', import.meta.url), { recursive: true });
+  const file = new URL(`./results/teaching-${label}.json`, import.meta.url);
+  writeFileSync(file, `${JSON.stringify({ label, mode, split, date: new Date().toISOString(), systems: Object.fromEntries(Object.entries(results).map(([system, value]) => [system, { summary: value.summary, runs: value.runs.map((run) => ({ ...run, turns: run.turns.map(({ turn, ...row }) => ({ student: turn.student, ...row })) })) }])) }, null, 2)}\n`);
+  console.log(`saved ${file.pathname}`);
+};
+
+const runModel = async () => {
+  const directory = arg('out', '') ? pathToFileURL(`${resolve(arg('out', ''), label)}/`) : new URL(`./results/runs/${label}/`, import.meta.url);
+  const metaFile = new URL('meta.json', directory);
+  const linesFile = new URL('results.jsonl', directory);
+  const meta = runMeta({ label, mode, split, systems, provider, pauseMs, scenarios: selected });
+  if (existsSync(metaFile)) {
+    if (!flag('resume')) throw new Error(`${directory.pathname} already exists; pass --resume to continue it or use another --label`);
+    const saved = JSON.parse(readFileSync(metaFile, 'utf8'));
+    const mismatch = sameVersion(saved, meta);
+    if (mismatch) throw new Error(`cannot resume: ${mismatch} changed since the run started`);
+  } else {
+    mkdirSync(directory, { recursive: true });
+    writeFileSync(metaFile, `${JSON.stringify(meta, null, 2)}\n`);
+  }
+  const done = new Set(latestRuns(readRun(linesFile)).filter((line) => line.status === 'complete').map((line) => `${line.system}/${line.id}`));
+  for (const system of systems) {
+    for (const scenario of selected) {
+      if (stopped) break;
+      if (done.has(`${system}/${scenario.id}`)) continue;
+      const startedAt = new Date().toISOString();
+      const before = calls;
+      const partial = [];
+      let line;
+      try {
+        const run = await modelScenario(scenario, system, partial);
+        line = { system, split: scenario.split, status: 'complete', startedAt, finishedAt: new Date().toISOString(), calls: calls - before, ...run, turns: run.turns.map(turnRecord) };
+      } catch (error) {
+        console.log(`ERR  ${system} ${scenario.id} ${error.code ?? error.message}`);
+        line = { system, id: scenario.id, category: scenario.category, split: scenario.split, status: error.code === 'quota_exhausted' ? 'stopped_quota' : 'infra_error', error: error.code ?? error.message, startedAt, finishedAt: new Date().toISOString(), calls: calls - before, partialTurns: partial };
+      }
+      appendFileSync(linesFile, `${JSON.stringify(line)}\n`);
     }
   }
-  results[system] = { summary: summarize(runs.filter((run) => !run.error)), errors: runs.filter((run) => run.error).map((run) => ({ id: run.id, error: run.error })), runs };
-  console.log(`${system}: ${JSON.stringify({ ...results[system].summary, failures: results[system].summary.failures.length })}`);
-}
+  const summary = summarizeRun({ meta: JSON.parse(readFileSync(metaFile, 'utf8')), lines: readRun(linesFile), scenarios: selected, systems });
+  writeFileSync(new URL('summary.json', directory), `${JSON.stringify(summary, null, 2)}\n`);
+  for (const system of systems) console.log(`${system}: ${JSON.stringify({ ...summary.systems[system].counts, scenarioPass: summary.systems[system].summary.scenarioPass })}`);
+  console.log(`saved ${directory.pathname}${stopped ? ` (stopped: ${stopped})` : ''}`);
+};
 
-if (arg('out', '') === 'none') process.exit(Object.values(results).some((value) => value.errors.length) ? 1 : 0);
-mkdirSync(new URL('./results/', import.meta.url), { recursive: true });
-const file = new URL(`./results/teaching-${label}.json`, import.meta.url);
-writeFileSync(file, `${JSON.stringify({ label, mode, split, provider: provider.name, model: provider.model ?? null, date: new Date().toISOString(), calls, stopped, systems: Object.fromEntries(Object.entries(results).map(([system, value]) => [system, { summary: value.summary, errors: value.errors, runs: value.runs.map((run) => ({ ...run, turns: run.turns.map(({ turn, ...row }) => ({ student: turn.student, ...row, progress: undefined })) })) }])) }, null, 2)}\n`);
-console.log(`saved ${file.pathname}${stopped ? ` (stopped: ${stopped})` : ''}`);
+if (mode === 'policy') {
+  runPolicy();
+} else {
+  try {
+    await runModel();
+  } catch (error) {
+    console.error(error.message);
+    process.exit(1);
+  }
+}

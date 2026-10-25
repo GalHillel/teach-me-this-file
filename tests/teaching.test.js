@@ -1,4 +1,7 @@
 import { execFileSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   checkEnd, checkTurn, citationSupport, endsWithQuestion, hasPraise, loadLessons, loadScenarios, notesContradiction,
@@ -42,10 +45,25 @@ describe('teaching scenarios', () => {
     expect(failures).toEqual([]);
   });
 
-  it('runs the model layer end to end through the real turn code', () => {
-    const output = execFileSync('node', ['eval/teaching.js', '--mode=model', '--provider=labels', '--split=dev', '--only=dev-en-prerequisite,dev-en-copied,dev-en-paraphrase-correct', '--systems=engine,plain', '--out=none'], { encoding: 'utf8' });
-    expect(output).toMatch(/ok\s+engine dev-en-prerequisite correct back_to_question/);
-    expect(output).toMatch(/engine: .*"scenarios":3/);
+  it('runs the model layer end to end through the real turn code, saving each scenario as it finishes', () => {
+    const out = mkdtempSync(join(tmpdir(), 'teaching-'));
+    try {
+      const args = ['eval/teaching.js', '--mode=model', '--provider=labels', '--split=dev', '--systems=engine,plain', `--out=${out}`, '--label=test'];
+      const env = { ...process.env, EVAL_PAUSE_MS: '0' };
+      const output = execFileSync('node', [...args, '--only=dev-en-prerequisite,dev-en-copied'], { encoding: 'utf8', env });
+      expect(output).toMatch(/ok\s+engine dev-en-prerequisite correct back_to_question/);
+      expect(() => execFileSync('node', [...args, '--only=dev-en-prerequisite,dev-en-copied'], { encoding: 'utf8', env, stdio: 'pipe' })).toThrow();
+      execFileSync('node', [...args, '--only=dev-en-prerequisite,dev-en-copied,dev-en-paraphrase-correct', '--resume'], { encoding: 'utf8', env });
+      const lines = readFileSync(join(out, 'test', 'results.jsonl'), 'utf8').trim().split('\n').map((line) => JSON.parse(line));
+      expect(lines.map((line) => `${line.system}/${line.id}`).sort()).toEqual(['engine/dev-en-copied', 'engine/dev-en-paraphrase-correct', 'engine/dev-en-prerequisite', 'plain/dev-en-copied', 'plain/dev-en-paraphrase-correct', 'plain/dev-en-prerequisite']);
+      const prerequisite = lines.find((line) => line.system === 'engine' && line.id === 'dev-en-prerequisite');
+      expect(prerequisite.turns[0]).toMatchObject({ turn: { student: expect.any(String) }, move: expect.any(String), assessment: { verdict: expect.any(String) }, models: ['labels', 'labels'], citations: expect.any(Object) });
+      const summary = JSON.parse(readFileSync(join(out, 'test', 'summary.json'), 'utf8'));
+      expect(summary.meta).toMatchObject({ provider: 'labels', split: 'dev', promptVersion: expect.any(String), engineVersion: expect.any(String) });
+      expect(summary.systems.engine.counts).toMatchObject({ complete: 3, notRun: [], infraErrors: [] });
+    } finally {
+      rmSync(out, { recursive: true, force: true });
+    }
   });
 });
 
