@@ -3,6 +3,7 @@ import { stripCitations, verifyCitations } from '../../shared/citations.js';
 import { AppError } from '../errors.js';
 import { count, recordFirstToken } from '../metrics.js';
 import { assessAnswer } from './assessor.js';
+import { openingPraiseFilter, praiseAllowed } from './calibration.js';
 import { activeStepIndex, lessonPace, planMove } from './progress.js';
 import { buildTutorSystem } from './prompts.js';
 
@@ -145,10 +146,12 @@ export const runTurn = async ({ provider, input, signal, send }) => {
     if (firstTokenMs === null) firstTokenMs = Date.now() - started;
     send('delta', { text });
   });
+  const calibrated = openingPraiseFilter(!praiseAllowed({ move, assessment }), (text) => guard.push(text));
   const messages = toProviderMessages(history, studentMessage || REQUEST_NOTES[kind] || '');
   for await (const text of provider.streamText({ system, messages, signal, onMeta })) {
-    guard.push(text);
+    calibrated.push(text);
   }
+  calibrated.flush();
   const reply = guard.flush();
   if (!reply.trim()) throw new AppError('bad_response', 'The AI returned an empty answer. Try again.');
 

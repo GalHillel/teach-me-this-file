@@ -168,6 +168,7 @@ const privateNotes = (assessment) => {
   if (assessment.conceptsShown.length) parts.push(`right: ${assessment.conceptsShown.join('; ')}`);
   if (assessment.conceptsMissing.length) parts.push(`missing or wrong: ${assessment.conceptsMissing.join('; ')}`);
   if (assessment.misconception) parts.push(`likely misconception: ${assessment.misconception}`);
+  if (assessment.issue === 'copied') parts.push('the answer repeats the source word for word, so it does not show understanding yet');
   return `Grader notes (private; use them, but do not quote them or reveal the missing ideas): ${parts.join('. ')}.`;
 };
 
@@ -195,7 +196,7 @@ const reteachInstruction = (intervention, requested) => {
 const PROBE = {
   hedged: 'The answer has the right idea, but the student sounds unsure. Ask one short follow-up that lets them show they understand: why it is so, or the same idea in a tiny new example.',
   unjustified: 'The student gave the right result without the reasoning the question asked for. Ask them in one short question to explain why.',
-  copied: 'The answer repeats the wording of the document. Without saying it is right yet, ask them to say it in their own words or to apply it to a tiny new example.',
+  copied: 'The answer repeats the wording of the document or of your explanation. Without saying it is right yet, ask them to explain the same answer in their own words, as if telling a friend. Do not change the question.',
   none: 'The answer looks right, but it is not clear the student understands it. Ask one short follow-up: why it is so, or the same idea applied to a tiny new example.',
 };
 
@@ -336,7 +337,7 @@ How you teach:
 - Match the student's level: simple words, concrete examples and analogies that fit the audience.
 - Do not paste or summarize large parts of the document. Explain in your own words, based on the sources.
 - End with exactly one question, then stop. Never answer your own question, and never give away the answers to future steps.
-- Be encouraging and honest. Never call a wrong or incomplete answer correct, and only praise an answer as right when "What to do now" says it is correct.
+- Be encouraging and honest. Never call a wrong or incomplete answer correct, and only praise an answer as right when "What to do now" says it is correct. Otherwise do not open with a praise word such as "Great", "Excellent", "מצוין" or "כל הכבוד"; name the specific part that is right instead.
 - When the student is wrong or incomplete, do not state the correct answer unless "What to do now" says to give it.
 - Do not repeat help you already gave on this step; build on it.
 - Stay grounded in the sources. If you add something that is not in them, keep it short and say it goes beyond the document.
