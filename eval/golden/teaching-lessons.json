@@ -114,5 +114,47 @@
       { "id": "c6", "label": "שורות 23-24", "section": "דף עבודה ישן", "text": "בדף עבודה ישן כתוב שהבועות במים רותחים הן אוויר שהיה מומס במים ויוצא כשהם מתחממים." }
     ],
     "stepSources": { "s2": ["c3", "c6"] }
+  },
+  "moon-en": {
+    "split": "holdout2",
+    "languageCode": "en",
+    "title": "Why the Moon changes shape",
+    "audience": "5th graders",
+    "style": "Simple explanations with everyday examples, one question at a time.",
+    "objectives": ["Explain where moonlight comes from", "Explain why the Moon has phases", "Tell an eclipse from a phase"],
+    "teacherPrompt": "Teach 5th graders about the Moon. Use simple everyday examples and ask one question at a time.",
+    "chunks": [
+      {"id": "c1", "label": "Lines 1-2", "section": "The Moon", "text": "The Moon is Earth's natural satellite. It orbits Earth about once every 29.5 days."},
+      {"id": "c2", "label": "Lines 4-6", "section": "Moonlight", "text": "The Moon does not make its own light. It shines because sunlight hits its surface and bounces off, the same way a white ball looks bright when a lamp shines on it."},
+      {"id": "c3", "label": "Lines 8-11", "section": "Phases", "text": "The Sun always lights up half of the Moon. As the Moon orbits Earth, we see different amounts of that lit half. When the lit half faces away from us we see a new moon; when it faces us we see a full moon. In between we see crescent, quarter and gibbous shapes. These changing shapes are called phases."},
+      {"id": "c4", "label": "Lines 13-16", "section": "Eclipses", "text": "A lunar eclipse happens when Earth passes exactly between the Sun and the Moon, so Earth's shadow falls on the Moon. This can only happen at full moon, and it is rare because the Moon's orbit is tilted. Phases are not caused by Earth's shadow."},
+      {"id": "c5", "label": "Lines 18-19", "section": "Observing safely", "text": "You can look at the Moon safely with your eyes or binoculars. Never look at the Sun directly or through binoculars or a telescope, even during an eclipse of the Sun, because it can blind you."}
+    ],
+    "steps": [
+      { "id": "s1", "title": "Where moonlight comes from", "goal": "The Moon does not make light; it reflects sunlight.", "keyConcepts": ["sunlight", "reflect", "Moon"], "approach": "explain", "checkQuestion": "Why can we see the Moon shining at night if it does not make its own light?", "successCriteria": "Says sunlight hits the Moon and reflects (bounces) off it toward us.", "transferQuestion": "A planet with no lights of its own can be seen in the night sky. How is that possible?", "transferCriteria": "Says the planet reflects sunlight, the same way the Moon does.", "commonMistake": "Thinking the Moon glows or makes its own light.", "prerequisites": [], "sourceIds": ["c1", "c2"] },
+      { "id": "s2", "title": "Phases of the Moon", "goal": "The Sun always lights half of the Moon; the phases come from how much of the lit half we see as the Moon orbits Earth.", "keyConcepts": ["lit half", "orbit", "phases"], "approach": "explain", "checkQuestion": "Why does the Moon look like a thin crescent on some nights and a full circle on others?", "successCriteria": "Says half the Moon is always lit by the Sun, and as the Moon orbits Earth we see more or less of the lit half.", "transferQuestion": "If you looked at the Moon from the same place every night for two weeks after a new moon, what would you see, and why?", "transferCriteria": "Says the lit part grows night by night (crescent, half, then full) because the Moon moves along its orbit and we see more of its lit half.", "commonMistake": "Thinking Earth's shadow covers part of the Moon to make the phases.", "prerequisites": ["s1"], "sourceIds": ["c3"] },
+      { "id": "s3", "title": "Eclipses are not phases", "goal": "A lunar eclipse is Earth's shadow on the Moon, which happens only at full moon and rarely; phases are not shadows.", "keyConcepts": ["lunar eclipse", "Earth's shadow", "full moon"], "approach": "explain", "checkQuestion": "What is the difference between a lunar eclipse and a half moon?", "successCriteria": "An eclipse is Earth's shadow falling on the Moon when Earth is exactly between the Sun and the Moon (only at full moon); a half moon is a phase, when we see half of the lit half, not a shadow.", "transferQuestion": "Your friend says a crescent moon is the Moon partly hidden in Earth's shadow. What would you tell them, and why?", "transferCriteria": "Disagrees: a crescent is a phase, we see only a small part of the lit half; Earth's shadow on the Moon is an eclipse, which happens only at full moon.", "commonMistake": "Thinking every phase is a small eclipse.", "prerequisites": ["s1", "s2"], "sourceIds": ["c4"] }
+    ]
+  },
+  "blood-he": {
+    "split": "holdout2",
+    "languageCode": "he",
+    "title": "מערכת הדם",
+    "audience": "תלמידי כיתה ו'",
+    "style": "הסברים פשוטים עם דוגמאות מהיומיום, שאלה אחת בכל פעם.",
+    "objectives": ["להסביר מה הלב עושה", "להבחין בין עורקים לוורידים", "להסביר מה קורה בנימים"],
+    "teacherPrompt": "למד תלמידי כיתה ו' על מערכת הדם. הסבר בפשטות, עם דוגמאות מהיומיום, ושאל שאלה אחת בכל פעם.",
+    "chunks": [
+      {"id": "c1", "label": "שורות 1-2", "section": "מערכת הדם", "text": "מערכת הדם מובילה חמצן ומזון לכל תאי הגוף ומפנה מהם פסולת. היא בנויה מהלב, מכלי הדם ומהדם."},
+      {"id": "c2", "label": "שורות 4-6", "section": "הלב", "text": "הלב הוא שריר שעובד כמו משאבה. בכל פעימה הוא מתכווץ ודוחף דם לכלי הדם. אצל ילד במנוחה הלב פועם בערך 80 עד 100 פעמים בדקה."},
+      {"id": "c3", "label": "שורות 8-11", "section": "עורקים וורידים", "text": "עורקים הם כלי דם שמובילים דם מהלב אל הגוף. ורידים הם כלי דם שמחזירים דם מהגוף אל הלב. הדם בעורקים עשיר בחמצן, חוץ מהעורק שיוצא מהלב אל הריאות."},
+      {"id": "c4", "label": "שורות 13-16", "section": "נימים", "text": "הנימים הם כלי הדם הדקים ביותר, והם מחברים בין העורקים לוורידים. דרך הדפנות הדקות של הנימים החמצן והמזון עוברים מהדם אל התאים, ופחמן דו־חמצני ופסולת עוברים מהתאים אל הדם."},
+      {"id": "c5", "label": "שורות 18-20", "section": "תרומת דם", "text": "מבוגרים בריאים יכולים לתרום דם. הגוף מייצר מחדש את הדם שנתרם תוך כמה שבועות. דם שנתרם עוזר לפצועים ולחולים בבתי חולים."}
+    ],
+    "steps": [
+      { "id": "s1", "title": "הלב כמשאבה", "goal": "הלב הוא שריר שמתכווץ ודוחף דם לכל הגוף.", "keyConcepts": ["לב", "שריר", "משאבה", "פעימה"], "approach": "explain", "checkQuestion": "מה הלב עושה בכל פעימה, ולמה זה חשוב לגוף?", "successCriteria": "הלב מתכווץ ודוחף (שואב) דם לכלי הדם, וכך הדם מגיע לכל הגוף ומביא חמצן ומזון.", "transferQuestion": "אחרי ריצה הלב פועם מהר יותר. למה הגוף צריך את זה?", "transferCriteria": "בריצה השרירים צריכים יותר חמצן ומזון, והלב פועם מהר יותר כדי לדחוף אליהם יותר דם.", "commonMistake": "לחשוב שהלב מייצר את הדם או מנקה אותו.", "prerequisites": [], "sourceIds": ["c1", "c2"] },
+      { "id": "s2", "title": "עורקים וורידים", "goal": "עורקים מובילים דם מהלב אל הגוף, וורידים מחזירים דם מהגוף אל הלב.", "keyConcepts": ["עורקים", "ורידים", "כיוון הזרימה"], "approach": "explain", "checkQuestion": "מה ההבדל בין עורק לווריד?", "successCriteria": "עורק מוביל דם מהלב אל הגוף; וריד מחזיר דם מהגוף אל הלב.", "transferQuestion": "טיפת דם יוצאת מהלב ומגיעה עד כף הרגל. באיזה סוג כלי דם היא נוסעת בדרך לשם, ובאיזה היא חוזרת? למה?", "transferCriteria": "בדרך לרגל בעורקים, כי הם מובילים דם מהלב; בחזרה בוורידים, כי הם מחזירים דם אל הלב.", "commonMistake": "לחשוב שההבדל הוא רק בצבע הדם ולא בכיוון הזרימה.", "prerequisites": ["s1"], "sourceIds": ["c3"] },
+      { "id": "s3", "title": "נימים וחילוף חומרים", "goal": "בנימים החמצן והמזון עוברים מהדם לתאים, ופחמן דו־חמצני ופסולת עוברים מהתאים לדם.", "keyConcepts": ["נימים", "חמצן", "פחמן דו־חמצני", "תאים"], "approach": "explain", "checkQuestion": "מה קורה בנימים, ולמה דווקא שם?", "successCriteria": "בנימים החמצן והמזון עוברים מהדם לתאים ופחמן דו־חמצני ופסולת עוברים מהתאים לדם, כי הדפנות של הנימים דקות מאוד.", "transferQuestion": "שריר ברגל עובד קשה. איך החמצן מגיע מהדם לתאים של השריר, ומה הדם לוקח מהם בחזרה?", "transferCriteria": "החמצן עובר מהדם לתאי השריר דרך הדפנות הדקות של הנימים, והדם לוקח מהתאים פחמן דו־חמצני ופסולת.", "commonMistake": "לחשוב שהחמצן עובר לתאים דרך העורקים הגדולים או דרך הלב.", "prerequisites": ["s1", "s2"], "sourceIds": ["c4"] }
+    ]
   }
 }
