@@ -25,7 +25,7 @@ I built it as a home assignment for an AI Engineer role. The reasoning behind th
 - A learning map shows the steps and which ones build on which, and marks each key concept as found in the file or not found in it.
 - The student can ask a question at any point. The app finds the passages of the whole file that answer it and sends them with the turn, so the tutor can answer from the file without losing its place in the lesson.
 - A search panel lists the lesson's key concepts and the file's sections, highlights matches, and says which step teaches each passage.
-- The tutor cites the passages it uses, like [c3]. The server keeps only citations of passages the tutor was actually given and checks quoted text against the file; citations show as chips that open the passage, and a quote that is not in the file is flagged under the message. When the tutor cites nothing, the app falls back to matching the message to passages ("based on", "related" or "step material").
+- The tutor cites the passages it uses, like [c3]. The server keeps only citations of passages the tutor was actually given and checks a quote that carries a passage id against the file; citations show as chips that open the passage, and a quote that is not in the file is flagged under the message. When the tutor cites nothing, the app falls back to matching the message to passages ("based on", "related" or "step material").
 - The interface is in English, Hebrew or French, with a right-to-left layout for Hebrew. Lessons and documents can be right-to-left too.
 - The lesson survives a reload in the same tab. The API key does not; it stays in memory only.
 - If the main AI models are busy and a lighter backup model answers, the app says so.
@@ -146,7 +146,7 @@ npm run eval:load     # first-screen load time under CPU and network throttling
 EVAL_API_KEY=your-key EVAL_LABEL=mine node eval/grading.js # grading on 51 golden answers, real model calls
 ```
 
-`npm run test:e2e` uses the Chromium that Playwright installs (`npx playwright install chromium` once). It serves the build with the headers from `vercel.json`, checks every screen at 15 sizes from 320 to 2560 px in English and Hebrew for overflow, unreachable buttons, small targets and axe-core violations, runs a full lesson with a re-check and a review round, reads a generated PDF, and fails on any problem. `--report=file.json` saves the details. It checks layout and flow with canned replies, not teaching quality.
+`npm run test:e2e` uses the Chromium that Playwright installs (`npx playwright install chromium` once). It serves the build with the headers from `vercel.json`, checks every screen at 15 sizes from 320 to 2560 px in English and Hebrew for overflow, unreachable buttons, small targets and axe-core violations, runs a full lesson with help requests, a detour, a re-check, the final check and a practice round, reads a generated PDF, and fails on any problem. `--report=file.json` saves the details. It checks layout and flow with canned replies, not teaching quality.
 
 `eval/grading.js` writes its results to `eval/results/grading-<label>.json`: accuracy, how often a wrong or partial answer was graded correct, median latency, and which models answered.
 

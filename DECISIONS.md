@@ -37,7 +37,7 @@ The model is good at wording an explanation and bad at deciding, turn after turn
 | Student presses "Explain differently" | analogy, worked example, sub-questions |
 | Third wrong answer | full explanation, then one easier question |
 
-Each step remembers the help it got (`used`), so the tutor does not give the same hint twice, and the prompt lists what was already tried.
+Each step remembers the help it got (`used`), so the tutor tries a different kind of help each time until the list for that situation runs out (then it repeats the last one), and the prompt lists what was already tried.
 
 **Going back to a prerequisite.** If a wrong answer's missing concepts match the key concepts of an earlier step this step builds on (and are not the current step's own concepts), or an earlier prerequisite was only `recovered` or `review` and the student is now failing, the tutor checks that earlier idea with one short question. The next answer is graded against the earlier step, with its passages. A right answer brings the student back to the current question; a wrong one gets a two-sentence re-explanation, and the earlier step is marked as a gap, which later puts it in the final check and the practice list. Only one such check per step, so it can not loop. This is the "detect the blocker, fix it, come back" behaviour; the matching is lexical (first six letters of words longer than three), so it misses a gap the grader describes in other words.
 
@@ -119,7 +119,7 @@ The file is treated as data. In every prompt the passages sit inside `<document>
 - A correct answer the grader is unsure about gets one short follow-up before the lesson moves on.
 - A question from the student is answered, but the tutor does not give away the answer to its own open check question.
 - The pace adjusts: after two steps understood first try, the tutor is asked to be more concise; when the student struggles or needed the explanation, simpler words and a concrete example.
-- The help after a wrong answer depends on the kind of mistake and is never repeated on the same step (see "The teaching policy").
+- The help after a wrong answer depends on the kind of mistake, and the same kind is not repeated on a step until the options run out (see "The teaching policy").
 - The grade names the kind of problem when there is one. A misread question gets the question asked another way, not a hint. "I think it's X, not sure" with a right X gets a short check instead of a hint. "I have no idea" gets a fresh, simpler explanation instead of a hint the student can not use. A right answer without the asked-for reasoning gets a request for the reason.
 - The lesson does not end when the steps end: a short final check asks new questions without hints, and the summary separates what was applied, shown, shown with help and still needs practice. A "Practise" button starts a practice round over the weak steps.
 - Steps can build on other steps. The plan says which, the steps are ordered so that a step never comes before what it builds on, and the tutor is told what the step builds on.
@@ -169,6 +169,9 @@ Text the app stores (system notes, file warnings, errors) is stored as a code wi
 - Source matching and question retrieval are lexical. A paraphrase with different words is missed, and a translated lesson always falls back to the step's passage. Retrieval was tuned on 20 English questions and checked on 11 held-out Hebrew and French ones; that is enough to see a direction, not to promise a number.
 - The rate limit, the server-key budget, the cooldowns and the metrics are in memory per serverless instance.
 - Prompt-injection defences reduce the risk but do not remove it.
+- The detour matching is lexical: a gap the grader describes in other words than the earlier step's concepts is missed. It was not triggered in the live runs.
+- The review days are fixed intervals, not fitted to the student, and nothing reminds the student.
+- Every real-model result in this round comes from the backup model, Flash-Lite, because the main model had no quota on the site's key.
 
 ## What I would do next
 
@@ -177,11 +180,20 @@ Text the app stores (system notes, file warnings, errors) is stored as a code wi
 3. Run the grading eval on every prompt change in CI, with a fixed key and model, and fail the build when false "correct" verdicts go up.
 4. Paste text as an alternative to uploading, and OCR through the provider's vision model.
 
+## How I would test the teaching
+
+The tests and evals show that the policy does what it says and that grading did not get worse. They do not show that students learn more. That needs an experiment:
+
+1. Three groups on the same material, assigned at random: reading the file alone, a plain AI chat with the same file, and this tutor. Same model for both AI groups.
+2. A short test before, the same kind of test right after, and a delayed test a week later. Questions are written in advance, without the app seeing them, and mix recall, application and telling related ideas apart.
+3. Measures: normalised learning gain, retention after a week, and accuracy on transfer questions; time spent and what students say as secondary measures. Sample size worked out before the study from the smallest gain worth having.
+4. Inside the product, the final check is a proxy. I could compare final-check results of students who got a detour with students who had the same mistakes and did not, but that is a correlation, not an experiment.
+
 ## How I know it works
 
 ### Automated tests
 
-`npm test` runs 187 tests (125 before the third round): extraction and chunking, BM25 source matching (including thresholds on the golden set), the lesson state machine (including a test that no sequence of messages keeps a step active), grade checks, plan validation and step sizing, prompt fencing, the chat reducer (commit on done, stop, failure, notices, resume), session storage (no key stored, broken storage), translations (every key in all three languages, same placeholders), the SSE parser, the provider adapters (fallback, cooldowns per key, daily quota, backup notice, thinkingLevel only where accepted), Markdown rendering of model output (no `javascript:` links, HTML escaped), and the API with a mock provider (streaming, cancellation, validation, server-key origin check and budget, `trust proxy`, rate limit, key not logged).
+`npm test` runs 229 tests (187 before the fourth round, 125 before the third): the teaching policy, prerequisite detours, the final check and evidence levels, citation and quote checks, the copy check, extraction and chunking, BM25 source matching (including thresholds on the golden set), the lesson state machine (including a test that no sequence of messages keeps a step active), grade checks, plan validation and step sizing, prompt fencing, the chat reducer (commit on done, stop, failure, notices, resume), session storage (no key stored, broken storage), translations (every key in all three languages, same placeholders), the SSE parser, the provider adapters (fallback, cooldowns per key, daily quota, backup notice, thinkingLevel only where accepted), Markdown rendering of model output (no `javascript:` links, HTML escaped), and the API with a mock provider (streaming, cancellation, validation, server-key origin check and budget, `trust proxy`, rate limit, key not logged).
 
 ### Golden sets
 
@@ -207,6 +219,29 @@ The drop in top-1 is one Hebrew message where two passages tie; the expected one
 | Models that answered | mostly `gemini-3.5-flash-lite` (the log shows 429 on the main model for all 43) | `gemini-3.5-flash-lite` 26, `gemini-2.5-flash` 15, `gemini-3.8-flash` 1 |
 
 I do not read this as an improvement or a regression. The key's daily quota for the main model was used up before the runs, so both runs were graded mostly by backup models, not by the same model. The difference is two answers. The after run is slower because of the fallback chain, not the prompt. What the runs do show: no false "correct" in either version, and the two misses in the after run had high confidence, so the confidence level is not yet a useful signal. Results are in `eval/results/`.
+
+### Live checks, 25 October
+
+I deployed commit `6ba634f` to production. The site served `assets/index-CB-UHBlb.js`, the same entry bundle as my local build of that commit, with the CSP, `nosniff`, `X-Frame-Options: DENY` and `Referrer-Policy` headers. Then I drove it with Playwright's Chromium in a Vercel Sandbox, using the site's own key. 45 of the 48 model calls in the instance's metrics came from the backup model, Flash-Lite, so this says nothing about the main model. Two runs; the second stopped when the backup model's daily quota ran out.
+
+| # | Scenario | What happened | Result |
+| --- | --- | --- | --- |
+| 1 | Plan from the English sample | 3 steps; step 2 builds on step 1, step 3 on both. 40 s and 5 s in the two runs | Pass |
+| 2 | "Hint" before any answer | `hint` with a nudge, citing the step's passage, in both runs | Pass |
+| 3 | "Explain differently" right after | `reteach` with an analogy, a different kind of help, in both runs | Pass |
+| 4 | "I think plants eat soil through their roots." | Graded incorrect; the tutor answered with a counter-example (a potted plant would slowly run out of dirt if plants ate soil), the third kind of help in a row | Pass |
+| 5 | Correct answer from the passage | `advance` to step 2 | Pass |
+| 6 | Answers about the wrong part of the passage (my script answers with the step's text) | Graded `misread_question`; the tutor re-asked the question, then gave a nudge, then re-asked; a later answer moved on | Pass |
+| 7 | Last step answered | `final_check_start` with all three steps (a lesson of three steps checks all of them) | Pass |
+| 8 | Final check with off-target answers | Re-asked twice with no hint, then counted as not passed and moved to the next question (`final_next`) | Pass |
+| 9 | Citations | 16 of 16 finished tutor replies cited passages the server had sent. Over both runs on that instance the server dropped 2 ids in 23 cited turns because the tutor had not been given them. The tutor quoted nothing word for word, so the quote check was not exercised | Pass, quote check not seen live |
+| 10 | Reload during the final check | 16 messages restored, still in the final check | Pass |
+| 11 | Learning map | 3 cards; every key concept found in the file | Pass |
+| 12 | Hebrew sample on a 390 px phone | Right-to-left, no horizontal overflow, first message cited two passages | Pass |
+| 13 | Provider limits | A rate limit on the Hebrew answer, then the daily quota in run 2; the student saw the matching message each time and "Try again" worked after the rate limit | Pass |
+| 14 | Time to first word | `/api/health`: p50 2.5 s, p95 3.3 s over 26 turns | Measured |
+
+Not seen live: the detour (my scripted wrong answers never named an idea from an earlier step), the end of the final check, the summary with evidence levels, the practice round and the notes download. My script used its turn budget on the misread answers, and the quota ran out in the second run. These paths are covered by the state-machine and API tests and by the browser harness with the mock provider, which is not evidence about a real model.
 
 ### Live checks, 24 October, evening
 
@@ -313,3 +348,19 @@ The full list with evidence is in [AUDIT.md](AUDIT.md), findings 16 to 43. The c
 
 Performance (`eval/results/bench-*.json`, synthetic documents, one run each on the same machine): chunking and scoring stayed under 6 ms for a 345,000-character document; building the index got slower (23 to 31 ms for the large document) because Hebrew prefix variants and section labels are indexed. First-screen JavaScript and CSS went from 105.5 to 104.3 KB gzipped even with the new features (`eval/results/bundle.json`).
 
+## What changed in the fourth round (24 and 25 October)
+
+The findings with evidence are in [AUDIT.md](AUDIT.md), 44 to 61.
+
+| Change | Why | Measured effect |
+| --- | --- | --- |
+| Teaching policy in code: help chosen by mistake type and history | Every miss got the same hint | 40 state-machine tests and a property test; live: nudge, analogy and counter-example on three turns in a row |
+| Detour to an earlier prerequisite step, one per step | A missing earlier idea was treated as a slip on the current step | State-machine, API and harness tests (mock); not seen live |
+| Final check of up to three steps, no hints | Finishing the steps was treated as learning | Tests and harness (mock); started and graded live with the backup model |
+| Evidence levels and a review schedule instead of a pass mark | A binary "done" hid help and failures | State-machine and reducer tests |
+| Citations by passage id, checked on the server; cited quotes checked against the file | Nothing checked what the tutor attributed to the file | Citation and API tests; live: 16 of 16 replies cited passages it was given, 2 invented ids dropped in 23 turns |
+| Copy check | A pasted answer counted as understanding | Grading eval on one model, same 51 cases: copied 0/2 to 2/2, verdicts 49/51 both, false "correct" 0/29 both |
+| Harness overflow measured on the visual viewport | The old check missed 5 to 24 px of scroll at 320 px | 0 overflow and 0 axe violations in 179 checks |
+| Hybrid retrieval tried and not adopted | Paraphrased questions are missed | Dev MRR 0.894 to 0.921, holdout 0.833 to 0.833 (`retrieval-hybrid.json`) |
+
+Cost: the first-screen JavaScript grew from 96.3 to 99.9 KB gzipped, mostly new strings in three languages; first contentful paint on a throttled phone profile went from 2.42 to 2.46 s (median of 5, `load-*.json`), within run-to-run noise. Building the index for a 345,000-character document takes 26 ms (`bench-after-p4.json`).

@@ -81,6 +81,40 @@ After the work above I had a separate reviewer, which had not written the code, 
 
 The reviewer also confirmed: the review round, stall handling and outcomes in the state machine; stale stream events; line labels; rendering paths (no raw HTML, `javascript:` links dropped, KaTeX without trust); the CSP; no keys in logs; input limits; key coverage of the translations; dialog focus.
 
+## Fourth round: the teaching engine, 24 and 25 October
+
+Baseline for this round: production at commit `20f5b13` (`eval/results/baseline-phase4.json`, `ui-baseline-strict.json`, `load-baseline.json`). The work added the teaching policy, prerequisite detours, the final check, evidence levels, citations checked by the server and the learning map; [DECISIONS.md](DECISIONS.md#the-teaching-policy) explains each. Findings from this round:
+
+| # | Sev. | Area | Problem | Evidence | Fix | Verification | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 44 | High | Teaching | Every wrong answer got the same kind of hint, whatever the mistake, and the tutor could repeat the same help. A missing earlier idea was treated like a slip on the current step. | `planMove` in `20f5b13` chose hint by attempt count only. | A policy (`server/lesson/policy.js`) picks the help from the grade (misconception, no knowledge, first or second miss, student request) and skips kinds already used on the step. When the grader names missing ideas that belong to an earlier prerequisite step, the tutor asks one question about that step first, then returns. | 40 state-machine tests and the property test (any plan, any sequence of grades and requests: a step ends within 15 non-question replies, 18 with a detour) | Fixed |
+| 45 | High | Assessment | The lesson ended after the last step, so nothing showed that the student could still answer earlier questions later. | `20f5b13`: `advance` on the last step goes to `completed`. | A final check of up to 3 earlier steps, chosen by weakness, help used, dependents and distance, with no hints and one try each. Results feed the evidence level of each step. | State-machine tests; harness (mock) runs the final check at desktop and phone sizes | Fixed; started and graded live with the backup model, end of the check not seen live (DECISIONS, 25 October) |
+| 46 | Medium | Faithfulness | The tutor could quote the file in its own words, or name a passage it was not given, and nothing checked it. | Prompt only asked it to stay faithful. | The tutor cites passage ids; the server keeps only ids it sent, and checks that every cited quote appears in the file. The client shows a warning for a quote that was not found. | Citation unit tests, API test with a mock reply that invents a quote | Fixed |
+| 47 | Medium | Assessment | An answer pasted from the passage was graded correct with no sign that the student had understood it. | Golden cases `en-copied-source`, `he-copied-source`: issue `none`. | A deterministic check marks an answer `copied` when it repeats most of a whole source sentence; the tutor then asks for it in the student's own words. | Grading eval on the same model, before and after: copied 0/2 to 2/2, verdicts unchanged (49/51) | Fixed |
+| 48 | Medium | Assessment | My first copy check flagged a correct French answer that shared a long phrase with the passage. | Live run: `fr-correct` flagged. | The rule now needs at least 80% of one whole source sentence, making up at least 70% of the answer, with at least 6 words. | Unit tests with the French answer; grading eval: 0 false copy flags in 51 | Fixed |
+| 49 | Medium | Responsive | The harness measured overflow against `window.innerWidth`, which grows with the page, so it missed horizontal scroll. Against the visual viewport, the old release overflowed by 5 to 24 px at 320 px. | `ui-baseline-strict.json` | The harness measures against `visualViewport.width`. The toolbar was rebuilt to fit 320 px, also in the final check. | Harness at 15 sizes in two languages: 0 overflow (`ui-after-p4.json`) | Fixed |
+| 50 | Low | Accessibility | axe reported contrast failures on elements that were still fading in. | Flaky axe runs. | The harness waits for finite animations before running axe; reduced motion turns them off. | Harness: 0 axe violations in 179 checks | Fixed (harness) |
+| 51 | Low | Retrieval | I tested whether character trigrams fused with BM25 would find more passages for student questions. | `eval/results/retrieval-hybrid.json`: dev MRR 0.894 to 0.921, holdout (Hebrew and French) 0.833 to 0.833. | Not adopted; the app keeps BM25. | The eval is in the repo (`eval/hybrid-retrieval.js`) | Kept as a negative result |
+
+### Independent review of the fourth round
+
+A separate reviewer read the new engine with a reproduction for each claim. It reported twelve findings, none high. What happened to them:
+
+| # | Sev. | Area | Problem | Fix | Verification | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| 52 | Medium | Faithfulness | On a turn that moves to another step (a detour, the next step, the first final question) the tutor had only the passages of the step it was leaving, so it could not cite the text it was now asking about. | The client also sends the passages of the current step's prerequisites and of the first final-check step; the server picks the prompt passages after it plans the move. | API test: a detour turn gets the earlier step's passage | Fixed |
+| 53 | Medium | Teaching | During a detour, the instructions for a question, an unclear answer or an off-topic message told the tutor to ask "the current question", which is the later step's. | Those instructions name the quick question about the earlier step during a detour. | API test | Fixed |
+| 54 | Medium | Teaching | Help, practice and skip turns reached the model with no user message, so it saw its own last question as the latest turn. | A short note says which button the student pressed. | API test | Fixed |
+| 55 | Medium | Faithfulness | Any quoted phrase of four words or more was checked against the file, including the student's own words quoted back, so correct replies got a warning. | Only quotes followed by a passage id are checked, and the prompt asks for the id right after a quote. | Citation tests | Fixed |
+| 56 | Medium | Assessment | A passed final check did not count as applied when the earlier detour had failed, so a student who caught up was still listed as needing practice. | A passed final check is the strongest evidence and counts as applied; the failed revisit stays as a signal. | State-machine test | Fixed |
+| 57 | Low | Teaching | The closing message after the final check and after practice described the step after the last one. | Those moves use the step that was just checked. | Prompt test | Fixed |
+| 58 | Low | Security | The help history kept the last 8 kinds, so after many hints the detour could drop out and happen a second time. A forged state could also send a detour to a step that is not a prerequisite, start practice on an open lesson, or use non-numeric result keys. | The detour stays in the history. The validator rejects the three forged states. | Property test and API test with the forged states | Fixed |
+| 59 | Low | Rendering | Citation markers were matched with two different patterns on the client, unknown ids could become links, markers inside code were turned into links, and labels were not escaped for Markdown. A stopped reply showed markers that were never checked. | One shared helper that skips code; unknown ids are dropped; labels are escaped; a stopped reply shows no markers. | Citation tests | Fixed |
+| 60 | Low | Docs | The README said the tutor never repeats help, and counted 43 golden answers. | The README says it repeats only after the options for that situation run out, and 51 answers. | Review | Fixed |
+| 61 | Low | Accessibility | The completion card sat inside the live log and was read out whole when it appeared; the learning map showed links between steps only as arrows. | The card is `aria-live="off"`, and each map card says which steps it builds on. | Harness and axe | Fixed |
+
+Related findings share a row, so the ten rows cover all twelve.
+
 ## Requirements matrix
 
 Status after the upgrade. "Live" refers to the browser runs against production on 24 October, listed in [DECISIONS.md](DECISIONS.md#live-checks-24-october-morning).
@@ -111,4 +145,9 @@ Status after the upgrade. "Live" refers to the browser runs against production o
 | Student questions answered from the whole file | `findRelatedPassages`, `sources.related` | `tests/sources.test.js`, `eval/retrieval.js`; live | Done |
 | Grade issue and review round | `assessor.js`, `progress.js` | assessor, state-machine and property tests; harness; issues seen live | Done; review round not run live |
 | Security headers and no third-party requests | `vercel.json`, self-hosted fonts | harness; live headers | Done |
-| Production matches `main` | manual deploy per commit | served bundle compared with the build; `1f2dc5e` checked on 24 October, evening | Done by hand; automatic deploy needs the Git connection (finding 12) |
+| Production matches `main` | manual deploy per commit | served bundle compared with the build; `1f2dc5e` checked on 24 October, evening, `6ba634f` on 25 October | Done by hand; automatic deploy needs the Git connection (finding 12) |
+| Help that depends on the mistake; step back to a prerequisite and return | `policy.js`, `progress.js` | `tests/progress.test.js`, `tests/properties.test.js`; harness (mock) | Done |
+| Final check and evidence levels instead of a pass mark | `shared/lesson.js`, `progress.js`, `CompletionCard` | state-machine tests; harness (mock); live run in DECISIONS | Done |
+| Citations checked by the server | `shared/citations.js`, `tutor.js` | `tests/citations.test.js`, API tests; live counts in DECISIONS | Done |
+| Learning map with concept provenance | `LearningMap.jsx`, `conceptInFile` | harness feature check | Done |
+| Review schedule only from what the lesson showed | `reviewSchedule` | state-machine test | Done; days are fixed, not fitted to the student |
