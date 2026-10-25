@@ -1,0 +1,6 @@
+{
+  "method": "vite build, gzip -9 of each file",
+  "before": { "commit": "38484da", "entryJs": 99909, "entryCss": 8790, "lessonJs": 139685 },
+  "after": { "entryJs": 99960, "entryCss": 8921, "lessonJs": 139843 },
+  "note": "Under 0.4 KB more in total: the build-up label in three languages, the help panels, inline math rules, the shared turn-source module."
+}

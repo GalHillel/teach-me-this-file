@@ -1,0 +1,225 @@
+{
+  "checks": 179,
+  "journeys": [
+    {
+      "viewport": "1280x800",
+      "language": "en",
+      "turns": 17,
+      "endState": {
+        "status": "completed",
+        "final": {
+          "results": {
+            "0": "fail",
+            "1": "pass"
+          },
+          "skipped": false
+        },
+        "review": {
+          "kind": "practice",
+          "queue": [
+            0
+          ],
+          "position": 0,
+          "results": {
+            "0": "pass"
+          },
+          "stalls": 0
+        }
+      },
+      "moves": [
+        "start:introduce:-:active/",
+        "hint:hint:-:active/",
+        "explain:reteach:-:active/",
+        "reply:hint:incorrect:active/",
+        "reply:hint:incorrect:active/",
+        "reply:advance:correct:active/",
+        "reply:answer_question:question:active/",
+        "undefined:final_check_start:correct:reviewing/0,1",
+        "undefined:final_check_start:correct:reviewing/0,1",
+        "reply:-:-:",
+        "reply:prerequisite_check:incorrect:active/",
+        "reply:resume:correct:active/",
+        "reply:final_check_start:correct:reviewing/0,1",
+        "reply:final_next:incorrect:reviewing/0,1",
+        "reply:final_finish:correct:completed/",
+        "review:review_question:-:reviewing/0",
+        "reply:review_finish:correct:completed/0"
+      ],
+      "steps": [
+        "start",
+        "hint button",
+        "explain button",
+        "first wrong answer",
+        "second wrong answer",
+        "correct answer",
+        "question about another part",
+        "stopped reply",
+        "reload during a reply",
+        "retry after a provider failure, into a detour",
+        "back from the detour",
+        "reload in the middle of the lesson",
+        "answer after reload 1",
+        "final 1",
+        "final 2",
+        "practice start",
+        "practice answered"
+      ],
+      "requestLabels": [
+        "Tutor\nAnalogy"
+      ],
+      "hintLabels": [
+        "Tutor\nCounter-example",
+        "Tutor\nFocused hint"
+      ],
+      "problems": [],
+      "errors": []
+    },
+    {
+      "viewport": "390x844",
+      "language": "he",
+      "turns": 34,
+      "endState": {
+        "status": "completed",
+        "final": {
+          "results": {
+            "0": "fail",
+            "1": "pass"
+          },
+          "skipped": false
+        },
+        "review": {
+          "kind": "practice",
+          "queue": [
+            0
+          ],
+          "position": 0,
+          "results": {
+            "0": "pass"
+          },
+          "stalls": 0
+        }
+      },
+      "moves": [
+        "start:introduce:-:active/",
+        "hint:hint:-:active/",
+        "explain:reteach:-:active/",
+        "reply:hint:incorrect:active/",
+        "reply:hint:incorrect:active/",
+        "reply:advance:correct:active/",
+        "reply:answer_question:question:active/",
+        "undefined:final_check_start:correct:reviewing/0,1",
+        "undefined:final_check_start:correct:reviewing/0,1",
+        "reply:-:-:",
+        "reply:prerequisite_check:incorrect:active/",
+        "reply:resume:correct:active/",
+        "reply:final_check_start:correct:reviewing/0,1",
+        "reply:final_next:incorrect:reviewing/0,1",
+        "reply:final_finish:correct:completed/",
+        "review:review_question:-:reviewing/0",
+        "reply:review_finish:correct:completed/0",
+        "start:introduce:-:active/",
+        "hint:hint:-:active/",
+        "explain:reteach:-:active/",
+        "reply:hint:incorrect:active/",
+        "reply:hint:incorrect:active/",
+        "reply:advance:correct:active/",
+        "reply:answer_question:question:active/",
+        "undefined:final_check_start:correct:reviewing/0,1",
+        "undefined:final_check_start:correct:reviewing/0,1",
+        "reply:-:-:",
+        "reply:prerequisite_check:incorrect:active/",
+        "reply:resume:correct:active/",
+        "reply:final_check_start:correct:reviewing/0,1",
+        "reply:final_next:incorrect:reviewing/0,1",
+        "reply:final_finish:correct:completed/",
+        "review:review_question:-:reviewing/0",
+        "reply:review_finish:correct:completed/0"
+      ],
+      "steps": [
+        "start",
+        "hint button",
+        "explain button",
+        "first wrong answer",
+        "second wrong answer",
+        "correct answer",
+        "question about another part",
+        "stopped reply",
+        "reload during a reply",
+        "retry after a provider failure, into a detour",
+        "back from the detour",
+        "reload in the middle of the lesson",
+        "answer after reload 1",
+        "final 1",
+        "final 2",
+        "practice start",
+        "practice answered"
+      ],
+      "requestLabels": [
+        "המורה\nאנלוגיה"
+      ],
+      "hintLabels": [
+        "המורה\nדוגמה נגדית",
+        "המורה\nרמז ממוקד"
+      ],
+      "problems": [],
+      "errors": []
+    }
+  ],
+  "pdfStructure": {
+    "status": "Ready: 3 pages, 6 passages, 3 sections, 4,464 characters",
+    "chunks": 6,
+    "sections": [
+      "Cell Respiration",
+      "Photosynthesis",
+      "Cell Division"
+    ],
+    "headerLeft": false,
+    "footerLeft": false
+  },
+  "renamedPdf": "This file could not be opened. It may be damaged, or saved in a different format than its name says.",
+  "keyboard": {
+    "skipVisible": true,
+    "skipFocusesAnswer": true,
+    "escapeStops": true,
+    "stepAfterStop": "Step 1 of 2"
+  },
+  "features": [
+    {
+      "viewport": "1280x800",
+      "language": "en",
+      "sampleLoaded": "Ready: 5 passages, 5 sections, 1,021 characters",
+      "lessonLanguage": "",
+      "sectionsListed": 5,
+      "conceptResults": 0,
+      "searchResults": 1,
+      "highlighted": 3,
+      "notesFile": "lesson-notes.md"
+    },
+    {
+      "viewport": "390x844",
+      "language": "he",
+      "sampleLoaded": "מוכן: 5 קטעים, 5 פרקים, 611 תווים, טקסט מימין לשמאל",
+      "lessonLanguage": "he",
+      "sectionsListed": 5,
+      "conceptResults": 0,
+      "searchResults": 1,
+      "highlighted": 2,
+      "notesFile": "lesson-notes.md"
+    }
+  ],
+  "externalRequests": [],
+  "overflow": [],
+  "offscreen": [],
+  "smallTargets": [],
+  "tinyText": [],
+  "axe": [],
+  "lessonCompleted": true,
+  "helpActions": true,
+  "detourShown": true,
+  "finalCheckShown": true,
+  "lessonRestored": true,
+  "recheckShown": true,
+  "reviewCompleted": true,
+  "pageErrors": [],
+  "blocked": []
+}
