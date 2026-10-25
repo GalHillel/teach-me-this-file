@@ -24,22 +24,26 @@ const git = (command) => {
   }
 };
 
+export const versionInfo = (provider) => ({
+  date: new Date().toISOString(),
+  provider: provider.name,
+  models: { main: process.env.GEMINI_MODELS || provider.model || null, backup: process.env.GEMINI_BACKUP_MODELS || null },
+  commit: git('rev-parse HEAD') ?? process.env.EVAL_COMMIT ?? null,
+  uncommittedChanges: git('status --porcelain -- server shared src eval') ? true : false,
+  engineVersion: hashFiles([...filesIn('server/lesson/'), ...filesIn('shared/'), 'src/lesson/turnSources.js', 'src/lesson/sources.js']),
+  promptVersion: hashFiles(['server/lesson/prompts.js']),
+  node: process.version,
+});
+
 export const runMeta = ({ label, mode, split, systems, provider, pauseMs, scenarios }) => ({
   label,
   mode,
   split,
   systems,
-  date: new Date().toISOString(),
-  provider: provider.name,
-  models: { main: process.env.GEMINI_MODELS || provider.model || null, backup: process.env.GEMINI_BACKUP_MODELS || null },
-  commit: git('rev-parse HEAD') ?? process.env.EVAL_COMMIT ?? null,
-  uncommittedChanges: git('status --porcelain -- server shared src eval/golden eval/teaching.js eval/teaching-lib.js eval/teaching-store.js') ? true : false,
-  engineVersion: hashFiles([...filesIn('server/lesson/'), ...filesIn('shared/'), 'src/lesson/turnSources.js', 'src/lesson/sources.js']),
-  promptVersion: hashFiles(['server/lesson/prompts.js']),
+  ...versionInfo(provider),
   scenariosVersion: hashFiles(['eval/golden/teaching.json', 'eval/golden/teaching-lessons.json']),
   scenarioIds: scenarios.map((scenario) => scenario.id),
   pauseMs,
-  node: process.version,
 });
 
 const VERSION_FIELDS = ['mode', 'split', 'provider', 'engineVersion', 'promptVersion', 'scenariosVersion'];

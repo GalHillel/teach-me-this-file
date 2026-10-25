@@ -1,7 +1,8 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { assessAnswer } from '../server/lesson/assessor.js';
 import { createProgress } from '../server/lesson/progress.js';
 import { resolveProvider } from '../server/providers/index.js';
+import { readRun, versionInfo } from './teaching-store.js';
 
 const golden = JSON.parse(readFileSync(new URL('./golden/grading.json', import.meta.url), 'utf8'));
 const label = process.env.EVAL_LABEL || 'run';
@@ -59,9 +60,15 @@ const summarize = (rows) => {
 
 const run = async () => {
   const { provider } = resolveProvider({ apiKey: process.env.EVAL_API_KEY || '', provider: process.env.EVAL_PROVIDER || '' });
-  const rows = [];
+  mkdirSync(new URL('./results/', import.meta.url), { recursive: true });
+  const linesFile = new URL(`./results/grading-${label}.jsonl`, import.meta.url);
+  if (existsSync(linesFile) && process.env.EVAL_RESUME !== '1') throw new Error(`${linesFile.pathname} exists; set EVAL_RESUME=1 to continue it or use another EVAL_LABEL`);
+  const earlier = readRun(linesFile);
+  const finished = new Set(earlier.filter((row) => !row.error).map((row) => row.id));
+  const rows = earlier.filter((row) => !row.error);
   for (const item of golden.cases) {
     if (only && !only.includes(item.id)) continue;
+    if (finished.has(item.id)) continue;
     const { plan, sources } = lessonFor(item.step);
     const started = Date.now();
     let meta = { model: provider.model, backup: false };
@@ -79,17 +86,26 @@ const run = async () => {
       });
       const row = { id: item.id, accept: item.accept, expectedIssue: item.issue ?? null, tags: item.tags, verdict: assessment.verdict, ok: item.accept.includes(assessment.verdict), ms: Date.now() - started, model: meta.model, backup: meta.backup, assessment };
       rows.push(row);
+      appendFileSync(linesFile, `${JSON.stringify(row)}\n`);
       console.log(`${row.ok ? 'ok  ' : 'MISS'} ${item.id.padEnd(36)} ${row.verdict.padEnd(10)} want ${item.accept.join('|')} issue=${assessment.issue}${item.issue ? ` want ${item.issue.join('|')}` : ''} ${row.ms}ms ${row.model}`);
     } catch (error) {
-      rows.push({ id: item.id, accept: item.accept, tags: item.tags, error: error.code ?? error.message, ms: Date.now() - started });
+      const row = { id: item.id, accept: item.accept, tags: item.tags, error: error.code ?? error.message, ms: Date.now() - started };
+      rows.push(row);
+      appendFileSync(linesFile, `${JSON.stringify(row)}\n`);
       console.log(`ERR  ${item.id.padEnd(36)} ${error.code ?? error.message}`);
+      if (error.code === 'quota_exhausted') break;
     }
     await wait(pauseMs);
   }
-  const summary = summarize(rows);
+  const planned = golden.cases.filter((item) => !only || only.includes(item.id)).length;
+  const summary = { planned, notRun: planned - rows.length, ...summarize(rows) };
   console.log(JSON.stringify(summary));
-  mkdirSync(new URL('./results/', import.meta.url), { recursive: true });
-  writeFileSync(new URL(`./results/grading-${label}.json`, import.meta.url), `${JSON.stringify({ label, date: new Date().toISOString(), summary, rows }, null, 2)}\n`);
+  writeFileSync(new URL(`./results/grading-${label}.json`, import.meta.url), `${JSON.stringify({ label, ...versionInfo(provider), summary, rows }, null, 2)}\n`);
 };
 
-await run();
+try {
+  await run();
+} catch (error) {
+  console.error(error.message);
+  process.exit(1);
+}
