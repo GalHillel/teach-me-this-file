@@ -15,7 +15,7 @@ export default function App() {
   const { t } = useI18n();
   const [settings, setSettings] = useState({ apiKey: '', provider: 'auto' });
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [serverKey, setServerKey] = useState(false);
+  const [serverKey, setServerKey] = useState(null);
   const [upload, setUpload] = useState(EMPTY_UPLOAD);
   const [teacherPrompt, setTeacherPrompt] = useState(DEFAULT_PROMPT);
   const [lessonLanguage, setLessonLanguage] = useState('');
@@ -26,7 +26,8 @@ export default function App() {
     fetchHealth().then((health) => setServerKey(Boolean(health.serverKey)));
   }, []);
 
-  const keyReady = Boolean(settings.apiKey) || serverKey || settings.provider === 'mock';
+  const keyReady = Boolean(settings.apiKey) || serverKey === true || settings.provider === 'mock';
+  const needsKey = !keyReady && serverKey === false;
 
   const readFile = async (file) => {
     const id = (uploadRef.current += 1);
@@ -76,13 +77,13 @@ export default function App() {
             lessonLanguage={lessonLanguage}
             onLessonLanguageChange={setLessonLanguage}
             settings={settings}
-            needsKey={!keyReady}
+            needsKey={needsKey}
             onOpenSettings={() => setSettingsOpen(true)}
             onLessonReady={setLesson}
           />
         </div>
       )}
-      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} settings={settings} serverKey={serverKey} onSave={setSettings} />
+      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} settings={settings} serverKey={serverKey === true} onSave={setSettings} />
     </div>
   );
 }

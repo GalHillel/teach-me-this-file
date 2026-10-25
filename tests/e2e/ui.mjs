@@ -346,6 +346,7 @@ const record = (screen, viewport, language, data, extra = {}) => results.push({ 
 
 const externalRequests = new Set();
 let keyboard = null;
+let coldStart = null;
 const features = [];
 let pdfStructure = null;
 let renamed = null;
@@ -355,6 +356,25 @@ const browser = await chromium.launch();
 const journeys = [];
 
 try {
+  coldStart = await (async () => {
+    const { context, page } = await openApp(browser, [1280, 800], 'en');
+    await page.route('**/api/health', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+      await route.continue();
+    });
+    await page.goto(base);
+    await page.waitForSelector('h1');
+    await uploadFixture(page);
+    await page.locator('main button.btn-primary').last().click();
+    const started = await page.waitForSelector('[role=progressbar]', { timeout: 20000 }).then(() => true).catch(() => false);
+    const settingsOpened = await page.locator('dialog[open]').count() > 0;
+    await context.close();
+    return { started, settingsOpened };
+  })().catch((error) => ({ error: error.message.split('\n')[0] }));
+  if (process.argv.includes('--cold-start')) {
+    print(JSON.stringify(coldStart));
+    process.exit(coldStart.started && !coldStart.settingsOpened ? 0 : 1);
+  }
   for (const [viewport, language] of [[[1280, 800], 'en'], [[390, 844], 'he']]) journeys.push(await journey(viewport, language));
   if (process.argv.includes('--journeys')) {
     print(JSON.stringify(journeys, null, 2));
@@ -580,6 +600,7 @@ const summary = {
   pdfStructure,
   renamedPdf: renamed,
   keyboard,
+  coldStart,
   features,
   externalRequests: [...externalRequests],
   overflow: results.filter((row) => row.overflow > 0).map((row) => `${row.screen} ${row.viewport} ${row.language} +${row.overflow}px`),
@@ -608,5 +629,5 @@ print(JSON.stringify(summary, null, 2));
 if (reportPath) writeFileSync(reportPath, `${JSON.stringify({ summary, results }, null, 2)}\n`);
 
 const serious = summary.axe.filter((violation) => violation.impact === 'serious' || violation.impact === 'critical');
-const failed = journeys.some((item) => item.problems.length || item.errors.length) || features.some((item) => item.error || !item.notesFile || !item.searchResults) || !keyboard?.escapeStops || !keyboard?.skipFocusesAnswer || !pdfStructure || pdfStructure.headerLeft || pdfStructure.footerLeft || pdfStructure.sections.length < 3 || !summary.recheckShown || !summary.reviewCompleted || !summary.helpActions || !summary.detourShown || !summary.finalCheckShown || summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
+const failed = !coldStart?.started || coldStart?.settingsOpened || journeys.some((item) => item.problems.length || item.errors.length) || features.some((item) => item.error || !item.notesFile || !item.searchResults) || !keyboard?.escapeStops || !keyboard?.skipFocusesAnswer || !pdfStructure || pdfStructure.headerLeft || pdfStructure.footerLeft || pdfStructure.sections.length < 3 || !summary.recheckShown || !summary.reviewCompleted || !summary.helpActions || !summary.detourShown || !summary.finalCheckShown || summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
 if (strict && failed) process.exit(1);
