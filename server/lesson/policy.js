@@ -44,13 +44,14 @@ const firstUnused = (ladder, used) => ladder.find((item) => !used.includes(item)
 
 export const chooseIntervention = ({ situation, assessment, state }) => {
   const used = state.used ?? [];
+  const pick = (ladder) => firstUnused(state.built ? ladder.filter((item) => !NARROWING.has(item)) : ladder, used);
   if (situation === 'wrong') {
-    if (assessment?.issue === 'no_knowledge') return firstUnused(LADDERS.no_knowledge, used);
-    if (assessment?.misconception) return firstUnused(LADDERS.misconception, used);
-    return firstUnused(state.attempts >= 2 ? LADDERS.second_wrong : LADDERS.first_wrong, used);
+    if (assessment?.issue === 'no_knowledge') return pick(LADDERS.no_knowledge);
+    if (assessment?.misconception) return pick(LADDERS.misconception);
+    return pick(state.attempts >= 2 ? LADDERS.second_wrong : LADDERS.first_wrong);
   }
-  if (situation === 'hint_request') return firstUnused(LADDERS.hint_request, used);
-  if (situation === 'explain_request') return firstUnused(LADDERS.explain_request, used);
+  if (situation === 'hint_request') return pick(LADDERS.hint_request);
+  if (situation === 'explain_request') return pick(LADDERS.explain_request);
   return null;
 };
 

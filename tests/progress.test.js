@@ -340,6 +340,23 @@ describe('narrowed questions', () => {
   });
 });
 
+describe('narrowed questions after the step already went back once', () => {
+  it('gives only help that asks the whole question, so a right answer to a sub-question cannot end the step', () => {
+    const first = answer(createProgress(plan), 'incorrect', 'high', 'none', { misconception: 'cells are tiny animals' });
+    const built = answer(first.progress, 'correct');
+    expect(built.move).toBe('build_up');
+    let progress = request(built.progress, 'hint').progress;
+    progress = request(progress, 'hint').progress;
+    const third = request(progress, 'hint');
+    expect(['decompose', 'analogy', 'counterexample']).not.toContain(third.intervention);
+    expect(third.progress.steps[0].scaffold).toBe(false);
+    const explain = request(third.progress, 'explain');
+    expect(['decompose', 'analogy', 'counterexample']).not.toContain(explain.intervention);
+    const wrong = answer(explain.progress, 'incorrect', 'high', 'none', { misconception: 'cells are tiny animals' });
+    expect(['decompose', 'analogy', 'counterexample']).not.toContain(wrong.intervention);
+  });
+});
+
 describe('final check', () => {
   it('starts a short final check when the last step is done, instead of ending the lesson', () => {
     const { progress, moves } = run(['correct', 'correct', 'correct']);

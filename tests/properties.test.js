@@ -128,6 +128,21 @@ describe('lesson state machine properties', () => {
     }), { numRuns: 400 });
   });
 
+  it('never ends a step on a right answer to a narrowed question unless the grader says it meets the step', () => {
+    fc.assert(fc.property(fc.integer({ min: 1, max: 4 }), fc.array(eventArb, { maxLength: 120 }), (length, events) => {
+      const plan = planOf(length);
+      let progress = createProgress(plan);
+      for (const event of events) {
+        const before = progress;
+        const result = apply(plan, progress, event);
+        progress = result.progress;
+        const step = before.status === 'active' ? before.steps[before.currentStep] : null;
+        const ended = ['advance', 'final_check_start'].includes(result.move) && step?.phase === 'learn' && step.detour === null;
+        if (ended && event.kind === 'reply') expect(step.scaffold === false || event.assessment.meetsCriteria === true).toBe(true);
+      }
+    }), { numRuns: 600 });
+  });
+
   it('only produces states that the server accepts back from the client', () => {
     fc.assert(fc.property(fc.integer({ min: 1, max: 5 }), fc.array(eventArb, { maxLength: 60 }), (length, events) => {
       const plan = planOf(length);
