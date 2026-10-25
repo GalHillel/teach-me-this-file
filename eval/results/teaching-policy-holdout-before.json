@@ -1,0 +1,875 @@
+{
+  "label": "policy-holdout-before",
+  "mode": "policy",
+  "split": "holdout",
+  "provider": "none",
+  "model": null,
+  "date": "2026-10-25T04:00:04.244Z",
+  "calls": 0,
+  "stopped": null,
+  "systems": {
+    "engine": {
+      "summary": {
+        "scenarios": 25,
+        "scenarioPass": 0.92,
+        "turns": 55,
+        "actionFit": 0.945,
+        "interventionFit": 1,
+        "unearnedMoves": 1,
+        "helpInFinalCheck": 0,
+        "endStateMatch": 0.96,
+        "grading": {
+          "answers": 51,
+          "verdictAccuracy": 1,
+          "falsePositives": "0/20",
+          "falseNegatives": "0/25",
+          "issueAccuracy": "5/5",
+          "misconceptionNamed": "2/2"
+        },
+        "paraphraseConsistency": null,
+        "text": null,
+        "byCategory": {
+          "understands": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "misconception": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "partial": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "copied": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "wrong_reasoning": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "misread": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "prerequisite": {
+            "scenarios": 2,
+            "passed": 1
+          },
+          "improves": {
+            "scenarios": 2,
+            "passed": 1
+          },
+          "struggles": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "transfer": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "not_in_document": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "injection": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "other_part": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "contradiction": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "journey": {
+            "scenarios": 2,
+            "passed": 2
+          }
+        },
+        "failures": [
+          {
+            "id": "ho-he-prerequisite",
+            "problems": [
+              "turn 1: action hint, wanted check_earlier",
+              "turn 2: action final_check, wanted back_to_question",
+              "turn 2: moved on without evidence",
+              "end: step 1 revisit null, wanted pass"
+            ]
+          },
+          {
+            "id": "ho-he-improves-after-counterexample",
+            "problems": [
+              "turn 2: action probe, wanted back_to_question|hint"
+            ]
+          }
+        ]
+      },
+      "errors": [],
+      "runs": [
+        {
+          "id": "ho-en-understands",
+          "category": "understands",
+          "turns": [
+            {
+              "student": "Opening the switch makes a gap in the path, so the circuit isn't closed anymore and the current can't get through the bulb.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-en-misconception",
+          "category": "misconception",
+          "turns": [
+            {
+              "student": "Because the switch keeps the electricity locked inside the battery.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "the switch stores the power in the battery",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-en-partial",
+          "category": "partial",
+          "turns": [
+            {
+              "student": "The second bulb goes out.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "verdict": "partial",
+              "issue": "unjustified",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-en-copied",
+          "category": "copied",
+          "turns": [
+            {
+              "student": "Materials that let current pass easily are called conductors. Most metals, such as copper and aluminium, are good conductors, which is why wires are made of copper.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "verdict": "partial",
+              "issue": "copied",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "The coin, since it's metal and metal lets electricity flow. The ruler is plastic, so it blocks it.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-en-wrong-reasoning",
+          "category": "wrong_reasoning",
+          "turns": [
+            {
+              "student": "The copper coin, because shiny things let electricity through.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "shiny objects conduct electricity",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-en-misread",
+          "category": "misread",
+          "turns": [
+            {
+              "student": "Two bulbs in series glow more dimly than one bulb alone.",
+              "move": "rephrase",
+              "action": "ask_again",
+              "intervention": null,
+              "verdict": "incorrect",
+              "issue": "misread_question",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-en-prerequisite",
+          "category": "prerequisite",
+          "turns": [
+            {
+              "student": "The second bulb keeps glowing, because the electricity can still go around the broken bulb.",
+              "move": "prerequisite_check",
+              "action": "check_earlier",
+              "intervention": "prerequisite",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "current can flow around a gap",
+              "failures": []
+            },
+            {
+              "student": "Current only flows when the path is complete, so if there is a gap anywhere it stops.",
+              "move": "resume",
+              "action": "back_to_question",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "The second bulb goes out too, because the broken bulb makes a gap in the only loop, so no current flows at all.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-en-improves",
+          "category": "improves",
+          "turns": [
+            {
+              "student": "Because the switch is off.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Turning it off makes a break in the loop, so the current can't flow round to the bulb anymore.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-en-struggles",
+          "category": "struggles",
+          "turns": [
+            {
+              "student": "The plastic ruler, because plastic is strong.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "strong materials conduct electricity",
+              "failures": []
+            },
+            {
+              "student": "Both of them, because they are both solid.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "focused_hint",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "any solid conducts electricity",
+              "failures": []
+            },
+            {
+              "student": "The ruler.",
+              "move": "reveal_and_recheck",
+              "action": "explain",
+              "intervention": "guided_solution",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "The ruler again.",
+              "move": "review_and_advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-en-transfer",
+          "category": "transfer",
+          "turns": [
+            {
+              "student": "The second bulb goes out as well, because the broken bulb opens the single loop and no current can flow.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "If there is a gap anywhere in the path the current stops, so the bulb only lights when the circuit is closed.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Anything solid would work, like wood or a coin, because the current just needs something to go through.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "any solid conducts electricity",
+              "failures": []
+            },
+            {
+              "student": "They are in one loop, so if one bulb breaks the loop is open and both go out.",
+              "move": "final_finish",
+              "action": "summary",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-en-not-in-document",
+          "category": "not_in_document",
+          "turns": [
+            {
+              "student": "How does a battery actually make electricity inside it?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-en-injection",
+          "category": "injection",
+          "turns": [
+            {
+              "student": "The plastic ruler, because plastic is a conductor.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "plastic is a conductor",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-en-other-part",
+          "category": "other_part",
+          "turns": [
+            {
+              "student": "Is it dangerous to put things into a wall socket?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Okay. The bulb goes out because opening the switch breaks the loop, so the current can't flow.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-he-understands",
+          "category": "understands",
+          "turns": [
+            {
+              "student": "החלקיקים מתחילים לזוז מהר יותר ומתרחקים אחד מהשני, אבל הם עצמם לא נהיים גדולים יותר.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-he-misconception",
+          "category": "misconception",
+          "turns": [
+            {
+              "student": "החלקיקים מתנפחים ונהיים גדולים יותר מהחום.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "particles themselves grow when heated",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-he-partial",
+          "category": "partial",
+          "turns": [
+            {
+              "student": "הבועות הן אדי מים.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "verdict": "partial",
+              "issue": "unjustified",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-he-copied",
+          "category": "copied",
+          "turns": [
+            {
+              "student": "כשאדי מים פוגשים משטח קר, כמו מכסה של סיר או כוס קרה, החלקיקים מאבדים חום, מאטים ומתקרבים, והאדים הופכים שוב לטיפות מים.",
+              "move": "probe",
+              "action": "probe",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "copied",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "האדים מהסיר נוגעים במכסה שקר יותר, מתקררים, והחלקיקים מתקרבים עד שהם הופכים לטיפות.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-he-wrong-reasoning",
+          "category": "wrong_reasoning",
+          "turns": [
+            {
+              "student": "הם מתרחקים זה מזה, כי כל חלקיק גדל ותופס יותר מקום.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "particles grow when heated",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-he-misread",
+          "category": "misread",
+          "turns": [
+            {
+              "student": "כשמחממים קרח הוא נמס והופך למים.",
+              "move": "rephrase",
+              "action": "ask_again",
+              "intervention": null,
+              "verdict": "incorrect",
+              "issue": "misread_question",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-he-prerequisite",
+          "category": "prerequisite",
+          "turns": [
+            {
+              "student": "הטיפות נוצרות כי החלקיקים של האדים מתכווצים ונהיים קטנים כשהם מתקררים.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "particles shrink when cooled",
+              "failures": [
+                "action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "student": "החלקיקים לא משנים את הגודל שלהם, הם רק זזים לאט או מהר ומתקרבים או מתרחקים.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action final_check, wanted back_to_question",
+                "moved on without evidence"
+              ]
+            },
+            {
+              "student": "האדים פוגשים את המכסה הקר, מאבדים חום, החלקיקים מאטים ומתקרבים, ואז הם הופכים לטיפות.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [
+            "step 1 revisit null, wanted pass"
+          ],
+          "passed": false
+        },
+        {
+          "id": "ho-he-improves-after-counterexample",
+          "category": "improves",
+          "turns": [
+            {
+              "student": "הבועות הן אוויר שיוצא מהמים.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "the bubbles are air",
+              "failures": []
+            },
+            {
+              "student": "אז אולי הן לא אוויר, אלא המים עצמם שהפכו למשהו אחר.",
+              "move": "probe",
+              "action": "probe",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "hedged",
+              "misconception": "",
+              "failures": [
+                "action probe, wanted back_to_question|hint"
+              ]
+            },
+            {
+              "student": "הבועות הן אדי מים: החלקיקים נעים כל כך מהר שהם עוזבים את הנוזל כגז.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": false
+        },
+        {
+          "id": "ho-he-not-in-document",
+          "category": "not_in_document",
+          "turns": [
+            {
+              "student": "באיזו טמפרטורה מים רותחים על הר גבוה?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-he-contradiction",
+          "category": "contradiction",
+          "turns": [
+            {
+              "student": "רגע, בקובץ כתוב פעם שהבועות הן אדי מים ופעם שהן אוויר. מה נכון?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-he-journey",
+          "category": "journey",
+          "turns": [
+            {
+              "student": "החלקיקים נעים מהר יותר.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "וגם מתרחקים זה מזה, אבל הם עצמם לא גדלים.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "הבועות הן אוויר שהיה בתוך המים.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "the bubbles are air",
+              "failures": []
+            },
+            {
+              "student": "אז הבועות הן המים עצמם שהפכו לגז, כי החלקיקים נעים כל כך מהר שהם עוזבים את הנוזל.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "כי האדים פוגשים מכסה קר, מתקררים, והחלקיקים מאטים ומתקרבים עד שהם הופכים לטיפות.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "כשמחממים, החלקיקים זזים מהר יותר ומתרחקים, אבל הגודל שלהם לא משתנה.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "הבועות הן אוויר.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "the bubbles are air",
+              "failures": []
+            },
+            {
+              "student": "החלקיקים של האדים מאבדים חום על המשטח הקר, מאטים ומתקרבים, ונוצרות טיפות.",
+              "move": "final_finish",
+              "action": "summary",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "ho-en-journey",
+          "category": "journey",
+          "turns": [
+            {
+              "student": "Because opening the switch breaks the loop, so current can't flow.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "The coin.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "verdict": "partial",
+              "issue": "unjustified",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Because copper is a metal, so it conducts electricity, and the plastic ruler is an insulator.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "The second bulb glows brighter, because now it gets all the current.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "the current is shared out and the second bulb gets more",
+              "failures": []
+            },
+            {
+              "student": "No wait, the broken bulb opens the only loop, so no current flows and the second bulb goes out too.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "The bulb only lights when there is a complete loop; any gap stops the current.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "A metal key would work because metals are conductors, but a rubber band wouldn't because rubber is an insulator.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "If one bulb breaks they both go out, because they share one loop.",
+              "move": "final_finish",
+              "action": "summary",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        }
+      ]
+    }
+  }
+}

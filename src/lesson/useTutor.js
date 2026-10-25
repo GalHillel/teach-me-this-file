@@ -1,43 +1,11 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { streamTurn } from '../api/client.js';
 import { chatReducer, historyFor, initChat, savedChat } from './chatReducer.js';
-import { activeStepIndex, finalCheckQueue, reviewQueue } from '../../shared/lesson.js';
-import { chunksById, findRelatedPassages } from './sources.js';
+import { isRequest, turnSources } from './turnSources.js';
 import { saveChat, saveLesson } from './storage.js';
 
 let nextId = 0;
 const newId = (prefix) => `${prefix}-${Date.now().toString(36)}-${(nextId += 1)}`;
-
-const stepSources = (state, index) => {
-  const step = index === undefined ? null : state.plan.steps[index];
-  return step ? chunksById(state.chunks, step.sourceIds) : [];
-};
-
-const REQUESTS = new Set(['hint', 'explain', 'skip_final']);
-
-const stepsForTurn = (progress, kind) => {
-  if (kind === 'review') return reviewQueue(progress).slice(0, 2);
-  if (progress.status === 'reviewing') {
-    const { queue, position } = progress.review;
-    return [queue[position], queue[position + 1]];
-  }
-  const detour = progress.steps[progress.currentStep]?.detour;
-  if (Number.isInteger(detour)) return [detour, progress.currentStep];
-  return [activeStepIndex(progress), progress.currentStep + 1];
-};
-
-const UPCOMING_LIMIT = 8;
-
-export const upcomingSources = (state, exclude) => {
-  const { plan, progress } = state;
-  if (progress.status !== 'active') return [];
-  const step = plan.steps[progress.currentStep];
-  const prerequisites = (step?.prerequisites ?? []).map((id) => plan.steps.findIndex((item) => item.id === id)).filter((index) => index >= 0);
-  const finalFirst = progress.currentStep === plan.steps.length - 1 ? finalCheckQueue(plan, progress).slice(0, 1) : [];
-  const skip = new Set(exclude);
-  const ids = [...new Set([...prerequisites, ...finalFirst].flatMap((index) => plan.steps[index].sourceIds))].filter((id) => !skip.has(id));
-  return chunksById(state.chunks, ids).slice(0, UPCOMING_LIMIT);
-};
 
 export const useTutor = ({ lesson, settings }) => {
   const [state, dispatch] = useReducer(chatReducer, lesson, initChat);
@@ -64,21 +32,15 @@ export const useTutor = ({ lesson, settings }) => {
       controllerRef.current = controller;
 
       const current = stateRef.current;
-      const asks = kind === 'reply' || REQUESTS.has(kind);
+      const asks = kind === 'reply' || isRequest(kind);
       const student = asks && !retryStudentId && studentMessage
-        ? { id: newId('student'), content: studentMessage, ...(REQUESTS.has(kind) ? { request: kind } : {}) }
+        ? { id: newId('student'), content: studentMessage, ...(isRequest(kind) ? { request: kind } : {}) }
         : null;
       const studentId = student?.id ?? retryStudentId;
       const history = historyFor(current.messages, studentId);
       const tutorId = newId('tutor');
-      const [currentIndex, nextIndex] = stepsForTurn(current.progress, kind);
-      const currentSources = stepSources(current, currentIndex);
-      const nextSources = stepSources(current, nextIndex);
-      const upcoming = upcomingSources(current, [...currentSources, ...nextSources].map((chunk) => chunk.id));
-      const related = kind === 'reply'
-        ? findRelatedPassages(studentMessage, current.chunks, { exclude: [...currentSources, ...nextSources].map((chunk) => chunk.id) })
-        : [];
-      dispatch({ type: 'turn_started', tutorId, student, studentId, relatedIds: related.map((chunk) => chunk.id) });
+      const sources = turnSources(current, kind, studentMessage);
+      dispatch({ type: 'turn_started', tutorId, student, studentId, relatedIds: sources.related.map((chunk) => chunk.id) });
 
       try {
         await streamTurn({
@@ -91,7 +53,7 @@ export const useTutor = ({ lesson, settings }) => {
             progress: current.progress,
             history,
             studentMessage: kind === 'reply' ? studentMessage : '',
-            sources: { current: currentSources, next: nextSources, related, upcoming },
+            sources,
           },
           onEvent: (event, data) => {
             if (event === 'status') dispatch({ type: 'phase', phase: data.phase, tutorId });

@@ -33,7 +33,7 @@ describe('lesson progress state machine', () => {
   it('starts on the first step in the learn phase', () => {
     const progress = createProgress(plan);
     expect(progress.currentStep).toBe(0);
-    expect(progress.steps[0]).toEqual({ status: 'active', phase: 'learn', attempts: 0, stalls: 0, probed: false, outcome: null, hints: 0, used: [], detour: null, revisit: null });
+    expect(progress.steps[0]).toEqual({ status: 'active', phase: 'learn', attempts: 0, stalls: 0, probed: false, scaffold: false, built: false, outcome: null, hints: 0, used: [], detour: null, revisit: null });
     expect(progress.review).toBe(null);
     expect(progress.final).toBe(null);
     expect(progress.steps.slice(1).every((step) => step.status === 'pending')).toBe(true);
@@ -133,11 +133,12 @@ describe('lesson progress state machine', () => {
     expect(progress.steps[0]).toMatchObject({ attempts: 1, stalls: 0 });
   });
 
-  it('needs at most 15 non-question replies to end a step without prerequisites, and that bound is reached', () => {
+  it('needs at most 18 non-question replies to end a step without prerequisites, and that bound is reached', () => {
     const single = makePlan(['Only']);
     const worst = [
       'off_topic', 'unclear', ['correct', 'low'],
-      'off_topic', 'unclear', 'off_topic',
+      'off_topic', 'unclear', ['incorrect', 'high', 'none', { misconception: 'a wrong idea' }],
+      'off_topic', 'unclear', 'correct',
       'off_topic', 'unclear', 'off_topic',
       'off_topic', 'unclear', 'off_topic',
       'off_topic', 'unclear', 'off_topic',
@@ -147,6 +148,8 @@ describe('lesson progress state machine', () => {
     const after = runIn(single)(worst);
     expect(after.progress.steps[0]).toMatchObject({ status: 'done', outcome: 'review' });
     expect(after.moves.at(-1)).toBe('final_check_start');
+    expect(after.moves).toContain('build_up');
+    expect(after.moves).toContain('probe');
   });
 
   it('ends the re-check as review after too many non-answers instead of explaining again', () => {
@@ -220,10 +223,10 @@ describe('going back to a prerequisite', () => {
   const runChain = runIn(chain);
   const answerChain = answerIn(chain);
 
-  it('checks the earlier step when the missing ideas belong to it, then returns to the current question', () => {
+  it('checks the earlier step the grader names, then returns to the current question', () => {
     const { progress: atStep2 } = runChain(['correct']);
-    const gap = answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['the photosynthesis inputs'] });
-    expect(gap).toMatchObject({ move: 'prerequisite_check', intervention: 'prerequisite', prerequisite: { index: 0, reason: 'missing_concept' } });
+    const gap = answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['the photosynthesis inputs'], missingPrerequisite: 1 });
+    expect(gap).toMatchObject({ move: 'prerequisite_check', intervention: 'prerequisite', prerequisite: { index: 0, reason: 'grader' } });
     expect(gap.progress.steps[1]).toMatchObject({ detour: 0, attempts: 1, used: ['prerequisite'] });
 
     const back = answerChain(gap.progress, 'correct');
@@ -234,11 +237,11 @@ describe('going back to a prerequisite', () => {
 
   it('records a failed revisit and re-explains before returning; only one detour per step', () => {
     const { progress: atStep2 } = runChain(['correct']);
-    const gap = answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'] });
+    const gap = answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'], missingPrerequisite: 1 });
     const back = answerChain(gap.progress, 'incorrect');
     expect(back.move).toBe('resume_after_reteach');
     expect(back.progress.steps[0].revisit).toBe('fail');
-    const again = answerChain(back.progress, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'] });
+    const again = answerChain(back.progress, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'], missingPrerequisite: 1 });
     expect(again).toMatchObject({ move: 'hint', intervention: 'focused_hint' });
     expect(again.progress.steps[1].attempts).toBe(2);
   });
@@ -250,24 +253,40 @@ describe('going back to a prerequisite', () => {
     expect(first).toMatchObject({ move: 'prerequisite_check', prerequisite: { index: 0, reason: 'weak_prerequisite' } });
   });
 
-  it('does not count concepts the current step itself teaches as a prerequisite gap', () => {
+  it('goes back to the earlier step the grader names, whatever language the plan is in', () => {
+    const hebrew = makePlan(['אידוי', 'עיבוי ועננים', 'משקעים'], { 1: ['s1'], 2: ['s2'] });
+    const { progress: atStep2 } = runIn(hebrew)(['correct']);
+    const lexical = answerIn(hebrew)(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['the sun heats the water'] });
+    expect(lexical.move).toBe('hint');
+    const named = answerIn(hebrew)(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['the sun heats the water'], missingPrerequisite: 1 });
+    expect(named).toMatchObject({ move: 'prerequisite_check', prerequisite: { index: 0, reason: 'grader' } });
+  });
+
+  it('ignores a named step that is not an earlier prerequisite', () => {
+    const { progress: atStep2 } = runChain(['correct']);
+    expect(answerChain(atStep2, 'incorrect', 'high', 'none', { missingPrerequisite: 2 }).move).toBe('hint');
+    expect(answerChain(atStep2, 'incorrect', 'high', 'none', { missingPrerequisite: 9 }).move).toBe('hint');
+  });
+
+  it('does not go back on words alone: a missing concept that shares a word with an earlier step is not a gap', () => {
     const { progress: atStep2 } = runChain(['correct']);
     expect(answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['chlorophyll role'] }).move).toBe('hint');
+    expect(answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['the photosynthesis inputs'] }).move).toBe('hint');
   });
 
   it('remembers the detour even after many other kinds of help, so it never happens twice on a step', () => {
     const { progress: atStep2 } = runChain(['correct']);
-    const gap = answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'] });
+    const gap = answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'], missingPrerequisite: 1 });
     let progress = answerChain(gap.progress, 'correct').progress;
     for (let turn = 0; turn < 10; turn += 1) progress = request(progress, turn % 2 ? 'hint' : 'explain', chain).progress;
     expect(progress.steps[1].used).toContain('prerequisite');
     expect(progress.steps[1].used.length).toBeLessThanOrEqual(8);
-    expect(answerChain(progress, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'] }).move).not.toBe('prerequisite_check');
+    expect(answerChain(progress, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'], missingPrerequisite: 1 }).move).not.toBe('prerequisite_check');
   });
 
   it('counts a passed final check as applied, even after a failed revisit', () => {
     const { progress: atStep2 } = runChain(['correct']);
-    const gap = answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'] });
+    const gap = answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'], missingPrerequisite: 1 });
     const back = answerChain(gap.progress, 'incorrect');
     const { progress: checking } = runChain(['correct', 'correct'], back.progress);
     expect(checking.review.kind).toBe('final');
@@ -279,10 +298,45 @@ describe('going back to a prerequisite', () => {
 
   it('limits non-answers during the detour', () => {
     const { progress: atStep2 } = runChain(['correct']);
-    const gap = answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'] });
+    const gap = answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'], missingPrerequisite: 1 });
     const { moves, progress } = runChain(['off_topic', 'question', 'unclear', 'off_topic'], gap.progress);
     expect(moves).toEqual(['redirect', 'answer_question', 'clarify', 'resume_after_reteach']);
     expect(progress.steps[1].detour).toBe(null);
+  });
+});
+
+describe('narrowed questions', () => {
+  it('goes back to the whole question after a correct answer to a counter-example, once per step', () => {
+    const first = answer(createProgress(plan), 'incorrect', 'high', 'none', { misconception: 'cells are tiny animals' });
+    expect(first).toMatchObject({ move: 'hint', intervention: 'counterexample' });
+    expect(first.progress.steps[0].scaffold).toBe(true);
+    const small = answer(first.progress, 'correct');
+    expect(small.move).toBe('build_up');
+    expect(small.progress.steps[0]).toMatchObject({ status: 'active', scaffold: false, built: true, attempts: 1 });
+    const whole = answer(small.progress, 'correct', 'high', 'none', { meetsCriteria: true });
+    expect(whole.move).toBe('advance');
+    expect(whole.progress.steps[0].outcome).toBe('learned');
+  });
+
+  it('moves on at once when the answer to the smaller question already meets the whole step', () => {
+    const first = answer(createProgress(plan), 'incorrect', 'high', 'none', { misconception: 'cells are tiny animals' });
+    expect(answer(first.progress, 'correct', 'high', 'none', { meetsCriteria: true }).move).toBe('advance');
+  });
+
+  it('does not go back to the whole question after a hint that already asks it', () => {
+    const partial = answer(createProgress(plan), 'partial');
+    expect(partial.intervention).toBe('nudge');
+    expect(partial.progress.steps[0].scaffold).toBe(false);
+    expect(answer(partial.progress, 'correct').move).toBe('advance');
+  });
+
+  it('treats a requested sub-question the same way', () => {
+    let progress = createProgress(plan);
+    progress = request(progress, 'hint').progress;
+    progress = request(progress, 'hint').progress;
+    const third = request(progress, 'hint');
+    expect(third.intervention).toBe('decompose');
+    expect(answer(third.progress, 'correct').move).toBe('build_up');
   });
 });
 

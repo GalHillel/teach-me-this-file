@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readEvents } from '../src/api/sse.js';
 import { chatReducer, historyFor, initChat, lessonSummary } from '../src/lesson/chatReducer.js';
 import { highlightPassage, selectPlanChunks } from '../src/lesson/sources.js';
+import { turnSources, upcomingSources } from '../src/lesson/turnSources.js';
 
 const chunks = [
   { id: 'c1', label: 'Page 1', text: 'Mitochondria release energy from glucose through cellular respiration.' },
@@ -255,8 +256,7 @@ describe('readEvents', () => {
   });
 });
 
-describe('passages sent ahead of a move', async () => {
-  const { upcomingSources } = await import('../src/lesson/useTutor.js');
+describe('passages sent ahead of a move', () => {
   const three = [...chunks, { id: 'c3', label: 'Page 3', text: 'Glucose stores energy in chemical bonds.' }];
   const lessonPlan = {
     steps: [
@@ -276,5 +276,14 @@ describe('passages sent ahead of a move', async () => {
     expect(upcomingSources(state, ['c3']).map((chunk) => chunk.id)).toEqual(['c1']);
     expect(upcomingSources({ ...state, progress: progress(1) }, ['c2', 'c3'])).toEqual([]);
     expect(upcomingSources({ ...state, progress: { ...progress(2), status: 'reviewing' } }, [])).toEqual([]);
+  });
+
+  it('sends the detour step and the current step during a detour, and related passages only for replies', () => {
+    const state = { plan: lessonPlan, chunks: three, progress: progress(2) };
+    state.progress.steps[2] = { ...state.progress.steps[2], detour: 0 };
+    const sources = turnSources(state, 'reply', 'How does glucose store energy in bonds?');
+    expect(sources.current.map((chunk) => chunk.id)).toEqual(['c1']);
+    expect(sources.next.map((chunk) => chunk.id)).toEqual(['c3']);
+    expect(turnSources(state, 'hint').related).toEqual([]);
   });
 });

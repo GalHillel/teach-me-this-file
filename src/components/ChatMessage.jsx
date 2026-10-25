@@ -30,6 +30,7 @@ const MOVE_STYLES = {
   finish_skipped: 'bg-success-soft text-success',
   prerequisite_check: 'bg-marker-soft text-ink',
   resume: 'bg-pen-soft text-pen',
+  build_up: 'bg-pen-soft text-pen',
   resume_after_reteach: 'bg-marker-soft text-ink',
 };
 

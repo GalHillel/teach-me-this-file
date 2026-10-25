@@ -6,7 +6,7 @@ import { validateTurnRequest } from '../server/validation.js';
 import { chatReducer, initChat } from '../src/lesson/chatReducer.js';
 
 const VERDICTS = ['correct', 'partial', 'incorrect', 'question', 'off_topic', 'unclear'];
-const MAX_REPLIES_PER_STEP = (MAX_ATTEMPTS + 2) * (STALL_LIMIT + 1);
+const MAX_REPLIES_PER_STEP = (MAX_ATTEMPTS + 3) * (STALL_LIMIT + 1);
 const MAX_REPLIES_WITH_DETOUR = MAX_REPLIES_PER_STEP + STALL_LIMIT + 1;
 const WORDS = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot'];
 
@@ -35,6 +35,8 @@ const assessmentArb = fc.record({
   issue: fc.constantFrom(...ISSUES),
   conceptsMissing: fc.constantFrom([], ['alpha idea'], ['bravo idea'], ['something else']),
   misconception: fc.constantFrom('', 'a wrong idea'),
+  meetsCriteria: fc.boolean(),
+  missingPrerequisite: fc.integer({ min: 0, max: 7 }),
 });
 
 const eventArb = fc.oneof(
@@ -94,9 +96,9 @@ describe('lesson state machine properties', () => {
   });
 
   const replyArb = assessmentArb.filter((assessment) => assessment.verdict !== 'question');
-  const questionArb = fc.constant({ verdict: 'question', confidence: 'high', issue: 'none', conceptsMissing: [], misconception: '' });
+  const questionArb = fc.constant({ verdict: 'question', confidence: 'high', issue: 'none', conceptsMissing: [], misconception: '', meetsCriteria: false, missingPrerequisite: 0 });
 
-  it('always ends a step without prerequisites within 15 non-question replies', () => {
+  it('always ends a step without prerequisites within 18 non-question replies', () => {
     fc.assert(fc.property(fc.array(fc.oneof(replyArb, questionArb), { minLength: 200, maxLength: 200 }), (events) => {
       const plan = planOf(1);
       let progress = createProgress(plan);
@@ -111,7 +113,7 @@ describe('lesson state machine properties', () => {
     }), { numRuns: 400 });
   });
 
-  it('ends a step that can go back to a prerequisite within 18 non-question replies', () => {
+  it('ends a step that can go back to a prerequisite within 21 non-question replies', () => {
     fc.assert(fc.property(fc.array(fc.oneof(replyArb, questionArb), { minLength: 200, maxLength: 200 }), (events) => {
       const plan = planOf(2);
       let progress = apply(plan, createProgress(plan), { kind: 'reply', assessment: { verdict: 'correct', confidence: 'high', issue: 'none', conceptsMissing: [], misconception: '' } }).progress;

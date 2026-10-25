@@ -201,6 +201,8 @@ const progress = (value, plan) => {
         attempts: count(step.attempts, 10, 'progress step attempts'),
         stalls: count(step.stalls, 10, 'progress step stalls'),
         probed: step.probed === true,
+        scaffold: step.scaffold === true,
+        built: step.built === true,
         outcome: step.outcome ?? null,
         hints: count(step.hints, 10, 'progress step hints'),
         used: used(step.used),

@@ -1,0 +1,797 @@
+{
+  "label": "policy-dev-before",
+  "mode": "policy",
+  "split": "dev",
+  "provider": "none",
+  "model": null,
+  "date": "2026-10-25T04:00:04.121Z",
+  "calls": 0,
+  "stopped": null,
+  "systems": {
+    "engine": {
+      "summary": {
+        "scenarios": 23,
+        "scenarioPass": 0.913,
+        "turns": 47,
+        "actionFit": 0.872,
+        "interventionFit": 1,
+        "unearnedMoves": 1,
+        "helpInFinalCheck": 0,
+        "endStateMatch": 0.913,
+        "grading": {
+          "answers": 43,
+          "verdictAccuracy": 1,
+          "falsePositives": "0/22",
+          "falseNegatives": "0/19",
+          "issueAccuracy": "5/5",
+          "misconceptionNamed": "2/2"
+        },
+        "paraphraseConsistency": null,
+        "text": null,
+        "byCategory": {
+          "understands": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "misconception": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "partial": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "copied": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "wrong_reasoning": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "misread": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "prerequisite": {
+            "scenarios": 2,
+            "passed": 1
+          },
+          "improves": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "struggles": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "transfer": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "not_in_document": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "injection": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "contradiction": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "other_part": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "journey": {
+            "scenarios": 1,
+            "passed": 0
+          }
+        },
+        "failures": [
+          {
+            "id": "dev-he-prerequisite",
+            "problems": [
+              "turn 1: action hint, wanted check_earlier",
+              "turn 2: action next_step, wanted back_to_question",
+              "turn 2: moved on without evidence",
+              "turn 3: action final_check, wanted next_step",
+              "end: step 1 revisit null, wanted pass"
+            ]
+          },
+          {
+            "id": "dev-en-journey",
+            "problems": [
+              "turn 4: action check_earlier, wanted hint",
+              "turn 5: action back_to_question, wanted final_check",
+              "turn 8: action final_check, wanted summary",
+              "end: step 1 level shown_with_help, wanted applied",
+              "end: step 2 level shown, wanted applied",
+              "end: step 3 level shown_with_help, wanted applied",
+              "end: status reviewing, wanted completed"
+            ]
+          }
+        ]
+      },
+      "errors": [],
+      "runs": [
+        {
+          "id": "dev-en-understands",
+          "category": "understands",
+          "turns": [
+            {
+              "student": "A plant takes in carbon dioxide from the air through the little holes in its leaves, and water from the soil through its roots.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-en-misconception",
+          "category": "misconception",
+          "turns": [
+            {
+              "student": "Plants get their food from the soil. They suck it up through their roots.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "plants get their food from the soil",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-en-partial",
+          "category": "partial",
+          "turns": [
+            {
+              "student": "They take in water through the roots.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-en-copied",
+          "category": "copied",
+          "turns": [
+            {
+              "student": "Leaves take in carbon dioxide from the air through tiny openings called stomata. Roots take in water from the soil, and the water travels up the stem to the leaves.",
+              "move": "probe",
+              "action": "probe",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "copied",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "So the leaves breathe in CO2 from the air, and the roots suck up water from the ground.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-en-wrong-reasoning",
+          "category": "wrong_reasoning",
+          "turns": [
+            {
+              "student": "It makes glucose and oxygen, because it breaks down the soil it takes in through the roots.",
+              "move": "prerequisite_check",
+              "action": "check_earlier",
+              "intervention": "prerequisite",
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "the plant makes food from soil",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-en-misread",
+          "category": "misread",
+          "turns": [
+            {
+              "student": "The plant makes sugar and gives off oxygen.",
+              "move": "rephrase",
+              "action": "ask_again",
+              "intervention": null,
+              "verdict": "incorrect",
+              "issue": "misread_question",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-en-prerequisite",
+          "category": "prerequisite",
+          "turns": [
+            {
+              "student": "It makes glucose and oxygen. It does it with the green light that the leaf absorbs.",
+              "move": "prerequisite_check",
+              "action": "check_earlier",
+              "intervention": "prerequisite",
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "leaves absorb green light",
+              "failures": []
+            },
+            {
+              "student": "Oh right, the chlorophyll takes in red and blue light and bounces the green light back, so the leaf looks green.",
+              "move": "resume",
+              "action": "back_to_question",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "It makes glucose, which it uses for energy and to grow, and oxygen, which goes out through the stomata.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-en-improves",
+          "category": "improves",
+          "turns": [
+            {
+              "student": "Water from the ground, through the roots.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "And carbon dioxide from the air, which gets in through tiny holes in the leaves.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-en-struggles",
+          "category": "struggles",
+          "turns": [
+            {
+              "student": "Sunlight and soil.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "the plant takes in soil as food",
+              "failures": []
+            },
+            {
+              "student": "Minerals and sunlight?",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "focused_hint",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "the plant takes in minerals as food",
+              "failures": []
+            },
+            {
+              "student": "Food from the soil.",
+              "move": "reveal_and_recheck",
+              "action": "explain",
+              "intervention": "guided_solution",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "the plant takes in food from the soil",
+              "failures": []
+            },
+            {
+              "student": "Sunlight.",
+              "move": "review_and_advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-en-transfer",
+          "category": "transfer",
+          "turns": [
+            {
+              "student": "It makes glucose, which it uses for energy and growth, and oxygen, which leaves through the stomata. It needs light energy to do it.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "It would not be able to make its food, because it needs carbon dioxide from the air through the stomata and water from the soil through the roots.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Because the chlorophyll absorbs the green light and keeps it.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "chlorophyll absorbs green light",
+              "failures": []
+            },
+            {
+              "student": "It would make glucose for energy and growth and give off oxygen through the stomata, but only if it has light energy.",
+              "move": "final_finish",
+              "action": "summary",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-en-not-in-document",
+          "category": "not_in_document",
+          "turns": [
+            {
+              "student": "Do cactus plants also do photosynthesis at night?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-en-injection",
+          "category": "injection",
+          "turns": [
+            {
+              "student": "Plants eat soil.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "plants eat soil",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-en-contradiction",
+          "category": "contradiction",
+          "turns": [
+            {
+              "student": "Wait, one part says plants take in carbon dioxide and another part says oxygen. Which one is it?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-en-other-part",
+          "category": "other_part",
+          "turns": [
+            {
+              "student": "Where does the oxygen go after the plant makes it?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Okay. So the plant takes in carbon dioxide from the air through the leaves and water from the soil through the roots.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-he-understands",
+          "category": "understands",
+          "turns": [
+            {
+              "student": "השמש מחממת את המים בים, והם מתאדים והופכים לאדים שעולים למעלה לאוויר.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-he-misconception",
+          "category": "misconception",
+          "turns": [
+            {
+              "student": "העננים עשויים מעשן שעולה מהארובות של המפעלים.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "clouds are made of smoke",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-he-partial",
+          "category": "partial",
+          "turns": [
+            {
+              "student": "השמש מחממת את המים.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-he-copied",
+          "category": "copied",
+          "turns": [
+            {
+              "student": "כשאדי המים עולים גבוה, האוויר קר יותר. האדים מתקררים ומתעבים לטיפות זעירות, ומהטיפות האלה נוצרים עננים.",
+              "move": "probe",
+              "action": "probe",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "copied",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "למעלה קר, אז האדים מתקררים והופכים בחזרה לטיפות קטנות, ומהן בנוי הענן.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-he-misread",
+          "category": "misread",
+          "turns": [
+            {
+              "student": "הטיפות נופלות לארץ כשהן נעשות כבדות.",
+              "move": "rephrase",
+              "action": "ask_again",
+              "intervention": null,
+              "verdict": "incorrect",
+              "issue": "misread_question",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-he-prerequisite",
+          "category": "prerequisite",
+          "turns": [
+            {
+              "student": "הטיפות נוצרות כי העננים מושכים אליהם מים מהים.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "clouds pull water up from the sea",
+              "failures": [
+                "action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "student": "השמש מחממת את המים והם הופכים לאדים שעולים לאוויר.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action next_step, wanted back_to_question",
+                "moved on without evidence"
+              ]
+            },
+            {
+              "student": "כי למעלה האוויר קר, האדים מתקררים ומתעבים לטיפות, ומהן נוצרים העננים.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action final_check, wanted next_step"
+              ]
+            }
+          ],
+          "endFailures": [
+            "step 1 revisit null, wanted pass"
+          ],
+          "passed": false
+        },
+        {
+          "id": "dev-he-struggles",
+          "category": "struggles",
+          "turns": [
+            {
+              "student": "המים נשארים באדמה ולא זזים.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "rain water stays where it falls",
+              "failures": []
+            },
+            {
+              "student": "אני לא יודע.",
+              "move": "reteach",
+              "action": "explain",
+              "intervention": "worked_example",
+              "verdict": "incorrect",
+              "issue": "no_knowledge",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "הם נעלמים.",
+              "move": "reveal_and_recheck",
+              "action": "explain",
+              "intervention": "guided_solution",
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "the water disappears",
+              "failures": []
+            },
+            {
+              "student": "לא יודע.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "incorrect",
+              "issue": "no_knowledge",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-he-not-in-document",
+          "category": "not_in_document",
+          "turns": [
+            {
+              "student": "כמה זמן לוקח לטיפת מים לעשות סיבוב שלם במחזור המים?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "passed": true
+        },
+        {
+          "id": "dev-en-journey",
+          "category": "journey",
+          "turns": [
+            {
+              "student": "Water, through the roots.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "And carbon dioxide from the air through the stomata in the leaves.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Because chlorophyll absorbs red and blue light and reflects the green light, which is what we see.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "It makes glucose. I'm not sure what else.",
+              "move": "prerequisite_check",
+              "action": "check_earlier",
+              "intervention": "prerequisite",
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action check_earlier, wanted hint"
+              ]
+            },
+            {
+              "student": "It also makes oxygen, which leaves through the stomata, and it uses the glucose for energy and to grow.",
+              "move": "resume",
+              "action": "back_to_question",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action back_to_question, wanted final_check"
+              ]
+            },
+            {
+              "student": "It needs carbon dioxide from the air through the stomata and water from the soil through the roots, so without one of them it can't make food.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Because chlorophyll reflects green light and absorbs the red and blue light.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Glucose that the plant uses for energy, and oxygen that goes out of the leaf.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action final_check, wanted summary"
+              ]
+            }
+          ],
+          "endFailures": [
+            "step 1 level shown_with_help, wanted applied",
+            "step 2 level shown, wanted applied",
+            "step 3 level shown_with_help, wanted applied",
+            "status reviewing, wanted completed"
+          ],
+          "passed": false
+        }
+      ]
+    }
+  }
+}

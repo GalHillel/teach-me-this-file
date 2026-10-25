@@ -1,5 +1,5 @@
 import { NEEDS_REVIEW, activeStepIndex, finalCheckQueue, inFinalCheck, reviewQueue } from '../../shared/lesson.js';
-import { chooseIntervention, findPrerequisiteGap, remember } from './policy.js';
+import { NARROWING, chooseIntervention, findPrerequisiteGap, remember } from './policy.js';
 
 export { NEEDS_REVIEW, activeStepIndex, reviewQueue };
 
@@ -20,6 +20,8 @@ export const newStepState = (status) => ({
   attempts: 0,
   stalls: 0,
   probed: false,
+  scaffold: false,
+  built: false,
   outcome: null,
   hints: 0,
   used: [],
@@ -70,19 +72,19 @@ const answerOutcome = (step) => (step.attempts === 0 && step.hints === 0 ? 'mast
 const wrongAnswer = (plan, progress, step, assessment) => {
   const attempts = step.attempts + 1;
   if (attempts >= MAX_ATTEMPTS) {
-    return result('reveal_and_recheck', updateCurrent(progress, { attempts, stalls: 0, phase: 'recheck', used: remember(step.used, 'guided_solution') }), { intervention: 'guided_solution' });
+    return result('reveal_and_recheck', updateCurrent(progress, { attempts, stalls: 0, phase: 'recheck', scaffold: false, used: remember(step.used, 'guided_solution') }), { intervention: 'guided_solution' });
   }
   const counted = updateCurrent(progress, { attempts, stalls: 0 });
   const gap = step.phase === 'learn' ? findPrerequisiteGap({ plan, progress: counted, stepIndex: progress.currentStep, assessment }) : null;
   if (gap) {
-    return result('prerequisite_check', updateCurrent(counted, { detour: gap.index, used: remember(step.used, 'prerequisite') }), {
+    return result('prerequisite_check', updateCurrent(counted, { detour: gap.index, scaffold: false, used: remember(step.used, 'prerequisite') }), {
       intervention: 'prerequisite',
       prerequisite: gap,
     });
   }
   const intervention = chooseIntervention({ situation: 'wrong', assessment, state: { ...step, attempts } });
   const move = assessment?.issue === 'no_knowledge' ? 'reteach' : 'hint';
-  return result(move, updateCurrent(counted, { used: remember(step.used, intervention) }), { intervention });
+  return result(move, updateCurrent(counted, { used: remember(step.used, intervention), scaffold: NARROWING.has(intervention) }), { intervention });
 };
 
 const handleAnswer = (plan, progress, step, assessment) => {
@@ -95,6 +97,9 @@ const handleAnswer = (plan, progress, step, assessment) => {
   }
 
   if (verdict === 'correct') {
+    if (step.scaffold && !step.built && assessment.meetsCriteria !== true) {
+      return result('build_up', updateCurrent(progress, { scaffold: false, built: true, stalls: 0 }));
+    }
     if ((confidence === 'low' || PROBE_ISSUES.has(issue)) && !step.probed) {
       return result('probe', updateCurrent(progress, { probed: true, stalls: 0 }));
     }
@@ -172,7 +177,7 @@ const helpRequest = (progress, kind) => {
   if (Number.isInteger(step.detour)) return result('clarify', progress);
   const situation = kind === 'hint' ? 'hint_request' : 'explain_request';
   const intervention = chooseIntervention({ situation, state: step });
-  const next = updateCurrent(progress, { hints: Math.min(step.hints + 1, 10), used: remember(step.used, intervention) });
+  const next = updateCurrent(progress, { hints: Math.min(step.hints + 1, 10), used: remember(step.used, intervention), scaffold: step.phase === 'learn' && NARROWING.has(intervention) });
   return result(kind === 'hint' ? 'hint' : 'reteach', next, { intervention, requested: true });
 };
 
@@ -190,6 +195,8 @@ export const planMove = (progress, { kind, assessment = null, plan }) => {
     issue: assessment?.issue ?? 'none',
     misconception: assessment?.misconception ?? '',
     conceptsMissing: assessment?.conceptsMissing ?? [],
+    missingPrerequisite: assessment?.missingPrerequisite ?? 0,
+    meetsCriteria: assessment?.meetsCriteria === true,
   };
 
   if (progress.status === 'reviewing') return planReviewMove(progress, grade);

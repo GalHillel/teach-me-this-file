@@ -19,19 +19,9 @@ const LADDERS = {
   explain_request: ['analogy', 'worked_example', 'decompose'],
 };
 
+export const NARROWING = new Set(['decompose', 'analogy', 'counterexample']);
+
 const WEAK_OUTCOMES = new Set(['recovered', 'review']);
-
-const terms = (text) =>
-  new Set(
-    String(text ?? '')
-      .normalize('NFKC')
-      .toLowerCase()
-      .split(/[^\p{L}\p{N}]+/u)
-      .filter((word) => word.length > 3)
-      .map((word) => word.slice(0, 6)),
-  );
-
-const overlaps = (a, b) => [...a].some((word) => b.has(word));
 
 export const findPrerequisiteGap = ({ plan, progress, stepIndex, assessment }) => {
   const step = plan.steps[stepIndex];
@@ -42,11 +32,8 @@ export const findPrerequisiteGap = ({ plan, progress, stepIndex, assessment }) =
     .filter((index) => index >= 0 && index < stepIndex && progress.steps[index].status === 'done');
   if (!candidates.length) return null;
 
-  const missing = terms([...(assessment?.conceptsMissing ?? []), assessment?.misconception ?? ''].join(' '));
-  const ownTerms = terms([...step.keyConcepts, step.title].join(' '));
-  const unexplained = new Set([...missing].filter((word) => !ownTerms.has(word)));
-  const byConcept = candidates.find((index) => overlaps(unexplained, terms([...plan.steps[index].keyConcepts, plan.steps[index].title].join(' '))));
-  if (byConcept !== undefined) return { index: byConcept, reason: 'missing_concept' };
+  const named = Number.isInteger(assessment?.missingPrerequisite) ? assessment.missingPrerequisite - 1 : -1;
+  if (candidates.includes(named)) return { index: named, reason: 'grader' };
 
   const weak = candidates.filter((index) => WEAK_OUTCOMES.has(progress.steps[index].outcome));
   if (weak.length && state.attempts >= 1) return { index: weak[weak.length - 1], reason: 'weak_prerequisite' };

@@ -1,0 +1,96 @@
+import { execFileSync } from 'node:child_process';
+import { describe, expect, it } from 'vitest';
+import {
+  checkEnd, checkTurn, citationSupport, endsWithQuestion, hasPraise, loadLessons, loadScenarios, notesContradiction,
+  policyRun, readTag, saysNotInDocument, similarity,
+} from '../eval/teaching-lib.js';
+
+const lessons = loadLessons();
+const { scenarios, categories } = loadScenarios();
+const dev = scenarios.filter((scenario) => scenario.split === 'dev' && !scenario.variants);
+
+describe('teaching scenarios', () => {
+  it('defines every category in advance and uses only known lessons, steps and passages', () => {
+    for (const scenario of scenarios) {
+      expect(categories[scenario.category], scenario.id).toBeTruthy();
+      const lesson = lessons[scenario.lesson];
+      expect(lesson, scenario.id).toBeTruthy();
+      expect(lesson.split).toBe(scenario.split);
+      expect(scenario.at ?? 0).toBeLessThan(lesson.steps.length);
+      const ids = new Set(lesson.chunks.map((chunk) => chunk.id));
+      for (const turn of scenario.turns ?? []) {
+        for (const id of [...(turn.expect?.cite ?? []), ...(turn.expect?.contradiction ?? [])]) expect(ids.has(id), `${scenario.id} ${id}`).toBe(true);
+      }
+    }
+    for (const definition of Object.values(categories)) expect(Object.keys(definition)).toEqual(['detect', 'intervene', 'evidence', 'success', 'failure']);
+  });
+
+  it('keeps the dev and held-out sets on different lessons', () => {
+    const lessonsOf = (split) => new Set(scenarios.filter((scenario) => scenario.split === split).map((scenario) => lessons[scenario.lesson].title));
+    const shared = [...lessonsOf('dev')].filter((title) => lessonsOf('holdout').has(title));
+    expect(shared).toEqual([]);
+  });
+
+  it('the engine meets every dev expectation when the grades are right', () => {
+    const failures = dev.flatMap((scenario) => {
+      const { progress, turns } = policyRun(lessons[scenario.lesson], scenario, 'engine');
+      return [
+        ...turns.flatMap((row, index) => checkTurn({ turn: row.turn, row, mode: 'policy' }).map((problem) => `${scenario.id} turn ${index + 1}: ${problem}`)),
+        ...checkEnd(scenario, 'engine', progress).map((problem) => `${scenario.id} end: ${problem}`),
+      ];
+    });
+    expect(failures).toEqual([]);
+  });
+
+  it('runs the model layer end to end through the real turn code', () => {
+    const output = execFileSync('node', ['eval/teaching.js', '--mode=model', '--provider=labels', '--split=dev', '--only=dev-en-prerequisite,dev-en-copied,dev-en-paraphrase-correct', '--systems=engine,plain', '--out=none'], { encoding: 'utf8' });
+    expect(output).toMatch(/ok\s+engine dev-en-prerequisite correct back_to_question/);
+    expect(output).toMatch(/engine: .*"scenarios":3/);
+  });
+});
+
+describe('text checks used on model replies', () => {
+  it('finds approval language without flagging partial credit', () => {
+    expect(hasPraise('That\'s correct! Plants take in carbon dioxide.')).toBe(true);
+    expect(hasPraise('Spot on. Now the next step.')).toBe(true);
+    expect(hasPraise('כל הכבוד, זו התשובה.')).toBe(true);
+    expect(hasPraise('You\'re right that roots take in water, but what else?')).toBe(false);
+    expect(hasPraise('Not quite. What else does the leaf take in?')).toBe(false);
+  });
+
+  it('recognises a reply that says the document does not cover a question', () => {
+    expect(saysNotInDocument('The document doesn\'t say anything about cactus plants at night.')).toBe(true);
+    expect(saysNotInDocument('That goes beyond our document, but in short: yes.')).toBe(true);
+    expect(saysNotInDocument('הקובץ לא עוסק בזה, אבל באופן כללי...')).toBe(true);
+    expect(saysNotInDocument('Plants take in carbon dioxide through the stomata [c2].')).toBe(false);
+  });
+
+  it('recognises a reply that points out a disagreement', () => {
+    expect(notesContradiction('The two passages contradict each other.')).toBe(true);
+    expect(notesContradiction('בקובץ כתובים שני דברים שונים.')).toBe(true);
+    expect(notesContradiction('Plants take in carbon dioxide.')).toBe(false);
+  });
+
+  it('reads the baseline tag and strips it from the text', () => {
+    expect(readTag('Good try! Think about the air.\n[[judgement: partial; action: hint]]')).toEqual({ text: 'Good try! Think about the air.', judgement: 'partial', action: 'hint' });
+    expect(readTag('No tag here.').action).toBe(null);
+    expect(readTag('Text [[judgement: correct; action: dance]]').action).toBe(null);
+  });
+
+  it('scores how well a cited sentence matches its passage', () => {
+    const chunks = [{ id: 'c2', text: 'Leaves take in carbon dioxide from the air through tiny openings called stomata.' }];
+    const [strong] = citationSupport('Leaves take in carbon dioxide through the stomata [c2].', chunks);
+    const [weak] = citationSupport('Volcanoes erupt when magma rises [c2].', chunks);
+    expect(strong).toBeGreaterThan(0.7);
+    expect(weak).toBeLessThan(0.2);
+    expect(citationSupport('No citations at all.', chunks)).toEqual([]);
+  });
+
+  it('measures repeated help and question endings', () => {
+    expect(similarity('Think about what the leaves take in from the air around them.', 'Think about what the leaves take in from the air around them!')).toBeGreaterThan(0.8);
+    expect(similarity('Think about the air.', 'Imagine a potted plant that never loses soil.')).toBeLessThan(0.1);
+    expect(endsWithQuestion('What do you think?')).toBe(true);
+    expect(endsWithQuestion('**What do you think?**')).toBe(true);
+    expect(endsWithQuestion('That is all.')).toBe(false);
+  });
+});

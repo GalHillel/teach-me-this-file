@@ -70,6 +70,8 @@ export const unclearAssessment = () => ({
   misconception: '',
   evidence: '',
   confidence: 'low',
+  meetsCriteria: false,
+  missingPrerequisite: 0,
   checks: ['no_usable_grade'],
 });
 
@@ -130,6 +132,8 @@ export const normalizeAssessment = (raw, studentMessage, sources = []) => {
     misconception: text(raw?.misconception, 200),
     evidence,
     confidence,
+    meetsCriteria: raw?.meetsCriteria === true && verdict === 'correct',
+    missingPrerequisite: Number.isInteger(raw?.missingPrerequisite) && raw.missingPrerequisite > 0 && verdict !== 'correct' ? raw.missingPrerequisite : 0,
     checks,
   };
 };
