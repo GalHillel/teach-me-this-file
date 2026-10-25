@@ -45,6 +45,8 @@ This path shows what a plain chat with the file would not do. It uses the photos
 7. After the last step comes the final check: new questions, no hints, the Hint button gone. Get one wrong.
 8. The summary separates "applied to a new question" from "needs practice", suggests review dates, and offers a practice round for the weak step. The learning map shows which steps build on which.
 
+Steps 3 and 6 depend on how the model grades the answer. In my live run on 25 October, step 3 went as described on the second try; on the first, the grader called the answer partial and the tutor gave a focused hint instead. The detour in step 6 happens only when the grader names the earlier step.
+
 ## How it works
 
 ```
@@ -164,7 +166,7 @@ EVAL_API_KEY=your-key EVAL_LABEL=mine node eval/grading.js # grading on 51 golde
 
 `npm run test:e2e` uses the Chromium that Playwright installs (`npx playwright install chromium` once). It serves the build with the headers from `vercel.json`, checks every screen at 15 sizes from 320 to 2560 px in English and Hebrew for overflow, unreachable buttons, small targets and axe-core violations, runs a full lesson with help requests, a detour, a re-check, the final check and a practice round, reads a generated PDF, and fails on any problem. Two full journeys (English on desktop, Hebrew on a phone) also stop a reply, fail a provider call and retry it, reload during a reply and in the middle of the lesson, and check after every turn that the server's state, the saved state and what the screen shows agree. `--report=file.json` saves the details. It checks layout and flow with canned replies, not teaching quality.
 
-`eval/teaching.js` plays 55 written scenarios (dev and held-out sets on different lessons) through the engine and checks what the tutor should detect, which help it should give and what it may claim; the design and the results are in [DECISIONS.md](DECISIONS.md#how-i-evaluate-the-teaching).
+`eval/teaching.js` plays 55 written scenarios (dev and held-out sets on different lessons) through the engine and checks what the tutor should detect, which help it should give and what it may claim; the design and the results are in [DECISIONS.md](DECISIONS.md#how-i-evaluate-the-teaching). In short: with the labelled grades the engine passes all 25 held-out scenarios it can run without a model; with a real model (Flash-Lite, the only one with quota) it passed 22 of 29 held-out scenarios against 16 for a plain single-prompt tutor with the same model and rules. These are scripted students, not real ones.
 
 `eval/grading.js` writes its results to `eval/results/grading-<label>.json`: accuracy, how often a wrong or partial answer was graded correct, median latency, and which models answered.
 
@@ -190,5 +192,6 @@ Any Node host works too: run `npm run build`, serve `dist/` as static files, and
 - The leak check on the tutor's output catches only a verbatim copy of a marker in the instructions. It does not stop a model that paraphrases its instructions.
 - Heading detection in PDFs uses font size, so a PDF that marks headings only with bold text of normal size gets no sections.
 - The live app's own Gemini key is on the free tier and only answers requests from the site itself. If its daily quota is used up, the server falls back to Flash-Lite and says so, and when that is used up too, the app says the daily quota is used up. Adding your own key in the settings avoids this.
+- Teaching quality is measured on 55 scenarios I wrote, with scripted students, and on a real model only with Flash-Lite. No study with students has been run.
 
 More in [DECISIONS.md](DECISIONS.md#weaknesses-i-know-about).

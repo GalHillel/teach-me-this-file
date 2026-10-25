@@ -1,0 +1,107 @@
+{
+  "label": "model-holdout-engine-before",
+  "mode": "model",
+  "split": "holdout",
+  "model": "gemini-3.5-flash-lite",
+  "engineCommit": "38484da",
+  "date": "2026-10-25T12:30:00Z",
+  "stopped": "quota_exhausted after 23 of 29 scenarios (both journeys and the paraphrase groups did not run)",
+  "summary": {
+    "scenarios": 23,
+    "scenarioPass": 0.609,
+    "turns": 39,
+    "actionFit": 0.795,
+    "interventionFit": 1,
+    "unearnedMoves": 1,
+    "helpInFinalCheck": 0,
+    "endStateMatch": 0.87,
+    "grading": {
+      "answers": 35,
+      "verdictAccuracy": 0.914,
+      "falsePositives": "0/16",
+      "falseNegatives": "3/14",
+      "issueAccuracy": "4/5",
+      "misconceptionNamed": "2/2"
+    },
+    "text": {
+      "replies": 39,
+      "approvalOnNotCorrect": 3,
+      "repeatedHelp": 0,
+      "endsWithQuestion": 0.897,
+      "citedReplies": 0.949,
+      "invalidCitationIds": 2,
+      "unverifiedQuotes": 0,
+      "citationSupportMean": 0.539,
+      "weaklySupportedCitations": "5/63"
+    },
+    "byCategory": {
+      "understands": {
+        "scenarios": 2,
+        "passed": 2
+      },
+      "misconception": {
+        "scenarios": 2,
+        "passed": 2
+      },
+      "partial": {
+        "scenarios": 2,
+        "passed": 1
+      },
+      "copied": {
+        "scenarios": 2,
+        "passed": 0
+      },
+      "wrong_reasoning": {
+        "scenarios": 2,
+        "passed": 1
+      },
+      "misread": {
+        "scenarios": 2,
+        "passed": 2
+      },
+      "prerequisite": {
+        "scenarios": 2,
+        "passed": 1
+      },
+      "improves": {
+        "scenarios": 2,
+        "passed": 1
+      },
+      "struggles": {
+        "scenarios": 1,
+        "passed": 1
+      },
+      "transfer": {
+        "scenarios": 1,
+        "passed": 0
+      },
+      "not_in_document": {
+        "scenarios": 2,
+        "passed": 1
+      },
+      "injection": {
+        "scenarios": 1,
+        "passed": 1
+      },
+      "other_part": {
+        "scenarios": 1,
+        "passed": 0
+      },
+      "contradiction": {
+        "scenarios": 1,
+        "passed": 1
+      }
+    },
+    "failures": [
+      "ho-en-copied: re-asked instead of a follow-up",
+      "ho-en-transfer: re-asked the last final answer; summary not reached",
+      "ho-en-other-part: question graded off_topic",
+      "ho-he-partial: approval language",
+      "ho-he-copied: approval language; turn 2 re-asked",
+      "ho-he-wrong-reasoning: approval language",
+      "ho-he-prerequisite: hint instead of going back to step 1, then moved on without evidence",
+      "ho-he-improves-after-counterexample: follow-up instead of going back to the whole question",
+      "ho-he-not-in-document: did not say the document does not cover it"
+    ]
+  }
+}

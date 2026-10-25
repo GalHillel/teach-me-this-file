@@ -176,6 +176,9 @@ Text the app stores (system notes, file warnings, errors) is stored as a code wi
 - Whether the tutor goes back to an earlier step depends on the grader naming it. The code only checks that the named step is a real, finished prerequisite.
 - The review days are fixed intervals, not fitted to the student, and nothing reminds the student.
 - Every real-model result in this round comes from the backup model, Flash-Lite, because the main model had no quota on the site's key.
+- Not rerun on a real model after the last changes: the 51-answer grading set after this round's grader prompt change (`meetsCriteria`, `missingPrerequisite`), and the teaching eval after removing passage ids from the history. Both ran out of daily quota. The policy layer and the tests cover the code paths; whether the grader got worse on the old answers is not measured.
+- The grader calls some questions about other parts of the file off-topic (AUDIT 75), and the scripted final-check answers in the eval sometimes do not fit the question the model asks, so the transfer scenario and the two journeys did not reach the summary on a real model.
+- The per-turn rows of the first model runs were lost when the sandbox timed out; only the printed summaries are in `eval/results/`.
 
 ## What I would do next
 
@@ -230,6 +233,55 @@ The previous engine failed the two Hebrew detours (the lexical match, see AUDIT 
 
 What this layer does not show: anything about the model. With a perfect grader the engine is right on every scenario I wrote; the model layer shows how far a real grader is from perfect.
 
+### Results: model layer (real model, held-out set)
+
+All model-layer runs used `gemini-3.5-flash-lite` for every call (the main and backup lists pinned to it), on 25 October, at commit `a761d46` for this engine and `38484da` for the previous one. This is the light backup model, not the one production tries first; the free tier did not leave quota for the main model.
+
+| | Engine, this round | Plain tutor (one prompt) | Previous engine (`38484da`) |
+| --- | --- | --- | --- |
+| Scenarios run | 29 (55 turns, 12 graded variants) | 29 (55 turns, 12 variants) | 23 (39 turns); stopped when the quota ran out |
+| Scenarios passed | 22/29 | 16/29 | 14/23 |
+| Same 23 scenarios as the previous engine | 18/23 | not kept | 14/23 |
+| Actions that fit | 87% | 69% | 80% |
+| Moved on without evidence | 0 | 0 | 1 |
+| Help during the final check | 0 | 2 | 0 |
+| Verdict accuracy | 47/51 (92%) | 42/50 (84%) | 32/35 (91%) |
+| Wrong or partial answer graded correct | 0/20 | 0/20 | 0/16 |
+| Correct answer not graded correct | 4/25 | 7/25 | 3/14 |
+| Paraphrase groups graded the same | 4/4 | not kept | did not run |
+| Approval language on an answer that was not right | 3 | not kept | 3 |
+| Replies that cite a passage | 80% | not kept | 95% |
+| Cited ids the tutor was not given | 3 | not kept | 2 |
+| Cited sentences with under 20% of their words in the passage | 6/76 | not kept | 5/63 |
+
+"Not kept": the per-turn files of the first runs were lost when the sandbox hit its time limit before I copied them out; the summaries the runs printed survived, and for the plain tutor only the first part of the summary did. The files in `eval/results/teaching-model-holdout-*.json` say this.
+
+What the numbers support:
+- **The engine beats the plain tutor on these scenarios, with the same model and rules.** 22 against 16 scenarios, fewer missed correct answers (4 against 7), and no hints in the final check. Both graded no wrong answer as correct. The plain tutor writes its own judgement in a tag, so its "verdict accuracy" is its self-report; it is still the fair comparison of what it then did.
+- **The engine improved on the previous one where this round changed it.** On the 23 scenarios both ran, 18 against 14. The four differences are the Hebrew prerequisite (the previous engine hinted instead of going back, then moved on without evidence), the counter-example followed by a right answer (the previous engine asked a follow-up instead of the whole question), the question outside the document (the previous prompt had no rule and the reply did not say so), and one Hebrew wrong-reasoning reply with approval language that the new run did not repeat. Four scenarios are not a measured improvement in any statistical sense; they are the cases the changes were made for, on a set they were not tuned on.
+
+What failed, and why:
+- **Copied answers (0/2 in both engines).** The copy check fired, but the grader also called the pasted text a misread question or partial, and a misread question is re-asked before anything else. The scenario expected a follow-up; a re-ask is arguably fine for the student, but the check is strict and I left it.
+- **The question about another part of the file.** The grader called "Is it dangerous to put things into a wall socket?" off-topic, so the tutor redirected instead of answering. Safety is in the document, so this is a grading error.
+- **Transfer and the two journeys.** Scripted final-check answers met new questions they did not fit, the grader called one unclear or misread, and the tutor re-asked; the summary was not reached in the budget. This is partly the fixed script (see "No adaptive scripts in the eval").
+- **Approval language (3 replies).** The model opened a hint or a follow-up with praise ("מצוין", "Great") on a partial answer, against the prompt's rule. The text check is a regular expression; I read the three replies and they are real.
+
+### Live checks on production, 25 October, after this round
+
+Production served `index-2GHhOVXu.js`, the same entry bundle as my local build of `011b768` and then `8fa9b77`, with the security headers. I drove it with Playwright's Chromium in a Vercel Sandbox, using the site's own key, with the English photosynthesis sample and then the Hebrew water cycle on a 390 px phone.
+
+| # | What happened | Result |
+| --- | --- | --- |
+| 1 | The first run at 07:12 UTC never started: the script clicked Start while `/api/health` was still answering on a cold instance, and the app opened Settings, saying a key was missing. | Bug, fixed in `011b768` (AUDIT 73); the harness now delays `/api/health` and fails on the old code |
+| 2 | Hint, then "Explain differently": a nudge, then an analogy. "Plants get their food from the soil": a counter-example. | Pass |
+| 3 | A right answer to the counter-example ("so the plant cannot be eating the soil"): on the second run the tutor said "Now the whole question" and asked it again (`build_up`); on the first run the grader called it partial and gave a focused hint. | Pass |
+| 4 | "Is it true that almost all the oxygen in the air comes from plants?": answered, citing the passage on why photosynthesis matters, without leaving step 1. | Pass |
+| 5 | Reload in the middle of the lesson: 11 messages restored, the counter matched the saved state. | Pass |
+| 6 | Final check on all three steps, results fail, fail, pass; the summary said "1 of 3 shown on new questions", listed the steps by what was shown, and the practice round ran; the notes downloaded. | Pass |
+| 7 | Citations: in the first run the server dropped 13 cited ids in 17 cited turns, because earlier replies with their ids went back to the model as history. After removing the ids from the history (`8fa9b77`, AUDIT 74) the second run had 0 dropped in 11 cited turns, but that run was mostly served by the backup model, so the comparison is not clean. | Fixed; effect not cleanly measured |
+| 8 | Hebrew on a phone: right-to-left, no overflow, first message cited a passage, a correct answer moved on, a hint was a nudge. My script compared the step counter with an English label, so its "mismatch" there is the script's. | Pass |
+| 9 | Time to first word: p50 5.8 s and p95 27.7 s in the first run (12 of 39 model calls failed and fell back); p50 3.2 s and p95 35.7 s in the second. Both runs ended on the daily quota. | Measured, slow under quota pressure |
+
 ## The experiment that would settle it
 
 The tests and evals show that the policy does what it says and that grading did not get worse. They do not show that students learn more. That needs an experiment:
@@ -243,7 +295,7 @@ The tests and evals show that the policy does what it says and that grading did 
 
 ### Automated tests
 
-`npm test` runs 229 tests (187 before the fourth round, 125 before the third): the teaching policy, prerequisite detours, the final check and evidence levels, citation and quote checks, the copy check, extraction and chunking, BM25 source matching (including thresholds on the golden set), the lesson state machine (including a test that no sequence of messages keeps a step active), grade checks, plan validation and step sizing, prompt fencing, the chat reducer (commit on done, stop, failure, notices, resume), session storage (no key stored, broken storage), translations (every key in all three languages, same placeholders), the SSE parser, the provider adapters (fallback, cooldowns per key, daily quota, backup notice, thinkingLevel only where accepted), Markdown rendering of model output (no `javascript:` links, HTML escaped), and the API with a mock provider (streaming, cancellation, validation, server-key origin check and budget, `trust proxy`, rate limit, key not logged).
+`npm test` runs 252 tests (229 before the fifth round, 187 before the fourth, 125 before the third): the teaching policy, prerequisite detours, `build_up` after narrowed questions, the teaching-eval checks and the policy layer on the dev set, the final check and evidence levels, citation and quote checks, the copy check, extraction and chunking, BM25 source matching (including thresholds on the golden set), the lesson state machine (including a test that no sequence of messages keeps a step active), grade checks, plan validation and step sizing, prompt fencing, the chat reducer (commit on done, stop, failure, notices, resume), session storage (no key stored, broken storage), translations (every key in all three languages, same placeholders), the SSE parser, the provider adapters (fallback, cooldowns per key, daily quota, backup notice, thinkingLevel only where accepted), Markdown rendering of model output (no `javascript:` links, HTML escaped), and the API with a mock provider (streaming, cancellation, validation, server-key origin check and budget, `trust proxy`, rate limit, key not logged).
 
 ### Golden sets
 
@@ -417,17 +469,18 @@ Cost: the first-screen JavaScript grew from 96.3 to 99.9 KB gzipped, mostly new 
 
 ## What changed in the fifth round (25 October)
 
-The findings are in [AUDIT.md](AUDIT.md), 62 to 72; the eval design and results are in "How I evaluate the teaching" above.
+The findings are in [AUDIT.md](AUDIT.md), 62 to 76; the eval design and results are in "How I evaluate the teaching" above.
 
 | Change | Why | Measured effect |
 | --- | --- | --- |
-| Teaching-quality eval with dev and held-out scenarios, a naive policy and a plain-prompt baseline | Tests checked the code, not the teaching | Policy layer: engine 25/25 held-out scenarios, previous engine 23/25, naive policy 14/25 |
+| Teaching-quality eval with dev and held-out scenarios, a naive policy and a plain-prompt baseline | Tests checked the code, not the teaching | Policy layer: engine 25/25 held-out scenarios, previous engine 23/25, naive policy 14/25. Model layer (Flash-Lite): engine 22/29, plain tutor 16/29; on the 23 scenarios the previous engine finished, 18 against 14 |
 | `build_up` after help that narrows the question | A right answer to a sub-question ended the step | State-machine and property tests; bound 18 replies per step (21 with a detour) |
 | The grader names the missing prerequisite step | The lexical match could not work for Hebrew or French and made a false detour | Hebrew detours now pass in the policy layer; no false detour on the dev journey |
 | Final check asks again on copied or unexplained answers; copying the tutor counts as copying | A pasted answer was counted as applied | State-machine, API and assessor tests |
-| Tutor rules for questions outside the document and for passages that disagree | No instruction existed | Model eval categories `not_in_document` and `contradiction` |
+| Tutor rules for questions outside the document and for passages that disagree | No instruction existed | Model eval, held-out: 3/3 of these scenarios passed; the previous engine failed the Hebrew question outside the document |
 | Help and check panels, single citations, whole inline formulas | Screenshot review | Harness: 179 checks, 0 axe violations, 0 overflow |
 | Full journeys in the harness with server, saved state and screen compared after each turn | Agreement between the three was never checked | 17 checkpoints per journey, English desktop and Hebrew phone, no mismatch |
+| Start waits for the key check; history without passage ids | Live run: Settings opened on a cold start; 13 dropped citations | Harness check fails on the old code; 0 dropped in 11 cited turns on the second run (mostly backup model) |
 
 Cost: the first-screen JavaScript and CSS grew by under 0.4 KB gzipped (`eval/results/bundle-r5.json`); first contentful paint on the throttled phone profile was 2.41 s (median of 5), against 2.46 s before, which is within run-to-run noise (`load-after-r5.json`). The text index and scoring did not change, so I did not rerun the benchmark.
 

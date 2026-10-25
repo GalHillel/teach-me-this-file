@@ -1,0 +1,23 @@
+{
+  "label": "model-holdout-plain",
+  "mode": "model",
+  "split": "holdout",
+  "model": "gemini-3.5-flash-lite",
+  "commit": "a761d46",
+  "date": "2026-10-25T07:35:00Z",
+  "note": "Per-turn rows were lost: the sandbox reached its time limit before the file was copied out. These numbers are the summary the run printed at the end. Only the first part of the printed summary was kept.",
+  "summary": {
+    "scenarios": 29,
+    "scenarioPass": 0.552,
+    "turns": 55,
+    "actionFit": 0.691,
+    "unearnedMoves": 0,
+    "helpInFinalCheck": 2,
+    "grading": {
+      "answers": 50,
+      "verdictAccuracy": 0.84,
+      "falsePositives": "0/20",
+      "falseNegatives": "7/25"
+    }
+  }
+}

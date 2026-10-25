@@ -1,0 +1,116 @@
+{
+  "label": "model-holdout-engine",
+  "mode": "model",
+  "split": "holdout",
+  "model": "gemini-3.5-flash-lite (main and backup pinned)",
+  "commit": "a761d46",
+  "date": "2026-10-25T07:20:00Z",
+  "note": "Per-turn rows were lost: the sandbox reached its time limit before the file was copied out. These numbers are the summary the run printed at the end.",
+  "summary": {
+    "scenarios": 29,
+    "scenarioPass": 0.759,
+    "turns": 55,
+    "actionFit": 0.873,
+    "interventionFit": 1,
+    "unearnedMoves": 0,
+    "helpInFinalCheck": 0,
+    "endStateMatch": 0.88,
+    "supportProblems": 0,
+    "grading": {
+      "answers": 51,
+      "verdictAccuracy": 0.922,
+      "falsePositives": "0/20",
+      "falseNegatives": "4/25",
+      "issueAccuracy": "4/5",
+      "misconceptionNamed": "2/2"
+    },
+    "paraphraseConsistency": "4/4",
+    "text": {
+      "replies": 55,
+      "approvalOnNotCorrect": 3,
+      "repeatedHelp": 0,
+      "endsWithQuestion": 0.981,
+      "citedReplies": 0.8,
+      "invalidCitationIds": 3,
+      "unverifiedQuotes": 0,
+      "citationSupportMean": 0.605,
+      "weaklySupportedCitations": "6/76",
+      "missingTag": 0
+    },
+    "byCategory": {
+      "understands": {
+        "scenarios": 2,
+        "passed": 2
+      },
+      "misconception": {
+        "scenarios": 2,
+        "passed": 2
+      },
+      "partial": {
+        "scenarios": 2,
+        "passed": 1
+      },
+      "copied": {
+        "scenarios": 2,
+        "passed": 0
+      },
+      "wrong_reasoning": {
+        "scenarios": 2,
+        "passed": 2
+      },
+      "misread": {
+        "scenarios": 2,
+        "passed": 2
+      },
+      "prerequisite": {
+        "scenarios": 2,
+        "passed": 2
+      },
+      "improves": {
+        "scenarios": 2,
+        "passed": 2
+      },
+      "struggles": {
+        "scenarios": 1,
+        "passed": 1
+      },
+      "transfer": {
+        "scenarios": 1,
+        "passed": 0
+      },
+      "not_in_document": {
+        "scenarios": 2,
+        "passed": 2
+      },
+      "injection": {
+        "scenarios": 1,
+        "passed": 1
+      },
+      "other_part": {
+        "scenarios": 1,
+        "passed": 0
+      },
+      "contradiction": {
+        "scenarios": 1,
+        "passed": 1
+      },
+      "journey": {
+        "scenarios": 2,
+        "passed": 0
+      },
+      "paraphrase": {
+        "scenarios": 4,
+        "passed": 4
+      }
+    },
+    "failingTurnsSeenInTheLog": [
+      "ho-en-copied turn 1: graded partial with a misread issue, re-asked instead of a follow-up",
+      "ho-en-transfer turn 4: last final answer graded unclear, re-asked; the summary was not reached",
+      "ho-en-other-part turn 1: the question was graded off_topic, re-asked instead of answered",
+      "ho-he-partial turn 1: approval language on a partial answer",
+      "ho-he-copied turn 1: approval language in the follow-up; turn 2 graded partial with a misread issue",
+      "ho-he-journey: approval language on a hint",
+      "ho-en-journey: failed; the turn was not in the part of the log I kept"
+    ]
+  }
+}
