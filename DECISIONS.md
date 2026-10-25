@@ -414,3 +414,20 @@ The findings with evidence are in [AUDIT.md](AUDIT.md), 44 to 61.
 | Hybrid retrieval tried and not adopted | Paraphrased questions are missed | Dev MRR 0.894 to 0.921, holdout 0.833 to 0.833 (`retrieval-hybrid.json`) |
 
 Cost: the first-screen JavaScript grew from 96.3 to 99.9 KB gzipped, mostly new strings in three languages; first contentful paint on a throttled phone profile went from 2.42 to 2.46 s (median of 5, `load-*.json`), within run-to-run noise. Building the index for a 345,000-character document takes 26 ms (`bench-after-p4.json`).
+
+## What changed in the fifth round (25 October)
+
+The findings are in [AUDIT.md](AUDIT.md), 62 to 72; the eval design and results are in "How I evaluate the teaching" above.
+
+| Change | Why | Measured effect |
+| --- | --- | --- |
+| Teaching-quality eval with dev and held-out scenarios, a naive policy and a plain-prompt baseline | Tests checked the code, not the teaching | Policy layer: engine 25/25 held-out scenarios, previous engine 23/25, naive policy 14/25 |
+| `build_up` after help that narrows the question | A right answer to a sub-question ended the step | State-machine and property tests; bound 18 replies per step (21 with a detour) |
+| The grader names the missing prerequisite step | The lexical match could not work for Hebrew or French and made a false detour | Hebrew detours now pass in the policy layer; no false detour on the dev journey |
+| Final check asks again on copied or unexplained answers; copying the tutor counts as copying | A pasted answer was counted as applied | State-machine, API and assessor tests |
+| Tutor rules for questions outside the document and for passages that disagree | No instruction existed | Model eval categories `not_in_document` and `contradiction` |
+| Help and check panels, single citations, whole inline formulas | Screenshot review | Harness: 179 checks, 0 axe violations, 0 overflow |
+| Full journeys in the harness with server, saved state and screen compared after each turn | Agreement between the three was never checked | 17 checkpoints per journey, English desktop and Hebrew phone, no mismatch |
+
+Cost: the first-screen JavaScript and CSS grew by under 0.4 KB gzipped (`eval/results/bundle-r5.json`); first contentful paint on the throttled phone profile was 2.41 s (median of 5), against 2.46 s before, which is within run-to-run noise (`load-after-r5.json`). The text index and scoring did not change, so I did not rerun the benchmark.
+
