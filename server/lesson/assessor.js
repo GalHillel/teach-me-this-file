@@ -148,7 +148,7 @@ export const assessAnswer = async ({ provider, plan, progress, tutorQuestion, st
       signal,
       onMeta,
     });
-    return normalizeAssessment(raw, studentMessage, sources);
+    return normalizeAssessment(raw, studentMessage, [...sources, { text: tutorQuestion ?? '' }]);
   } catch (error) {
     if (error instanceof AppError && error.code === 'bad_response') return unclearAssessment();
     throw error;

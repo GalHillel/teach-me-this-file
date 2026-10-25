@@ -1,3 +1,5 @@
+import { AppError } from '../errors.js';
+
 const wait = (ms, signal) =>
   new Promise((resolve, reject) => {
     const timer = setTimeout(resolve, ms);
@@ -47,12 +49,19 @@ const mockAssessment = (prompt) => {
   return { ...base, verdict: 'correct', completeness: 1, conceptsShown: ['the main point'], confidence: answer.includes('maybe') ? 'low' : 'high' };
 };
 
-export const createMockProvider = ({ delayMs = 40 } = {}) => ({
+export const createMockProvider = ({ delayMs = 40 } = {}) => {
+  const failed = new Set();
+  return {
   name: 'mock',
   model: 'mock',
 
   async generateJson({ task, prompt, signal, onMeta }) {
     await wait(delayMs * 5, signal);
+    const answer = between(prompt, 'student_message');
+    if (/fail once/i.test(answer) && !failed.has(answer)) {
+      failed.add(answer);
+      throw new AppError('provider_unavailable');
+    }
     onMeta?.({ model: 'mock', backup: false, fallbacks: 0 });
     return task === 'plan' ? mockPlan(prompt) : mockAssessment(prompt);
   },
@@ -67,10 +76,14 @@ export const createMockProvider = ({ delayMs = 40 } = {}) => ({
     const words = source.replace(/^#+\s*/, '').split(/\s+/).filter(Boolean).slice(0, 6).join(' ');
     const invented = /fake quote/i.test(messages.at(-1)?.content ?? '');
     const quote = invented ? 'the moon is made of green cheese' : words;
-    const reply = `Mock tutor reply. The source says "${quote}"${id ? ` [${id}]` : ''}. What do you think this means?`;
+    const formatting = /show formatting/i.test(messages.at(-1)?.content ?? '');
+    const reply = formatting
+      ? `Here is the idea in three parts${id ? ` [${id}]` : ''}.\n\n| Goes in | Comes out |\n| --- | --- |\n| carbon dioxide | glucose |\n| water | oxygen |\n\nThe balanced equation is $6CO_2 + 6H_2O \\rightarrow C_6H_{12}O_6 + 6O_2$, and light provides the energy.\n\n${'A longer explanation follows so the message wraps over several lines and shows how long replies read. '.repeat(3)}\n\nWhich of the two products does the plant keep?`
+      : `Mock tutor reply. The source says "${quote}"${id ? ` [${id}]` : ''}. What do you think this means?`;
     for (const word of reply.split(/(?<= )/)) {
       await wait(slow ? delayMs * 40 : delayMs, signal);
       yield word;
     }
   },
-});
+};
+};

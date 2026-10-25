@@ -161,12 +161,15 @@ const reviewAnswer = (progress, verdict) => {
   return result('review_next', { ...progress, review: { ...review, position, results, stalls: 0 } });
 };
 
+const REVIEW_PROBES = new Set(['copied', 'unjustified']);
+
 const planReviewMove = (progress, { verdict, issue }) => {
   if (verdict === 'question') return result('answer_question', progress);
-  if (isNonAnswer(verdict, issue)) {
+  const unproven = verdict === 'correct' && REVIEW_PROBES.has(issue);
+  if (isNonAnswer(verdict, issue) || unproven) {
     const stalls = progress.review.stalls + 1;
     if (stalls > STALL_LIMIT) return reviewAnswer(progress, 'incorrect');
-    return result(nonAnswerMove(verdict, issue), { ...progress, review: { ...progress.review, stalls } });
+    return result(unproven ? 'probe' : nonAnswerMove(verdict, issue), { ...progress, review: { ...progress.review, stalls } });
   }
   return reviewAnswer(progress, verdict);
 };

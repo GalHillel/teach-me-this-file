@@ -36,6 +36,15 @@ const MOVE_STYLES = {
 
 const RESULT_NOTES = new Set(['review_item', 'final_item']);
 
+const HELP_MOVES = new Set(['hint', 'reteach', 'reveal_and_recheck', 'prerequisite_check', 'resume_after_reteach']);
+const CHECK_MOVES = new Set(['probe', 'rephrase', 'build_up', 'final_check_start', 'final_next', 'review_question', 'review_next']);
+
+const bodyStyle = (move) => {
+  if (HELP_MOVES.has(move)) return 'rounded-e-xl border-s-4 border-marker-edge bg-marker-soft/60 px-4 py-3';
+  if (CHECK_MOVES.has(move)) return 'rounded-e-xl border-s-4 border-pen/50 bg-pen-soft/50 px-4 py-3';
+  return '';
+};
+
 const LABELLED_BY_INTERVENTION = new Set(['hint', 'reteach', 'prerequisite_check']);
 
 const SOURCE_STYLES = {
@@ -48,12 +57,15 @@ const SOURCE_STYLES = {
 function SourceLinks({ message, chunkLabels, onOpenSource }) {
   const { t } = useI18n();
   if (message.status !== 'done') return null;
-  if (message.sources.length === 0) {
+  const citedInline = message.citations?.cited?.length > 0;
+  const sources = citedInline ? message.sources.filter((source) => source.kind !== 'cited') : message.sources;
+  if (citedInline && sources.length === 0) return null;
+  if (sources.length === 0) {
     return <p className="mt-2 text-xs text-muted">{t('chat.noSource')}</p>;
   }
   return (
     <div className="mt-2 flex flex-wrap gap-1.5">
-      {message.sources.map((source) => {
+      {sources.map((source) => {
         const kind = SOURCE_STYLES[source.kind] ? source.kind : 'based';
         return (
           <button
@@ -139,7 +151,7 @@ function TutorMessage({ message, chunkLabels, onOpenSource }) {
         {t('chat.tutor')}
         {label && <span className={`rounded-full px-2 py-0.5 font-normal ${moveStyle}`}>{label}</span>}
       </p>
-      <div dir="auto" className={`text-[15.5px] text-ink ${message.status === 'streaming' ? 'streaming-caret' : ''}`}>
+      <div dir="auto" className={`text-[15.5px] text-ink ${bodyStyle(message.move)} ${message.status === 'streaming' ? 'streaming-caret' : ''}`}>
         <Markdown onCite={message.status === 'done' ? cite : null}>{text}</Markdown>
       </div>
       {message.status === 'stopped' && <p className="mt-1.5 text-xs text-muted">{t('chat.stopped')}</p>}

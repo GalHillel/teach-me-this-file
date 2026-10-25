@@ -150,3 +150,16 @@ describe('assessAnswer', () => {
     await expect(assessAnswer({ provider, plan, progress, tutorQuestion: 'q', studentMessage: 'a', sources: [] })).rejects.toMatchObject({ code: 'invalid_key' });
   });
 });
+
+describe('copying the tutor', () => {
+  it('flags an answer that repeats the tutor\'s own explanation, not only the document', async () => {
+    const provider = { generateJson: async () => ({ verdict: 'correct', completeness: 1, confidence: 'high', issue: 'none' }) };
+    const plan = { audience: 'kids', steps: [{ id: 's1', title: 'Inputs', goal: 'g', checkQuestion: 'q', successCriteria: 's', keyConcepts: [] }] };
+    const progress = { status: 'active', currentStep: 0, steps: [{ status: 'active', detour: null }] };
+    const tutorQuestion = 'The plant takes in carbon dioxide from the air and water from the soil. Can you say it back in your own words?';
+    const copied = await assessAnswer({ provider, plan, progress, tutorQuestion, studentMessage: 'The plant takes in carbon dioxide from the air and water from the soil.', sources: [] });
+    expect(copied.issue).toBe('copied');
+    const own = await assessAnswer({ provider, plan, progress, tutorQuestion, studentMessage: 'Leaves breathe in CO2 and the roots drink water from the ground.', sources: [] });
+    expect(own.issue).toBe('none');
+  });
+});

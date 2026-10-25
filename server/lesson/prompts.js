@@ -224,7 +224,7 @@ export const moveInstructions = ({ move, assessment, step, intervention, request
     case 'hint':
       return `${notes}\n${hintInstruction(intervention, requested)}`;
     case 'probe':
-      return `${notes}\n${PROBE[assessment?.issue] ?? PROBE.none} Do not say yet whether the answer is right or wrong.`;
+      return `${notes}\n${finalCheck ? 'This is the final check, so give no hints. ' : ''}${PROBE[assessment?.issue] ?? PROBE.none} Do not say yet whether the answer is right or wrong.`;
     case 'reteach':
       return `${notes}\n${reteachInstruction(intervention, requested)}`;
     case 'rephrase':

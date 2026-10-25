@@ -38,6 +38,27 @@ const vercelHeaders = () => {
   return (config.headers ?? []).flatMap((rule) => rule.headers);
 };
 
+const turnLog = [];
+
+const captureTurns = (req, res, next) => {
+  if (req.method !== 'POST' || req.path !== '/api/turns') return next();
+  const entry = { events: [] };
+  turnLog.push(entry);
+  const write = res.write.bind(res);
+  res.write = (chunk, ...rest) => {
+    for (const block of String(chunk).split('\n\n')) {
+      const [eventLine, dataLine] = block.split('\n');
+      if (eventLine?.startsWith('event: ') && dataLine?.startsWith('data: ')) entry.events.push({ event: eventLine.slice(7), data: JSON.parse(dataLine.slice(6)) });
+    }
+    return write(chunk, ...rest);
+  };
+  res.on('finish', () => {
+    entry.kind = req.body?.kind;
+    entry.related = req.body?.sources?.related?.map((chunk) => chunk.id) ?? [];
+  });
+  return next();
+};
+
 const startServer = () => {
   const outer = express();
   const headers = vercelHeaders();
@@ -45,6 +66,7 @@ const startServer = () => {
     headers.forEach(({ key, value }) => res.set(key, value));
     next();
   });
+  outer.use(captureTurns);
   const provider = createMockProvider({ delayMs: 4 });
   outer.use(createApp({ providerFor: () => ({ provider, usesServerKey: false }) }));
   outer.use(express.static(`${root}dist`));
@@ -144,6 +166,181 @@ const startLesson = async (page) => {
   await waitTutorDone(page, 0);
 };
 
+
+const LABELS = {
+  en: { step: (c, t) => `Step ${c} of ${t}`, final: (c, t) => `Final check ${c} of ${t}`, practice: (c, t) => `Practice ${c} of ${t}`, complete: 'Lesson complete', finalPlaceholder: 'Answer from memory', retry: 'Try again', hint: 'Hint', explain: 'Explain differently', practise: /Practise/ },
+  he: { step: (c, t) => `צעד ${c} מתוך ${t}`, final: (c, t) => `בדיקה מסכמת ${c} מתוך ${t}`, practice: (c, t) => `תרגול ${c} מתוך ${t}`, complete: 'השיעור הסתיים', finalPlaceholder: 'תשובה מהזיכרון', retry: 'לנסות שוב', hint: 'רמז', explain: 'הסבר אחר', practise: /תרגול|לתרגל/ },
+};
+
+const expectedCounter = (labels, progress) => {
+  const total = progress.steps.length;
+  if (progress.status === 'reviewing') return (progress.review.kind === 'final' ? labels.final : labels.practice)(progress.review.position + 1, progress.review.queue.length);
+  if (progress.status === 'completed') return labels.complete;
+  return labels.step(progress.currentStep + 1, total);
+};
+
+const storedChat = (page) => page.evaluate(() => JSON.parse(sessionStorage.getItem('tmtf.chat') ?? 'null')?.chat ?? null);
+
+const syncCheck = async (page, labels, name, { serverProgress = true } = {}) => {
+  await page.waitForTimeout(150);
+  const chat = await storedChat(page);
+  const problems = [];
+  if (!chat) return [`${name}: nothing saved`];
+  const progress = chat.progress;
+  const lastTurn = turnLog.at(-1);
+  const server = lastTurn?.events.find((item) => item.event === 'progress')?.data.progress;
+  if (serverProgress && JSON.stringify(server) !== JSON.stringify(progress)) problems.push(`${name}: saved state differs from the server's`);
+  const ui = await page.evaluate(() => {
+    const bar = document.querySelector('[role=progressbar]');
+    const marked = [...document.querySelectorAll('li[aria-current="step"]')].find((item) => item.getBoundingClientRect().width > 0);
+    const current = marked ? [...marked.parentElement.children].indexOf(marked) : -1;
+    return {
+      counter: bar?.previousElementSibling?.textContent.trim() ?? null,
+      done: Number(bar?.getAttribute('aria-valuenow')),
+      placeholder: document.querySelector('#answer')?.getAttribute('placeholder') ?? null,
+      planVisible: Boolean(marked),
+      current,
+    };
+  });
+  const counter = expectedCounter(labels, progress);
+  if (ui.counter !== counter) problems.push(`${name}: counter shows "${ui.counter}", state says "${counter}"`);
+  const done = progress.steps.filter((step) => step.status === 'done').length;
+  if (ui.done !== done) problems.push(`${name}: progress bar shows ${ui.done} done, state says ${done}`);
+  const inFinal = progress.status === 'reviewing' && progress.review.kind === 'final';
+  if ((ui.placeholder === labels.finalPlaceholder) !== inFinal) problems.push(`${name}: composer mode does not match the final check`);
+  if (ui.planVisible && progress.status !== 'completed') {
+    const active = progress.status === 'reviewing' ? progress.review.queue[progress.review.position] : progress.currentStep;
+    if (ui.current !== active) problems.push(`${name}: plan highlights step ${ui.current + 1}, state says ${active + 1}`);
+  }
+  return problems;
+};
+
+const lastMoveLabel = (page) => page.locator('article').last().locator('p').first().innerText().catch(() => '');
+
+const journey = async (viewport, language) => {
+  const labels = LABELS[language];
+  const { context, page, errors } = await openApp(browser, viewport, language);
+  const log = [];
+  const problems = [];
+  const check = async (name, options) => {
+    const found = await syncCheck(page, labels, name, options);
+    problems.push(...found);
+    log.push(`${name}${found.length ? ' !' : ''}`);
+  };
+  const progressNow = async () => (await storedChat(page)).progress;
+  try {
+    await page.goto(base);
+    await page.waitForSelector('h1');
+    await startLesson(page);
+    await check('start');
+
+    let before = await page.locator('article').count();
+    await page.getByRole('button', { name: labels.hint, exact: true }).click();
+    await waitTutorDone(page, before);
+    await check('hint button');
+    before = await page.locator('article').count();
+    await page.getByRole('button', { name: labels.explain, exact: true }).click();
+    await waitTutorDone(page, before);
+    await check('explain button');
+    const requestLabels = [await lastMoveLabel(page)];
+
+    await answer(page, 'This is wrong');
+    const firstHint = await lastMoveLabel(page);
+    await check('first wrong answer');
+    await answer(page, 'Still wrong');
+    const secondHint = await lastMoveLabel(page);
+    await check('second wrong answer');
+    if (firstHint === secondHint) problems.push('the second hint has the same label as the first');
+    await answer(page, 'Plants make glucose from light.');
+    await check('correct answer');
+    if ((await progressNow()).currentStep !== 1) problems.push('did not move to step 2 after the correct answer');
+
+    await answer(page, 'Where does the oxygen go?');
+    const asked = turnLog.at(-1);
+    if (!asked.related.length) problems.push('no passage from another part of the file was sent with the question');
+    if (asked.events.find((item) => item.event === 'progress')?.data.move !== 'answer_question') problems.push('the question was not answered as a question');
+    await check('question about another part');
+
+    const beforeStop = JSON.stringify(await progressNow());
+    await page.locator('#answer').fill('Please explain slowly with an example');
+    await page.locator('#answer').press('Enter');
+    await page.waitForSelector('.streaming-caret', { timeout: 10000 });
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => !document.querySelector('.streaming-caret'), null, { timeout: 5000 });
+    await page.waitForTimeout(300);
+    if (JSON.stringify(await progressNow()) !== beforeStop) problems.push('stopping a reply changed the lesson state');
+    await check('stopped reply', { serverProgress: false });
+
+    const messagesBefore = (await storedChat(page)).messages.length;
+    await page.locator('#answer').fill('Please explain slowly once more');
+    await page.locator('#answer').press('Enter');
+    await page.waitForSelector('.streaming-caret', { timeout: 10000 });
+    await page.reload();
+    await page.waitForSelector('article');
+    const afterReload = await storedChat(page);
+    if (JSON.stringify(afterReload.progress) !== beforeStop) problems.push('reloading during a reply changed the lesson state');
+    if (afterReload.messages.length !== messagesBefore) problems.push('reloading during a reply saved a half-finished turn');
+    await check('reload during a reply', { serverProgress: false });
+
+    const failText = `fail once (${language}): there is a gap in this answer`;
+    before = await page.locator('article').count();
+    await page.locator('#answer').fill(failText);
+    await page.locator('#answer').press('Enter');
+    await page.waitForSelector('[role=alert]', { timeout: 10000 });
+    if (JSON.stringify(await progressNow()) !== beforeStop) problems.push('a failed turn changed the lesson state');
+    await page.getByRole('button', { name: labels.retry }).click();
+    await waitTutorDone(page, before);
+    await page.waitForFunction(() => !document.querySelector('[role=alert]'), null, { timeout: 5000 }).catch(() => problems.push('the error stayed after a successful retry'));
+    const copies = await page.evaluate((text) => [...document.querySelectorAll('div.whitespace-pre-wrap')].filter((item) => item.textContent.trim() === text).length, failText);
+    if (copies !== 1) problems.push(`the retried answer appears ${copies} times`);
+    if (turnLog.at(-1).events.find((item) => item.event === 'progress')?.data.move !== 'prerequisite_check') problems.push('no detour on the retried gap answer');
+    await check('retry after a provider failure, into a detour');
+
+    await answer(page, 'Plants make glucose from light.');
+    if (turnLog.at(-1).events.find((item) => item.event === 'progress')?.data.move !== 'resume') problems.push('did not return to the question after the detour');
+    await check('back from the detour');
+
+    await page.reload();
+    await page.waitForSelector('article');
+    await check('reload in the middle of the lesson', { serverProgress: false });
+
+    for (let turn = 0; turn < 4 && (await progressNow()).status === 'active'; turn += 1) {
+      await answer(page, 'Plants make glucose from light.');
+      await check(`answer after reload ${turn + 1}`);
+    }
+    if ((await progressNow()).status !== 'reviewing') problems.push('the final check did not start after the last step');
+    let finalAnswers = 0;
+    for (const text of ['This is wrong', 'Plants make glucose from light.', 'Plants make glucose from light.', 'Plants make glucose from light.']) {
+      if ((await progressNow()).status !== 'reviewing') break;
+      await answer(page, text);
+      finalAnswers += 1;
+      await check(`final ${finalAnswers}`);
+    }
+    const summary = page.locator('section[aria-labelledby="summary-title"]');
+    const summaryShown = await summary.count() > 0;
+    if (!summaryShown) problems.push('no summary after the final check');
+    const scheduleItems = summaryShown ? await summary.locator('dl dt, dl > div').count() : 0;
+    if (summaryShown && !scheduleItems) problems.push('the summary has no review schedule');
+    const practise = summary.locator('button.btn-primary');
+    if (summaryShown && await practise.count()) {
+      before = await page.locator('article').count();
+      await practise.first().click();
+      await waitTutorDone(page, before);
+      await check('practice start');
+      await answer(page, 'Plants make glucose from light.');
+      await check('practice answered');
+    } else problems.push('no practice offered after a failed final question');
+    const endState = await progressNow();
+    const moves = turnLog.map((entry) => { const update = entry.events.find((item) => item.event === 'progress')?.data; return `${entry.kind}:${update?.move ?? '-'}:${update?.assessment?.verdict ?? '-'}:${update ? `${update.progress.status}/${update.progress.review?.queue ?? ''}` : ''}`; });
+    return { viewport: viewport.join('x'), language, turns: turnLog.length, endState: { status: endState.status, final: endState.final, review: endState.review }, moves, steps: log, requestLabels, hintLabels: [firstHint, secondHint], problems, errors: [...errors] };
+  } catch (error) {
+    problems.push(`stopped: ${error.message.split('\n')[0].slice(0, 160)}`);
+    return { viewport: viewport.join('x'), language, steps: log, problems, errors: [...errors] };
+  } finally {
+    await context.close();
+  }
+};
+
 const results = [];
 const record = (screen, viewport, language, data, extra = {}) => results.push({ screen, viewport: viewport.join('x'), language, ...data, ...extra });
 
@@ -155,8 +352,15 @@ let renamed = null;
 const server = await startServer();
 const base = `http://localhost:${server.address().port}`;
 const browser = await chromium.launch();
+const journeys = [];
 
 try {
+  for (const [viewport, language] of [[[1280, 800], 'en'], [[390, 844], 'he']]) journeys.push(await journey(viewport, language));
+  if (process.argv.includes('--journeys')) {
+    print(JSON.stringify(journeys, null, 2));
+    process.exit(journeys.some((item) => item.problems.length || item.errors.length) ? 1 : 0);
+  }
+
   for (const language of ['en', 'he']) {
     for (const viewport of VIEWPORTS) {
       const { context, page, errors } = await openApp(browser, viewport, language);
@@ -372,6 +576,7 @@ try {
 
 const summary = {
   checks: results.length,
+  journeys,
   pdfStructure,
   renamedPdf: renamed,
   keyboard,
@@ -403,5 +608,5 @@ print(JSON.stringify(summary, null, 2));
 if (reportPath) writeFileSync(reportPath, `${JSON.stringify({ summary, results }, null, 2)}\n`);
 
 const serious = summary.axe.filter((violation) => violation.impact === 'serious' || violation.impact === 'critical');
-const failed = features.some((item) => item.error || !item.notesFile || !item.searchResults) || !keyboard?.escapeStops || !keyboard?.skipFocusesAnswer || !pdfStructure || pdfStructure.headerLeft || pdfStructure.footerLeft || pdfStructure.sections.length < 3 || !summary.recheckShown || !summary.reviewCompleted || !summary.helpActions || !summary.detourShown || !summary.finalCheckShown || summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
+const failed = journeys.some((item) => item.problems.length || item.errors.length) || features.some((item) => item.error || !item.notesFile || !item.searchResults) || !keyboard?.escapeStops || !keyboard?.skipFocusesAnswer || !pdfStructure || pdfStructure.headerLeft || pdfStructure.footerLeft || pdfStructure.sections.length < 3 || !summary.recheckShown || !summary.reviewCompleted || !summary.helpActions || !summary.detourShown || !summary.finalCheckShown || summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
 if (strict && failed) process.exit(1);

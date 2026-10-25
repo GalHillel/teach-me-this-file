@@ -295,10 +295,15 @@ describe('tutor prompt contents', () => {
 
     const finalCheck = { ...atStep2, status: 'reviewing', steps: atStep2.steps.map((step) => ({ ...step, status: 'done', outcome: 'mastered', detour: null })), review: { kind: 'final', queue: [0, 1], position: 0, results: {}, stalls: 0 } };
     const final = capture();
-    await request(createApp({ providerFor: withProvider(final.provider) })).post('/api/turns').send(turn({ kind: 'reply', plan: twoSteps, progress: finalCheck, studentMessage: 'The cell is the smallest unit of life' }));
+    await request(createApp({ providerFor: withProvider(final.provider) })).post('/api/turns').send(turn({ kind: 'reply', plan: twoSteps, progress: finalCheck, studentMessage: 'Cells are the tiniest living units there are' }));
     expect(final.seen.system).toContain('This is the final check');
     expect(final.seen.system).toContain('give no hints');
     expect(final.seen.system).toContain('Step being checked in the final check');
+
+    const pasted = capture();
+    const pastedTurn = await request(createApp({ providerFor: withProvider(pasted.provider) })).post('/api/turns').send(turn({ kind: 'reply', plan: twoSteps, progress: finalCheck, studentMessage: 'A cell is the smallest unit of life.' }));
+    expect(parseEvents(pastedTurn.text).find((item) => item.event === 'progress').data).toMatchObject({ move: 'probe', progress: { review: { results: {}, stalls: 1 } } });
+    expect(pasted.seen.system).toContain('This is the final check, so give no hints');
   });
 
   it('puts a fresh confidential marker in every tutor prompt', async () => {

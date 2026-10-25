@@ -388,6 +388,18 @@ describe('final check', () => {
     expect(finalCheckQueue(makePlan(['Only']), { steps: [{ outcome: 'mastered' }] })).toEqual([0]);
   });
 
+  it('does not count a copied or unexplained answer as applied; it asks once more, and repeated copying fails', () => {
+    const { progress: checking } = run(['correct', 'correct', 'correct']);
+    const copied = answer(checking, 'correct', 'high', 'copied');
+    expect(copied.move).toBe('probe');
+    expect(copied.progress.review).toMatchObject({ position: 0, results: {}, stalls: 1 });
+    expect(answer(copied.progress, 'correct').move).toBe('final_next');
+    const unexplained = answer(checking, 'correct', 'high', 'unjustified');
+    expect(unexplained.move).toBe('probe');
+    const { progress: afterCopies } = run([['correct', 'high', 'copied'], ['correct', 'high', 'copied'], ['correct', 'high', 'copied']], checking);
+    expect(afterCopies.review.results).toEqual({ [checking.review.queue[0]]: 'fail' });
+  });
+
   it('turns final results and revisits into evidence levels and a review schedule', () => {
     const { progress: checking } = run(['correct', 'partial', 'correct', 'correct']);
     const { progress } = run(['correct', 'incorrect', 'correct'], checking);

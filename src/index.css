@@ -16,6 +16,7 @@
   --color-pen-soft: #e6ebfb;
   --color-marker: #fff07a;
   --color-marker-soft: #fff9cc;
+  --color-marker-edge: #b8951a;
   --color-danger: #b83a2a;
   --color-danger-soft: #fbe9e6;
   --color-success: #1d7550;
@@ -121,6 +122,20 @@
   overflow-x: auto;
   overflow-y: hidden;
   padding: 0.2em 0;
+}
+
+.prose-tutor :not(.katex-display) > .katex {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  vertical-align: middle;
+  white-space: nowrap;
+  padding-block: 0.1em;
+}
+
+.prose-tutor .katex-html {
+  white-space: nowrap;
 }
 
 .prose-tutor code,
