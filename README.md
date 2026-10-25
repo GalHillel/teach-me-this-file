@@ -178,7 +178,7 @@ The repo deploys to Vercel as is: Vite builds the front end to `dist/`, and `api
 
 1. Import the repository in Vercel. No settings are needed beyond the defaults read from `vercel.json`.
 2. Optionally add `AI_API_KEY` in Project Settings > Environment Variables.
-3. To deploy on every push to `main`, the project must be connected to the repository under Project Settings > Git. My project is not connected yet, so I deploy each commit by hand.
+3. To deploy on every push to `main`, connect the project to the repository under Project Settings > Git. Mine is connected, so each push to `main` builds a production deployment.
 
 Any Node host works too: run `npm run build`, serve `dist/` as static files, and run `npm start` for the API behind the same origin.
 
