@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo } from 'react';
-import { stripCitations } from '../../shared/citations.js';
+import { mapCitations } from '../../shared/citations.js';
 import { localizeLabel, useI18n } from '../i18n/translate.js';
 import Icon from './Icon.jsx';
 import Markdown from './Markdown.jsx';
@@ -116,7 +116,7 @@ function ChatMessage({ message, chunkLabels, onOpenSource }) {
   return <TutorMessage message={message} chunkLabels={chunkLabels} onOpenSource={onOpenSource} />;
 }
 
-const citationLabel = (label) => String(label ?? '').replace(/[[\]]/g, '');
+const citationLabel = (label) => String(label ?? '').replace(/[[\]]/g, '').replace(/[\\`*_<>~|]/g, (char) => `\\${char}`);
 
 function TutorMessage({ message, chunkLabels, onOpenSource }) {
   const { t } = useI18n();
@@ -126,10 +126,10 @@ function TutorMessage({ message, chunkLabels, onOpenSource }) {
   const ids = useMemo(() => new Map([...chunkLabels.keys()].map((id) => [id.toLowerCase(), id])), [chunkLabels]);
   const text = useMemo(() => {
     const verified = message.citations ? new Set(message.citations.cited) : null;
-    const keep = (id) => ids.has(id) && (!verified || verified.has(id));
-    return stripCitations(message.content, keep).replace(/\[\s*(c\d+(?:\s*,\s*c\d+)*)\s*\]/gi, (whole, list) =>
-      list.split(/\s*,\s*/).map((id) => `[${citationLabel(localizeLabel(chunkLabels.get(ids.get(id.toLowerCase())), t))}](#cite-${ids.get(id.toLowerCase())})`).join(''));
-  }, [message.content, message.citations, ids, chunkLabels, t]);
+    const keep = (id) => ids.has(id) && (verified ? verified.has(id) : message.status !== 'stopped');
+    return mapCitations(message.content, (list) =>
+      list.filter(keep).map((id) => `[${citationLabel(localizeLabel(chunkLabels.get(ids.get(id)), t))}](#cite-${ids.get(id)})`).join(''));
+  }, [message.content, message.citations, message.status, ids, chunkLabels, t]);
   const cite = useCallback((chunkId) => onOpenSource(message, { chunkId, kind: 'cited' }), [message, onOpenSource]);
   const missingQuote = message.citations?.quotes?.some((quote) => !quote.chunkId);
   return (

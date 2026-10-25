@@ -28,7 +28,7 @@ export const stepEvidence = (progress, index) => {
   if (finalResult) signals.push(finalResult === 'pass' ? 'final_pass' : 'final_fail');
   if (practiceResult) signals.push(practiceResult === 'pass' ? 'practice_pass' : 'practice_fail');
 
-  if (finalResult === 'pass' && state.revisit !== 'fail') return { level: 'applied', signals };
+  if (finalResult === 'pass') return { level: 'applied', signals };
   const weak = finalResult === 'fail' || state.outcome === 'review' || state.revisit === 'fail';
   if (weak) return { level: practiceResult === 'pass' ? 'shown_with_help' : 'needs_practice', signals };
   if (state.outcome === 'mastered') return { level: 'shown', signals };

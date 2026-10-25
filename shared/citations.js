@@ -1,5 +1,7 @@
 const CITATION = /\[\s*(c\d{1,4}(?:\s*[,;]\s*c\d{1,4})*)\s*\]/gi;
-const QUOTE = /(?<=^|[\s([:,\u2014\u2013-])["\u201C\u201D\u201E\u00AB]([^"\u201C\u201D\u201E\u00AB\u00BB\n]{1,300})["\u201C\u201D\u00BB](?=$|[\s.,;:!?)\]\u2014\u2013-])/gu;
+const QUOTE = /(?<=^|[\s([:,—–-])["“”„«]([^"“”„«»\n]{1,300})["“”»](?=$|[\s.,;:!?)\]—–-])/gu;
+const CITED_AFTER = /^[\s.,;:]{0,3}\[\s*c\d/i;
+const CODE = /(```[\s\S]*?(?:```|$)|`[^`\n]*`)/g;
 const MIN_QUOTE_WORDS = 4;
 
 const normalize = (text) =>
@@ -9,18 +11,30 @@ const normalize = (text) =>
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim();
 
+const splitIds = (list) => list.split(/[,;]/).map((id) => id.trim().toLowerCase());
+
+export const mapCitations = (text, render) =>
+  String(text ?? '')
+    .split(CODE)
+    .map((part, index) => (index % 2 ? part : part.replace(CITATION, (whole, list) => render(splitIds(list)))))
+    .join('');
+
 export const citedIds = (text) => {
   const ids = [];
-  for (const match of String(text ?? '').matchAll(CITATION)) {
-    for (const id of match[1].split(/[,;]/)) ids.push(id.trim().toLowerCase());
-  }
+  mapCitations(text, (list) => {
+    ids.push(...list);
+    return '';
+  });
   return [...new Set(ids)];
 };
 
-export const quotedSpans = (text) =>
-  [...String(text ?? '').matchAll(QUOTE)]
+export const quotedSpans = (text) => {
+  const source = String(text ?? '');
+  return [...source.matchAll(QUOTE)]
+    .filter((match) => CITED_AFTER.test(source.slice(match.index + match[0].length)))
     .map((match) => match[1].trim())
     .filter((span) => normalize(span).split(' ').length >= MIN_QUOTE_WORDS);
+};
 
 export const verifyCitations = (reply, chunks) => {
   const byId = new Map(chunks.map((chunk) => [chunk.id.toLowerCase(), chunk]));
@@ -38,7 +52,7 @@ export const verifyCitations = (reply, chunks) => {
 };
 
 export const stripCitations = (text, keep) =>
-  String(text ?? '').replace(CITATION, (whole, list) => {
-    const ids = list.split(/[,;]/).map((id) => id.trim().toLowerCase()).filter((id) => keep(id));
+  mapCitations(text, (list) => {
+    const ids = list.filter((id) => keep(id));
     return ids.length ? `[${ids.join(', ')}]` : '';
   });

@@ -81,7 +81,11 @@ describe('lesson state machine properties', () => {
         if (before.status === 'reviewing' && before.review.kind === 'final' && progress.status === 'completed') {
           expect(progress.final).not.toBe(null);
         }
-        if (result.intervention) expect(progress.steps[activeStepIndex(before)].used.at(-1)).toBe(result.intervention);
+        if (result.intervention) {
+          const used = progress.steps[activeStepIndex(before)].used;
+          expect(used).toContain(result.intervention);
+          if (result.intervention !== 'prerequisite') expect(used.at(-1)).toBe(result.intervention);
+        }
         if (before.status === 'active' && progress.status === 'active') {
           expect(['advance', 'review_and_advance'].includes(result.move)).toBe(progress.currentStep === before.currentStep + 1);
         }

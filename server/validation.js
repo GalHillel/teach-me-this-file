@@ -10,6 +10,8 @@ export const LIMITS = {
   planChars: 90000,
   turnSources: 6,
   relatedSources: 3,
+  upcomingSources: 8,
+  stepSources: 12,
   history: 40,
   historyMessage: 6000,
   steps: 10,
@@ -97,6 +99,8 @@ const plan = (value) => {
         successCriteria: field('successCriteria'),
         commonMistake: field('commonMistake'),
         prerequisites: array(step.prerequisites ?? [], `plan.steps[${index}].prerequisites`, LIMITS.steps).map((id) => string(id, `plan.steps[${index}].prerequisites`, { max: 10 })),
+        sourceIds: array(step.sourceIds ?? [], `plan.steps[${index}].sourceIds`, LIMITS.stepSources)
+          .filter((id) => typeof id === 'string' && /^c\d{1,4}$/.test(id)),
       };
     }),
   };
@@ -112,22 +116,25 @@ const count = (value, max, name) => {
   return value;
 };
 
-const checkConsistency = ({ status, currentStep, steps, review: round, final }) => {
+const checkConsistency = ({ status, currentStep, steps, review: round, final }, plan) => {
   steps.forEach((step, index) => {
     if ((step.status === 'done') !== (step.outcome !== null)) fail('progress step outcome does not match its status');
     const expected = status !== 'active' ? 'done' : index < currentStep ? 'done' : index === currentStep ? 'active' : 'pending';
     if (step.status !== expected) fail('progress steps do not match the current step');
-    if (step.detour !== null && (step.status !== 'active' || step.detour >= index || steps[step.detour].status !== 'done')) fail('progress step detour is not valid');
+    if (step.detour !== null && (step.status !== 'active' || step.detour >= index || steps[step.detour].status !== 'done' || !(plan.steps[index].prerequisites ?? []).includes(plan.steps[step.detour].id))) {
+      fail('progress step detour is not valid');
+    }
     if (step.revisit !== null && step.status !== 'done') fail('progress step revisit is not valid');
   });
   if (final && status === 'active') fail('progress.final is not valid before the lesson ends');
+  if (round && status === 'active') fail('progress.review is not valid during the lesson');
   if (round?.kind === 'final' && (status !== 'reviewing' || final)) fail('progress.review is not a valid final check');
 };
 
 const results = (value, allowed, name) => {
   const entries = isObject(value) ? Object.entries(value) : [];
   return Object.fromEntries(entries.map(([key, result]) => {
-    if (!allowed(Number(key)) || !REVIEW_RESULTS.includes(result)) fail(`${name} is not valid`);
+    if (!/^\d{1,2}$/.test(key) || !allowed(Number(key)) || !REVIEW_RESULTS.includes(result)) fail(`${name} is not valid`);
     return [Number(key), result];
   }));
 };
@@ -166,7 +173,8 @@ const used = (value) => {
   return list;
 };
 
-const progress = (value, stepCount) => {
+const progress = (value, plan) => {
+  const stepCount = plan.steps.length;
   if (!isObject(value)) fail('missing progress');
   const steps = array(value.steps, 'progress.steps', LIMITS.steps);
   if (steps.length !== stepCount) fail('progress does not match the plan');
@@ -201,7 +209,7 @@ const progress = (value, stepCount) => {
       };
     }),
   };
-  checkConsistency(clean);
+  checkConsistency(clean, plan);
   return clean;
 };
 
@@ -215,7 +223,7 @@ export const validateTurnRequest = (body) => {
   if (!isObject(body)) fail('missing body');
   if (!TURN_KINDS.includes(body.kind)) fail(`kind must be one of ${TURN_KINDS.join(', ')}`);
   const lessonPlan = plan(body.plan);
-  const lessonProgress = progress(body.progress, lessonPlan.steps.length);
+  const lessonProgress = progress(body.progress, lessonPlan);
   if (body.kind === 'review' && lessonProgress.status !== 'completed') fail('a review can only start after the lesson is complete');
   const sources = isObject(body.sources) ? body.sources : {};
 
@@ -230,6 +238,7 @@ export const validateTurnRequest = (body) => {
       current: chunks(sources.current ?? [], 'sources.current', LIMITS.turnSources),
       next: chunks(sources.next ?? [], 'sources.next', LIMITS.turnSources),
       related: chunks(sources.related ?? [], 'sources.related', LIMITS.relatedSources),
+      upcoming: chunks(sources.upcoming ?? [], 'sources.upcoming', LIMITS.upcomingSources),
     },
   };
 };

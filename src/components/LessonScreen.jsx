@@ -134,7 +134,7 @@ function CompletionCard({ plan, progress, messages, busy, onReview, onNewLesson 
   };
 
   return (
-    <section className="step-enter rounded-2xl border border-line bg-paper px-5 py-5" aria-labelledby="summary-title">
+    <section className="step-enter rounded-2xl border border-line bg-paper px-5 py-5" aria-labelledby="summary-title" aria-live="off">
       <h2 id="summary-title" className="font-display text-lg font-semibold">{t('summary.title')}</h2>
       <p className="mt-1 text-sm text-muted">{t('summary.basedOn')}</p>
 

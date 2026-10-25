@@ -254,3 +254,27 @@ describe('readEvents', () => {
     ]);
   });
 });
+
+describe('passages sent ahead of a move', async () => {
+  const { upcomingSources } = await import('../src/lesson/useTutor.js');
+  const three = [...chunks, { id: 'c3', label: 'Page 3', text: 'Glucose stores energy in chemical bonds.' }];
+  const lessonPlan = {
+    steps: [
+      { id: 's1', title: 'Respiration', sourceIds: ['c1'], prerequisites: [] },
+      { id: 's2', title: 'Photosynthesis', sourceIds: ['c2'], prerequisites: [] },
+      { id: 's3', title: 'Glucose', sourceIds: ['c3'], prerequisites: ['s1'] },
+    ],
+  };
+  const progress = (currentStep) => ({
+    status: 'active',
+    currentStep,
+    steps: lessonPlan.steps.map((_, index) => ({ status: index < currentStep ? 'done' : index === currentStep ? 'active' : 'pending', outcome: index < currentStep ? 'mastered' : null, hints: 0, revisit: null })),
+  });
+
+  it('sends the passages of the step\'s prerequisites and of the first final-check step', () => {
+    const state = { plan: lessonPlan, chunks: three, progress: progress(2) };
+    expect(upcomingSources(state, ['c3']).map((chunk) => chunk.id)).toEqual(['c1']);
+    expect(upcomingSources({ ...state, progress: progress(1) }, ['c2', 'c3'])).toEqual([]);
+    expect(upcomingSources({ ...state, progress: { ...progress(2), status: 'reviewing' } }, [])).toEqual([]);
+  });
+});

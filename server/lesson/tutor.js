@@ -3,7 +3,7 @@ import { verifyCitations } from '../../shared/citations.js';
 import { AppError } from '../errors.js';
 import { count, recordFirstToken } from '../metrics.js';
 import { assessAnswer } from './assessor.js';
-import { lessonPace, planMove } from './progress.js';
+import { activeStepIndex, lessonPace, planMove } from './progress.js';
 import { buildTutorSystem } from './prompts.js';
 
 const HISTORY_LIMIT = 12;
@@ -25,6 +25,26 @@ export const toProviderMessages = (history, studentMessage) => {
     }
     return merged;
   }, []);
+};
+
+const REQUEST_NOTES = {
+  hint: '(The student pressed "Hint" and asks for a hint.)',
+  explain: '(The student pressed "Explain differently" and asks for another explanation.)',
+  skip_final: '(The student chose to skip the final check.)',
+  review: '(The student chose to practise the steps that were hard.)',
+};
+
+const FINISHING_MOVES = new Set(['final_finish', 'review_finish', 'finish_skipped']);
+
+export const pickSources = ({ plan, before, after, move, sources }) => {
+  const pool = new Map([...sources.current, ...sources.next, ...sources.upcoming].map((chunk) => [chunk.id, chunk]));
+  const focus = FINISHING_MOVES.has(move) ? activeStepIndex(before) : activeStepIndex(after);
+  const detour = after.steps[activeStepIndex(after)]?.detour;
+  const wanted = [focus, Number.isInteger(detour) ? detour : null, FINISHING_MOVES.has(move) ? null : focus + 1]
+    .filter((index) => index !== null && plan.steps[index])
+    .flatMap((index) => plan.steps[index].sourceIds ?? []);
+  const picked = [...new Set(wanted)].map((id) => pool.get(id)).filter(Boolean);
+  return picked.length ? picked : [...sources.current, ...sources.next];
 };
 
 const lastTutorMessage = (history) => [...history].reverse().find((message) => message.role === 'tutor')?.content ?? '';
@@ -98,6 +118,7 @@ export const runTurn = async ({ provider, input, signal, send }) => {
   }
 
   const { move, progress, intervention, prerequisite, requested } = planMove(input.progress, { kind, assessment, plan });
+  const promptSources = pickSources({ plan, before: input.progress, after: progress, move, sources });
   send('progress', { move, progress, assessment: publicAssessment(assessment), intervention });
   send('status', { phase: 'teaching' });
 
@@ -106,7 +127,8 @@ export const runTurn = async ({ provider, input, signal, send }) => {
     plan,
     progress,
     teacherPrompt,
-    sources: [...sources.current, ...sources.next],
+    sources: promptSources,
+    stepIndex: FINISHING_MOVES.has(move) ? activeStepIndex(input.progress) : null,
     relatedSources: sources.related,
     canary,
     move,
@@ -122,13 +144,14 @@ export const runTurn = async ({ provider, input, signal, send }) => {
     if (firstTokenMs === null) firstTokenMs = Date.now() - started;
     send('delta', { text });
   });
-  for await (const text of provider.streamText({ system, messages: toProviderMessages(history, studentMessage), signal, onMeta })) {
+  const messages = toProviderMessages(history, studentMessage || REQUEST_NOTES[kind] || '');
+  for await (const text of provider.streamText({ system, messages, signal, onMeta })) {
     guard.push(text);
   }
   const reply = guard.flush();
   if (!reply.trim()) throw new AppError('bad_response', 'The AI returned an empty answer. Try again.');
 
-  const citations = verifyCitations(reply, [...sources.current, ...sources.next, ...sources.related]);
+  const citations = verifyCitations(reply, [...promptSources, ...sources.related]);
   const totalMs = Date.now() - started;
   count('turns');
   if (firstTokenMs !== null) recordFirstToken(firstTokenMs);

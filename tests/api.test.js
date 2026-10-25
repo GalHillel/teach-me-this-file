@@ -235,7 +235,7 @@ describe('tutor prompt contents', () => {
     const seen = { system: '' };
     return {
       seen,
-      provider: { ...base, streamText: (options) => { seen.system = options.system; return base.streamText(options); } },
+      provider: { ...base, streamText: (options) => { seen.system = options.system; seen.messages = options.messages; return base.streamText(options); } },
     };
   };
 
@@ -258,6 +258,30 @@ describe('tutor prompt contents', () => {
     expect(seen.system).toContain('put the passage id in square brackets');
   });
 
+  it('tells the model which button the student pressed', async () => {
+    const { seen, provider } = capture();
+    await request(createApp({ providerFor: withProvider(provider) })).post('/api/turns').send(turn({ kind: 'hint' }));
+    expect(seen.messages.at(-1).role).toBe('user');
+    expect(seen.messages.at(-1).content).toContain('(The student pressed "Hint" and asks for a hint.)');
+  });
+
+  it('gives the tutor the earlier step\'s passages when the move goes back to it', async () => {
+    const twoSteps = { ...plan, steps: [{ ...plan.steps[0], id: 's1', keyConcepts: ['alpha term'], sourceIds: ['c1'] }, { ...plan.steps[1], id: 's2', prerequisites: ['s1'], sourceIds: ['c2'] }] };
+    const atStep2 = { ...createProgress(twoSteps), currentStep: 1 };
+    atStep2.steps = [{ ...atStep2.steps[0], status: 'done', outcome: 'mastered' }, { ...atStep2.steps[1], status: 'active' }];
+    const { seen, provider } = capture();
+    const response = await request(createApp({ providerFor: withProvider(provider) })).post('/api/turns').send(turn({
+      kind: 'reply',
+      plan: twoSteps,
+      progress: atStep2,
+      studentMessage: 'it is a gap answer',
+      history: [{ role: 'tutor', content: 'What does the nucleus do?' }],
+      sources: { current: [document.chunks[1]], next: [], upcoming: [document.chunks[0]] },
+    }));
+    expect(parseEvents(response.text).find((item) => item.event === 'progress').data.move).toBe('prerequisite_check');
+    expect(seen.system).toContain(document.chunks[0].text);
+  });
+
   it('describes the earlier step during a prerequisite check, and the final check rules', async () => {
     const twoSteps = { ...plan, steps: [{ ...plan.steps[0], id: 's1' }, { ...plan.steps[1], id: 's2', prerequisites: ['s1'] }] };
     const atStep2 = { ...createProgress(twoSteps), currentStep: 1 };
@@ -265,6 +289,9 @@ describe('tutor prompt contents', () => {
     const detour = capture();
     await request(createApp({ providerFor: withProvider(detour.provider) })).post('/api/turns').send(turn({ kind: 'reply', plan: twoSteps, progress: atStep2, studentMessage: 'something about cells' }));
     expect(detour.seen.system).toContain('quick check on the earlier idea');
+    const asked = capture();
+    await request(createApp({ providerFor: withProvider(asked.provider) })).post('/api/turns').send(turn({ kind: 'reply', plan: twoSteps, progress: atStep2, studentMessage: 'what does smallest mean?' }));
+    expect(asked.seen.system).toContain('ask the quick question about the earlier step again');
 
     const finalCheck = { ...atStep2, status: 'reviewing', steps: atStep2.steps.map((step) => ({ ...step, status: 'done', outcome: 'mastered', detour: null })), review: { kind: 'final', queue: [0, 1], position: 0, results: {}, stalls: 0 } };
     const final = capture();
@@ -318,6 +345,9 @@ describe('teaching flow over the API', () => {
       { ...fresh, review: { kind: 'final', queue: [0], position: 0, results: {}, stalls: 0 } },
       { ...fresh, final: { results: { 0: 'pass' }, skipped: false } },
       { ...fresh, steps: [{ ...fresh.steps[0], revisit: 'pass' }, fresh.steps[1]] },
+      { ...fresh, currentStep: 1, steps: [{ ...fresh.steps[0], status: 'done', outcome: 'mastered' }, { ...fresh.steps[1], status: 'active', detour: 0 }] },
+      { ...fresh, review: { kind: 'practice', queue: [0], position: 0, results: {}, stalls: 0 } },
+      { ...fresh, status: 'completed', steps: fresh.steps.map((step) => ({ ...step, status: 'done', outcome: 'mastered' })), final: { results: { first: 'pass' }, skipped: false } },
     ];
     for (const progress of forged) {
       const response = await request(mockApp()).post('/api/turns').send(turn({ kind: 'reply', studentMessage: 'x', progress }));

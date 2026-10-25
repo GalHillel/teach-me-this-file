@@ -16,7 +16,7 @@ I built it as a home assignment for an AI Engineer role. The reasoning behind th
 - The teacher prompt sets age, style, length and goals. The lesson language is a separate choice (or taken from the prompt). Three editable examples are included, one in Hebrew.
 - The server builds a structured lesson plan: objectives, the content type, 2 to 8 steps sized to the file and the time, and per step an approach (explanation, worked example or practice), a check question, success criteria, a common mistake, the steps it builds on, and the passages it is based on. Steps are put in an order where each comes after the steps it builds on.
 - Each student answer is graded first: verdict, completeness, concepts shown and missing, misconception, what kind of problem it is (misread the question, unsure, does not know, right without the reasoning, copied from the file), an evidence quote and a confidence level. The server checks the grade, then decides the next move in code.
-- The help after a wrong answer depends on the mistake: a small nudge first, then a focused hint, a counter-example when the grader names a misconception, smaller sub-questions, a worked example or an analogy when the student does not know, and the full explanation with one more check after three tries. The tutor never repeats help it already gave on the step.
+- The help after a wrong answer depends on the mistake: a small nudge first, then a focused hint, a counter-example when the grader names a misconception, smaller sub-questions, a worked example or an analogy when the student does not know, and the full explanation with one more check after three tries. The tutor picks a kind of help it has not used on the step yet, and repeats only after the options for that situation run out.
 - When the missing ideas belong to an earlier step, or an earlier step was weak, the tutor checks that step first with one short question, grades the answer against it, and comes back to the current question. A failed check marks the earlier step for practice.
 - "Hint" and "Explain differently" buttons let the student ask for help before answering. A right answer after help counts as shown with help, not as understood on the first try.
 - After the last step comes a short final check: up to three steps, chosen by how weak they were, how many steps build on them and how long ago they were taught, each with a new question that asks the student to use the idea, answered without hints. It can be skipped.
@@ -143,7 +143,7 @@ npm run eval:retrieval
 npm run bench         # chunking, indexing and scoring times on synthetic documents
 npm run eval:hybrid   # BM25 against character trigrams and their fusion, tuned on English, held out on Hebrew and French
 npm run eval:load     # first-screen load time under CPU and network throttling
-EVAL_API_KEY=your-key EVAL_LABEL=mine node eval/grading.js # grading on 43 golden answers, real model calls
+EVAL_API_KEY=your-key EVAL_LABEL=mine node eval/grading.js # grading on 51 golden answers, real model calls
 ```
 
 `npm run test:e2e` uses the Chromium that Playwright installs (`npx playwright install chromium` once). It serves the build with the headers from `vercel.json`, checks every screen at 15 sizes from 320 to 2560 px in English and Hebrew for overflow, unreachable buttons, small targets and axe-core violations, runs a full lesson with a re-check and a review round, reads a generated PDF, and fails on any problem. `--report=file.json` saves the details. It checks layout and flow with canned replies, not teaching quality.

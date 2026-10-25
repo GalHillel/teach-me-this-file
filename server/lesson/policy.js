@@ -67,4 +67,10 @@ export const chooseIntervention = ({ situation, assessment, state }) => {
   return null;
 };
 
-export const remember = (used, intervention) => (intervention ? [...(used ?? []), intervention].slice(-8) : used ?? []);
+export const remember = (used, intervention) => {
+  if (!intervention) return used ?? [];
+  const next = [...(used ?? []), intervention];
+  const detoured = next.includes('prerequisite');
+  const rest = next.filter((item) => item !== 'prerequisite').slice(detoured ? -7 : -8);
+  return detoured ? ['prerequisite', ...rest] : rest;
+};

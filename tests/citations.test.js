@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { citedIds, quotedSpans, stripCitations, verifyCitations } from '../shared/citations.js';
+import { citedIds, mapCitations, quotedSpans, stripCitations, verifyCitations } from '../shared/citations.js';
 
 const chunks = [
   { id: 'c1', label: 'Lines 1–3', text: 'Leaves take in carbon dioxide from the air through tiny openings called stomata.' },
@@ -18,12 +18,16 @@ describe('citation checks', () => {
     expect(result.invalid).toEqual(['c7']);
   });
 
-  it('checks that a quote really appears in the file, ignoring case and punctuation', () => {
-    const result = verifyCitations('The file says "Chlorophyll absorbs mostly red and blue light" [c2], and “the moon is made of green cheese”.', chunks);
+  it('checks that a cited quote really appears in the file, ignoring case and punctuation', () => {
+    const result = verifyCitations('The file says "Chlorophyll absorbs mostly red and blue light" [c2], and “the moon is made of green cheese” [c1].', chunks);
     expect(result.quotes).toEqual([
       { text: 'Chlorophyll absorbs mostly red and blue light', chunkId: 'c2' },
       { text: 'the moon is made of green cheese', chunkId: null },
     ]);
+  });
+
+  it('does not check quotes without a passage id, such as the student\'s own words', () => {
+    expect(verifyCitations('You wrote "plants eat soil through roots", which is a common idea.', chunks).quotes).toEqual([]);
   });
 
   it('ignores short quoted words, which are emphasis rather than quotes', () => {
@@ -42,5 +46,11 @@ describe('citation checks', () => {
   it('strips citation markers that should not be shown', () => {
     expect(stripCitations('Air goes in [c1]. Water goes up [c9, c2].', (id) => id !== 'c9')).toBe('Air goes in [c1]. Water goes up [c2].');
     expect(stripCitations('Made up [c9].', () => false)).toBe('Made up .');
+  });
+
+  it('leaves code spans alone', () => {
+    const text = 'Use `arr[c1]` here [c1].\n\n```\nx = y[c2]\n```';
+    expect(citedIds(text)).toEqual(['c1']);
+    expect(mapCitations(text, (ids) => `<${ids.join('|')}>`)).toBe('Use `arr[c1]` here <c1>.\n\n```\nx = y[c2]\n```');
   });
 });

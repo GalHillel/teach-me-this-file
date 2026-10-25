@@ -54,6 +54,10 @@ export default function LearningMap({ open, onClose, plan, progress, chunks, onS
     });
     return grouped.filter(Boolean);
   }, [depths]);
+  const builds = useMemo(
+    () => plan.steps.map((step) => (step.prerequisites ?? []).map((id) => plan.steps.findIndex((item) => item.id === id) + 1).filter((number) => number > 0)),
+    [plan],
+  );
   const provenance = useMemo(
     () => plan.steps.map((step) => step.keyConcepts.map((concept) => ({ concept, inFile: conceptInFile(concept, chunks) }))),
     [plan.steps, chunks],
@@ -112,6 +116,7 @@ export default function LearningMap({ open, onClose, plan, progress, chunks, onS
                       <div className="min-w-0">
                         <p dir="auto" className="text-sm font-medium leading-snug">{step.title}</p>
                         <p className="mt-0.5 text-xs text-muted">{t(`level.${level}`)}</p>
+                        {builds[index].length > 0 && <p className="mt-0.5 text-xs text-muted">{t('map.buildsOn', { steps: builds[index].join(', ') })}</p>}
                       </div>
                     </div>
                     {provenance[index].length > 0 && (

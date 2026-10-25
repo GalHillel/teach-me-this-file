@@ -255,6 +255,28 @@ describe('going back to a prerequisite', () => {
     expect(answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['chlorophyll role'] }).move).toBe('hint');
   });
 
+  it('remembers the detour even after many other kinds of help, so it never happens twice on a step', () => {
+    const { progress: atStep2 } = runChain(['correct']);
+    const gap = answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'] });
+    let progress = answerChain(gap.progress, 'correct').progress;
+    for (let turn = 0; turn < 10; turn += 1) progress = request(progress, turn % 2 ? 'hint' : 'explain', chain).progress;
+    expect(progress.steps[1].used).toContain('prerequisite');
+    expect(progress.steps[1].used.length).toBeLessThanOrEqual(8);
+    expect(answerChain(progress, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'] }).move).not.toBe('prerequisite_check');
+  });
+
+  it('counts a passed final check as applied, even after a failed revisit', () => {
+    const { progress: atStep2 } = runChain(['correct']);
+    const gap = answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'] });
+    const back = answerChain(gap.progress, 'incorrect');
+    const { progress: checking } = runChain(['correct', 'correct'], back.progress);
+    expect(checking.review.kind).toBe('final');
+    expect(checking.review.queue).toContain(0);
+    const { progress: done } = runChain(checking.review.queue.map(() => 'correct'), checking);
+    expect(done.steps[0].revisit).toBe('fail');
+    expect(stepEvidence(done, 0)).toMatchObject({ level: 'applied', signals: expect.arrayContaining(['prerequisite_gap', 'final_pass']) });
+  });
+
   it('limits non-answers during the detour', () => {
     const { progress: atStep2 } = runChain(['correct']);
     const gap = answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'] });
