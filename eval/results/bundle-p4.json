@@ -1,0 +1,6 @@
+{
+  "method": "vite build, gzip -9 of each file",
+  "before": { "commit": "20f5b13", "entryJs": 96309, "entryCss": 8331, "lessonJs": 136042, "lessonCss": 7909 },
+  "after": { "entryJs": 99891, "entryCss": 8790, "lessonJs": 139436, "lessonCss": 7909 },
+  "note": "The entry grew by about 3.5 KB gzipped, mostly the new strings in all three languages, which ship in the entry bundle."
+}

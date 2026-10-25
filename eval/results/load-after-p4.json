@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-25T00:05:55.225Z",
+  "conditions": "setup screen, 390x844, CPU 4x slower, 150 ms latency, 1.6 Mbit/s down, local static server",
+  "runs": 5,
+  "medianMs": {
+    "fcp": 2464,
+    "lcp": 2464,
+    "domContentLoaded": 2225
+  },
+  "transferredKilobytes": 446
+}

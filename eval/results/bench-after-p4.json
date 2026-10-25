@@ -1,0 +1,28 @@
+{
+  "node": "v22.22.0",
+  "date": "2026-10-25T00:06:06.537Z",
+  "small": {
+    "characters": 2566,
+    "chunks": 6,
+    "chunkMs": 2.01,
+    "indexMs": 2.08,
+    "scorePerQueryMs": 0.137,
+    "sourcesPerMessageMs": 0.056
+  },
+  "medium": {
+    "characters": 34200,
+    "chunks": 71,
+    "chunkMs": 0.78,
+    "indexMs": 3.65,
+    "scorePerQueryMs": 0.275,
+    "sourcesPerMessageMs": 0.304
+  },
+  "large": {
+    "characters": 345791,
+    "chunks": 768,
+    "chunkMs": 5.51,
+    "indexMs": 26.09,
+    "scorePerQueryMs": 3.172,
+    "sourcesPerMessageMs": 3.049
+  }
+}
