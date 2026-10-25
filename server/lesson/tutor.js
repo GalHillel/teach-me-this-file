@@ -112,6 +112,7 @@ export const runTurn = async ({ provider, input, signal, send }) => {
       tutorQuestion: lastTutorMessage(history),
       studentMessage,
       sources: sources.current,
+      related: sources.related,
       signal,
       onMeta,
     });

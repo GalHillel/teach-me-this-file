@@ -249,6 +249,20 @@ describe('tutor prompt contents', () => {
     expect(seen.system).toContain('Use them only to answer a question the student asked');
   });
 
+  it('answers a question about another part of the file even when the grader calls it off topic', async () => {
+    const { seen, provider } = capture();
+    let gradePrompt = '';
+    const offTopicGrader = { ...provider, generateJson: async (options) => { gradePrompt = options.prompt; return { verdict: 'off_topic', completeness: 0, confidence: 'medium' }; } };
+    const related = [{ id: 'c9', label: 'Page 9', text: 'Never push anything into a wall socket.' }];
+    const response = await request(createApp({ providerFor: withProvider(offTopicGrader) }))
+      .post('/api/turns')
+      .send(turn({ kind: 'reply', studentMessage: 'Is it dangerous to put things into a wall socket?', history: [{ role: 'tutor', content: 'What is a cell?' }], sources: { current: [document.chunks[0]], next: [], related } }));
+    const progress = parseEvents(response.text).find((item) => item.event === 'progress').data;
+    expect(gradePrompt).toContain('Never push anything into a wall socket.');
+    expect(progress.move).toBe('answer_question');
+    expect(seen.system).toContain('Never push anything into a wall socket.');
+  });
+
   it('tells the tutor which help to give and to cite passage ids', async () => {
     const { seen, provider } = capture();
     const progress = createProgress(plan);
