@@ -98,6 +98,8 @@ const plan = (value) => {
         checkQuestion: field('checkQuestion'),
         successCriteria: field('successCriteria'),
         commonMistake: field('commonMistake'),
+        transferQuestion: field('transferQuestion'),
+        transferCriteria: field('transferCriteria'),
         prerequisites: array(step.prerequisites ?? [], `plan.steps[${index}].prerequisites`, LIMITS.steps).map((id) => string(id, `plan.steps[${index}].prerequisites`, { max: 10 })),
         sourceIds: array(step.sourceIds ?? [], `plan.steps[${index}].sourceIds`, LIMITS.stepSources)
           .filter((id) => typeof id === 'string' && /^c\d{1,4}$/.test(id)),

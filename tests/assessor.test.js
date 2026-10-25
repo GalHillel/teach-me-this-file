@@ -226,3 +226,18 @@ describe('pasting more than one sentence', () => {
     expect(copiedShare('Most metals, such as copper and aluminium, are good conductors, which is why wires are made of copper. I think the coin works because it is metal and lets the current through it easily.', sources)).toBeLessThan(0.7);
   });
 });
+
+describe('grading the final check', () => {
+  it('grades against the planned final-check question and its criteria', async () => {
+    let prompt = '';
+    const provider = { generateJson: async (request) => { prompt = request.prompt; return { verdict: 'correct', completeness: 1 }; } };
+    const plan = { audience: 'kids', steps: [{ id: 's1', title: 'Inputs', goal: 'g', checkQuestion: 'What goes in?', successCriteria: 'water and carbon dioxide', transferQuestion: 'What happens to a plant kept in a sealed jar with no air?', transferCriteria: 'It cannot get carbon dioxide, so it cannot make food.', keyConcepts: [] }] };
+    const progress = { status: 'reviewing', currentStep: 0, steps: [{ status: 'done', detour: null }], review: { kind: 'final', queue: [0], position: 0, results: {}, stalls: 0 } };
+    await assessAnswer({ provider, plan, progress, tutorQuestion: 'q', studentMessage: 'It starves without CO2.', sources: [] });
+    expect(prompt).toContain('Planned check question: What happens to a plant kept in a sealed jar with no air?');
+    expect(prompt).toContain('Success criteria: It cannot get carbon dioxide, so it cannot make food.');
+    const learning = { status: 'active', currentStep: 0, steps: [{ status: 'active', detour: null }] };
+    await assessAnswer({ provider, plan, progress: learning, tutorQuestion: 'q', studentMessage: 'Water.', sources: [] });
+    expect(prompt).toContain('Planned check question: What goes in?');
+  });
+});

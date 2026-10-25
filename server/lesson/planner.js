@@ -59,6 +59,8 @@ export const validatePlan = (raw, chunks, { fallbackTitle, lessonLanguage = null
         checkQuestion: text(item?.checkQuestion, 400),
         successCriteria: text(item?.successCriteria, 400),
         commonMistake: text(item?.commonMistake, 300),
+        transferQuestion: text(item?.transferQuestion, 400),
+        transferCriteria: text(item?.transferCriteria, 400),
       },
     }))
     .filter(({ step }) => {
@@ -77,9 +79,12 @@ export const validatePlan = (raw, chunks, { fallbackTitle, lessonLanguage = null
   const steps = kept.map((candidateIndex, index) => {
     const { step, rawSourceIds, rawPrerequisites } = candidates[candidateIndex];
     const id = `s${index + 1}`;
+    const repeatsCheck = step.transferQuestion.toLowerCase() === step.checkQuestion.toLowerCase();
     return {
       id,
       ...step,
+      transferQuestion: repeatsCheck ? '' : step.transferQuestion,
+      transferCriteria: repeatsCheck || !step.transferQuestion ? '' : step.transferCriteria,
       goal: step.goal || step.title,
       successCriteria: step.successCriteria || step.goal || step.title,
       prerequisites: [...new Set(rawPrerequisites.map((other) => placeOf.get(position.get(other))).filter((place) => place !== undefined && place < index))].map((place) => `s${place + 1}`),

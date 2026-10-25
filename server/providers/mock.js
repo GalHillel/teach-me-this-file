@@ -27,6 +27,8 @@ const mockPlan = (prompt) => {
       keyConcepts: [`${['alpha', 'beta', 'gamma'][index]} term`],
       checkQuestion: `What is idea ${index + 1} about?`,
       successCriteria: 'Mentions the main point.',
+      transferQuestion: `How would idea ${index + 1} apply to a new case?`,
+      transferCriteria: 'Applies the main point to the new case.',
       prerequisites: index ? [index] : [],
       sourceIds: ids.slice(index, index + 1),
     })),

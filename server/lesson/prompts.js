@@ -33,6 +33,7 @@ Rules:
   For procedures, use a worked_example step before a practice step.
 - Classify the document ("contentType"): "concept" (science or ideas), "procedure" (math, methods, grammar), "narrative" (history, stories, events), "language" (vocabulary or reading in a foreign language) or "mixed".
 - For each step, name one common mistake students make about it, so the tutor can watch for it.
+- For each step, write one "transferQuestion" for the final check at the end of the lesson: a new case, prediction or "why" question that the step's idea answers but the lesson does not show, answerable in one or two sentences, with no answer inside it and not answerable by repeating a sentence of the document. Put what a good answer must contain in "transferCriteria".
 - For each step, list the ids of the passages (like "c12") it is based on. Only use ids that appear in the document.
 - If the document is garbled, very short or not educational, make the best plan you can from what is readable, use fewer steps, and explain the problem in "notes".
 
@@ -53,6 +54,8 @@ Return only JSON with this shape:
       "checkQuestion": "one question that checks understanding of this step",
       "successCriteria": "what a correct answer must contain",
       "commonMistake": "a typical wrong idea about this step",
+      "transferQuestion": "a new question for the final check that applies this step's idea",
+      "transferCriteria": "what a correct answer to the transfer question must contain",
       "prerequisites": [1],
       "sourceIds": ["c1"]
     }
@@ -65,7 +68,7 @@ export const buildPlanPrompt = ({ teacherPrompt, document, lessonLanguage, maxSt
     ? ` note="long document: ${document.chunks.length} of ${document.totalChunks} passages are shown, spread evenly across it"`
     : '';
   const language = lessonLanguage
-    ? `The teacher chose the lesson language: ${languageName(lessonLanguage)}. Write every student-facing text (title, objectives, step titles, goals, concepts, check questions, success criteria, common mistakes) in ${languageName(lessonLanguage)}, even if the document or the instructions are in another language.`
+    ? `The teacher chose the lesson language: ${languageName(lessonLanguage)}. Write every student-facing text (title, objectives, step titles, goals, concepts, check and transfer questions, success and transfer criteria, common mistakes) in ${languageName(lessonLanguage)}, even if the document or the instructions are in another language.`
     : 'Write every student-facing text in the lesson language: the language the teacher asks for; if the teacher does not say, the language of the teacher\'s instructions; if those are empty, the language of the document. Also return "languageCode" with its BCP 47 code, like en, fr, he, ar.';
   return `<teacher_instructions>
 ${fence(teacherPrompt)}
@@ -134,10 +137,14 @@ const earlierSteps = (plan, step) => {
 
 const relatedBlock = (related) => (related.length ? `\nPassages from other parts of the document that match the student's message:\n<sources>\n${formatPassages(related)}\n</sources>\n` : '');
 
-export const buildAssessPrompt = ({ plan, step, tutorQuestion, studentMessage, sources, related = [] }) => `Audience: ${fence(plan.audience)}
+export const plannedQuestion = (step, finalCheck) => (finalCheck && step.transferQuestion
+  ? { question: step.transferQuestion, criteria: step.transferCriteria || step.successCriteria }
+  : { question: step.checkQuestion, criteria: step.successCriteria });
+
+export const buildAssessPrompt = ({ plan, step, tutorQuestion, studentMessage, sources, related = [], finalCheck = false }) => `Audience: ${fence(plan.audience)}
 Step goal: ${fence(step.goal)}
-Planned check question: ${fence(step.checkQuestion)}
-Success criteria: ${fence(step.successCriteria)}
+Planned check question: ${fence(plannedQuestion(step, finalCheck).question)}
+Success criteria: ${fence(plannedQuestion(step, finalCheck).criteria)}
 Common mistake for this step: ${fence(step.commonMistake || 'none listed')}
 Earlier steps this step builds on:
 ${earlierSteps(plan, step)}
@@ -216,7 +223,11 @@ const lastAnswerFeedback = (assessment) =>
     ? 'The student answered the last question correctly. Confirm it in one specific sentence.'
     : 'The student did not answer the last question correctly. Give the right answer in one or two kind sentences.';
 
-const FINAL_QUESTION = 'Ask one question about the step shown above that makes the student use the idea: a new case, a prediction or a "why" question. Do not reuse a question from earlier in the lesson, do not make it answerable by repeating a sentence from the lesson, do not teach first and give no hints.';
+const NEW_FINAL_QUESTION = 'Ask one question about the step shown above that makes the student use the idea: a new case, a prediction or a "why" question. Do not reuse a question from earlier in the lesson, do not make it answerable by repeating a sentence from the lesson, do not teach first and give no hints.';
+
+const finalQuestion = (step) => (step?.transferQuestion
+  ? `Ask the final-check question of the step shown above: "${fence(step.transferQuestion)}". Keep its case and what it asks; you may only adjust the wording for the audience and the lesson language. Do not teach first and give no hints.`
+  : NEW_FINAL_QUESTION);
 
 export const moveInstructions = ({ move, assessment, step, intervention, requested, prerequisite, finalSize = 0, closingLists = {}, finalCheck = false, detour = false }) => {
   const notes = privateNotes(assessment);
@@ -241,9 +252,9 @@ export const moveInstructions = ({ move, assessment, step, intervention, request
     case 'resume_after_reteach':
       return `${notes}\nThe student did not get the earlier idea yet. Explain it in two sentences with a concrete example, connect it to the current step in one sentence, then ask the current check question again in simpler words.`;
     case 'final_check_start':
-      return `${notes}\n${lastAnswerFeedback(assessment)} Then say that before the summary there is a short final check: ${finalSize} ${finalSize === 1 ? 'question' : 'questions'}, answered from memory, without hints. ${FINAL_QUESTION}`;
+      return `${notes}\n${lastAnswerFeedback(assessment)} Then say that before the summary there is a short final check: ${finalSize} ${finalSize === 1 ? 'question' : 'questions'}, answered from memory, without hints. ${finalQuestion(step)}`;
     case 'final_next':
-      return `${notes}\nThis is the final check. ${lastAnswerFeedback(assessment)} Then ${FINAL_QUESTION.charAt(0).toLowerCase()}${FINAL_QUESTION.slice(1)}`;
+      return `${notes}\nThis is the final check. ${lastAnswerFeedback(assessment)} Then: ${finalQuestion(step)}`;
     case 'final_finish':
       return `${notes}\nThis was the last final-check question. ${lastAnswerFeedback(assessment)}\n${closing(closingLists)}`;
     case 'finish_skipped':
@@ -296,13 +307,14 @@ const HELP_NAMES = {
   guided_solution: 'the full explanation',
 };
 
-const stepBlock = (plan, index, heading) => {
+const stepBlock = (plan, index, heading, finalCheck = false) => {
   const step = plan.steps[index];
+  const planned = plannedQuestion(step, finalCheck);
   return `${heading} (${index + 1} of ${plan.steps.length}): ${fence(step.title)}
 Goal: ${fence(step.goal)}
 Key concepts: ${step.keyConcepts.map(fence).join(', ')}
-Check question idea: ${fence(step.checkQuestion)}
-Success criteria: ${fence(step.successCriteria)}
+${finalCheck && step.transferQuestion ? 'Final-check question' : 'Check question idea'}: ${fence(planned.question)}
+Success criteria: ${fence(planned.criteria)}
 Common mistake to watch for: ${fence(step.commonMistake || 'none listed')}
 Builds on: ${(step.prerequisites ?? []).map((id) => plan.steps.find((item) => item.id === id)?.title).filter(Boolean).map(fence).join('; ') || 'nothing earlier'}`;
 };
@@ -359,7 +371,7 @@ Objectives: ${plan.objectives.map(fence).join('; ')}
 Plan:
 ${plan.steps.map((item, index) => stepLine(item, index, progress)).join('\n')}
 
-${stepBlock(plan, stepIndex, heading)}
+${stepBlock(plan, stepIndex, heading, finalCheck)}
 Attempts on this step: ${state.attempts}
 Help already given on this step: ${used.length ? used.join(', ') : 'none'}
 ${detourIndex !== null ? `\n${stepBlock(plan, detourIndex, 'Earlier step being checked first')}\nThe student's next answer is about this earlier step.\n` : ''}
