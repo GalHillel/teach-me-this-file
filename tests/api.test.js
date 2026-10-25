@@ -336,6 +336,22 @@ describe('teaching flow over the API', () => {
     expect(parseEvents(skipped.text).find((item) => item.event === 'progress').data).toMatchObject({ move: 'finish_skipped', progress: { status: 'completed', final: { skipped: true } } });
   });
 
+  it('tells the tutor when a step has no passages, and rejects a citation it was not given', async () => {
+    const seen = { system: '' };
+    const citing = {
+      name: 'citing',
+      model: 'x',
+      generateJson: async () => ({}),
+      async *streamText({ system }) {
+        seen.system = system;
+        yield 'Cells are small [c1]. What is a cell?';
+      },
+    };
+    const response = await request(createApp({ providerFor: withProvider(citing) })).post('/api/turns').send(turn({ sources: { current: [], next: [] } }));
+    expect(seen.system).toContain('No passages are linked to this step');
+    expect(parseEvents(response.text).find((item) => item.event === 'done').data.citations).toMatchObject({ cited: [], invalid: ['c1'] });
+  });
+
   it('flags a quote that is not in the file', async () => {
     const response = await request(mockApp()).post('/api/turns').send(turn({ kind: 'reply', studentMessage: 'please give a fake quote', history: [{ role: 'tutor', content: 'What is a cell?' }] }));
     const done = parseEvents(response.text).find((item) => item.event === 'done').data;

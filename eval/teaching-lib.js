@@ -252,9 +252,10 @@ export const policyRun = (lesson, scenario, system) => {
     const sources = turnSources(state, turn.kind ?? 'reply', turn.student);
     const assessment = normalizeAssessment(labelGrade(turn.label), turn.student, sources.current);
     const decide = system === 'engine' ? planMove : naivePlanMove;
+    const step = progress.status === 'active' ? progress.currentStep : null;
     const result = decide(progress, { kind: turn.kind ?? 'reply', assessment, plan });
     progress = result.progress;
-    turns.push({ turn, assessment, move: result.move, action: ACTION_OF_MOVE[result.move] ?? 'other', intervention: result.intervention, progress });
+    turns.push({ turn, assessment, move: result.move, action: ACTION_OF_MOVE[result.move] ?? 'other', intervention: result.intervention, step, progress });
   }
   return { plan, progress, turns };
 };
@@ -279,6 +280,29 @@ export const checkTurn = ({ turn, row, mode, previousHelp }) => {
     if (HELP_ACTIONS.has(row.action) && previousHelp && similarity(previousHelp, text) > 0.5) failures.push('repeated the previous help');
   }
   return failures;
+};
+
+const SUPPORT = { nudge: 1, prerequisite: 2, counterexample: 2, focused_hint: 2, analogy: 3, decompose: 3, worked_example: 4, guided_solution: 5 };
+
+export const supportProblems = (rows) => {
+  const problems = [];
+  let step = null;
+  let used = [];
+  let last = 0;
+  rows.forEach((row, index) => {
+    const key = row.step ?? null;
+    if (key !== step) {
+      step = key;
+      used = [];
+      last = 0;
+    }
+    if (!row.intervention || !SUPPORT[row.intervention]) return;
+    if (used.includes(row.intervention) && row.intervention !== 'guided_solution') problems.push(`turn ${index + 1}: repeated ${row.intervention}`);
+    if (SUPPORT[row.intervention] < last && row.intervention !== 'prerequisite') problems.push(`turn ${index + 1}: less support (${row.intervention}) after more`);
+    used.push(row.intervention);
+    last = Math.max(last, SUPPORT[row.intervention]);
+  });
+  return problems;
 };
 
 export const checkEnd = (scenario, system, progress) => {
@@ -327,6 +351,7 @@ export const summarize = (scenarios) => {
     unearnedMoves: turns.filter((row) => row.failures.includes('moved on without evidence')).length,
     helpInFinalCheck: turns.filter((row) => row.failures.includes('help during the final check')).length,
     endStateMatch: share(scenarios.filter((item) => item.endFailures), (item) => !item.endFailures.length),
+    supportProblems: scenarios.reduce((sum, item) => sum + (item.supportProblems?.length ?? 0), 0),
     grading: graded.length ? {
       answers: graded.length,
       verdictAccuracy: share(graded, (row) => acceptOf(row.turn).verdict.includes(row.verdict)),
@@ -349,7 +374,7 @@ export const summarize = (scenarios) => {
       missingTag: replies.filter((row) => row.tagMissing).length,
     } : null,
     byCategory,
-    failures: scenarios.filter((item) => !item.passed).map((item) => ({ id: item.id, problems: [...item.turns.flatMap((row, index) => row.failures.map((failure) => `turn ${index + 1}: ${failure}`)), ...(item.endFailures ?? []).map((failure) => `end: ${failure}`), ...(item.variants && !item.consistent ? [`verdicts ${item.verdicts.join(', ')}`] : [])] })),
+    failures: scenarios.filter((item) => !item.passed).map((item) => ({ id: item.id, problems: [...item.turns.flatMap((row, index) => row.failures.map((failure) => `turn ${index + 1}: ${failure}`)), ...(item.endFailures ?? []).map((failure) => `end: ${failure}`), ...(item.supportProblems ?? []).map((problem) => `support: ${problem}`), ...(item.variants && !item.consistent ? [`verdicts ${item.verdicts.join(', ')}`] : [])] })),
   };
 };
 

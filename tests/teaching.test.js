@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 import {
   checkEnd, checkTurn, citationSupport, endsWithQuestion, hasPraise, loadLessons, loadScenarios, notesContradiction,
-  policyRun, readTag, saysNotInDocument, similarity,
+  policyRun, readTag, saysNotInDocument, similarity, supportProblems,
 } from '../eval/teaching-lib.js';
 
 const lessons = loadLessons();
@@ -92,5 +92,11 @@ describe('text checks used on model replies', () => {
     expect(endsWithQuestion('What do you think?')).toBe(true);
     expect(endsWithQuestion('**What do you think?**')).toBe(true);
     expect(endsWithQuestion('That is all.')).toBe(false);
+  });
+
+  it('checks that help escalates within a step and never repeats, counting each step on its own', () => {
+    expect(supportProblems([{ step: 0, intervention: 'nudge' }, { step: 0, intervention: 'focused_hint' }, { step: 1, intervention: 'nudge' }])).toEqual([]);
+    expect(supportProblems([{ step: 0, intervention: 'nudge' }, { step: 0, intervention: 'nudge' }])).toEqual(['turn 2: repeated nudge']);
+    expect(supportProblems([{ step: 0, intervention: 'worked_example' }, { step: 0, intervention: 'nudge' }])).toEqual(['turn 2: less support (nudge) after more']);
   });
 });

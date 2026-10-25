@@ -17,9 +17,10 @@ I built it as a home assignment for an AI Engineer role. The reasoning behind th
 - The server builds a structured lesson plan: objectives, the content type, 2 to 8 steps sized to the file and the time, and per step an approach (explanation, worked example or practice), a check question, success criteria, a common mistake, the steps it builds on, and the passages it is based on. Steps are put in an order where each comes after the steps it builds on.
 - Each student answer is graded first: verdict, completeness, concepts shown and missing, misconception, what kind of problem it is (misread the question, unsure, does not know, right without the reasoning, copied from the file), an evidence quote and a confidence level. The server checks the grade, then decides the next move in code.
 - The help after a wrong answer depends on the mistake: a small nudge first, then a focused hint, a counter-example when the grader names a misconception, smaller sub-questions, a worked example or an analogy when the student does not know, and the full explanation with one more check after three tries. The tutor picks a kind of help it has not used on the step yet, and repeats only after the options for that situation run out.
-- When the missing ideas belong to an earlier step, or an earlier step was weak, the tutor checks that step first with one short question, grades the answer against it, and comes back to the current question. A failed check marks the earlier step for practice.
+- When the grader says a wrong answer comes from an idea of an earlier step this one builds on (the code checks that the step really is one), or an earlier step was weak, the tutor checks that step first with one short question, grades the answer against it, and comes back to the current question. A failed check marks the earlier step for practice.
+- A right answer to a smaller question (a sub-question, a counter-example) is not counted as understanding the step: the tutor confirms it and asks the whole question again, unless the answer already covers it.
 - "Hint" and "Explain differently" buttons let the student ask for help before answering. A right answer after help counts as shown with help, not as understood on the first try.
-- After the last step comes a short final check: up to three steps, chosen by how weak they were, how many steps build on them and how long ago they were taught, each with a new question that asks the student to use the idea, answered without hints. It can be skipped.
+- After the last step comes a short final check: up to three steps, chosen by how weak they were, how many steps build on them and how long ago they were taught, each with a new question that asks the student to use the idea, answered without hints. A copied answer, or one without the asked-for reason, gets one request to say it in their own words before it counts. It can be skipped.
 - Tutor answers stream token by token. Stop cancels the request on the server and the provider, keeps the partial text, and leaves the lesson state unchanged.
 - Progress shows what was shown for each step, not a percentage: applied to a new question, shown on your own, shown with help, or needs practice, with the reasons (first try, hints, full explanation, final check). The summary groups the steps this way, suggests when to review each one (1, 3, 7 or 14 days), offers a practice round for the weak ones, and downloads the notes as Markdown.
 - A learning map shows the steps and which ones build on which, and marks each key concept as found in the file or not found in it.
@@ -30,6 +31,19 @@ I built it as a home assignment for an AI Engineer role. The reasoning behind th
 - The lesson survives a reload in the same tab. The API key does not; it stays in memory only.
 - If the main AI models are busy and a lighter backup model answers, the app says so.
 - Keyboard: Esc stops a reply, a skip link jumps to the answer box, and new messages are announced to screen readers.
+
+## A three-minute demo
+
+This path shows what a plain chat with the file would not do. It uses the photosynthesis sample on the setup screen.
+
+1. Start the lesson. The tutor teaches step 1 and asks what a plant takes in.
+2. Answer "Plants get their food from the soil." The reply comes in a tinted panel labelled "Counter-example": a case where your idea predicts something that does not happen, not the answer.
+3. Answer the counter-example correctly. The tutor does not move on; it says "Now the whole question" and asks the step's question again, because answering a smaller question is not the step.
+4. Answer fully. Step 1 is marked "shown with help" in the plan, not "shown on your own".
+5. Click a passage chip in any reply. The panel shows the exact text from the file, which the server checked the tutor was given.
+6. On the last step, answer with a mistake from an earlier step ("it uses the green light the leaf absorbs"). The tutor goes back to that step with one short question, then returns to the original question.
+7. After the last step comes the final check: new questions, no hints, the Hint button gone. Get one wrong.
+8. The summary separates "applied to a new question" from "needs practice", suggests review dates, and offers a practice round for the weak step. The learning map shows which steps build on which.
 
 ## How it works
 
@@ -143,10 +157,14 @@ npm run eval:retrieval
 npm run bench         # chunking, indexing and scoring times on synthetic documents
 npm run eval:hybrid   # BM25 against character trigrams and their fusion, tuned on English, held out on Hebrew and French
 npm run eval:load     # first-screen load time under CPU and network throttling
+npm run eval:teaching # teaching scenarios through the engine with the labelled grades, dev and held-out, no AI calls
+EVAL_API_KEY=your-key node eval/teaching.js --mode=model --split=holdout --systems=engine,plain # the same scenarios with a real model, and a plain single-prompt tutor as baseline
 EVAL_API_KEY=your-key EVAL_LABEL=mine node eval/grading.js # grading on 51 golden answers, real model calls
 ```
 
-`npm run test:e2e` uses the Chromium that Playwright installs (`npx playwright install chromium` once). It serves the build with the headers from `vercel.json`, checks every screen at 15 sizes from 320 to 2560 px in English and Hebrew for overflow, unreachable buttons, small targets and axe-core violations, runs a full lesson with help requests, a detour, a re-check, the final check and a practice round, reads a generated PDF, and fails on any problem. `--report=file.json` saves the details. It checks layout and flow with canned replies, not teaching quality.
+`npm run test:e2e` uses the Chromium that Playwright installs (`npx playwright install chromium` once). It serves the build with the headers from `vercel.json`, checks every screen at 15 sizes from 320 to 2560 px in English and Hebrew for overflow, unreachable buttons, small targets and axe-core violations, runs a full lesson with help requests, a detour, a re-check, the final check and a practice round, reads a generated PDF, and fails on any problem. Two full journeys (English on desktop, Hebrew on a phone) also stop a reply, fail a provider call and retry it, reload during a reply and in the middle of the lesson, and check after every turn that the server's state, the saved state and what the screen shows agree. `--report=file.json` saves the details. It checks layout and flow with canned replies, not teaching quality.
+
+`eval/teaching.js` plays 55 written scenarios (dev and held-out sets on different lessons) through the engine and checks what the tutor should detect, which help it should give and what it may claim; the design and the results are in [DECISIONS.md](DECISIONS.md#how-i-evaluate-the-teaching).
 
 `eval/grading.js` writes its results to `eval/results/grading-<label>.json`: accuracy, how often a wrong or partial answer was graded correct, median latency, and which models answered.
 

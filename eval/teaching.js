@@ -1,9 +1,10 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { assessAnswer } from '../server/lesson/assessor.js';
 import { runTurn, toProviderMessages } from '../server/lesson/tutor.js';
 import { resolveProvider } from '../server/providers/index.js';
 import { turnSources } from '../src/lesson/turnSources.js';
 import {
-  ACTION_OF_MOVE, checkEnd, checkTurn, citationSupport, labelGrade, loadLessons, loadScenarios, openingMessage,
+  ACTION_OF_MOVE, checkEnd, supportProblems, checkTurn, citationSupport, labelGrade, loadLessons, loadScenarios, openingMessage,
   planOf, plainSystem, policyRun, readTag, startProgress, summarize, verifyReply,
 } from './teaching-lib.js';
 
@@ -118,7 +119,12 @@ const gradeVariant = async ({ lesson, plan, scenario, student, system }) => {
   const turn = { student, label: scenario.label };
   const history = [{ role: 'tutor', content: openingMessage(plan, scenario.at ?? 0) }];
   if (system === 'plain') return plainTurn({ lesson, plan, scenario, history, turn });
-  return engineTurn({ lesson, plan, progress: startProgress(plan, scenario), history, turn });
+  const progress = startProgress(plan, scenario);
+  const sources = turnSources({ plan, chunks: lesson.chunks, progress }, 'reply', student);
+  currentLabel = scenario.label;
+  const assessment = await withRetry(() => assessAnswer({ provider, plan, progress, tutorQuestion: history[0].content, studentMessage: student, sources: sources.current }));
+  calls += 1;
+  return { verdict: assessment.verdict, issue: assessment.issue };
 };
 
 const modelScenario = async (scenario, system) => {
@@ -142,6 +148,7 @@ const modelScenario = async (scenario, system) => {
     const row = system === 'plain'
       ? await plainTurn({ lesson, plan, scenario, history, turn })
       : await engineTurn({ lesson, plan, progress, history, turn });
+    row.step = progress.status === 'active' ? progress.currentStep : null;
     if (row.progress) progress = row.progress;
     row.failures = checkTurn({ turn, row, mode, previousHelp });
     previousHelp = ['hint', 'explain', 'probe'].includes(row.action) ? row.text : null;
@@ -151,20 +158,22 @@ const modelScenario = async (scenario, system) => {
     await wait(pauseMs);
   }
   const endFailures = system === 'engine' ? checkEnd(scenario, system, progress) : null;
-  return { id: scenario.id, category: scenario.category, turns: rows, endFailures, passed: rows.every((row) => !row.failures.length) && !(endFailures ?? []).length };
+  const support = system === 'engine' ? supportProblems(rows) : null;
+  return { id: scenario.id, category: scenario.category, turns: rows, endFailures, supportProblems: support, passed: rows.every((row) => !row.failures.length) && !(endFailures ?? []).length && !(support ?? []).length };
 };
 
 const policyScenario = (scenario, system) => {
   if (scenario.variants) return null;
   const lesson = lessons[scenario.lesson];
   const { progress, turns } = policyRun(lesson, scenario, system);
-  const rows = turns.map(({ turn, assessment, move, action, intervention }) => {
-    const row = { turn, move, action, intervention, verdict: assessment.verdict, issue: assessment.issue, misconception: assessment.misconception };
+  const rows = turns.map(({ turn, assessment, move, action, intervention, step }) => {
+    const row = { turn, move, action, intervention, step, verdict: assessment.verdict, issue: assessment.issue, misconception: assessment.misconception };
     row.failures = checkTurn({ turn, row, mode: 'policy' });
     return row;
   });
   const endFailures = checkEnd(scenario, system, progress);
-  return { id: scenario.id, category: scenario.category, turns: rows, endFailures, passed: rows.every((row) => !row.failures.length) && !endFailures.length };
+  const support = system === 'engine' ? supportProblems(rows) : null;
+  return { id: scenario.id, category: scenario.category, turns: rows, endFailures, supportProblems: support, passed: rows.every((row) => !row.failures.length) && !endFailures.length && !(support ?? []).length };
 };
 
 const results = {};

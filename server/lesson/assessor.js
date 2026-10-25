@@ -20,7 +20,7 @@ const DEFAULT_COMPLETENESS = { correct: 1, partial: 0.5, incorrect: 0 };
 
 const DONT_KNOW = /^\s*(i\s*(really\s*)?(do\s*n[o']?t|dunno)\s*know|idk|no\s*idea|not\s*sure|\?+|לא\s*יודע(ת)?|אין\s*לי\s*מושג|je\s*ne\s*sais\s*pas|aucune\s*id[eé]e|no\s*s[eé])\s*[.!?]*\s*$/iu;
 const HEDGE = /(^|[\s,.;!?])(maybe|perhaps|i think|i guess|i'm not sure|im not sure|not sure|probably|אולי|נראה לי|אני חושב|אני חושבת|לא בטוח|לא בטוחה|peut-être|peut etre|je crois|je pense|pas sûr|pas sure|quizás|creo que)([\s,.;!?]|$)/iu;
-const GRADER_INSTRUCTION = /(\b(system|grader|developer)\s*:|\bmark (this|it|my answer) (as )?(correct|right)\b|\bignore (all |the |your |previous )*(rules|instructions)\b)/i;
+const GRADER_INSTRUCTION = /(\b(system|grader|developer)\s*:|\bmark (this|it|my answer) (as )?(correct|right)\b|\bignore (all |the |your |previous )*(rules|instructions)\b|(תסמן|סמן|תסמני|סמני|תן|תני)\s+(את\s+)?(זה|התשובה|התשובה שלי)\s+(כ)?נכונ|התעלם\s+מ(כל\s+)?ה(הוראות|כללים)|\bmarque[sz]?\s+(cette|ma)\s+réponse\s+comme\s+(juste|correcte)|\bignore[sz]?\s+(toutes\s+)?les\s+(règles|instructions))/iu;
 
 const text = (value, max) => (typeof value === 'string' ? value.trim().slice(0, max) : '');
 

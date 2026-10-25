@@ -115,6 +115,25 @@ A separate reviewer read the new engine with a reproduction for each claim. It r
 
 Related findings share a row, so the ten rows cover all twelve.
 
+## Fifth round: does the teaching work, 25 October
+
+This round added a teaching-quality eval (`eval/teaching.js`, described in [DECISIONS.md](DECISIONS.md#how-i-evaluate-the-teaching)), a full-journey browser test and a screenshot review. Most findings came from the eval scenarios, written before the fixes and run on the dev set; the held-out set was run once the engine was frozen.
+
+| # | Sev. | Area | Problem | Evidence | Fix | Verification | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 62 | High | Teaching | A correct answer to a smaller question (a sub-question, a counter-example, an analogy with a simpler question) ended the step as understood, because the grader grades against the tutor's last question. | The `decompose` and `counterexample` instructions ask a narrower question; on the old code a wrong answer followed by a right answer to the counter-example ends the step as `learned`. | After help that narrows the question, a correct answer leads back to the whole check question (`build_up`) unless the grader says the answer already meets the step (`meetsCriteria`); once per step, so the bounds stay at 18 and 21 replies. | 4 state-machine tests; property tests with the new bound; a test that the bound is reached | Fixed |
+| 63 | High | Teaching | The prerequisite detour matched the grader's missing concepts to the earlier step's key words. The grader writes its notes in English, so the match could never fire for a Hebrew or French plan; and a shared word sent a student back to the wrong step. | Policy eval on the old engine: `dev-he-prerequisite` and `ho-he-prerequisite` got a hint instead of a detour; `dev-en-journey` went back to step 1 because "stomata" is one of its key words, though the missing idea belonged to step 3. | The grader is shown the earlier steps and names the one whose idea is missing; the engine accepts only a real, finished prerequisite. The lexical match is removed. | Policy eval: dev 21/23 to 23/23, held-out 23/25 to 25/25; state-machine tests in Hebrew | Fixed |
+| 64 | Medium | Assessment | In the final check and the practice round, a copied answer or a right result without the asked-for reason counted as applied. | `planReviewMove` ignored the grade's issue. | One "in your own words" turn without hints, counted against the stall limit; copying again counts as not passed. | State-machine and API tests | Fixed |
+| 65 | Medium | Assessment | Repeating the tutor's own explanation was not seen as copying; only the document's sentences were checked. | A student can paste the explanation the tutor just gave. | The tutor's last message is checked with the same sentence rule. | Assessor test | Fixed |
+| 66 | Medium | Faithfulness | Nothing told the tutor what to do with a question the document does not answer. | Prompt review. | The tutor says the document does not cover it, and marks any general knowledge as going beyond it. | Model eval, `not_in_document` scenarios (see DECISIONS) | Fixed in the prompt |
+| 67 | Low | Faithfulness | Nothing told the tutor what to do when two passages disagree. | Prompt review. | Say that the document says different things, cite both, and say which fits the lesson plan. | Model eval, `contradiction` scenarios | Fixed in the prompt |
+| 68 | Medium | UX | Hints and other help looked exactly like teaching; only a small label told them apart. | Screenshot review. | Help sits in a tinted panel with a marker edge; final-check and follow-up questions in another. | Screenshots; axe in the harness | Fixed |
+| 69 | Low | UX | Every citation showed twice, inline and again as a chip under the message, which crowded the phone layout. | Screenshot review at 390 px. | The chip row only lists sources the tutor did not cite inline. | Screenshots | Fixed |
+| 70 | Medium | RTL | An inline formula in a right-to-left message wrapped in the middle and reordered its parts. | Screenshot review, Hebrew at 390 px. | Inline math does not wrap; a long formula scrolls inside itself. | Screenshots | Fixed |
+| 71 | Low | Tests | Nothing checked that the server's state, the saved state and the screen agree during a lesson, or what a reload during a reply does. | Harness review. | Two full journeys (English desktop, Hebrew phone) check the three after every turn, through stop, provider failure and retry, and reload during a reply and mid-lesson. | Harness: 17 checkpoints per journey, no mismatch | Fixed (test) |
+
+Checked and found working: late or foreign stream events are ignored (property test on the reducer); a stopped reply and a failed turn leave the state unchanged and the retried answer appears once (journey); a reload during a reply restores the last finished turn and drops the half-finished one (journey); a step without passages is told so and any citation from it is dropped (API test); document text with instructions to the AI is fenced in every prompt, and the model eval measures whether the model follows it.
+
 ## Requirements matrix
 
 Status after the upgrade. "Live" refers to the browser runs against production on 24 October, listed in [DECISIONS.md](DECISIONS.md#live-checks-24-october-morning).
@@ -151,3 +170,5 @@ Status after the upgrade. "Live" refers to the browser runs against production o
 | Citations checked by the server | `shared/citations.js`, `tutor.js` | `tests/citations.test.js`, API tests; live counts in DECISIONS | Done |
 | Learning map with concept provenance | `LearningMap.jsx`, `conceptInFile` | harness feature check | Done |
 | Review schedule only from what the lesson showed | `reviewSchedule` | state-machine test | Done; days are fixed, not fitted to the student |
+| Teaching-quality eval with dev and held-out sets | `eval/teaching.js`, `eval/golden/teaching*.json` | `tests/teaching.test.js`; results in `eval/results/teaching-*.json` | Done; real-model results in DECISIONS |
+| Full user journey with state agreement | `tests/e2e/ui.mjs` journeys | harness | Done (mock) |
