@@ -21,6 +21,12 @@ describe('opening praise on an answer that is not right', () => {
     expect(run(true, ['Très bien ! Tu as trouvé l\'eau.'])).toBe('Tu as trouvé l\'eau.');
   });
 
+  it('drops an opening that calls the whole answer right', () => {
+    expect(run(true, ["You're absolutely right! ", 'Plants do need sunlight. But what does the plant take in from the air?'])).toBe('Plants do need sunlight. But what does the plant take in from the air?');
+    expect(run(true, ["That's exactly right, and there is one more part. What else does the leaf need?"])).toBe('And there is one more part. What else does the leaf need?');
+    expect(run(true, ['זה נכון מאוד! אבל מה עוד צריך העלה?'])).toBe('אבל מה עוד צריך העלה?');
+  });
+
   it('keeps praise that is not at the start, specific acknowledgements, and everything when the answer was right', () => {
     expect(run(true, ['You\'re right that water comes in through the roots. What about the air?'])).toBe('You\'re right that water comes in through the roots. What about the air?');
     expect(run(true, ['Water is one part. Great that you thought of the roots!'])).toBe('Water is one part. Great that you thought of the roots!');

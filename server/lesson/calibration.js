@@ -1,4 +1,4 @@
-const OPENING_PRAISE = /^\s*(?:\*\*|__)?(?:great job|good job|nice work|nice job|well done|spot on|great|excellent|perfect|nice|awesome|fantastic|wonderful|brilliant|amazing|exactly|correct|bravo|super|מצוין|מצויין|מעולה|כל הכבוד|יפה מאוד|יופי|נהדר|נכון מאוד|בדיוק|מושלם|très bien|parfait|exactement|génial|excellente)(?:\*\*|__)?(?:\s+(?:job|work|thinking|try|effort|start|answer|question|point|idea))?(?:\*\*|__)?\s*[!.,:;—–-]+\s*/iu;
+const OPENING_PRAISE = /^\s*(?:\*\*|__)?(?:you'?re (?:absolutely |totally |completely |exactly |so )?right|that'?s (?:absolutely |exactly |totally |completely )?(?:right|correct)|great job|good job|nice work|nice job|well done|spot on|great|excellent|perfect|nice|awesome|fantastic|wonderful|brilliant|amazing|exactly|correct|bravo|super|מצוין|מצויין|מעולה|כל הכבוד|יפה מאוד|יופי|נהדר|זה נכון מאוד|נכון מאוד|בדיוק|מושלם|très bien|parfait|exactement|génial|excellente)(?:\*\*|__)?(?:\s+(?:job|work|thinking|try|effort|start|answer|question|point|idea))?(?:\*\*|__)?\s*[!.,:;—–-]+\s*/iu;
 const DECIDED = /\p{L}[^]*?[!.,:;?\n—–]/u;
 const DECIDE_AFTER = 60;
 

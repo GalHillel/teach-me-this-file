@@ -1,0 +1,639 @@
+{
+ "note": "Held-out-2 on gemini-3.6-flash (the model production tries first), 26 October 07:19 UTC. The model's free daily quota ran out after about 25 calls, during the fourth scenario, so 3 of 19 scenarios finished for each system. Compact copy: the full per-turn records stayed in the sandbox, whose output can only be read 2,000 characters at a time; replies are cut to 140 characters unless the turn failed.",
+ "runs": {
+  "r6-holdout2-new": {
+   "meta": {
+    "label": "r6-holdout2-new",
+    "mode": "model",
+    "split": "holdout2",
+    "systems": [
+     "engine",
+     "plain"
+    ],
+    "date": "2026-10-26T07:19:09.186Z",
+    "provider": "gemini",
+    "models": {
+     "main": "gemini-3.6-flash",
+     "backup": "gemini-3.6-flash"
+    },
+    "commit": "659a903427efe53e4f951d8147dc231b7986f6d0",
+    "uncommittedChanges": false,
+    "engineVersion": "bf42bf87c19a",
+    "promptVersion": "781c434bc845",
+    "node": "v24.22.1",
+    "scenariosVersion": "8d38f62c3b34",
+    "scenarioIds": [
+     "ho2-en-understands"
+    ],
+    "pauseMs": 4500
+   },
+   "counts": {
+    "engine": {
+     "planned": 19,
+     "complete": 3,
+     "infraErrors": [],
+     "stoppedOnQuota": [
+      "ho2-en-copied"
+     ],
+     "notRun": [
+      "ho2-en-other-part",
+      "ho2-en-not-in-document",
+      "ho2-en-prerequisite",
+      "ho2-en-transfer",
+      "ho2-en-journey",
+      "ho2-he-understands",
+      "ho2-he-misconception",
+      "ho2-he-copied",
+      "ho2-he-misread",
+      "ho2-he-improves",
+      "ho2-he-other-part",
+      "ho2-he-not-in-document",
+      "ho2-he-journey",
+      "ho2-en-paraphrase-correct",
+      "ho2-he-paraphrase-misconception"
+     ]
+    },
+    "plain": {
+     "planned": 19,
+     "complete": 3,
+     "infraErrors": [],
+     "stoppedOnQuota": [],
+     "notRun": [
+      "ho2-en-copied",
+      "ho2-en-other-part",
+      "ho2-en-not-in-document",
+      "ho2-en-prerequisite",
+      "ho2-en-transfer",
+      "ho2-en-journey",
+      "ho2-he-understands",
+      "ho2-he-misconception",
+      "ho2-he-copied",
+      "ho2-he-misread",
+      "ho2-he-improves",
+      "ho2-he-other-part",
+      "ho2-he-not-in-document",
+      "ho2-he-journey",
+      "ho2-en-paraphrase-correct",
+      "ho2-he-paraphrase-misconception"
+     ]
+    }
+   },
+   "modelCalls": {
+    "engine": {
+     "gemini-3.6-flash": 6
+    },
+    "plain": {
+     "gemini-3.6-flash": 3
+    }
+   },
+   "summary": {
+    "engine": {
+     "scenarios": 3,
+     "scenarioPass": 1,
+     "turns": 3,
+     "actionFit": 1,
+     "interventionFit": 1,
+     "unearnedMoves": 0,
+     "helpInFinalCheck": 0,
+     "endStateMatch": 1,
+     "supportProblems": 0,
+     "grading": {
+      "answers": 3,
+      "verdictAccuracy": 1,
+      "falsePositives": "0/2",
+      "falseNegatives": "0/1",
+      "issueAccuracy": null,
+      "misconceptionNamed": "1/1"
+     },
+     "paraphraseConsistency": null,
+     "text": {
+      "replies": 3,
+      "approvalOnNotCorrect": 0,
+      "repeatedHelp": 0,
+      "endsWithQuestion": 1,
+      "citedReplies": 1,
+      "invalidCitationIds": 0,
+      "unverifiedQuotes": 0,
+      "citationSupportMean": 0.494,
+      "weaklySupportedCitations": "1/10",
+      "missingTag": 0
+     },
+     "byCategory": {
+      "understands": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "misconception": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "partial": {
+       "scenarios": 1,
+       "passed": 1
+      }
+     },
+     "failures": []
+    },
+    "plain": {
+     "scenarios": 3,
+     "scenarioPass": 1,
+     "turns": 3,
+     "actionFit": 1,
+     "interventionFit": 0,
+     "unearnedMoves": 0,
+     "helpInFinalCheck": 0,
+     "endStateMatch": null,
+     "supportProblems": 0,
+     "grading": {
+      "answers": 3,
+      "verdictAccuracy": 1,
+      "falsePositives": "0/2",
+      "falseNegatives": "0/1",
+      "issueAccuracy": null,
+      "misconceptionNamed": "0/1"
+     },
+     "paraphraseConsistency": null,
+     "text": {
+      "replies": 3,
+      "approvalOnNotCorrect": 0,
+      "repeatedHelp": 0,
+      "endsWithQuestion": 1,
+      "citedReplies": 1,
+      "invalidCitationIds": 0,
+      "unverifiedQuotes": 0,
+      "citationSupportMean": 0.693,
+      "weaklySupportedCitations": "0/5",
+      "missingTag": 0
+     },
+     "byCategory": {
+      "understands": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "misconception": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "partial": {
+       "scenarios": 1,
+       "passed": 1
+      }
+     },
+     "failures": []
+    }
+   },
+   "lines": [
+    {
+     "s": "engine",
+     "id": "ho2-en-understands",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        56,
+        30,
+        14
+       ],
+       "m": [
+        "gemini-3.6-flash"
+       ],
+       "ms": 4507,
+       "x": "You nailed it—sunlight bounces off the Moon right to our eyes!\n\nNow, let's look at why the Moon seems to change shape. The Sun is always lig"
+      }
+     ]
+    },
+    {
+     "s": "plain",
+     "id": "ho2-en-understands",
+     "st": "complete",
+     "p": true,
+     "ef": null,
+     "sp": null,
+     "end": {
+      "status": "active",
+      "currentStep": 0,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": null,
+       "f": [],
+       "c": [
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        80
+       ],
+       "m": [
+        "gemini-3.6-flash"
+       ],
+       "ms": 29298,
+       "x": "That is completely right! The Moon doesn't make its own light; sunlight hits it and bounces off to us, just like light bouncing off a bright"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-misconception",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": "counterexample",
+       "v": "incorrect",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        50,
+        60,
+        64
+       ],
+       "m": [
+        "gemini-3.6-flash"
+       ],
+       "ms": 44046,
+       "x": "If Earth's shadow caused the Moon's changing shapes every month, we would see a lunar eclipse almost every night [c4]! But real lunar eclips"
+      }
+     ]
+    },
+    {
+     "s": "plain",
+     "id": "ho2-en-misconception",
+     "st": "complete",
+     "p": true,
+     "ef": null,
+     "sp": null,
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": null,
+       "v": "incorrect",
+       "is": null,
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        75
+       ],
+       "m": [
+        "gemini-3.6-flash"
+       ],
+       "ms": 2762,
+       "x": "That is a super common thought, but Earth's shadow isn't actually what causes the Moon's shapes! \n\nRemember, the Sun is always shining on th"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-partial",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": "nudge",
+       "v": "partial",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        50,
+        40,
+        67,
+        64
+       ],
+       "m": [
+        "gemini-3.6-flash"
+       ],
+       "ms": 30613,
+       "x": "You are right that the Moon moves around the Earth [c3]! \n\nTo help us see the full picture, imagine holding a basketball in a dark room with"
+      }
+     ]
+    },
+    {
+     "s": "plain",
+     "id": "ho2-en-partial",
+     "st": "complete",
+     "p": true,
+     "ef": null,
+     "sp": null,
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": null,
+       "v": "partial",
+       "is": null,
+       "f": [],
+       "c": [
+        "c1",
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        50,
+        75,
+        67
+       ],
+       "m": [
+        "gemini-3.6-flash"
+       ],
+       "ms": 3615,
+       "x": "You've got a great start! The Moon moving around the Earth (its orbit) is a big part of it [c1, c3]. \n\nRemember, the Sun is always shining o"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-copied",
+     "st": "stopped_quota",
+     "e": "quota_exhausted",
+     "t": []
+    }
+   ]
+  },
+  "r6-holdout2-old": {
+   "meta": {
+    "label": "r6-holdout2-old",
+    "mode": "model",
+    "split": "holdout2",
+    "systems": [
+     "engine"
+    ],
+    "date": "2026-10-26T07:19:52.079Z",
+    "provider": "gemini",
+    "models": {
+     "main": "gemini-3.6-flash",
+     "backup": "gemini-3.6-flash"
+    },
+    "commit": "8fa9b7740d8f69d31e46a1c9a2f9373a0cbeb2b0",
+    "uncommittedChanges": true,
+    "engineVersion": "474825c4a4c2",
+    "promptVersion": "1c1c8c728efc",
+    "node": "v24.22.1",
+    "scenariosVersion": "8d38f62c3b34",
+    "scenarioIds": [
+     "ho2-en-understands"
+    ],
+    "pauseMs": 4500
+   },
+   "counts": {
+    "engine": {
+     "planned": 19,
+     "complete": 3,
+     "infraErrors": [],
+     "stoppedOnQuota": [
+      "ho2-en-copied"
+     ],
+     "notRun": [
+      "ho2-en-other-part",
+      "ho2-en-not-in-document",
+      "ho2-en-prerequisite",
+      "ho2-en-transfer",
+      "ho2-en-journey",
+      "ho2-he-understands",
+      "ho2-he-misconception",
+      "ho2-he-copied",
+      "ho2-he-misread",
+      "ho2-he-improves",
+      "ho2-he-other-part",
+      "ho2-he-not-in-document",
+      "ho2-he-journey",
+      "ho2-en-paraphrase-correct",
+      "ho2-he-paraphrase-misconception"
+     ]
+    }
+   },
+   "modelCalls": {
+    "engine": {
+     "gemini-3.6-flash": 6
+    }
+   },
+   "summary": {
+    "engine": {
+     "scenarios": 3,
+     "scenarioPass": 1,
+     "turns": 3,
+     "actionFit": 1,
+     "interventionFit": 1,
+     "unearnedMoves": 0,
+     "helpInFinalCheck": 0,
+     "endStateMatch": 1,
+     "supportProblems": 0,
+     "grading": {
+      "answers": 3,
+      "verdictAccuracy": 1,
+      "falsePositives": "0/2",
+      "falseNegatives": "0/1",
+      "issueAccuracy": null,
+      "misconceptionNamed": "1/1"
+     },
+     "paraphraseConsistency": null,
+     "text": {
+      "replies": 3,
+      "approvalOnNotCorrect": 0,
+      "repeatedHelp": 0,
+      "endsWithQuestion": 0.667,
+      "citedReplies": 1,
+      "invalidCitationIds": 0,
+      "unverifiedQuotes": 0,
+      "citationSupportMean": 0.545,
+      "weaklySupportedCitations": "1/8",
+      "missingTag": 0
+     },
+     "byCategory": {
+      "understands": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "misconception": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "partial": {
+       "scenarios": 1,
+       "passed": 1
+      }
+     },
+     "failures": []
+    }
+   },
+   "lines": [
+    {
+     "s": "engine",
+     "id": "ho2-en-understands",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        14,
+        83,
+        80
+       ],
+       "m": [
+        "gemini-3.6-flash"
+       ],
+       "ms": 15201,
+       "x": "That is exactly right—sunlight shines on the Moon and bounces off to our eyes, making it look bright [c3]!\n\nNow, have you ever noticed that "
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-misconception",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": "counterexample",
+       "v": "incorrect",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        60,
+        50,
+        42
+       ],
+       "m": [
+        "gemini-3.6-flash"
+       ],
+       "ms": 9391,
+       "x": "Many people think Earth's shadow makes the Moon change shape! But let's think about that idea. \n\nIf Earth's shadow caused the Moon's shapes "
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-partial",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": "nudge",
+       "v": "partial",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        43,
+        64
+       ],
+       "m": [
+        "gemini-3.6-flash"
+       ],
+       "ms": 16367,
+       "x": "You got a great part of it—the Moon orbiting around Earth is a big piece of the puzzle! [c3] \n\nTo see the rest, think of holding a basketbal"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-copied",
+     "st": "stopped_quota",
+     "e": "quota_exhausted",
+     "t": []
+    }
+   ]
+  }
+ }
+}
