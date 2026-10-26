@@ -46,7 +46,15 @@ This path shows what a plain chat with the file would not do. It uses the photos
 7. After the last step comes the final check: new questions, no hints, the Hint button gone. Get one wrong.
 8. The summary separates "applied to a new question" from "needs practice", suggests review dates, and offers a practice round for the weak step. The learning map shows which steps build on which.
 
-Steps 3 and 6 depend on how the model grades the answer. In my live run on 25 October, step 3 went as described on the second try; on the first, the grader called the answer partial and the tutor gave a focused hint instead. The detour in step 6 happens only when the grader names the earlier step.
+Steps 3 and 6 depend on how the model grades the answer. The detour in step 6 happens only when the grader names the earlier step.
+
+When things go wrong, these are the paths I have seen on the live site and how the app recovers:
+
+- **An answer to a different question.** If the student answers something the tutor did not ask, the grader calls it a misread question. The tutor says so and asks again in simpler words, and the attempt is not counted. On 26 October this happened to my own scripted answers, which did not fit the first step the model had planned.
+- **A pasted answer.** Paste a sentence from the passage. The tutor asks for the same answer in your own words instead of moving on.
+- **A failed request.** Turn off the network, or hit the provider's rate limit, and send an answer. The message says what happened, and Try again sends the same answer once. The lesson state does not change in between.
+- **Stop.** Press Stop or Esc during a reply. The partial text stays, marked as stopped, and the step is not counted.
+- **The tutor's own mistake.** After a counter-example, the grader sometimes counted a narrow answer as the whole step (AUDIT 84). The app now always asks the whole question once after such help, so this costs one extra question instead of a false "understood".
 
 ## How it works
 
@@ -167,7 +175,7 @@ EVAL_API_KEY=your-key EVAL_LABEL=mine node eval/grading.js # grading on 51 golde
 
 `npm run test:e2e` uses the Chromium that Playwright installs (`npx playwright install chromium` once). It serves the build with the headers from `vercel.json`, checks every screen at 15 sizes from 320 to 2560 px in English and Hebrew for overflow, unreachable buttons, small targets and axe-core violations, runs a full lesson with help requests, a detour, a re-check, the final check and a practice round, reads a generated PDF, and fails on any problem. Two full journeys (English on desktop, Hebrew on a phone) also stop a reply, fail a provider call and retry it, reload during a reply and in the middle of the lesson, and check after every turn that the server's state, the saved state and what the screen shows agree. `--report=file.json` saves the details. It checks layout and flow with canned replies, not teaching quality.
 
-`eval/teaching.js` plays 74 written scenarios (a dev set and two held-out sets, each on different lessons; held-out-2 was written after the engine was frozen) through the engine and checks what the tutor should detect, which help it should give and what it may claim; the design and the results are in [DECISIONS.md](DECISIONS.md#how-i-evaluate-the-teaching). In short: with the labelled grades the engine passes all 25 held-out scenarios it can run without a model; with a real model (Flash-Lite, the only one with quota) it passed 22 of 29 held-out scenarios against 16 for a plain single-prompt tutor with the same model and rules. These are scripted students, not real ones.
+`eval/teaching.js` plays 74 written scenarios (a dev set and two held-out sets, each on different lessons; held-out-2 was written after the engine was frozen) through the engine and checks what the tutor should detect, which help it should give and what it may claim; the design and the results are in [DECISIONS.md](DECISIONS.md#how-i-evaluate-the-teaching). In short: with the labelled grades, the engine passes every scenario in all three sets. With a real model (Flash-Lite, the model with quota left) on the 9 held-out-2 scenarios that all three systems finished, this engine and the previous one each passed 8 and a plain single-prompt tutor 4. These are scripted students, not real ones, and one run each.
 
 A model run saves each scenario as it finishes to `eval/results/runs/<label>/results.jsonl`, with every turn, next to a meta file (commit, engine, prompt and scenario hashes, models) and a summary that counts complete, failed and not-run scenarios. It never overwrites a run, and `--resume` refuses to continue if the code, prompts, scenarios or models changed.
 

@@ -175,7 +175,9 @@ Text the app stores (system notes, file warnings, errors) is stored as a code wi
 - The teaching scenarios and their expected behaviour are mine. They encode what I think good tutoring is; a teacher writing them might disagree with some expectations, and 55 scenarios on four lessons are a small sample.
 - Whether the tutor goes back to an earlier step depends on the grader naming it. The code only checks that the named step is a real, finished prerequisite.
 - The review days are fixed intervals, not fitted to the student, and nothing reminds the student.
-- Every real-model result in this round comes from the backup model, Flash-Lite, because the main model had no quota on the site's key.
+- Almost every real-model result comes from the backup model, Flash-Lite; the main model's free quota covered 3 of 19 held-out-2 scenarios before running out.
+- The round-6 model comparison rests on 9 English scenarios, one run per system. The Hebrew half has no result for the new engine.
+- The `build_up` rule (AUDIT 84) was changed after seeing held-out-2, so no fresh set has tested it yet.
 - Not rerun on a real model after the last changes: the 51-answer grading set after this round's grader prompt change (`meetsCriteria`, `missingPrerequisite`), and the teaching eval after removing passage ids from the history. Both ran out of daily quota. The policy layer and the tests cover the code paths; whether the grader got worse on the old answers is not measured.
 - The grader calls some questions about other parts of the file off-topic (AUDIT 75), and the scripted final-check answers in the eval sometimes do not fit the question the model asks, so the transfer scenario and the two journeys did not reach the summary on a real model.
 - The per-turn rows of the first model runs were lost when the sandbox timed out; only the printed summaries are in `eval/results/`.
@@ -302,6 +304,59 @@ The tests that prove each fix fail on the round-5 code (`8fa9b77`) and pass now:
 
 **Durable runs.** Model runs now save one line per scenario as it finishes, with every turn: the student message, the expected grade, the move, the grade with its server checks, the passages given, the reply, the citations, the models that answered and the latency. A meta file records the commit, whether there were uncommitted changes, hashes of the engine, the prompts and the scenarios, and the models. `--resume` skips finished scenarios and refuses to continue if any of those changed, so a run cannot mix two versions. The summary counts complete, failed, quota-stopped and not-run scenarios, so every rate has its denominator.
 
+### Results: round 6 on a real model (held-out-2)
+
+What ran, on 26 October, with the engine at `659a903` (all round-6 fixes except 84 and 85 in AUDIT), the round-5 engine at `8fa9b77`, and the plain single-prompt tutor; each system's model pinned for main and backup:
+
+| Run | Model | Scenarios completed | What stopped it |
+| --- | --- | --- | --- |
+| Main model | `gemini-3.6-flash` | 3 of 19 for each system | its free daily quota, after about 25 calls |
+| First Flash-Lite run (07:25) | `gemini-3.5-flash-lite` | 19 of 19 for each system | nothing; then the sandbox timed out before I copied the results out. Only the new engine's printed summary survived: 14 of 19 passed |
+| Second Flash-Lite run (13:00) | `gemini-3.5-flash-lite` | new engine and plain tutor 9 of 19 (the English half), round-5 engine 16 of 19 | the model's free daily quota; the model also answered in 7 to 30 s that afternoon, so I raised the eval timeout from 15 to 30 s |
+
+All three systems completed the same 9 English scenarios in the second Flash-Lite run, so the comparison below uses only those:
+
+| On the 9 common scenarios | Engine, round 6 | Engine, round 5 | Plain tutor |
+| --- | --- | --- | --- |
+| Scenarios passed | 8/9 | 8/9 | 4/9 |
+| Verdicts within the accepted grades | 21/22 | 18/22 | 15/22 |
+| Wrong or partial answers graded correct | 0/6 | 0/6 | 0/6 |
+| Correct answers not graded correct | 1/14 | 4/14 | 6/14 |
+| Moved on without evidence | 1 | 1 | 0 |
+| Help during the final check | 0 | 0 | 2 |
+| Replies citing a passage | 18/24 | 23/24 | 19/24 |
+| Cited ids the tutor was not given | 0 | 0 | 0 |
+| Cited sentences with under 20% of their words in the passage | 2/36 | 0/42 | 1/28 |
+| Opening approval on an answer that was not right | 0 | 0 | 0 |
+
+The main-model run passed 3 of 3 for every system. The round-5 engine passed 4 of the 7 Hebrew scenarios it completed (failures: approval language on a copied answer, the narrow-answer step of finding 84, and a question the document does not answer graded off-topic); the new engine has no Hebrew result.
+
+What these numbers support, and what they do not:
+- **No measured improvement over the round-5 engine in scenarios passed** on the 9 common scenarios: 8 and 8. Both engines failed the same turn of the English journey for the same reason (finding 84).
+- **Grading was closer to the labels** in the round-6 engine (1 missed correct answer against 4), mostly on final-check answers, which the round-6 grader grades against planned criteria. Nine scenarios and 22 graded answers are a small sample; one run each, so this is a direction, not a measured effect.
+- **The engines did better than the plain tutor** with the same model and the same rules in its prompt (8 against 4 scenarios, 6 against 1 missed correct answer), as in round 5.
+- **Several round-6 fixes were not exercised.** On held-out-2 the question about another part of the file was answered by all three systems, and the round-5 engine also caught the pasted answer (this paste is long enough for its single-sentence check). The fixes for those failures rest on the unit and API tests that fail on the round-5 code, not on a model result.
+- **The run found a new failure** (finding 84) that both engines share; I changed the engine after seeing it, so held-out-2 cannot test that change.
+- The round-6 engine cited fewer replies (18 of 24 against 23 of 24). I did not find a cause and do not claim one.
+
+### Production on 26 October
+
+Production served the round-6 build. The script uploaded the photosynthesis text as a file and a Hebrew file on a 390 px phone; the main model's quota had just run out, so turns fell back to the other models in the production order. The notes file was lost with the sandbox; these observations come from the log lines I read during the run.
+
+| Checked | Result |
+| --- | --- |
+| A renamed non-PDF file | Rejected with the "could not be opened" message |
+| Upload, plan | Plan in 47 s; the step shown in the log had a planned final-check question |
+| Stop during a reply | State unchanged, partial text kept, marked stopped |
+| Network failure on a turn (aborted request), then Try again | Error with a way out; the retry went through |
+| Rate limit from the provider | "too many requests" message; Try again worked |
+| Misread answers | My scripted answers did not fit the first step the model planned ("What is Photosynthesis?"); the grader called them misread and the tutor re-asked, which is correct, but the English run did not get past step 1 within the script's budget |
+| Step counter, saved state and screen | Agreed on every turn I saw in the log |
+| Hebrew on a phone | Right-to-left, no horizontal overflow, the answer box visible; a partial answer got a nudge, an answer in the student's own words moved on and cited the passage |
+| Opening approval | One reply to a misread answer began "You're absolutely right" (fixed as finding 85) |
+
+Not verified on production with a real model: the detour, a question about another part of the file, the final check, the summary and reload. The mock harness covers that path on every build (two journeys, 179 checks).
+
 ## The experiment that would settle it
 
 The tests and evals show that the policy does what it says and that grading did not get worse. They do not show that students learn more. That needs an experiment:
@@ -315,7 +370,7 @@ The tests and evals show that the policy does what it says and that grading did 
 
 ### Automated tests
 
-`npm test` runs 270 tests (252 before the sixth round, 229 before the fifth, 187 before the fourth, 125 before the third): the teaching policy, prerequisite detours, `build_up` after narrowed questions, the teaching-eval checks and the policy layer on the dev set, the final check and evidence levels, citation and quote checks, the copy check, extraction and chunking, BM25 source matching (including thresholds on the golden set), the lesson state machine (including a test that no sequence of messages keeps a step active), grade checks, plan validation and step sizing, prompt fencing, the chat reducer (commit on done, stop, failure, notices, resume), session storage (no key stored, broken storage), translations (every key in all three languages, same placeholders), the SSE parser, the provider adapters (fallback, cooldowns per key, daily quota, backup notice, thinkingLevel only where accepted), Markdown rendering of model output (no `javascript:` links, HTML escaped), and the API with a mock provider (streaming, cancellation, validation, server-key origin check and budget, `trust proxy`, rate limit, key not logged).
+`npm test` runs 272 tests (252 before the sixth round, 229 before the fifth, 187 before the fourth, 125 before the third): the teaching policy, prerequisite detours, `build_up` after narrowed questions, the teaching-eval checks and the policy layer on the dev set, the final check and evidence levels, citation and quote checks, the copy check, extraction and chunking, BM25 source matching (including thresholds on the golden set), the lesson state machine (including a test that no sequence of messages keeps a step active), grade checks, plan validation and step sizing, prompt fencing, the chat reducer (commit on done, stop, failure, notices, resume), session storage (no key stored, broken storage), translations (every key in all three languages, same placeholders), the SSE parser, the provider adapters (fallback, cooldowns per key, daily quota, backup notice, thinkingLevel only where accepted), Markdown rendering of model output (no `javascript:` links, HTML escaped), and the API with a mock provider (streaming, cancellation, validation, server-key origin check and budget, `trust proxy`, rate limit, key not logged).
 
 ### Golden sets
 
@@ -503,4 +558,18 @@ The findings are in [AUDIT.md](AUDIT.md), 62 to 76; the eval design and results 
 | Start waits for the key check; history without passage ids | Live run: Settings opened on a cold start; 13 dropped citations | Harness check fails on the old code; 0 dropped in 11 cited turns on the second run (mostly backup model) |
 
 Cost: the first-screen JavaScript and CSS grew by under 0.4 KB gzipped (`eval/results/bundle-r5.json`); first contentful paint on the throttled phone profile was 2.41 s (median of 5), against 2.46 s before, which is within run-to-run noise (`load-after-r5.json`). The text index and scoring did not change, so I did not rerun the benchmark.
+
+## What changed in the sixth round (25 and 26 October)
+
+The findings are in [AUDIT.md](AUDIT.md), 77 to 87, with the open list after them; the design of each fix is in "Round 6: closing the gaps the model eval found" above.
+
+| Change | Why | Measured effect |
+| --- | --- | --- |
+| The grader sees the passages retrieval matched; a question about the document is never off-topic | A question about another part of the file was not answered | Tests that fail on round 5; not reproduced on held-out-2 |
+| The copy check counts every pasted sentence and outranks the model's guess | Two pasted sentences passed as the student's own answer | Tests that fail on round 5 |
+| Opening praise dropped when the answer was not right | 3 of 55 held-out replies opened with praise; one production reply with "You're absolutely right" | 0 on held-out-2 English for both engines |
+| After narrowing help, the whole question is asked once, always | Narrow answers ended steps, both through later help and through the grader's flag | Tests; found on held-out-2, so not independently verified |
+| Planned final-check questions with criteria | Improvised questions made the final check unreliable to grade | Verdicts 21/22 against 18/22 for round 5 on 9 scenarios |
+| Durable, resumable eval runs, held-out-2, conditional follow-up turns | Round 5 lost its per-turn results; the held-out set had been seen | Two of three model runs on 26 October survived; the third was lost in transfer (AUDIT 87) |
+| Tailwind reads only `src` | Eval text changed the client bundle | Harness |
 
