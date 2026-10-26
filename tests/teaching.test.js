@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   checkEnd, checkTurn, citationSupport, endsWithQuestion, hasPraise, loadLessons, loadScenarios, notesContradiction,
-  policyRun, readTag, saysNotInDocument, similarity, supportProblems,
+  policyRun, readTag, saysNotInDocument, similarity, supportProblems, turnApplies,
 } from '../eval/teaching-lib.js';
 
 const lessons = loadLessons();
@@ -67,6 +67,15 @@ describe('teaching scenarios', () => {
     } finally {
       rmSync(out, { recursive: true, force: true });
     }
+  });
+});
+
+describe('conditional follow-up turns', () => {
+  it('sends a turn marked with when only after one of those tutor actions', () => {
+    expect(turnApplies({ student: 'x' }, 'next_step')).toBe(true);
+    expect(turnApplies({ student: 'x', when: ['back_to_question'] }, 'back_to_question')).toBe(true);
+    expect(turnApplies({ student: 'x', when: ['back_to_question'] }, 'next_step')).toBe(false);
+    expect(turnApplies({ student: 'x', when: ['back_to_question'] }, undefined)).toBe(false);
   });
 });
 

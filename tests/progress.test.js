@@ -313,14 +313,14 @@ describe('narrowed questions', () => {
     const small = answer(first.progress, 'correct');
     expect(small.move).toBe('build_up');
     expect(small.progress.steps[0]).toMatchObject({ status: 'active', scaffold: false, built: true, attempts: 1 });
-    const whole = answer(small.progress, 'correct', 'high', 'none', { meetsCriteria: true });
+    const whole = answer(small.progress, 'correct');
     expect(whole.move).toBe('advance');
     expect(whole.progress.steps[0].outcome).toBe('learned');
   });
 
-  it('moves on at once when the answer to the smaller question already meets the whole step', () => {
+  it('asks the whole question even when the grader says the smaller answer already meets the step', () => {
     const first = answer(createProgress(plan), 'incorrect', 'high', 'none', { misconception: 'cells are tiny animals' });
-    expect(answer(first.progress, 'correct', 'high', 'none', { meetsCriteria: true }).move).toBe('advance');
+    expect(answer(first.progress, 'correct', 'high', 'none', { meetsCriteria: true }).move).toBe('build_up');
   });
 
   it('does not go back to the whole question after a hint that already asks it', () => {

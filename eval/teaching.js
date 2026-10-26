@@ -7,7 +7,7 @@ import { resolveProvider } from '../server/providers/index.js';
 import { turnSources } from '../src/lesson/turnSources.js';
 import {
   ACTION_OF_MOVE, checkEnd, supportProblems, checkTurn, citationSupport, labelGrade, loadLessons, loadScenarios, openingMessage,
-  planOf, plainSystem, policyRun, readTag, startProgress, summarize, verifyReply,
+  planOf, plainSystem, policyRun, readTag, startProgress, summarize, turnApplies, verifyReply,
 } from './teaching-lib.js';
 import { latestRuns, readRun, runMeta, sameVersion, summarizeRun, turnRecord } from './teaching-store.js';
 
@@ -160,6 +160,7 @@ const modelScenario = async (scenario, system, partial) => {
   const rows = [];
   let previousHelp = null;
   for (const turn of scenario.turns) {
+    if (!turnApplies(turn, rows.at(-1)?.action)) continue;
     const row = system === 'plain'
       ? await plainTurn({ lesson, plan, scenario, history, turn })
       : await engineTurn({ lesson, plan, progress, history, turn });

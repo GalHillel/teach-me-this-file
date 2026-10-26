@@ -89,7 +89,6 @@ export const labelGrade = (label = {}) => ({
   evidence: '',
   confidence: label.confidence ?? 'high',
   issue: label.issue ?? 'none',
-  meetsCriteria: label.meetsCriteria ?? label.verdict === 'correct',
   missingPrerequisite: label.missingPrerequisite ?? 0,
 });
 
@@ -245,11 +244,14 @@ ${formatPassages(lesson.chunks)}
 </document>`;
 };
 
+export const turnApplies = (turn, previousAction) => !turn.when || turn.when.includes(previousAction);
+
 export const policyRun = (lesson, scenario, system) => {
   const plan = planOf(lesson);
   let progress = startProgress(plan, scenario);
   const turns = [];
   for (const turn of scenario.turns) {
+    if (!turnApplies(turn, turns.at(-1)?.action)) continue;
     const state = { plan, chunks: lesson.chunks, progress };
     const sources = turnSources(state, turn.kind ?? 'reply', turn.student);
     const assessment = normalizeAssessment(labelGrade(turn.label), turn.student, sources.current);

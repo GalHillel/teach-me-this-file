@@ -35,7 +35,6 @@ const assessmentArb = fc.record({
   issue: fc.constantFrom(...ISSUES),
   conceptsMissing: fc.constantFrom([], ['alpha idea'], ['bravo idea'], ['something else']),
   misconception: fc.constantFrom('', 'a wrong idea'),
-  meetsCriteria: fc.boolean(),
   missingPrerequisite: fc.integer({ min: 0, max: 7 }),
 });
 
@@ -96,7 +95,7 @@ describe('lesson state machine properties', () => {
   });
 
   const replyArb = assessmentArb.filter((assessment) => assessment.verdict !== 'question');
-  const questionArb = fc.constant({ verdict: 'question', confidence: 'high', issue: 'none', conceptsMissing: [], misconception: '', meetsCriteria: false, missingPrerequisite: 0 });
+  const questionArb = fc.constant({ verdict: 'question', confidence: 'high', issue: 'none', conceptsMissing: [], misconception: '', missingPrerequisite: 0 });
 
   it('always ends a step without prerequisites within 18 non-question replies', () => {
     fc.assert(fc.property(fc.array(fc.oneof(replyArb, questionArb), { minLength: 200, maxLength: 200 }), (events) => {
@@ -128,7 +127,7 @@ describe('lesson state machine properties', () => {
     }), { numRuns: 400 });
   });
 
-  it('never ends a step on a right answer to a narrowed question unless the grader says it meets the step', () => {
+  it('never ends a step on a right answer to a narrowed question', () => {
     fc.assert(fc.property(fc.integer({ min: 1, max: 4 }), fc.array(eventArb, { maxLength: 120 }), (length, events) => {
       const plan = planOf(length);
       let progress = createProgress(plan);
@@ -138,7 +137,7 @@ describe('lesson state machine properties', () => {
         progress = result.progress;
         const step = before.status === 'active' ? before.steps[before.currentStep] : null;
         const ended = ['advance', 'final_check_start'].includes(result.move) && step?.phase === 'learn' && step.detour === null;
-        if (ended && event.kind === 'reply') expect(step.scaffold === false || event.assessment.meetsCriteria === true).toBe(true);
+        if (ended && event.kind === 'reply') expect(step.scaffold).toBe(false);
       }
     }), { numRuns: 600 });
   });

@@ -97,7 +97,7 @@ const handleAnswer = (plan, progress, step, assessment) => {
   }
 
   if (verdict === 'correct') {
-    if (step.scaffold && !step.built && assessment.meetsCriteria !== true) {
+    if (step.scaffold && !step.built) {
       return result('build_up', updateCurrent(progress, { scaffold: false, built: true, stalls: 0 }));
     }
     if ((confidence === 'low' || PROBE_ISSUES.has(issue)) && !step.probed) {
@@ -199,7 +199,6 @@ export const planMove = (progress, { kind, assessment = null, plan }) => {
     misconception: assessment?.misconception ?? '',
     conceptsMissing: assessment?.conceptsMissing ?? [],
     missingPrerequisite: assessment?.missingPrerequisite ?? 0,
-    meetsCriteria: assessment?.meetsCriteria === true,
   };
 
   if (progress.status === 'reviewing') return planReviewMove(progress, grade);

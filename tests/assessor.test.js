@@ -24,15 +24,12 @@ describe('normalizeAssessment', () => {
       misconception: '',
       evidence: 'uses light',
       confidence: 'high',
-      meetsCriteria: false,
       missingPrerequisite: 0,
       checks: [],
     });
   });
 
-  it('keeps the step-level fields only when they fit the verdict', () => {
-    expect(normalizeAssessment(graded({ meetsCriteria: true }), 'The plant uses light to make sugar.').meetsCriteria).toBe(true);
-    expect(normalizeAssessment(graded({ verdict: 'partial', completeness: 0.5, meetsCriteria: true }), 'The plant uses light to make sugar.').meetsCriteria).toBe(false);
+  it('keeps the prerequisite field only when it fits the verdict', () => {
     expect(normalizeAssessment(graded({ verdict: 'incorrect', completeness: 0, missingPrerequisite: 2 }), 'Plants eat soil.').missingPrerequisite).toBe(2);
     expect(normalizeAssessment(graded({ missingPrerequisite: 2 }), 'The plant uses light to make sugar.').missingPrerequisite).toBe(0);
     expect(normalizeAssessment(graded({ verdict: 'incorrect', completeness: 0, missingPrerequisite: '2' }), 'Plants eat soil.').missingPrerequisite).toBe(0);

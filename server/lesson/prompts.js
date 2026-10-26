@@ -108,7 +108,6 @@ More rules:
   - "no_knowledge": the student says they do not know, or makes no attempt.
   - "unjustified": the question asks for a reason or an explanation, and the student gives only the final answer.
   - "none": none of these.
-- Set "meetsCriteria" to true only when the message, on its own, meets the step's full success criteria, even if the tutor's last question asked about less. Otherwise false.
 - If the answer is wrong because an idea from one of the earlier steps listed under "Earlier steps this step builds on" is missing or misunderstood, set "missingPrerequisite" to that step's number. Otherwise 0.
 - Write the short notes in English.
 
@@ -122,7 +121,6 @@ Return only JSON:
   "evidence": "the shortest exact quote from the student's message that supports the verdict, or an empty string",
   "confidence": "high | medium | low",
   "issue": "none | misread_question | hedged | no_knowledge | unjustified",
-  "meetsCriteria": false,
   "missingPrerequisite": 0
 }
 "completeness" is the share of what the question asked for that the student got right, from 0 to 1.`;

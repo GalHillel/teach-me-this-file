@@ -1,0 +1,2729 @@
+{
+ "note": "Held-out-2 on gemini-3.5-flash-lite (main and backup pinned), 26 October 12:59-13:38 UTC, engine at 659a903, previous engine 8fa9b77. The new engine with the plain tutor ran in one loop and the previous engine in a parallel loop; the model's free daily quota ran out at 13:37, after 9 of 19 scenarios for the new engine and the plain tutor (the English half) and 16 of 19 for the previous engine. Compare systems only on the scenarios all three completed. The eval timeout was raised from 15 s to 30 s at 13:07 because the model answered in 7 to 30 s that afternoon. An earlier complete run of the same code that morning was lost when its sandbox timed out; only its printed summary for the new engine (14 of 19 scenarios passed) survived. Compact copy: full per-turn records stayed in the sandbox; replies are cut to 140 characters unless the turn failed.",
+ "runs": {
+  "r6l2-holdout2-new": {
+   "meta": {
+    "label": "r6l2-holdout2-new",
+    "mode": "model",
+    "split": "holdout2",
+    "systems": [
+     "engine",
+     "plain"
+    ],
+    "date": "2026-10-26T12:59:02.764Z",
+    "provider": "gemini",
+    "models": {
+     "main": "gemini-3.5-flash-lite",
+     "backup": "gemini-3.5-flash-lite"
+    },
+    "commit": "659a903427efe53e4f951d8147dc231b7986f6d0",
+    "uncommittedChanges": true,
+    "engineVersion": "bf42bf87c19a",
+    "promptVersion": "781c434bc845",
+    "node": "v24.22.1",
+    "scenariosVersion": "8d38f62c3b34",
+    "scenarioIds": [
+     "ho2-en-understands"
+    ],
+    "pauseMs": 3000
+   },
+   "counts": {
+    "engine": {
+     "planned": 19,
+     "complete": 9,
+     "infraErrors": [],
+     "stoppedOnQuota": [
+      "ho2-he-understands"
+     ],
+     "notRun": [
+      "ho2-he-misconception",
+      "ho2-he-copied",
+      "ho2-he-misread",
+      "ho2-he-improves",
+      "ho2-he-other-part",
+      "ho2-he-not-in-document",
+      "ho2-he-journey",
+      "ho2-en-paraphrase-correct",
+      "ho2-he-paraphrase-misconception"
+     ]
+    },
+    "plain": {
+     "planned": 19,
+     "complete": 9,
+     "infraErrors": [],
+     "stoppedOnQuota": [],
+     "notRun": [
+      "ho2-he-understands",
+      "ho2-he-misconception",
+      "ho2-he-copied",
+      "ho2-he-misread",
+      "ho2-he-improves",
+      "ho2-he-other-part",
+      "ho2-he-not-in-document",
+      "ho2-he-journey",
+      "ho2-en-paraphrase-correct",
+      "ho2-he-paraphrase-misconception"
+     ]
+    }
+   },
+   "modelCalls": {
+    "engine": {
+     "gemini-3.5-flash-lite": 48
+    },
+    "plain": {
+     "gemini-3.5-flash-lite": 24
+    }
+   },
+   "summary": {
+    "engine": {
+     "scenarios": 9,
+     "scenarioPass": 0.889,
+     "turns": 24,
+     "actionFit": 0.917,
+     "interventionFit": 1,
+     "unearnedMoves": 1,
+     "helpInFinalCheck": 0,
+     "endStateMatch": 1,
+     "supportProblems": 0,
+     "grading": {
+      "answers": 22,
+      "verdictAccuracy": 0.955,
+      "falsePositives": "0/6",
+      "falseNegatives": "1/14",
+      "issueAccuracy": "1/1",
+      "misconceptionNamed": "1/1"
+     },
+     "paraphraseConsistency": null,
+     "text": {
+      "replies": 24,
+      "approvalOnNotCorrect": 0,
+      "repeatedHelp": 0,
+      "endsWithQuestion": 0.955,
+      "citedReplies": 0.75,
+      "invalidCitationIds": 0,
+      "unverifiedQuotes": 0,
+      "citationSupportMean": 0.759,
+      "weaklySupportedCitations": "2/36",
+      "missingTag": 0
+     },
+     "byCategory": {
+      "understands": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "misconception": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "partial": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "copied": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "other_part": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "not_in_document": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "prerequisite": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "transfer": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "journey": {
+       "scenarios": 1,
+       "passed": 0
+      }
+     },
+     "failures": [
+      {
+       "id": "ho2-en-journey",
+       "problems": [
+        "turn 2: action next_step, wanted back_to_question|hint",
+        "turn 2: moved on without evidence",
+        "turn 3: action ask_again, wanted next_step"
+       ]
+      }
+     ]
+    },
+    "plain": {
+     "scenarios": 9,
+     "scenarioPass": 0.444,
+     "turns": 24,
+     "actionFit": 0.417,
+     "interventionFit": 0,
+     "unearnedMoves": 0,
+     "helpInFinalCheck": 2,
+     "endStateMatch": null,
+     "supportProblems": 0,
+     "grading": {
+      "answers": 22,
+      "verdictAccuracy": 0.682,
+      "falsePositives": "0/6",
+      "falseNegatives": "6/14",
+      "issueAccuracy": "0/1",
+      "misconceptionNamed": "0/1"
+     },
+     "paraphraseConsistency": null,
+     "text": {
+      "replies": 24,
+      "approvalOnNotCorrect": 0,
+      "repeatedHelp": 0,
+      "endsWithQuestion": 0.958,
+      "citedReplies": 0.792,
+      "invalidCitationIds": 0,
+      "unverifiedQuotes": 0,
+      "citationSupportMean": 0.644,
+      "weaklySupportedCitations": "1/28",
+      "missingTag": 0
+     },
+     "byCategory": {
+      "understands": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "misconception": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "partial": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "copied": {
+       "scenarios": 1,
+       "passed": 0
+      },
+      "other_part": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "not_in_document": {
+       "scenarios": 1,
+       "passed": 0
+      },
+      "prerequisite": {
+       "scenarios": 1,
+       "passed": 0
+      },
+      "transfer": {
+       "scenarios": 1,
+       "passed": 0
+      },
+      "journey": {
+       "scenarios": 1,
+       "passed": 0
+      }
+     },
+     "failures": [
+      {
+       "id": "ho2-en-copied",
+       "problems": [
+        "turn 1: action ask_again, wanted probe|hint"
+       ]
+      },
+      {
+       "id": "ho2-en-not-in-document",
+       "problems": [
+        "turn 1: action ask_again, wanted answer_question"
+       ]
+      },
+      {
+       "id": "ho2-en-prerequisite",
+       "problems": [
+        "turn 1: action hint, wanted check_earlier",
+        "turn 2: action ask_again, wanted back_to_question",
+        "turn 3: action next_step, wanted final_check"
+       ]
+      },
+      {
+       "id": "ho2-en-transfer",
+       "problems": [
+        "turn 3: action hint, wanted final_check",
+        "turn 3: help during the final check",
+        "turn 4: action ask_again, wanted summary",
+        "turn 4: summary does not name the weak step"
+       ]
+      },
+      {
+       "id": "ho2-en-journey",
+       "problems": [
+        "turn 3: action ask_again, wanted next_step",
+        "turn 4: action ask_again, wanted next_step",
+        "turn 5: action ask_again, wanted hint",
+        "turn 6: action ask_again, wanted final_check",
+        "turn 7: action next_step, wanted final_check",
+        "turn 8: action hint, wanted final_check",
+        "turn 8: help during the final check",
+        "turn 9: action ask_again, wanted summary"
+       ]
+      }
+     ]
+    }
+   },
+   "lines": [
+    {
+     "s": "engine",
+     "id": "ho2-en-understands",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        100,
+        70
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 16280,
+       "x": "Spot on—sunlight hits the Moon and bounces off toward our eyes so we can see it! \n\nNow let's talk about why the Moon seems to change shape o"
+      }
+     ]
+    },
+    {
+     "s": "plain",
+     "id": "ho2-en-understands",
+     "st": "complete",
+     "p": true,
+     "ef": null,
+     "sp": null,
+     "end": {
+      "status": "active",
+      "currentStep": 0,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": null,
+       "f": [],
+       "c": [
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        58
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 9026,
+       "x": "That is spot on! The Moon doesn't make its own light at all. Instead, sunlight hits the Moon's surface and bounces off toward Earth, just li"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-misconception",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": "counterexample",
+       "v": "incorrect",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c4",
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        67,
+        100
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 34840,
+       "x": "That is a very common thought, but Earth's shadow is actually not what causes the phases [c4]. \n\nImagine holding a ball in a dark room with "
+      }
+     ]
+    },
+    {
+     "s": "plain",
+     "id": "ho2-en-misconception",
+     "st": "complete",
+     "p": true,
+     "ef": null,
+     "sp": null,
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": null,
+       "v": "incorrect",
+       "is": null,
+       "f": [],
+       "c": [
+        "c4",
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        57,
+        83,
+        13
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 26681,
+       "x": "That is actually not quite right! Earth's shadow causes eclipses rather than the changing shapes we see [c4]. Instead, the Sun is always lig"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-partial",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": "nudge",
+       "v": "partial",
+       "is": "unjustified",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        60,
+        100
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 17184,
+       "x": "You are right that the Moon moves, or orbits, around Earth [c3]. \n\nThink about the Sun's light as it shines out in space. The Sun always lig"
+      }
+     ]
+    },
+    {
+     "s": "plain",
+     "id": "ho2-en-partial",
+     "st": "complete",
+     "p": true,
+     "ef": null,
+     "sp": null,
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": null,
+       "v": "partial",
+       "is": null,
+       "f": [],
+       "c": [
+        "c1"
+       ],
+       "inv": 0,
+       "sup": [
+        50
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 10079,
+       "x": "You are right that the Moon moves around Earth [c1]! But think about what shines on the Moon and how much of that lit part is facing us as i"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-copied",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "probe",
+       "i": null,
+       "v": "correct",
+       "is": "copied",
+       "ch": [
+        "copied_from_source"
+       ],
+       "f": [],
+       "c": [],
+       "inv": 0,
+       "sup": [],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 21353,
+       "x": "You found the exact explanation from our notes! That is a great start. To make sure we really get the picture, can you try explaining it in "
+      },
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        100,
+        78
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 19130,
+       "x": "You explained it perfectly by comparing the Moon to a mirror reflecting sunlight! \n\nNow let's look at why the Moon seems to change shape ove"
+      }
+     ]
+    },
+    {
+     "s": "plain",
+     "id": "ho2-en-copied",
+     "st": "complete",
+     "p": false,
+     "ef": null,
+     "sp": null,
+     "end": {
+      "status": "active",
+      "currentStep": 0,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "correct",
+       "is": null,
+       "f": [
+        "action ask_again, wanted probe|hint"
+       ],
+       "c": [],
+       "inv": 0,
+       "sup": [],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 20035,
+       "x": "You have the right scientific idea, but those sentences are copied right out of our reading! To make sure you really understand it, can you try explaining it to me using your own everyday words? How does sunlight help us see the Moon shine at night?"
+      },
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": null,
+       "f": [],
+       "c": [
+        "c2",
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        29,
+        75
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 25256,
+       "x": "That is a wonderful way to put it! The Moon acts just like a mirror, catching the Sun's light and sending it right down to us [c2]. \n\nNow le"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-other-part",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "answer_question",
+       "i": null,
+       "v": "question",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c5",
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        100,
+        100,
+        100
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 25511,
+       "x": "Yes, you can look at the Moon safely with your eyes or with binoculars [c5]. (Just remember to never look directly at the Sun [c5]!)\n\nNow, l"
+      },
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        100,
+        70
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 82130,
+       "x": "You correctly pointed out that sunlight bounces off the Moon toward us. \n\nNow let's think about why the Moon changes shape. The Sun is alway"
+      }
+     ]
+    },
+    {
+     "s": "plain",
+     "id": "ho2-en-other-part",
+     "st": "complete",
+     "p": true,
+     "ef": null,
+     "sp": null,
+     "end": {
+      "status": "active",
+      "currentStep": 0,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "answer_question",
+       "i": null,
+       "v": "question",
+       "is": null,
+       "f": [],
+       "c": [
+        "c5"
+       ],
+       "inv": 0,
+       "sup": [
+        100
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 27861,
+       "x": "Yes, you can look at the Moon safely with binoculars [c5]! Now, let's go back to our first question about how it shines. Why can we see the "
+      },
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": null,
+       "f": [],
+       "c": [
+        "c2",
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        80,
+        85
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 47221,
+       "x": "That is correct! Sunlight hits the Moon and bounces off it toward us [c2]. \n\nNow let's look at why the Moon seems to change shape. The Sun a"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-not-in-document",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 0,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "answer_question",
+       "i": null,
+       "v": "question",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        67,
+        75
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 16660,
+       "x": "The document we are using does not cover how far away the Moon is. Beyond the document, it is about 238,900 miles away! \n\nLet's get back to "
+      }
+     ]
+    },
+    {
+     "s": "plain",
+     "id": "ho2-en-not-in-document",
+     "st": "complete",
+     "p": false,
+     "ef": null,
+     "sp": null,
+     "end": {
+      "status": "active",
+      "currentStep": 0,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "off_topic",
+       "is": null,
+       "f": [
+        "action ask_again, wanted answer_question"
+       ],
+       "c": [],
+       "inv": 0,
+       "sup": [],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 28438,
+       "x": "Our document does not cover how far away the Moon is from Earth. You asked a different question than the one I asked! Let's go back to it: Why can we see the Moon shining at night if it does not make its own light?"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-prerequisite",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "reviewing",
+      "currentStep": 2,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "check_earlier",
+       "i": "prerequisite",
+       "v": "incorrect",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        100,
+        25
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 33933,
+       "x": "That is a very common idea to have, but let's take a quick step back to review how moon phases actually work. The Sun always lights up half "
+      },
+      {
+       "a": "back_to_question",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        62
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 53813,
+       "x": "You correctly explained that as the Moon goes around Earth, we see different parts of its lit half. That changing view creates our moon phas"
+      },
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        39
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 21299,
+       "x": "You correctly noted that a lunar eclipse happens when Earth's shadow blocks the Moon, whereas a half moon is simply seeing half of the Moon'"
+      }
+     ]
+    },
+    {
+     "s": "plain",
+     "id": "ho2-en-prerequisite",
+     "st": "complete",
+     "p": false,
+     "ef": null,
+     "sp": null,
+     "end": {
+      "status": "active",
+      "currentStep": 2,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": null,
+       "v": "incorrect",
+       "is": null,
+       "f": [
+        "action hint, wanted check_earlier"
+       ],
+       "c": [
+        "c4",
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        100,
+        70
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 37209,
+       "x": "That is not quite right, because phases are not caused by Earth's shadow [c4]! A half moon is just a regular phase where we see half of the lit part of the Moon as it moves around Earth [c3]. \n\nIf a half moon is just a phase and not a shadow, what actually causes a lunar eclipse to happen?"
+      },
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "off_topic",
+       "is": null,
+       "f": [
+        "action ask_again, wanted back_to_question"
+       ],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        80
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 7832,
+       "x": "You described how moon phases work, but you are answering a different question! What actually causes a lunar eclipse to happen [c4]?"
+      },
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": null,
+       "f": [
+        "action next_step, wanted final_check"
+       ],
+       "c": [
+        "c4",
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        90,
+        70
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 43587,
+       "x": "Spot on! A lunar eclipse happens when Earth's shadow falls on the Moon, which only occurs at full moon [c4]. A half moon, on the other hand, is just a phase where we see half of the lit half of the Moon, and it has nothing to do with shadows [c3, c4]. \n\nHere is your next question: Your friend says a crescent moon is the Moon partly hidden in Earth's shadow. What would you tell them, and why?"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-transfer",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "completed",
+      "currentStep": 2,
+      "final": {
+       "results": {
+        "0": "pass",
+        "1": "fail",
+        "2": "pass"
+       },
+       "skipped": false
+      }
+     },
+     "t": [
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [],
+       "inv": 0,
+       "sup": [],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 41545,
+       "x": "You correctly explained that a lunar eclipse happens when Earth casts a shadow on the Moon during a full moon, whereas a half moon is a phas"
+      },
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [],
+       "inv": 0,
+       "sup": [],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 19260,
+       "x": "You are correct that it reflects sunlight, just the same way the Moon does. \n\nIf you looked at the Moon from the same place every night for "
+      },
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "incorrect",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 46313,
+       "x": "Actually, over those two weeks, the Moon doesn't stay a full circle. As it moves along its orbit, we see more of its lit half, so the lit pa"
+      },
+      {
+       "a": "summary",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3",
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        17,
+        88,
+        100,
+        80
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 38139,
+       "x": "You accurately explained that a crescent is a phase where we see a portion of the lit half, and that Earth's shadow causes an eclipse only d"
+      }
+     ]
+    },
+    {
+     "s": "plain",
+     "id": "ho2-en-transfer",
+     "st": "complete",
+     "p": false,
+     "ef": null,
+     "sp": null,
+     "end": {
+      "status": "active",
+      "currentStep": 2,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "correct",
+       "is": null,
+       "f": [],
+       "c": [
+        "c3",
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        56
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 23784,
+       "x": "That is spot on! An eclipse happens when Earth's shadow falls on the Moon, whereas a half moon is simply a phase where we see half of the Su"
+      },
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "correct",
+       "is": null,
+       "f": [],
+       "c": [
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        60
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 87628,
+       "x": "That is correct! Just like the Moon, a planet shines because it reflects sunlight [c2]. \n\nNow for the next question: If you looked at the Mo"
+      },
+      {
+       "a": "hint",
+       "i": null,
+       "v": "incorrect",
+       "is": null,
+       "f": [
+        "action hint, wanted final_check",
+        "help during the final check"
+       ],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        31,
+        63
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 10063,
+       "x": "Not quite! The Moon actually appears to change its shape in our sky over those two weeks, going from a tiny sliver to a half circle and then a full circle [c3]. Think about how the Moon orbits Earth and how our view of its lit half changes as it moves [c3]. What happens to the visible lit part day by day right after a new moon?"
+      },
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "off_topic",
+       "is": null,
+       "f": [
+        "action ask_again, wanted summary",
+        "summary does not name the weak step"
+       ],
+       "c": [],
+       "inv": 0,
+       "sup": [],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 28132,
+       "x": "You actually answered a different question there—that was our final question about what to tell a friend who thinks a crescent moon is a shadow! Let's go back to the question we were working on: If you looked at the Moon from the same place every night for two weeks right after a new moon, what would you see, and why?"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-journey",
+     "st": "complete",
+     "p": false,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "completed",
+      "currentStep": 2,
+      "final": {
+       "results": {
+        "0": "pass",
+        "1": "pass",
+        "2": "pass"
+       },
+       "skipped": false
+      }
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": "counterexample",
+       "v": "incorrect",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3",
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        13,
+        50
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 40302,
+       "x": "Think about a light bulb in your room—it makes its own light and stays bright. But if the Moon made its own light like a bulb, it would alwa"
+      },
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [
+        "action next_step, wanted back_to_question|hint",
+        "moved on without evidence"
+       ],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        83,
+        70
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 26887,
+       "x": "You are spot on—sunlight has to reach the Moon for us to see it! \n\nThe Sun actually always lights up half of the Moon [c3]. Think of it like holding a ball in front of a lamp in a dark room: the lamp always shines on one half of the ball. As the Moon travels or *orbits* around Earth, we move around and see different amounts of that lit half [c3]. \n\nWhy do you think the Moon looks like a thin crescent on some nights and a big full circle on other nights?"
+      },
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "partial",
+       "is": "misread_question",
+       "ch": [],
+       "f": [
+        "action ask_again, wanted next_step"
+       ],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        100,
+        75
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 69625,
+       "x": "You are completely right that the Moon bounces sunlight to us, but that is answering a different question! We are now looking at why the Moon's shape seems to change. \n\nThe Sun always lights up half of the Moon [c3]. As the Moon travels around Earth, we get to see different amounts of that lit-up half [c3]. \n\nWhy does the Moon look like a thin crescent on some nights and a full circle on other nights?"
+      },
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        86,
+        90,
+        100
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 31515,
+       "x": "You got it—as the Moon travels around Earth, we see different amounts of the half lit by the Sun! \n\nNow, some people think that the changing"
+      },
+      {
+       "a": "hint",
+       "i": "nudge",
+       "v": "partial",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        75
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 24431,
+       "x": "You correctly noted that a lunar eclipse is when Earth's shadow falls on the Moon [c4]. \n\nNow, think about a half moon. Is a half moon also "
+      },
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [],
+       "inv": 0,
+       "sup": [],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 46575,
+       "x": "You correctly explained that a half moon is a phase where we see half of the lit side because of the Moon's position, rather than a shadow. "
+      },
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [],
+       "inv": 0,
+       "sup": [],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 55175,
+       "x": "You correctly noted that the planet reflects sunlight, just the same way the Moon does. \n\nIf you looked at the Moon from the same place ever"
+      },
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [],
+       "inv": 0,
+       "sup": [],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 25271,
+       "x": "You nailed it—the lit part grows night by night, going from a crescent to a half and then a full moon because the Moon moves along its orbit"
+      },
+      {
+       "a": "summary",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        82,
+        25,
+        89
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 28369,
+       "x": "You are completely right that a crescent is a phase and not a shadow, and that Earth's shadow only causes a rare eclipse during a full moon "
+      }
+     ]
+    },
+    {
+     "s": "plain",
+     "id": "ho2-en-journey",
+     "st": "complete",
+     "p": false,
+     "ef": null,
+     "sp": null,
+     "end": {
+      "status": "active",
+      "currentStep": 0,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": null,
+       "v": "incorrect",
+       "is": null,
+       "f": [],
+       "c": [
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        25,
+        45
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 8179,
+       "x": "Not quite! The Moon actually doesn't make any light of its own, just like a dark rock in a dark room [c2]. Think about what big, bright obje"
+      },
+      {
+       "a": "hint",
+       "i": null,
+       "v": "partial",
+       "is": null,
+       "f": [],
+       "c": [
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        88
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 49096,
+       "x": "You are on the right track about the Sun! But how does that sunlight get to our eyes? When sunlight hits the Moon, \"sunlight hits its surfac"
+      },
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "correct",
+       "is": null,
+       "f": [
+        "action ask_again, wanted next_step"
+       ],
+       "c": [],
+       "inv": 0,
+       "sup": [],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 56327,
+       "x": "That is scientifically correct, but you used almost the exact words from our text! Can you explain how we see the Moon in your own words, maybe using an everyday example like a flashlight shining on a ball?"
+      },
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "off_topic",
+       "is": null,
+       "f": [
+        "action ask_again, wanted next_step"
+       ],
+       "c": [
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        38
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 8462,
+       "x": "You are describing how the Moon's phases work, which is great, but that is a different question! Let's finish our first step first. Can you try explaining how we see the Moon in your own words, maybe using an everyday example like a lamp shining on a ball [c2]?"
+      },
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "off_topic",
+       "is": null,
+       "f": [
+        "action ask_again, wanted hint"
+       ],
+       "c": [],
+       "inv": 0,
+       "sup": [],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 12695,
+       "x": "You are talking about eclipses now, but we are still on our first question about how we see the Moon shine at night. \n\nHow does sunlight help us see the Moon if the Moon doesn't make its own light? Try explaining it in your own words, maybe like a lamp shining on a ball."
+      },
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "off_topic",
+       "is": null,
+       "f": [
+        "action ask_again, wanted final_check"
+       ],
+       "c": [
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        75
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 21450,
+       "x": "You are talking about half moons and phases, but we are still on our first step! The Moon does not make its own light, instead \"sunlight hits its surface and bounces off\" [c2] toward us. Can you explain how we see the Moon in your own words, using an example like a lamp shining on a ball?"
+      },
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": null,
+       "f": [
+        "action next_step, wanted final_check"
+       ],
+       "c": [
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        64
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 16305,
+       "x": "Spot on! Planets don't make their own light either, so they shine because \"sunlight hits its surface and bounces off\" [c2] toward us, just like the Moon does. You've mastered how moonlight works! \n\nNow let's move on to our next step. Why does the Moon look like a thin crescent on some nights and a full circle on others?"
+      },
+      {
+       "a": "hint",
+       "i": null,
+       "v": "partial",
+       "is": null,
+       "f": [
+        "action hint, wanted final_check",
+        "help during the final check"
+       ],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        60,
+        60
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 24727,
+       "x": "You are right that we see more of the lit part as the Moon moves along its orbit [c3]! But remember, how much of the Moon is actually lit by the Sun at any given time [c3]?"
+      },
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "off_topic",
+       "is": null,
+       "f": [
+        "action ask_again, wanted summary"
+       ],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        100
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 23929,
+       "x": "You are thinking about shadows and eclipses, but we are still talking about the phases in Step 2! Remember, \"The Sun always lights up half of the Moon\" [c3]. As the Moon travels around Earth, we see different amounts of that lit half. Can you tell me how much of the Moon is actually lit by the Sun at any given time?"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-he-understands",
+     "st": "stopped_quota",
+     "e": "quota_exhausted",
+     "t": []
+    }
+   ]
+  },
+  "r6l2-holdout2-old": {
+   "meta": {
+    "label": "r6l2-holdout2-old",
+    "mode": "model",
+    "split": "holdout2",
+    "systems": [
+     "engine"
+    ],
+    "date": "2026-10-26T12:59:34.159Z",
+    "provider": "gemini",
+    "models": {
+     "main": "gemini-3.5-flash-lite",
+     "backup": "gemini-3.5-flash-lite"
+    },
+    "commit": "8fa9b7740d8f69d31e46a1c9a2f9373a0cbeb2b0",
+    "uncommittedChanges": true,
+    "engineVersion": "474825c4a4c2",
+    "promptVersion": "1c1c8c728efc",
+    "node": "v24.22.1",
+    "scenariosVersion": "8d38f62c3b34",
+    "scenarioIds": [
+     "ho2-en-understands"
+    ],
+    "pauseMs": 3000
+   },
+   "counts": {
+    "engine": {
+     "planned": 19,
+     "complete": 16,
+     "infraErrors": [],
+     "stoppedOnQuota": [
+      "ho2-he-journey"
+     ],
+     "notRun": [
+      "ho2-en-paraphrase-correct",
+      "ho2-he-paraphrase-misconception"
+     ]
+    }
+   },
+   "modelCalls": {
+    "engine": {
+     "gemini-3.5-flash-lite": 70
+    }
+   },
+   "summary": {
+    "engine": {
+     "scenarios": 16,
+     "scenarioPass": 0.75,
+     "turns": 35,
+     "actionFit": 0.8,
+     "interventionFit": 1,
+     "unearnedMoves": 2,
+     "helpInFinalCheck": 0,
+     "endStateMatch": 0.938,
+     "supportProblems": 0,
+     "grading": {
+      "answers": 31,
+      "verdictAccuracy": 0.839,
+      "falsePositives": "0/9",
+      "falseNegatives": "5/18",
+      "issueAccuracy": "3/3",
+      "misconceptionNamed": "2/2"
+     },
+     "paraphraseConsistency": null,
+     "text": {
+      "replies": 35,
+      "approvalOnNotCorrect": 2,
+      "repeatedHelp": 0,
+      "endsWithQuestion": 0.971,
+      "citedReplies": 0.943,
+      "invalidCitationIds": 0,
+      "unverifiedQuotes": 0,
+      "citationSupportMean": 0.64,
+      "weaklySupportedCitations": "3/58",
+      "missingTag": 0
+     },
+     "byCategory": {
+      "understands": {
+       "scenarios": 2,
+       "passed": 2
+      },
+      "misconception": {
+       "scenarios": 2,
+       "passed": 2
+      },
+      "partial": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "copied": {
+       "scenarios": 2,
+       "passed": 1
+      },
+      "other_part": {
+       "scenarios": 2,
+       "passed": 2
+      },
+      "not_in_document": {
+       "scenarios": 2,
+       "passed": 1
+      },
+      "prerequisite": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "transfer": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "journey": {
+       "scenarios": 1,
+       "passed": 0
+      },
+      "misread": {
+       "scenarios": 1,
+       "passed": 1
+      },
+      "improves": {
+       "scenarios": 1,
+       "passed": 0
+      }
+     },
+     "failures": [
+      {
+       "id": "ho2-en-journey",
+       "problems": [
+        "turn 2: action next_step, wanted back_to_question|hint",
+        "turn 2: moved on without evidence",
+        "turn 3: action ask_again, wanted next_step",
+        "turn 8: action ask_again, wanted final_check",
+        "turn 9: action ask_again, wanted summary",
+        "end: step 1 level shown_with_help, wanted applied",
+        "end: step 2 level shown, wanted applied",
+        "end: step 3 level shown_with_help, wanted applied",
+        "end: status reviewing, wanted completed"
+       ]
+      },
+      {
+       "id": "ho2-he-copied",
+       "problems": [
+        "turn 1: approval language on an answer that was not correct"
+       ]
+      },
+      {
+       "id": "ho2-he-improves",
+       "problems": [
+        "turn 1: approval language on an answer that was not correct",
+        "turn 2: action next_step, wanted back_to_question|hint",
+        "turn 2: moved on without evidence",
+        "turn 3: action ask_again, wanted next_step"
+       ]
+      },
+      {
+       "id": "ho2-he-not-in-document",
+       "problems": [
+        "turn 1: action ask_again, wanted answer_question",
+        "turn 1: did not say the document does not cover it"
+       ]
+      }
+     ]
+    }
+   },
+   "lines": [
+    {
+     "s": "engine",
+     "id": "ho2-en-understands",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        100,
+        70
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 35296,
+       "x": "Spot on! Sunlight hits the Moon and bounces off toward our eyes so we can see it. \n\nNow, let's look at why the Moon seems to change shape. T"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-misconception",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": "counterexample",
+       "v": "incorrect",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        67
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 35847,
+       "x": "That is a very common guess, but Earth's shadow does not cause the phases [c4]. If Earth's shadow covered the Moon to make a crescent shape,"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-partial",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": "nudge",
+       "v": "partial",
+       "is": "unjustified",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        40
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 34141,
+       "x": "You are completely right that the Moon moves around the Earth [c3]! \n\nImagine holding a ball in a dark room with a lamp turned on. The lamp "
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-copied",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "probe",
+       "i": null,
+       "v": "correct",
+       "is": "copied",
+       "ch": [
+        "copied_from_source"
+       ],
+       "f": [],
+       "c": [],
+       "inv": 0,
+       "sup": [],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 69145,
+       "x": "You used the exact idea from our notes! That is a great start. \n\nTo make sure you really have it down, can you try explaining it in your own"
+      },
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        100,
+        75,
+        100
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 26087,
+       "x": "Spot on—the Moon acts just like a mirror, reflecting sunlight right back down to us! \n\nNow, let's look at why the Moon seems to change shape"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-other-part",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "answer_question",
+       "i": null,
+       "v": "question",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c5",
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        75,
+        100,
+        40
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 15582,
+       "x": "Yes, it is safe to look at the Moon with your eyes or binoculars [c5]! Just remember that you should never look directly at the Sun [c5]. \n\n"
+      },
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        100,
+        78
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 31740,
+       "x": "Spot on! Sunlight bounces off the Moon and travels straight to our eyes. \n\nNow, let's talk about why the Moon changes shape. The Sun is alwa"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-not-in-document",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 0,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "answer_question",
+       "i": null,
+       "v": "question",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        57
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 26258,
+       "x": "Our document doesn't cover the distance to the Moon. Going beyond the document, it is about 238,900 miles away! \n\nLet's get back to our myst"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-prerequisite",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "reviewing",
+      "currentStep": 2,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "check_earlier",
+       "i": "prerequisite",
+       "v": "incorrect",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c4",
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        57,
+        45,
+        60
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 33390,
+       "x": "That is a very common mix-up, but phases are actually not caused by Earth's shadow [c4]! Let's take a quick step back to review. \n\nThe Sun a"
+      },
+      {
+       "a": "back_to_question",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        64
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 34825,
+       "x": "Spot on! You nailed how we see different amounts of the Moon's lit half as it orbits Earth. However, a lunar eclipse is completely different"
+      },
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        33
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 44595,
+       "x": "That is spot on—an eclipse is Earth's shadow, whereas a half moon is simply seeing half of the lit half! \n\nNow, before we move on to our sum"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-transfer",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "completed",
+      "currentStep": 2,
+      "final": {
+       "results": {
+        "0": "pass",
+        "1": "fail",
+        "2": "pass"
+       },
+       "skipped": false
+      }
+     },
+     "t": [
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        53
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 46253,
+       "x": "That is completely correct—a lunar eclipse is caused by Earth's shadow, while a half moon is just a phase showing part of the Sun-lit half o"
+      },
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        44
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 45903,
+       "x": "Spot on—the Moon and the spoon shine simply because they bounce light from another source! \n\nNow, thinking about how the Moon moves around o"
+      },
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "incorrect",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        85
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 25559,
+       "x": "Actually, the Moon itself doesn't change shape, but as it travels in its orbit around Earth, we see different angles of its sunlit half. Tha"
+      },
+      {
+       "a": "summary",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c4",
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        92,
+        80,
+        100,
+        29,
+        50
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 54556,
+       "x": "That is correct—a lunar eclipse only happens when Earth passes directly between the Sun and the Moon so Earth's shadow falls on it during a "
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-en-journey",
+     "st": "complete",
+     "p": false,
+     "ef": [
+      "step 1 level shown_with_help, wanted applied",
+      "step 2 level shown, wanted applied",
+      "step 3 level shown_with_help, wanted applied",
+      "status reviewing, wanted completed"
+     ],
+     "sp": [],
+     "end": {
+      "status": "reviewing",
+      "currentStep": 2,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": "counterexample",
+       "v": "incorrect",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        40
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 33967,
+       "x": "That is a very common guess, but the Moon actually \"does not make its own light\" [c2]. \n\nIf the Moon worked like a light bulb and made its o"
+      },
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [
+        "action next_step, wanted back_to_question|hint",
+        "moved on without evidence"
+       ],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        100,
+        70
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 37168,
+       "x": "Spot on! Sunlight hits the Moon and bounces off to our eyes, which is why we can see it. \n\nThe Sun is always lighting up half of the Moon [c3]. Imagine holding a sports ball in a dark room with a flashlight pointed at one side: half of the ball is bright, and the other half is dark. As the Moon travels in a circle (or orbits) around Earth, we get to see different amounts of that lit-up half [c3]. \n\nSo, why do you think the Moon looks like a thin crescent on some nights and a full circle on others?"
+      },
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "incorrect",
+       "is": "misread_question",
+       "ch": [],
+       "f": [
+        "action ask_again, wanted next_step"
+       ],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        100,
+        70
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 32840,
+       "x": "That is a great point about how the Moon gets its light, but that answers our previous question instead! \n\nLet's think about how the Moon moves. The Sun is always lighting up half of the Moon [c3]. As the Moon travels, or orbits, around Earth, we get to see different amounts of that bright, lit-up half [c3]. \n\nSo, why does the Moon look like a thin crescent on some nights and a full circle on others?"
+      },
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        79,
+        73
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 55402,
+       "x": "Spot on! You nailed it: phases happen because we see different amounts of the lit half as the Moon orbits Earth. \n\nSometimes people think th"
+      },
+      {
+       "a": "hint",
+       "i": "nudge",
+       "v": "partial",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        86,
+        100
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 32584,
+       "x": "You are completely right that a lunar eclipse is when Earth's shadow falls on the Moon [c4]. \n\nHowever, you still need to explain what a hal"
+      },
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        70
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 24119,
+       "x": "Yes, exactly right—a half moon is just a phase where we see half of the lit side because of the Moon's position as it orbits, and not becaus"
+      },
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "incorrect",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        27,
+        67
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 24319,
+       "x": "That side of the Moon doesn't shine because the Sun's rays do not reach it [c3], so there is no light to bounce off toward our eyes. \n\nLet's"
+      },
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "incorrect",
+       "is": "misread_question",
+       "ch": [],
+       "f": [
+        "action ask_again, wanted final_check"
+       ],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        69
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 25019,
+       "x": "You described how we go from a new moon to a full moon, but I asked how we get *from* a full moon *to* a new moon! If we see a full moon tonight, where does the Moon need to travel in its orbit so that the lit half faces away from us, giving us a new moon [c3]?"
+      },
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "incorrect",
+       "is": "misread_question",
+       "ch": [],
+       "f": [
+        "action ask_again, wanted summary"
+       ],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        75,
+        50,
+        55
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 17905,
+       "x": "You are spot on that a crescent is a phase and not a shadow! But let's look back at how the Moon gets from a full moon to a new moon. \n\nRemember, during a full moon, the bright, lit half of the Moon faces right toward us [c3]. As the Moon continues traveling along its orbit, it keeps moving until that lit half faces completely away from us [c3]. \n\nSo, when the Moon has moved so that its lit half is facing entirely away from Earth, what phase do we see in the night sky [c3]?"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-he-understands",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        42,
+        83
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 37470,
+       "x": "כל הכבוד! תשובה מדויקת – הלב מתכווץ כמו משאבה ודואג שהדם יגיע עם חמצן ומזון לכל האיברים בגוף. \n\nעכשיו נכיר את \"הכבישים\" שדרכם זורם הדם בגוף "
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-he-misconception",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 0,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": "counterexample",
+       "v": "incorrect",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        85
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 16124,
+       "x": "זה נראה כמו רעיון הגיוני בהתחלה, אבל הלב בעצם לא מייצר או מנקה את הדם. \n\nתאר לעצמך משאבת אופניים: היא דוחפת אוויר לתוך הגלגל, אבל היא לא מיי"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-he-copied",
+     "st": "complete",
+     "p": false,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "reviewing",
+      "currentStep": 2,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "probe",
+       "i": null,
+       "v": "correct",
+       "is": "copied",
+       "ch": [
+        "copied_from_source"
+       ],
+       "f": [
+        "approval language on an answer that was not correct"
+       ],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        0
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 17293,
+       "x": "התשובה שלך מדויקת מאוד ומבוססת היטב על הטקסט [c4]! \n\nכדי לוודא שאתה שולט בחומר בצורה מושלמת, נסה להסביר את אותו הדבר במילים שלך שלך. איך היית מסביר לחבר בכיתה, במילים פשוטות משלך, מה בדיוק קורה שם בתוך הנימים הדקים?"
+      },
+      {
+       "a": "final_check",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [],
+       "inv": 0,
+       "sup": [],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 47579,
+       "x": "התשובה שלך נכונה ומדויקת! \n\nכעת, לפני שנסיים את השיעור, נעשה מבחן קצרצר הכולל 3 שאלות שעונים עליהן מהזיכרון ובלי רמזים. \n\nהנה השאלה הראשונה:"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-he-misread",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "incorrect",
+       "is": "misread_question",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        100
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 43705,
+       "x": "הזכרת עובדה מעניינת מאוד על פעימות הלב, אבל אנחנו רוצים כעת להתמקד בצינורות שהדם זורם דרכם. \n\nבגוף שלנו יש שני סוגים עיקריים של צינורות דם: "
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-he-improves",
+     "st": "complete",
+     "p": false,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 2,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "hint",
+       "i": "counterexample",
+       "v": "incorrect",
+       "is": "none",
+       "ch": [],
+       "f": [
+        "approval language on an answer that was not correct"
+       ],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        38,
+        41,
+        9
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 24658,
+       "x": "זה נכון שפעמים רבות יש הבדל בצבע הדם בין כלי הדם [c3]. אבל אם ההבדל היחיד היה הצבע, היינו מתבלבלים במקומות מסוימים בגוף. לדוגמה, אם נחשוב שכל העורקים תמיד מובילים רק דם אדום ובריא, נפספס את העובדה שיש עורק מיוחד שיוצא מהלב אל הריאות והדם בו שונה [c3]! \n\nהצבע הוא רק סימן צדדי, והתפקיד האמיתי קשור ל**לאן** הדם זורם ביחס ללב [c3]. \n\nנסו לחשוב שוב בעזרת הדוגמה של משאבת מים: לאן לדעתכם עורק מוביל את הדם, ולאן וריד מחזיר אותו?"
+      },
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [
+        "action next_step, wanted back_to_question|hint",
+        "moved on without evidence"
+       ],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        57,
+        75
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 28328,
+       "x": "כל הכבוד! בדיוק רב – עורק מוביל דם שיוצא החוצה מהלב, ווריד מחזיר דם שחוזר חזרה אל הלב. \n\nעכשיו כשהדם הגיע לכלי דם קטנים וצפופים שמגיעים לכל מקום בגוף, הוא עובר דרך כלי דם זעירים שנקראים **נימים**. דמיינו צינורות השקיה קטנטנים עם חורים מיקרוסקופיים, או שליחים שמביאים חבילות בדיוק לפתח הבית. בנימים הדקים הללו קורה הקסם האמיתי: החמצן והמזון עוברים מהדם אל תאי הגוף שלנו, ובאותו זמן פחמן דו־חמצני ופסולת עוברים מהתאים חזרה אל הדם [c4]. זה קורה שם כי הדפנות של הנימים דקות מאוד [c4].\n\nמה קורה בנימים, ולמה החילוף החשוב הזה קורה דווקא שם ולא בעורקים הגדולים?"
+      },
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "incorrect",
+       "is": "misread_question",
+       "ch": [],
+       "f": [
+        "action ask_again, wanted next_step"
+       ],
+       "c": [
+        "c4"
+       ],
+       "inv": 0,
+       "sup": [
+        18
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 19565,
+       "x": "שמת לב? ענית הפעם על התפקיד של עורקים וורידים, אבל השאלה שלנו מתמקדת במה שקורה ב**נימים**. \n\nהדם זורם דרך העורקים ומגיע בסוף אל הנימים הזעירים. נסה לחשוב: מה קורה לחמצן ולמזון כשהם מגיעים לנימים האלו, ולמה החילוף החשוב הזה קורה דווקא שם ולא בצינורות הגדולים [c4]?"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-he-other-part",
+     "st": "complete",
+     "p": true,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "answer_question",
+       "i": null,
+       "v": "question",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c5",
+        "c2",
+        "c1"
+       ],
+       "inv": 0,
+       "sup": [
+        40,
+        57,
+        24
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 47044,
+       "x": "שלום! לפי המסמך, מבוגרים בריאים יכולים לתרום דם [c5], ולכן ילדים עדיין לא תורמים דם. \n\nעכשיו בוא נחזור אל הלב המופלא שלנו. הלב הוא שריר שפוע"
+      },
+      {
+       "a": "next_step",
+       "i": null,
+       "v": "correct",
+       "is": "none",
+       "ch": [],
+       "f": [],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        79
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 40341,
+       "x": "כל הכבוד! ענית נכון מאוד: הלב מתכווץ, דוחף את הדם ומביא חמצן ומזון לכל איברי הגוף.\n\nעכשיו נכיר את הצינורות שבהם זורם הדם. דמיין כבישים בגוף:"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-he-not-in-document",
+     "st": "complete",
+     "p": false,
+     "ef": [],
+     "sp": [],
+     "end": {
+      "status": "active",
+      "currentStep": 1,
+      "final": null
+     },
+     "t": [
+      {
+       "a": "ask_again",
+       "i": null,
+       "v": "off_topic",
+       "is": "none",
+       "ch": [],
+       "f": [
+        "action ask_again, wanted answer_question",
+        "did not say the document does not cover it"
+       ],
+       "c": [
+        "c3"
+       ],
+       "inv": 0,
+       "sup": [
+        42
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 32785,
+       "x": "זו שאלה מעניינת מאוד, אבל בוא נחזור לרגע למסע המופלא שלנו בגוף! ראינו שהלב פועל כמשאבה שדוחפת את הדם, והדם הזה זורם בצינורות שנקראים עורקים וורידים [c3]. \n\nכדי שנבין איך הם עובדים יחד, תוכל לספר לי: מה ההבדל בין עורק לווריד?"
+      }
+     ]
+    },
+    {
+     "s": "engine",
+     "id": "ho2-he-journey",
+     "st": "stopped_quota",
+     "e": "quota_exhausted",
+     "t": [
+      {
+       "a": "hint",
+       "i": "nudge",
+       "v": "partial",
+       "is": "none",
+       "ch": [],
+       "f": [
+        "approval language on an answer that was not correct"
+       ],
+       "c": [
+        "c2"
+       ],
+       "inv": 0,
+       "sup": [
+        50,
+        56
+       ],
+       "m": [
+        "gemini-3.5-flash-lite"
+       ],
+       "ms": 47141,
+       "x": "נכון מאוד, הלב אכן דוחף דם בגוף! [c2] \n\nכדי לעשות את זה, הלב הוא שריר מיוחד שגם **מתכווץ** בכל פעימה [c2]. \n\nעכשיו נשאר לחשוב על השלם: לאן הדם הזה צריך להגיע בכל פעימה, ולמה זה כל כך חשוב לכל שאר חלקי הגוף?"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}
