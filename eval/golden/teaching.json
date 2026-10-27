@@ -56,14 +56,14 @@
         { "student": "Oh right, the chlorophyll takes in red and blue light and bounces the green light back, so the leaf looks green.", "label": { "verdict": "correct" }, "expect": { "actions": ["back_to_question"] } },
         { "student": "It makes glucose, which it uses for energy and to grow, and oxygen, which goes out through the stomata.", "label": { "verdict": "correct" }, "expect": { "actions": ["final_check"] } }
       ],
-      "end": { "levels": { "2": ["shown_with_help"] }, "revisits": { "1": "pass" }, "status": "reviewing" } },
+      "end": { "levels": { "2": ["shown_with_help"] }, "states": { "1": ["needs_review"], "2": ["developing"] }, "revisits": { "1": "pass" }, "status": "reviewing" } },
 
     { "id": "dev-en-improves", "split": "dev", "category": "improves", "lesson": "photosynthesis-en", "at": 0,
       "turns": [
         { "student": "Water from the ground, through the roots.", "label": { "verdict": "partial", "conceptsMissing": ["carbon dioxide from the air"] }, "expect": { "actions": ["hint"], "noPraise": true } },
         { "student": "And carbon dioxide from the air, which gets in through tiny holes in the leaves.", "label": { "verdict": "correct" }, "expect": { "actions": ["next_step"] } }
       ],
-      "end": { "levels": { "0": ["shown_with_help"] }, "step": 1 } },
+      "end": { "levels": { "0": ["shown_with_help"] }, "states": { "0": ["developing"] }, "step": 1 } },
 
     { "id": "dev-en-struggles", "split": "dev", "category": "struggles", "lesson": "photosynthesis-en", "at": 0,
       "turns": [
@@ -131,7 +131,7 @@
         { "student": "השמש מחממת את המים והם הופכים לאדים שעולים לאוויר.", "label": { "verdict": "correct" }, "expect": { "actions": ["back_to_question"] } },
         { "student": "כי למעלה האוויר קר, האדים מתקררים ומתעבים לטיפות, ומהן נוצרים העננים.", "label": { "verdict": "correct" }, "expect": { "actions": ["next_step"] } }
       ],
-      "end": { "levels": { "1": ["shown_with_help"] }, "revisits": { "0": "pass" }, "step": 2 } },
+      "end": { "levels": { "1": ["shown_with_help"] }, "states": { "0": ["needs_review"], "1": ["developing"] }, "revisits": { "0": "pass" }, "step": 2 } },
 
     { "id": "dev-he-struggles", "split": "dev", "category": "struggles", "lesson": "water-cycle-he", "at": 2, "earlier": { "0": "mastered", "1": "mastered" },
       "turns": [
@@ -146,6 +146,16 @@
       "turns": [ { "student": "כמה זמן לוקח לטיפת מים לעשות סיבוב שלם במחזור המים?", "label": { "verdict": "question" }, "expect": { "actions": ["answer_question"], "notInDocument": true } } ],
       "end": { "step": 0 } },
 
+    { "id": "dev-he-fragile-prerequisite", "split": "dev", "category": "fragile_prerequisite", "lesson": "water-cycle-he", "at": 1, "earlier": { "0": "learned" },
+      "turns": [
+        { "student": "כי העננים קרים.", "label": { "verdict": "incorrect" }, "accept": { "verdict": ["incorrect", "partial"] }, "expect": { "actions": ["hint"], "noPraise": true } },
+        { "student": "אולי כי הרוח דוחפת אותם למעלה?", "label": { "verdict": "incorrect" }, "accept": { "verdict": ["incorrect", "question"] }, "expect": { "actions": ["check_earlier"], "noPraise": true } },
+        { "when": ["check_earlier"], "student": "השמש מחממת את המים והם מתאדים לאדים שעולים לאוויר.", "label": { "verdict": "correct" }, "expect": { "actions": ["back_to_question"] } },
+        { "student": "למעלה האוויר קר, האדים מתקררים ומתעבים לטיפות, וכך נוצרים עננים.", "label": { "verdict": "correct" }, "expect": { "actions": ["next_step", "back_to_question"] } },
+        { "when": ["back_to_question"], "student": "למעלה האוויר קר, האדים מתקררים ומתעבים לטיפות, וכך נוצרים עננים.", "label": { "verdict": "correct" }, "expect": { "actions": ["next_step"] } }
+      ],
+      "end": { "states": { "0": ["needs_review"], "1": ["developing"] }, "step": 2 } },
+
     { "id": "dev-en-journey", "split": "dev", "category": "journey", "lesson": "photosynthesis-en", "at": 0,
       "turns": [
         { "student": "Water, through the roots.", "label": { "verdict": "partial", "conceptsMissing": ["carbon dioxide from the air"] }, "expect": { "actions": ["hint"], "noPraise": true } },
@@ -157,7 +167,7 @@
         { "about": 1, "student": "Because chlorophyll reflects green light and absorbs the red and blue light.", "label": { "verdict": "correct" }, "expect": { "actions": ["final_check"], "noHint": true } },
         { "about": 2, "student": "Glucose that the plant uses for energy, and oxygen that goes out of the leaf.", "label": { "verdict": "correct" }, "expect": { "actions": ["summary"] } }
       ],
-      "end": { "levels": { "0": ["applied"], "1": ["applied"], "2": ["applied"] }, "status": "completed" } },
+      "end": { "levels": { "0": ["applied"], "1": ["applied"], "2": ["applied"] }, "states": { "0": ["demonstrated"], "1": ["demonstrated"], "2": ["demonstrated"] }, "status": "completed" } },
 
     { "id": "dev-en-paraphrase-correct", "split": "dev", "category": "paraphrase", "lesson": "photosynthesis-en", "at": 0, "gradeOnly": true,
       "variants": ["Carbon dioxide from the air via the stomata, and water from the soil via the roots.", "The leaves take in CO2 from the air and the roots take up water from the ground.", "It pulls water up from the dirt with its roots and breathes in carbon dioxide through little pores in its leaves."],

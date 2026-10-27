@@ -1,4 +1,5 @@
 import { assessedStepIndex, inFinalCheck } from '../../shared/lesson.js';
+import { misconceptionsShown } from '../../shared/learner.js';
 import { AppError } from '../errors.js';
 import { ASSESS_SYSTEM, buildAssessPrompt } from './prompts.js';
 
@@ -151,7 +152,7 @@ export const assessAnswer = async ({ provider, plan, progress, tutorQuestion, st
     const raw = await provider.generateJson({
       task: 'assessment',
       system: ASSESS_SYSTEM,
-      prompt: buildAssessPrompt({ plan, step, tutorQuestion, studentMessage, sources, related, finalCheck: inFinalCheck(progress) }),
+      prompt: buildAssessPrompt({ plan, step, tutorQuestion, studentMessage, sources, related, finalCheck: inFinalCheck(progress), seen: misconceptionsShown(progress) }),
       signal,
       onMeta,
     });

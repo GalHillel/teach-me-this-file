@@ -46,14 +46,16 @@ No names or other personal data; the student's text stays in the chat messages, 
 | State | Meaning | Set by |
 | --- | --- | --- |
 | `not_assessed` | No graded answer about this step | No entries |
-| `emerging` | Answers so far are partial or wrong, without a named misconception; or right but copied, unsure or without the asked reason | Partial or incorrect without misconception; a right answer with issue `copied`, `hedged` or `unjustified` |
+| `emerging` | Answers so far are partial or wrong, without a named misconception; or right but copied, unsure or without the asked reason; or still wrong after the full explanation | Partial or incorrect without misconception; a right answer with issue `copied`, `hedged` or `unjustified`; a wrong answer after a worked solution |
 | `developing` | Right only with help, or a misconception was named and not yet followed by an independent right answer | A right answer with support other than `independent`; an incorrect answer with a misconception |
 | `demonstrated` | A right answer to the whole question with no help on the step | A right, unqualified answer with support `independent` (check, transfer or practice) |
-| `needs_review` | Was demonstrated, then a later answer in this lesson showed a gap | A gap entry, or a wrong transfer, practice or prerequisite answer after `demonstrated` |
+| `needs_review` | The lesson had moved past the step (demonstrated or developing), then a later answer in this lesson showed a gap | A gap entry, or a wrong transfer, practice or prerequisite answer on a step that was `developing` or `demonstrated` |
 
 `needs_review` means "a later answer in this lesson missed it". It says nothing about forgetting over time, which this app cannot observe.
 
-**Confidence** is a word, not a number: `low` (one answer, or only partial evidence), `medium` (one independent right answer on the step's own question), `high` (an independent right answer to a new transfer question, or two independent right answers). A state from assisted answers is never above `medium`.
+**Confidence** is a word, not a number: `low` (one answer, or only partial evidence), `medium` (one independent right answer on the step's own question, or two or more answers for the other states), `high` (an independent right answer to a new transfer or practice question, or two independent right answers, and no missed later answer or gap on the step). A state from assisted answers is never above `medium`.
+
+The older levels the interface used (`shown`, `applied` and so on) are now read from the state: `demonstrated` is `applied` with high confidence from a transfer or practice answer and `shown` otherwise, `developing` is `shown_with_help`, `emerging` and `needs_review` are `needs_practice`. Sessions saved before the log existed, and steps the evaluation starts as already done, get their entries from the step's outcome (`mastered` independent, `learned` hinted, `recovered` right after a worked solution, `review` wrong after one), its prerequisite check and its final-check result.
 
 **Rules that keep claims honest**
 

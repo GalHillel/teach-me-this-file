@@ -1,6 +1,8 @@
 import { AppError } from './errors.js';
 import { OUTCOMES as LESSON_OUTCOMES, REVIEW_KINDS, REVIEW_RESULTS, REVISITS } from './lesson/progress.js';
 import { INTERVENTIONS } from './lesson/policy.js';
+import { ISSUES } from './lesson/assessor.js';
+import { EVIDENCE_LIMIT, QUESTIONS, SUPPORTS } from '../shared/learner.js';
 
 export const LIMITS = {
   teacherPrompt: 3000,
@@ -175,6 +177,41 @@ const used = (value) => {
   return list;
 };
 
+const CODE = /^[a-z_]{1,40}$/;
+const VERDICTS = ['correct', 'partial', 'incorrect'];
+
+const evidenceEntry = (entry, stepCount) => {
+  if (!isObject(entry) || !Number.isInteger(entry.step) || !Number.isInteger(entry.n)) fail('progress.evidence is not valid');
+  const step = count(entry.step, stepCount - 1, 'progress.evidence step');
+  const n = count(entry.n, 1000000, 'progress.evidence n');
+  if (!CODE.test(entry.move ?? '') || !CODE.test(entry.reason ?? '')) fail('progress.evidence move is not valid');
+  const message = entry.message ?? null;
+  if (message !== null && (typeof message !== 'string' || !/^[\w-]{1,60}$/.test(message))) fail('progress.evidence message is not valid');
+  const common = { n, step, move: entry.move, reason: entry.reason, ...(message ? { message } : {}) };
+  if (entry.gap === true) return { ...common, gap: true, from: count(entry.from, stepCount - 1, 'progress.evidence from') };
+  if (!QUESTIONS.includes(entry.question) || !SUPPORTS.includes(entry.support) || !VERDICTS.includes(entry.verdict) || !ISSUES.includes(entry.issue)) {
+    fail('progress.evidence entry is not valid');
+  }
+  const sources = array(entry.sources ?? [], 'progress.evidence sources', 6);
+  if (sources.some((id) => typeof id !== 'string' || !/^c\d{1,4}$/.test(id))) fail('progress.evidence sources are not valid');
+  return {
+    ...common,
+    question: entry.question,
+    support: entry.support,
+    verdict: entry.verdict,
+    issue: entry.issue,
+    misconception: string(entry.misconception ?? '', 'progress.evidence misconception', { max: 160, required: false }),
+    sources,
+  };
+};
+
+const evidence = (value, stepCount) => {
+  if (value === undefined || value === null) return {};
+  const list = array(value, 'progress.evidence', EVIDENCE_LIMIT).map((entry) => evidenceEntry(entry, stepCount));
+  if (list.some((entry, index) => index > 0 && entry.n <= list[index - 1].n)) fail('progress.evidence is out of order');
+  return { evidence: list };
+};
+
 const progress = (value, plan) => {
   const stepCount = plan.steps.length;
   if (!isObject(value)) fail('missing progress');
@@ -189,6 +226,7 @@ const progress = (value, plan) => {
     currentStep: value.currentStep,
     review: review(value.review, value.status, stepCount),
     final: final(value.final, stepCount),
+    ...evidence(value.evidence, stepCount),
     steps: steps.map((step) => {
       if (!isObject(step) || !STEP_STATUSES.has(step.status) || !OUTCOMES.has(step.outcome ?? null) || !PHASES.has(step.phase ?? 'learn')) {
         fail('progress step is not valid');

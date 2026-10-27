@@ -59,6 +59,16 @@ describe('chat reducer', () => {
     expect(state.messages[2]).toMatchObject({ status: 'done', stepIndex: 1, move: 'advance', sources: [{ chunkId: 'c2', kind: 'based' }] });
   });
 
+  it('links the new evidence entries to the student message and keeps the reason for the move', () => {
+    const logged = { ...advanced, evidence: [{ n: 1, step: 0, question: 'check', support: 'independent', verdict: 'correct', issue: 'none', misconception: '', sources: ['c1'], move: 'advance', reason: 'right_without_help' }] };
+    const turn = [answerTurn[0], { type: 'progress', move: 'advance', reason: 'right_without_help', progress: logged, assessment: { verdict: 'correct', confidence: 'high', checks: [] } }, answerTurn[3]];
+    const state = chatReducer(turn.reduce(chatReducer, initChat({ plan, progress: { ...progress, evidence: [] }, document: { chunks } })), { type: 'done' });
+    expect(state.progress.evidence[0].message).toBe('s1');
+    expect(state.messages.at(-1).reason).toBe('right_without_help');
+    const later = chatReducer(chatReducer(chatReducer(state, { type: 'turn_started', tutorId: 't2', student: { id: 's2', content: 'x' } }), { type: 'progress', move: 'clarify', progress: state.progress, tutorId: 't2' }), { type: 'done', tutorId: 't2' });
+    expect(later.progress.evidence.map((entry) => entry.message)).toEqual(['s1']);
+  });
+
   it('adds a re-check note and no step change after an explanation', () => {
     const recheck = { ...progress, steps: [{ ...progress.steps[0], phase: 'recheck', attempts: 3 }, progress.steps[1]] };
     const state = run([

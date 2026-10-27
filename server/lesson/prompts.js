@@ -125,13 +125,15 @@ Return only JSON:
 }
 "completeness" is the share of what the question asked for that the student got right, from 0 to 1.`;
 
-const earlierSteps = (plan, step) => {
+const earlierSteps = (plan, step, seen = {}) => {
   const lines = (step.prerequisites ?? [])
     .map((id) => plan.steps.findIndex((item) => item.id === id))
     .filter((index) => index >= 0)
     .map((index) => {
       const earlier = plan.steps[index];
-      return `${index + 1}. ${fence(earlier.title)}: ${fence(earlier.goal)}${earlier.commonMistake ? `\n   Common mistake there: ${fence(earlier.commonMistake)}` : ''}`;
+      const mistake = earlier.commonMistake ? `\n   Common mistake there: ${fence(earlier.commonMistake)}` : '';
+      const student = seen[index]?.length ? `\n   This student's wrong ideas there: ${seen[index].map(fence).join('; ')}` : '';
+      return `${index + 1}. ${fence(earlier.title)}: ${fence(earlier.goal)}${mistake}${student}`;
     });
   return lines.length ? lines.join('\n') : 'none';
 };
@@ -142,13 +144,13 @@ export const plannedQuestion = (step, finalCheck) => (finalCheck && step.transfe
   ? { question: step.transferQuestion, criteria: step.transferCriteria || step.successCriteria }
   : { question: step.checkQuestion, criteria: step.successCriteria });
 
-export const buildAssessPrompt = ({ plan, step, tutorQuestion, studentMessage, sources, related = [], finalCheck = false }) => `Audience: ${fence(plan.audience)}
+export const buildAssessPrompt = ({ plan, step, tutorQuestion, studentMessage, sources, related = [], finalCheck = false, seen = {} }) => `Audience: ${fence(plan.audience)}
 Step goal: ${fence(step.goal)}
 Planned check question: ${fence(plannedQuestion(step, finalCheck).question)}
 Success criteria: ${fence(plannedQuestion(step, finalCheck).criteria)}
 Common mistake for this step: ${fence(step.commonMistake || 'none listed')}
 Earlier steps this step builds on:
-${earlierSteps(plan, step)}
+${earlierSteps(plan, step, seen)}
 
 <sources>
 ${formatPassages(sources)}

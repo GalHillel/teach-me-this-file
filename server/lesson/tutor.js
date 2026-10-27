@@ -119,9 +119,9 @@ export const runTurn = async ({ provider, input, signal, send }) => {
     });
   }
 
-  const { move, progress, intervention, prerequisite, requested } = planMove(input.progress, { kind, assessment, plan });
+  const { move, progress, reason, intervention, prerequisite, requested } = planMove(input.progress, { kind, assessment, plan, sourceIds: sources.current.map((chunk) => chunk.id) });
   const promptSources = pickSources({ plan, before: input.progress, after: progress, move, sources });
-  send('progress', { move, progress, assessment: publicAssessment(assessment), intervention });
+  send('progress', { move, reason, progress, assessment: publicAssessment(assessment), intervention });
   send('status', { phase: 'teaching' });
 
   const canary = newCanary();

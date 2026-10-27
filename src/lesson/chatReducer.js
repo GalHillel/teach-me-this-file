@@ -66,9 +66,15 @@ const citedSources = (citations, chunks) => {
 
 const sourceIdsOf = (plan, indexes) => [...new Set(indexes.flatMap((index) => plan.steps[index]?.sourceIds ?? []))];
 
+const withMessageIds = (progress, before, studentId) => {
+  if (!studentId || !Array.isArray(progress?.evidence)) return progress;
+  const last = before?.evidence?.at(-1)?.n ?? 0;
+  return { ...progress, evidence: progress.evidence.map((entry) => (entry.n > last && !entry.message ? { ...entry, message: studentId } : entry)) };
+};
+
 const commitTurn = (state, citations = null) => {
   const { tutorId, studentId, pending } = state.turn;
-  const progress = pending?.progress ?? state.progress;
+  const progress = withMessageIds(pending?.progress ?? state.progress, state.progress, studentId);
   const tutor = state.messages.find((message) => message.id === tutorId);
   const before = activeStepIndex(state.progress);
   const stepIndex = activeStepIndex(progress);
@@ -85,6 +91,7 @@ const commitTurn = (state, citations = null) => {
     sources,
     stepIndex,
     move: pending?.move ?? null,
+    reason: pending?.reason ?? null,
     intervention: pending?.intervention ?? null,
     citations: citations ? { cited: citations.cited ?? [], quotes: citations.quotes ?? [] } : null,
   });
@@ -133,7 +140,7 @@ export const chatReducer = (state, action) => {
     case 'phase':
       return { ...state, turn: { ...state.turn, status: action.phase } };
     case 'progress':
-      return { ...state, turn: { ...state.turn, pending: { move: action.move, progress: action.progress, assessment: action.assessment ?? null, intervention: action.intervention ?? null } } };
+      return { ...state, turn: { ...state.turn, pending: { move: action.move, reason: action.reason ?? null, progress: action.progress, assessment: action.assessment ?? null, intervention: action.intervention ?? null } } };
     case 'notice':
       return { ...state, notice: action.notice };
     case 'delta': {

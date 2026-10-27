@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { verifyCitations } from '../shared/citations.js';
+import { stepState } from '../shared/learner.js';
 import { stepEvidence } from '../shared/lesson.js';
 import { termGroups } from '../shared/text.js';
 import { normalizeAssessment } from '../server/lesson/assessor.js';
@@ -269,6 +270,7 @@ const levelOf = (system, progress, index) => (system === 'naive' ? naiveLevel(pr
 const STATE_OF_LEVEL = { not_started: 'not_assessed', shown_with_help: 'developing', shown: 'demonstrated', applied: 'demonstrated' };
 
 export const stateOf = (system, progress, index) => {
+  if (system !== 'naive' && Array.isArray(progress.evidence)) return stepState(progress, index).state;
   const level = levelOf(system, progress, index);
   const step = progress.steps[index];
   if (level === 'in_progress') return step.attempts > 0 || step.hints > 0 ? 'emerging' : 'not_assessed';

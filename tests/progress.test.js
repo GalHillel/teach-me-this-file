@@ -286,7 +286,7 @@ describe('going back to a prerequisite', () => {
     expect(answerChain(progress, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'], missingPrerequisite: 1 }).move).not.toBe('prerequisite_check');
   });
 
-  it('counts a passed final check as applied, even after a failed revisit', () => {
+  it('counts a passed final check as demonstrated after a failed revisit, but with medium confidence', () => {
     const { progress: atStep2 } = runChain(['correct']);
     const gap = answerChain(atStep2, 'incorrect', 'high', 'none', { conceptsMissing: ['photosynthesis inputs'], missingPrerequisite: 1 });
     const back = answerChain(gap.progress, 'incorrect');
@@ -295,7 +295,7 @@ describe('going back to a prerequisite', () => {
     expect(checking.review.queue).toContain(0);
     const { progress: done } = runChain(checking.review.queue.map(() => 'correct'), checking);
     expect(done.steps[0].revisit).toBe('fail');
-    expect(stepEvidence(done, 0)).toMatchObject({ level: 'applied', signals: expect.arrayContaining(['prerequisite_gap', 'final_pass']) });
+    expect(stepEvidence(done, 0)).toMatchObject({ level: 'shown', state: 'demonstrated', confidence: 'medium', signals: expect.arrayContaining(['prerequisite_gap', 'final_pass']) });
   });
 
   it('limits non-answers during the detour', () => {
@@ -451,7 +451,7 @@ describe('final check', () => {
     expect(activeStepIndex(start.progress)).toBe(1);
     const finish = answer(start.progress, 'correct');
     expect(finish.move).toBe('review_finish');
-    expect(stepEvidence(finish.progress, 1).level).toBe('shown_with_help');
+    expect(stepEvidence(finish.progress, 1)).toMatchObject({ level: 'shown', state: 'demonstrated', confidence: 'medium' });
   });
 
   it('has nothing to practise after a clean lesson, and only practises a completed lesson', () => {
