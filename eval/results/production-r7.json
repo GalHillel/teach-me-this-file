@@ -1,0 +1,962 @@
+{
+  "date": "2026-10-27",
+  "commit": "47f06c8",
+  "note": "Production with the site key and its model order. Student answers written by me after reading each generated question; the label and why fields say what each answer was meant to be.",
+  "runs": {
+    "en": {
+      "site": "https://teach-me-this-file.vercel.app",
+      "bundle": "/assets/index-DE2YVcnZ.js",
+      "viewport": "desktop 1360",
+      "plan": [
+        {
+          "title": "How Sound Begins and Moves",
+          "checkQuestion": "If you pluck a guitar string and then touch it to stop it from moving, what happens to the sound and why?",
+          "successCriteria": "Explains that the sound stops because the string stops vibrating, so it can no longer push nearby particles.",
+          "commonMistake": "Believing that sound continues moving forward on its own even after the vibrating source stops.",
+          "transferQuestion": "When you touch your throat while humming, you feel a gentle buzzing. What are your vocal cords doing to make that sound?",
+          "transferCriteria": "Mentions that the vocal cords are vibrating and pushing air particles to produce sound.",
+          "prerequisites": [],
+          "sourceIds": [
+            "c2",
+            "c3"
+          ]
+        },
+        {
+          "title": "Why Sound Needs a Medium",
+          "checkQuestion": "Why can't two astronauts outside their spaceship hear each other if they try to shout through empty space?",
+          "successCriteria": "States that space has almost no particles to pass the vibrations along.",
+          "commonMistake": "Thinking space blocks sound because it is cold or airless in terms of breathing, rather than recognizing the lack of particles to carry vibrations.",
+          "transferQuestion": "If an alarm clock rings inside a sealed glass jar and all the air is pumped out, what will happen to the sound?",
+          "transferCriteria": "States that the sound will stop being heard because there are no air particles left to transmit the vibration.",
+          "prerequisites": [
+            "s1"
+          ],
+          "sourceIds": [
+            "c3",
+            "c4"
+          ]
+        },
+        {
+          "title": "Speed of Sound in Different Materials",
+          "checkQuestion": "Does sound travel faster through a wooden desk or through the air around it, and why?",
+          "successCriteria": "Identifies that sound travels faster through the wooden desk because its particles are packed tightly together.",
+          "commonMistake": "Thinking sound moves faster through air because air feels thinner and easier to move through.",
+          "transferQuestion": "In movies, characters often place their ear on a metal train track to listen for an oncoming train. Why does listening through the track work better than listening through the air?",
+          "transferCriteria": "Explains that metal is a solid with closely packed particles, allowing the train's sound vibrations to travel much faster and clearer than through air.",
+          "prerequisites": [
+            "s1",
+            "s2"
+          ],
+          "sourceIds": [
+            "c5"
+          ]
+        }
+      ],
+      "turns": [
+        {
+          "label": "plan",
+          "why": null,
+          "student": null,
+          "grade": null,
+          "move": "introduce",
+          "intervention": null,
+          "tutor": "Hello! Welcome to today's science lesson. Today, we are going to learn about how sound is made and how it travels!\n\nEvery sound begins with a **vibration**, which means something is moving back and forth very quickly [c2]. When an object vibrates, it pushes against tiny particles right next to it [c3]. Those particles then bump into their neighbors, passing the energy along like a chain reaction or a line of falling dominoes [c3]. \n\nTo see how this works, imagine playing an instrument! If you pluck a guitar string and then touch it with your finger to stop it from moving, what happens to the sound, and why?",
+          "cited": [
+            "c2",
+            "c3"
+          ],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-3.6-flash"
+          ],
+          "firstTokenMs": 7613,
+          "totalMs": 8333,
+          "error": null,
+          "status": "active",
+          "step": 0,
+          "review": null,
+          "counter": "Step 1 of 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "ltr",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "step1-correct",
+          "why": "correct own words, built from successCriteria of step 1",
+          "student": "The sound stops, because the string is not vibrating any more, so it can't push on the air particles next to it.",
+          "grade": {
+            "verdict": "correct",
+            "issue": "none",
+            "misconception": "",
+            "checks": []
+          },
+          "move": "advance",
+          "intervention": null,
+          "tutor": "That is spot on! You correctly pointed out that stopping the vibration stops the string from pushing on nearby air particles, which stops the sound.\n\nNow, let's look at where sound can travel. Since sound travels by particles bumping into each other [c3], it needs a material—like air, water, or solids—to move through [c3]. \n\nOuter space is a **vacuum**, which means it is almost completely empty with virtually no particles in it [c4]. \n\nThinking about how sound travels, why wouldn't two astronauts outside their spaceship be able to hear each other if they tried to shout through empty space?",
+          "cited": [
+            "c3",
+            "c4"
+          ],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-3.6-flash",
+            "gemini-3.6-flash"
+          ],
+          "firstTokenMs": 4047,
+          "totalMs": 4740,
+          "error": null,
+          "status": "active",
+          "step": 1,
+          "review": null,
+          "counter": "Step 2 of 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "ltr",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "step2-mistake",
+          "why": "wrong answer built from commonMistake of step 2",
+          "student": "Because space is freezing cold and there's no air to breathe, so they can't shout properly.",
+          "grade": {
+            "verdict": "incorrect",
+            "issue": "none",
+            "misconception": "sound cannot travel in space because it is too cold or because astronauts cannot breathe to shout, rather than a lack of particles to carry vibrations",
+            "checks": []
+          },
+          "move": "hint",
+          "intervention": "counterexample",
+          "tutor": "You noticed that there is no air to breathe in space!\n\nHowever, imagine being in a freezing cold place on Earth, like a snowy mountain peak. People can still hear each other shout in the cold! \n\nIf sound can travel through freezing air on Earth, what does that tell us about whether cold temperature is what actually stops sound from moving through space? Try thinking about what is missing in space that sound needs to bump along!",
+          "cited": [],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-3.6-flash",
+            "gemini-3.6-flash"
+          ],
+          "firstTokenMs": 8647,
+          "totalMs": 11484,
+          "error": null,
+          "status": "active",
+          "step": 1,
+          "review": null,
+          "counter": "Step 2 of 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "ltr",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "step2-narrow",
+          "why": "answers only the narrowed counterexample question, not the whole question",
+          "student": "So the cold is not what stops the sound. Sound can still go through cold air.",
+          "grade": {
+            "verdict": "partial",
+            "issue": "none",
+            "misconception": "",
+            "checks": []
+          },
+          "move": "hint",
+          "intervention": "focused_hint",
+          "tutor": "You are right that cold air does not stop sound! \n\nRemember, sound moves like a line of falling dominoes because vibrating objects push on tiny **particles** [c3]. \n\nSince outer space is almost completely empty, it has almost no ________ to pass the sound vibrations along [c4]. \n\nCan you fill in that missing word to explain why sound cannot travel through space?",
+          "cited": [
+            "c3",
+            "c4"
+          ],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-3.6-flash",
+            "gemini-3.6-flash"
+          ],
+          "firstTokenMs": 5218,
+          "totalMs": 5613,
+          "error": null,
+          "status": "active",
+          "step": 1,
+          "review": null,
+          "counter": "Step 2 of 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "ltr",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "step2-fill-blank",
+          "why": "answers only the fill-in-the-blank the hint narrowed to",
+          "student": "Particles.",
+          "grade": {
+            "verdict": "correct",
+            "issue": "none",
+            "misconception": "",
+            "checks": []
+          },
+          "move": "advance",
+          "intervention": null,
+          "tutor": "You got it! Exactly, outer space lacks particles to pass vibrations along.\n\nNow let's talk about how fast sound moves through different materials. In a solid material, like steel or wood, the particles are packed very closely together [c5]. Because they are so close, it takes very little time for one particle to bump into the next and pass the vibration along [c5]. In air, the particles are much further apart.\n\nImagine putting your ear flat on a wooden desk and knocking on it, versus just hearing the knock through the air. Does sound travel faster through the wooden desk or through the air around it, and why?",
+          "cited": [
+            "c5"
+          ],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-3.6-flash",
+            "gemini-3.6-flash"
+          ],
+          "firstTokenMs": 9654,
+          "totalMs": 10299,
+          "error": null,
+          "status": "active",
+          "step": 2,
+          "review": null,
+          "counter": "Step 3 of 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "ltr",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "other-part-question",
+          "why": "question about a section no step covers (Protecting your ears)",
+          "student": "Wait, can listening to loud music in headphones hurt my ears?",
+          "grade": null,
+          "move": null,
+          "intervention": null,
+          "tutor": "Yes, listening to music played loudly through headphones for a long time can damage the tiny hair cells inside your ears [c6",
+          "cited": null,
+          "invalidCitations": 0,
+          "models": null,
+          "firstTokenMs": null,
+          "totalMs": null,
+          "error": {
+            "code": "timeout",
+            "message": "The AI provider took too long to answer. Try again.",
+            "retryable": true
+          },
+          "status": "active",
+          "step": 2,
+          "review": null,
+          "counter": "Step 3 of 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "ltr",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "retry-after-timeout",
+          "why": null,
+          "student": "Try again",
+          "grade": {
+            "verdict": "question",
+            "issue": "none",
+            "misconception": "",
+            "checks": []
+          },
+          "move": "answer_question",
+          "intervention": null,
+          "tutor": "Yes, it can! Playing music loudly through headphones for a long time can damage the tiny hair cells inside your ears [c6]. Because those hair cells do not grow back, protecting your ears is very important [c6].\n\nNow, returning to our lesson on how fast sound moves: Remember that in solid objects, particles are packed tightly together, whereas in gases like air, they are spread further apart [c5]. \n\nDoes sound travel faster through a wooden desk or through the air around it, and why?",
+          "cited": [
+            "c6",
+            "c5"
+          ],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-3.6-flash",
+            "gemini-3.6-flash"
+          ],
+          "firstTokenMs": 5494,
+          "totalMs": 5898,
+          "error": null,
+          "status": "active",
+          "step": 2,
+          "review": null,
+          "counter": "Step 3 of 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "ltr",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "step3-correct",
+          "why": "correct own words from successCriteria of step 3",
+          "student": "Faster through the desk. The wood particles are squashed close together, so each one passes the vibration to the next quicker than the spread-out air particles.",
+          "grade": {
+            "verdict": "correct",
+            "issue": "none",
+            "misconception": "",
+            "checks": []
+          },
+          "move": "final_check_start",
+          "intervention": null,
+          "tutor": "You correctly noted that sound travels faster through the wooden desk because the particles in wood are packed tightly together and pass the vibration more quickly than air.\n\nBefore we move on to our summary, we have a short final check: 3 questions, answered from memory, without hints. \n\nWhen you touch your throat while humming, you feel a gentle buzzing. What are your vocal cords doing to make that sound?",
+          "cited": [],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-3.5-flash-lite",
+            "gemini-3.5-flash-lite"
+          ],
+          "firstTokenMs": 29389,
+          "totalMs": 29518,
+          "error": null,
+          "status": "reviewing",
+          "step": 2,
+          "review": {
+            "kind": "final",
+            "position": 0,
+            "queue": [
+              0,
+              1,
+              2
+            ]
+          },
+          "counter": "Final check 1 of 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "ltr",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "final-1-correct",
+          "why": "final check, transfer question of step 1, correct from transferCriteria",
+          "student": "They are vibrating, moving back and forth fast, and that pushes the air particles so the sound comes out.",
+          "grade": {
+            "verdict": "correct",
+            "issue": "none",
+            "misconception": "",
+            "checks": []
+          },
+          "move": "final_next",
+          "intervention": null,
+          "tutor": "You correctly explained that your vocal cords make sound by vibrating and pushing on air particles [c3].\n\nHere is your second question: If an alarm clock rings inside a sealed glass jar and all the air is pumped out, what will happen to the sound?",
+          "cited": [
+            "c3"
+          ],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-3.6-flash",
+            "gemini-3.6-flash"
+          ],
+          "firstTokenMs": 4235,
+          "totalMs": 4541,
+          "error": null,
+          "status": "reviewing",
+          "step": 2,
+          "review": {
+            "kind": "final",
+            "position": 1,
+            "queue": [
+              0,
+              1,
+              2
+            ]
+          },
+          "counter": "Final check 2 of 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "ltr",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "final-2-wrong",
+          "why": "final check, deliberately wrong (sound gets louder in the jar)",
+          "student": "It gets louder, because the sound bounces around inside the glass with nothing to stop it.",
+          "grade": {
+            "verdict": "incorrect",
+            "issue": "none",
+            "misconception": "sound gets louder without air because there is nothing to stop it from bouncing around",
+            "checks": []
+          },
+          "move": "final_next",
+          "intervention": null,
+          "tutor": "Actually, the sound will stop being heard altogether because once the air is pumped out, there are no particles left to carry the sound vibrations.\n\nHere is your final question: In movies, characters often place their ear on a metal train track to listen for an oncoming train. Why does listening through the track work better than listening through the air?",
+          "cited": [],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-3.6-flash",
+            "gemini-3.6-flash"
+          ],
+          "firstTokenMs": 7964,
+          "totalMs": 8197,
+          "error": null,
+          "status": "reviewing",
+          "step": 2,
+          "review": {
+            "kind": "final",
+            "position": 2,
+            "queue": [
+              0,
+              1,
+              2
+            ]
+          },
+          "counter": "Final check 3 of 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "ltr",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "final-3-correct",
+          "why": "final check, transfer of step 3, correct",
+          "student": "The metal particles are packed tightly, so the vibration from the train travels through the track much faster than through the air, and you hear it sooner.",
+          "grade": {
+            "verdict": "correct",
+            "issue": "none",
+            "misconception": "",
+            "checks": []
+          },
+          "move": "final_finish",
+          "intervention": null,
+          "tutor": "That's absolutely right! You've nailed it. The metal particles in the train track are packed very tightly together, allowing the vibrations from the train to travel much faster through the track than through the air, so you hear it sooner.\n\nYou've done a great job exploring how sound travels! Here's a quick recap of what we've covered:\n\n*   Sound begins with **vibrations** that push on nearby particles.\n*   Sound needs **particles** (a medium) to travel and cannot move through empty space.\n*   Sound travels fastest through **solids**, then liquids, and slowest through gases, because of how closely packed their particles are.\n\nYou showed a strong understanding of how sound begins and moves, and how its speed changes in different materials. We also saw that the idea of why sound needs a medium to travel is something that could use a bit more practice.\n\nLearning is a journey, and this lesson is a great start! Coming back to these ideas in a few days often helps them stick even better. Keep up the great work!",
+          "cited": [],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-2.5-flash",
+            "gemini-2.5-flash"
+          ],
+          "firstTokenMs": 13029,
+          "totalMs": 13956,
+          "error": null,
+          "status": "completed",
+          "step": 2,
+          "review": null,
+          "counter": "Lesson complete",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "ltr",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": {
+            "results": {
+              "0": "pass",
+              "1": "fail",
+              "2": "pass"
+            },
+            "skipped": false
+          },
+          "summary": "Lesson complete Based on your answers in this lesson, not on a test score. Final check: 2 of 3 shown on new questions. Applied to a new question How Sound Begins and Moves answered on the first try, passed the final check Speed of Sound in Different Materials answered on the first try, passed the final check Needs practice Why Sound Needs a Medium missed in the final check Suggested review TomorrowWed, Oct 28 Why Sound Needs a Medium In 14 daysTue, Nov 10 How Sound Begins and Moves In 14 daysTue, Nov 10 Speed of Sound in Different Materials A suggestion from this one lesson. Coming back on these days helps the ideas stay. Practise this step Copy summary Download notes New lesson You can keep asking questions about the material below."
+        },
+        {
+          "label": "reload",
+          "why": null,
+          "student": null,
+          "grade": null,
+          "move": "final_finish",
+          "intervention": null,
+          "tutor": "That's absolutely right! You've nailed it. The metal particles in the train track are packed very tightly together, allowing the vibrations from the train to travel much faster through the track than through the air, so you hear it sooner.\n\nYou've done a great job exploring how sound travels! Here's a quick recap of what we've covered:\n\n*   Sound begins with **vibrations** that push on nearby particles.\n*   Sound needs **particles** (a medium) to travel and cannot move through empty space.\n*   Sound travels fastest through **solids**, then liquids, and slowest through gases, because of how closely packed their particles are.\n\nYou showed a strong understanding of how sound begins and moves, and how its speed changes in different materials. We also saw that the idea of why sound needs a medium to travel is something that could use a bit more practice.\n\nLearning is a journey, and this lesson is a great start! Coming back to these ideas in a few days often helps them stick even better. Keep up the great work!",
+          "cited": [],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-2.5-flash",
+            "gemini-2.5-flash"
+          ],
+          "firstTokenMs": 13029,
+          "totalMs": 13956,
+          "error": null,
+          "status": "completed",
+          "step": 2,
+          "review": null,
+          "counter": "Lesson complete",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "ltr",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": {
+            "results": {
+              "0": "pass",
+              "1": "fail",
+              "2": "pass"
+            },
+            "skipped": false
+          },
+          "summary": "Lesson complete Based on your answers in this lesson, not on a test score. Final check: 2 of 3 shown on new questions. Applied to a new question How Sound Begins and Moves answered on the first try, passed the final check Speed of Sound in Different Materials answered on the first try, passed the final check Needs practice Why Sound Needs a Medium missed in the final check Suggested review TomorrowWed, Oct 28 Why Sound Needs a Medium In 14 daysTue, Nov 10 How Sound Begins and Moves In 14 daysTue, Nov 10 Speed of Sound in Different Materials A suggestion from this one lesson. Coming back on these days helps the ideas stay. Practise this step Copy summary Download notes New lesson You can keep asking questions about the material below."
+        }
+      ],
+      "metrics": {
+        "since": "2026-10-27T12:59:22.685Z",
+        "aiCalls": 22,
+        "aiFailures": 5,
+        "averageAiMs": 3960,
+        "fallbacks": 2,
+        "backupModelUses": 2,
+        "turns": 10,
+        "turnErrors": 1,
+        "cancelledTurns": 0,
+        "averageFirstTokenMs": 9529,
+        "firstTokenP50Ms": 7964,
+        "firstTokenP95Ms": 29389,
+        "firstTokenSamples": 10,
+        "citedTurns": 6,
+        "invalidCitations": 0
+      },
+      "pageErrors": []
+    },
+    "he": {
+      "site": "https://teach-me-this-file.vercel.app",
+      "bundle": "/assets/index-DE2YVcnZ.js",
+      "viewport": "phone 390",
+      "plan": [
+        {
+          "title": "מהו חיכוך?",
+          "checkQuestion": "אם תדחף קופסה על הרצפה, מדוע היא נעצרת בסופו של דבר?",
+          "successCriteria": "התשובה צריכה להזכיר שחיכוך הוא כוח שפועל בכיוון ההפוך לתנועה ומאט אותה.",
+          "commonMistake": "תלמידים עשויים לחשוב שחיכוך הוא כוח שגורם לתנועה, או שהוא פועל רק כשהחפץ נע במהירות גבוהה.",
+          "transferQuestion": "אם כדור מתגלגל על משטח חלק מאוד, האם הוא ייעצר מיד או ימשיך להתגלגל זמן מה? מדוע?",
+          "transferCriteria": "הוא ימשיך להתגלגל זמן מה כי עדיין קיים חיכוך, אך הוא קטן יותר ממשטח מחוספס, ולכן לוקח לו יותר זמן לעצור.",
+          "prerequisites": [],
+          "sourceIds": [
+            "c2"
+          ]
+        },
+        {
+          "title": "חיכוך, חספוס וחום",
+          "checkQuestion": "מדוע קל יותר להחליק על קרח מאשר על מדרכה, ומדוע הידיים מתחממות כשמשפשפים אותן זו בזו?",
+          "successCriteria": "התשובה צריכה להסביר שקרח הוא משטח חלק עם חיכוך נמוך, וששפשוף ידיים יוצר חיכוך שהופך לאנרגיית חום.",
+          "commonMistake": "תלמידים עלולים לבלבל בין משטחים חלקים למשטחים עם חיכוך גבוה, או לא לקשר בין חיכוך לייצור חום.",
+          "transferQuestion": "מדוע בלמי אופניים מתחממים מאוד לאחר ירידה ארוכה במורד?",
+          "transferCriteria": "הבלמים מתחממים בגלל החיכוך הרב שנוצר בינם לבין הגלגל כדי להאט את האופניים, והחיכוך הזה ממיר את אנרגיית התנועה לחום.",
+          "prerequisites": [
+            "s1"
+          ],
+          "sourceIds": [
+            "c3",
+            "c4"
+          ]
+        },
+        {
+          "title": "חיכוך: מועיל ומזיק",
+          "checkQuestion": "תן דוגמה אחת למצב שבו חיכוך עוזר לנו, ודוגמה אחת למצב שבו הוא מזיק.",
+          "successCriteria": "התשובה צריכה לכלול דוגמה חיובית (כמו הליכה או בלימה) ודוגמה שלילית (כמו שחיקת חלקים או בזבוז אנרגיה).",
+          "commonMistake": "תלמידים עשויים לראות בחיכוך כוח שלילי בלבד, או לא להבין כיצד ניתן להפחית אותו.",
+          "transferQuestion": "מדוע מהנדסים מתכננים חריצים ודוגמאות מיוחדות על צמיגי מכוניות?",
+          "transferCriteria": "החריצים מגבירים את החיכוך בין הצמיג לכביש, במיוחד בתנאים רטובים, מה שעוזר למכונית לאחוז טוב יותר בכביש ומונע החלקה, ובכך הופך את הנהיגה לבטוחה יותר.",
+          "prerequisites": [
+            "s1"
+          ],
+          "sourceIds": [
+            "c5",
+            "c6"
+          ]
+        }
+      ],
+      "turns": [
+        {
+          "label": "plan",
+          "why": null,
+          "student": null,
+          "grade": null,
+          "move": "introduce",
+          "intervention": null,
+          "tutor": "שלום! היום נלמד על כוח מעניין וחשוב מאוד שנקרא חיכוך.\n\nחיכוך הוא כוח שנוצר כששני משטחים נוגעים זה בזה [c2]. הוא תמיד פועל בכיוון ההפוך לכיוון התנועה ומנסה להאט אותה [c2]. לדוגמה, אם אתם מגלגלים כדור על הרצפה, החיכוך בין הכדור לרצפה הוא זה שגורם לו להאט ולעצור בסופו של דבר [c2].\n\nאם כך, אם תדחפו קופסה על הרצפה, מדוע היא נעצרת בסופו של דבר?",
+          "cited": [
+            "c2"
+          ],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-2.5-flash"
+          ],
+          "firstTokenMs": 603,
+          "totalMs": 1258,
+          "error": null,
+          "status": "active",
+          "step": 0,
+          "review": null,
+          "counter": "צעד 1 מתוך 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "rtl",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "step1-correct",
+          "why": "correct own words from successCriteria of step 1",
+          "student": "כי יש חיכוך בין הקופסה לרצפה, והוא פועל נגד הכיוון שבו הקופסה זזה ומאט אותה עד שהיא נעצרת.",
+          "grade": {
+            "verdict": "correct",
+            "issue": "none",
+            "misconception": "",
+            "checks": []
+          },
+          "move": "advance",
+          "intervention": null,
+          "tutor": "כל הכבוד! הבנת מצוין שחיכוך הוא הכוח שפועל נגד תנועת הקופסה ומאט אותה עד שהיא נעצרת.\n\nעכשיו בואו נתקדם ונבין איך חספוס של משטחים קשור לחיכוך, ואיך חיכוך יכול לייצר חום.\n\nככל שמשטח מחוספס יותר, כך החיכוך בינו לבין משטח אחר יהיה גדול יותר [c3]. לדוגמה, קל יותר להחליק על קרח מאשר על מדרכה, כי קרח הוא משטח חלק מאוד, ולכן החיכוך עליו קטן [c3].\n\nדבר נוסף שחשוב לדעת הוא שחיכוך יכול להפוך חלק מאנרגיית התנועה לחום [c4]. בטח שמתם לב שכשמשפשפים ידיים זו בזו בחורף, הן מתחממות [c4]. זה קורה בגלל החיכוך שנוצר בין כפות הידיים, שהופך לאנרגיית חום.\n\nבהתבסס על מה שלמדנו, למה לדעתכם קל יותר להחליק על קרח מאשר על מדרכה, ומדוע הידיים מתחממות כשמשפשפים אותן זו בזו?",
+          "cited": [
+            "c3",
+            "c4"
+          ],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-2.5-flash",
+            "gemini-2.5-flash"
+          ],
+          "firstTokenMs": 5941,
+          "totalMs": 7356,
+          "error": null,
+          "status": "active",
+          "step": 1,
+          "review": null,
+          "counter": "צעד 2 מתוך 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "rtl",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "step2-partial",
+          "why": "partial: answers only the ice half of the two-part question",
+          "student": "כי הקרח חלק אז יש עליו פחות חיכוך.",
+          "grade": {
+            "verdict": "partial",
+            "issue": "none",
+            "misconception": "",
+            "checks": []
+          },
+          "move": "hint",
+          "intervention": "nudge",
+          "tutor": "אתה בהחלט צודק לגבי הקרח! קל יותר להחליק על קרח כי הוא משטח חלק [c3], ולכן יש עליו פחות חיכוך.\n\nאבל מה לגבי החלק השני של השאלה? מדוע הידיים מתחממות כשמשפשפים אותן זו בזו? נסה לחשוב איזו אנרגיה נוצרת כתוצאה מהחיכוך.",
+          "cited": [
+            "c3"
+          ],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-2.5-flash",
+            "gemini-2.5-flash"
+          ],
+          "firstTokenMs": 2995,
+          "totalMs": 3401,
+          "error": null,
+          "status": "active",
+          "step": 1,
+          "review": null,
+          "counter": "צעד 2 מתוך 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "rtl",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "step2-complete",
+          "why": "completes the missing half after the nudge",
+          "student": "והידיים מתחממות כי החיכוך ביניהן הופך חלק מהתנועה לחום.",
+          "grade": {
+            "verdict": "correct",
+            "issue": "none",
+            "misconception": "",
+            "checks": []
+          },
+          "move": "advance",
+          "intervention": null,
+          "tutor": "מעולה! הבנת היטב שהחיכוך בין הידיים הופך חלק מאנרגיית התנועה לחום, ולכן הידיים מתחממות. זהו הסבר מדויק.\n\nעכשיו, בואו נסתכל על חיכוך מזווית אחרת: מתי הוא עוזר לנו ומתי הוא מפריע לנו?\n\nלחיכוך יש גם צדדים טובים וגם צדדים פחות טובים. לדוגמה, בזכות החיכוך אנחנו יכולים ללכת בלי להחליק, וגם לעצור אופניים [c5]. מצד שני, חיכוך יכול לשחוק חלקים במכונות ולבזבז אנרגיה [c5]. כדי להפחית את החיכוך במנועים, למשל, מוסיפים שמן שיוצר שכבה חלקה בין החלקים [c5].\n\nתן לי בבקשה דוגמה אחת למצב שבו חיכוך מועיל לנו, ודוגמה אחת למצב שבו הוא מזיק לנו.",
+          "cited": [
+            "c5"
+          ],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-2.5-flash",
+            "gemini-2.5-flash"
+          ],
+          "firstTokenMs": 4438,
+          "totalMs": 5500,
+          "error": null,
+          "status": "active",
+          "step": 2,
+          "review": null,
+          "counter": "צעד 3 מתוך 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "rtl",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "other-part-question",
+          "why": "question about the spacecraft section no step covers",
+          "student": "רגע, למה חלליות צריכות מגן חום כשהן חוזרות לכדור הארץ?",
+          "grade": {
+            "verdict": "question",
+            "issue": "none",
+            "misconception": "",
+            "checks": []
+          },
+          "move": "answer_question",
+          "intervention": null,
+          "tutor": "זו שאלה מצוינת!\n\nחלליות צריכות מגן חום מכיוון שכשהן חוזרות לכדור הארץ, הן נכנסות לאטמוספירה במהירות עצומה. החיכוך החזק מאוד בינן לבין האוויר מחמם את המעטפת שלהן לטמפרטורות גבוהות במיוחד, שיכולות להגיע לאלפי מעלות [c6]. מגן החום מגן על החללית ועל מי שבתוכה מפני החום העצום הזה [c6].\n\nעכשיו, נחזור לשאלה המקורית: האם תוכל לתת לי דוגמה אחת למצב שבו חיכוך מועיל לנו, ודוגמה אחת למצב שבו הוא מזיק לנו?",
+          "cited": [
+            "c6"
+          ],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-2.5-flash",
+            "gemini-2.5-flash"
+          ],
+          "firstTokenMs": 5153,
+          "totalMs": 5800,
+          "error": null,
+          "status": "active",
+          "step": 2,
+          "review": null,
+          "counter": "צעד 3 מתוך 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "rtl",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "step3-correct",
+          "why": "correct from successCriteria of step 3",
+          "student": "החיכוך עוזר לנו לעצור את האופניים כשלוחצים על הבלמים, והוא מזיק כשהוא שוחק את החלקים במנוע של מכונית.",
+          "grade": {
+            "verdict": "correct",
+            "issue": "none",
+            "misconception": "",
+            "checks": []
+          },
+          "move": "final_check_start",
+          "intervention": null,
+          "tutor": "שלום! אתה לגמרי צודק בשתי הדוגמאות שהבאת. חיכוך אכן מועיל לנו מאוד כשאנחנו בולמים באופניים, והוא בהחלט מזיק כשהוא גורם לשחיקת חלקים במנוע של מכונית.\n\nלפני שנמשיך הלאה לסיכום השיעור, יש לנו בדיקה קצרה של שלושה שאלות, כדי לוודא שאנחנו זוכרים את הדברים החשובים שלמדנו. נסה לענות עליהן מהזיכרון, בלי רמזים.\n\nהנה השאלה הראשונה: אם כדור מתגלגל על משטח חלק מאוד, האם הוא ייעצר מיד או ימשיך להתגלגל זמן מה? מדוע?",
+          "cited": [],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-2.5-flash",
+            "gemini-2.5-flash"
+          ],
+          "firstTokenMs": 5705,
+          "totalMs": 6535,
+          "error": null,
+          "status": "reviewing",
+          "step": 2,
+          "review": {
+            "kind": "final",
+            "position": 0,
+            "queue": [
+              0,
+              1,
+              2
+            ]
+          },
+          "counter": "בדיקה מסכמת 1 מתוך 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "rtl",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "final-1-correct",
+          "why": "final check q1, correct",
+          "student": "הוא ימשיך להתגלגל זמן מה, כי על משטח חלק יש מעט חיכוך שמאט אותו, אבל בסוף הוא ייעצר.",
+          "grade": {
+            "verdict": "correct",
+            "issue": "none",
+            "misconception": "",
+            "checks": []
+          },
+          "move": "final_next",
+          "intervention": null,
+          "tutor": "שלום! התשובה שלך מצוינת ומדויקת מאוד. כדור ימשיך להתגלגל זמן מה על משטח חלק מאוד [c3], כי החיכוך עליו קטן [c3], אבל בסופו של דבר הוא ייעצר בגלל החיכוך שכן קיים [c3].\n\nעכשיו נעבור לשאלה הבאה:\n\nמדוע בלמי אופניים מתחממים מאוד לאחר ירידה ארוכה במורד?",
+          "cited": [
+            "c3"
+          ],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-2.5-flash",
+            "gemini-2.5-flash"
+          ],
+          "firstTokenMs": 6269,
+          "totalMs": 6684,
+          "error": null,
+          "status": "reviewing",
+          "step": 2,
+          "review": {
+            "kind": "final",
+            "position": 1,
+            "queue": [
+              0,
+              1,
+              2
+            ]
+          },
+          "counter": "בדיקה מסכמת 2 מתוך 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "rtl",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "final-2-wrong",
+          "why": "final check q2, deliberately wrong (sun heats the brakes)",
+          "student": "הבלמים מתחממים כי השמש מחממת את המתכת בירידה הארוכה.",
+          "grade": {
+            "verdict": "incorrect",
+            "issue": "none",
+            "misconception": "התלמיד חושב שהבלמים מתחממים מהשמש ולא בגלל החיכוך.",
+            "checks": []
+          },
+          "move": "final_next",
+          "intervention": null,
+          "tutor": "הבלמים לא מתחממים בגלל השמש, אלא בגלל החיכוך הרב שנוצר בעצירת הגלגל. החיכוך הזה ממיר את אנרגיית התנועה של האופניים לחום [c5].\n\nעכשיו נעבור לשאלה הבאה: מדוע מהנדסים מתכננים חריצים ודוגמאות מיוחדות על צמיגי מכוניות?",
+          "cited": [
+            "c5"
+          ],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-3.5-flash-lite",
+            "gemini-3.5-flash-lite"
+          ],
+          "firstTokenMs": 13704,
+          "totalMs": 13806,
+          "error": null,
+          "status": "reviewing",
+          "step": 2,
+          "review": {
+            "kind": "final",
+            "position": 2,
+            "queue": [
+              0,
+              1,
+              2
+            ]
+          },
+          "counter": "בדיקה מסכמת 3 מתוך 3",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "rtl",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": null,
+          "summary": null
+        },
+        {
+          "label": "final-3-correct",
+          "why": "final check q3, correct",
+          "student": "החריצים הופכים את הצמיג למחוספס יותר, אז יש יותר חיכוך עם הכביש והמכונית לא מחליקה.",
+          "grade": {
+            "verdict": "correct",
+            "issue": "none",
+            "misconception": "",
+            "checks": []
+          },
+          "move": "final_finish",
+          "intervention": null,
+          "tutor": "שלום! התשובה שלך מצוינת ומדויקת מאוד. החריצים אכן הופכים את הצמיג למחוספס יותר, מה שמגביר את החיכוך עם הכביש ומונע החלקה.\n\nלסיכום השיעור שלנו, הנה כמה מהרעיונות המרכזיים שלמדנו:\n\n*   **מהו חיכוך?** חיכוך הוא כוח שמתנגד לתנועה בין שני משטחים הבאים במגע [c3].\n*   **חיכוך הופך תנועה לחום:** חיכוך יכול להפוך אנרגיית תנועה לחום, כמו שקורה כשמשפשפים ידיים או כשבלמים מתחממים [c4].\n*   **חספוס משפיע על חיכוך:** ככל שמשטח מחוספס יותר, כך יהיה יותר חיכוך [c3].\n*   **חיכוך מועיל ומזיק:** חיכוך עוזר לנו במצבים רבים, כמו הליכה ועצירה, אך הוא גם יכול לגרום לשחיקה ולבזבוז אנרגיה [c5].\n\nבמהלך השיעור הזה, הראית שהבנת היטב:\n*   מהו חיכוך וכיצד הוא משפיע על תנועה.\n*   מצבים שבהם חיכוך מועיל לנו ומצבים שבהם הוא מזיק.\n\nמה שעדיין דורש קצת יותר תרגול הוא הקשר בין חיכוך, חספוס וחום, וכיצד חיכוך מייצר חום.\n\nזכור, שיעור אחד הוא רק התחלה. חזרה על הרעיונות הללו בעוד כמה ימים תעזור להם להתקבע טוב יותר בזיכרונך.\n\nכל הכבוד על הלמידה וההשתתפות!",
+          "cited": [
+            "c5"
+          ],
+          "invalidCitations": 0,
+          "models": [
+            "gemini-3.5-flash-lite",
+            "gemini-2.5-flash"
+          ],
+          "firstTokenMs": 4591,
+          "totalMs": 6576,
+          "error": null,
+          "status": "completed",
+          "step": 2,
+          "review": null,
+          "counter": "השיעור הסתיים",
+          "counterAgrees": true,
+          "layout": {
+            "dir": "rtl",
+            "overflow": 0,
+            "composerVisible": true
+          },
+          "final": {
+            "results": {
+              "0": "pass",
+              "1": "fail",
+              "2": "pass"
+            },
+            "skipped": false
+          },
+          "summary": "השיעור הסתיים לפי התשובות שלך בשיעור הזה, לא לפי ציון במבחן. בדיקה מסכמת: 2 מתוך 3 הודגמו בשאלות חדשות. יושם בשאלה חדשה מהו חיכוך? נענה בניסיון הראשון, עבר את הבדיקה המסכמת חיכוך: מועיל ומזיק נענה בניסיון הראשון, עבר את הבדיקה המסכמת צריך תרגול חיכוך, חספוס וחום לא עבר את הבדיקה המסכמת חזרה מומלצת מחריום ד׳, 28 באוק׳ חיכוך, חספוס וחום בעוד 14 ימיםיום ג׳, 10 בנוב׳ מהו חיכוך? בעוד 14 ימיםיום ג׳, 10 בנוב׳ חיכוך: מועיל ומזיק הצעה על סמך השיעור הזה בלבד. חזרה בימים האלה עוזרת לרעיונות להישאר. לתרגל את הצעד הזה העתקת הסיכום הורדת סיכום שיעור חדש אפשר להמשיך לשאול שאלות על החומר למטה."
+        }
+      ],
+      "metrics": {
+        "since": "2026-10-27T12:59:22.685Z",
+        "aiCalls": 40,
+        "aiFailures": 12,
+        "averageAiMs": 3351,
+        "fallbacks": 8,
+        "backupModelUses": 5,
+        "turns": 19,
+        "turnErrors": 1,
+        "cancelledTurns": 0,
+        "averageFirstTokenMs": 7615,
+        "firstTokenP50Ms": 5705,
+        "firstTokenP95Ms": 29389,
+        "firstTokenSamples": 19,
+        "citedTurns": 14,
+        "invalidCitations": 2
+      },
+      "pageErrors": []
+    }
+  }
+}

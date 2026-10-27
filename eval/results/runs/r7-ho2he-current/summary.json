@@ -1,0 +1,296 @@
+{
+  "meta": {
+    "label": "r7-ho2he-current",
+    "mode": "model",
+    "split": "holdout2",
+    "systems": [
+      "engine",
+      "plain"
+    ],
+    "date": "2026-10-27T13:23:21.262Z",
+    "provider": "remote",
+    "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+    "models": {
+      "main": "gemini-3.5-flash-lite",
+      "backup": "gemini-3.5-flash-lite"
+    },
+    "commit": "021bdb43fbc52611d94e5a04f8da51beef456a28",
+    "uncommittedChanges": true,
+    "engineVersion": "469f3a245da8",
+    "promptVersion": "c6d31f9f9bec",
+    "node": "v24.22.1",
+    "scenariosVersion": "0799a00916a9",
+    "scenarioIds": [
+      "ho2-he-understands",
+      "ho2-he-misconception",
+      "ho2-he-copied",
+      "ho2-he-misread",
+      "ho2-he-improves",
+      "ho2-he-other-part",
+      "ho2-he-not-in-document",
+      "ho2-he-journey",
+      "ho2-he-paraphrase-misconception"
+    ],
+    "pauseMs": 4500
+  },
+  "systems": {
+    "engine": {
+      "counts": {
+        "planned": 9,
+        "complete": 9,
+        "infraErrors": [],
+        "stoppedOnQuota": [],
+        "notRun": []
+      },
+      "modelCalls": {
+        "gemini-3.5-flash-lite": 43
+      },
+      "summary": {
+        "scenarios": 9,
+        "scenarioPass": 0.444,
+        "turns": 20,
+        "actionFit": 0.95,
+        "interventionFit": 1,
+        "unearnedMoves": 0,
+        "helpInFinalCheck": 0,
+        "endStateMatch": 1,
+        "supportProblems": 0,
+        "returnTurnsFit": "2/2",
+        "lessonsCompleted": "1/1",
+        "latencyMs": {
+          "turns": 20,
+          "p50": 8159,
+          "p95": 23931
+        },
+        "grading": {
+          "answers": 18,
+          "verdictAccuracy": 1,
+          "falsePositives": "0/5",
+          "falseNegatives": "0/10",
+          "issueAccuracy": "2/2",
+          "misconceptionNamed": "1/1"
+        },
+        "paraphraseConsistency": "1/1",
+        "text": {
+          "replies": 20,
+          "approvalOnNotCorrect": 4,
+          "repeatedHelp": 0,
+          "endsWithQuestion": 0.947,
+          "citedReplies": 0.7,
+          "invalidCitationIds": 0,
+          "unverifiedQuotes": 0,
+          "citationSupportMean": 0.591,
+          "weaklySupportedCitations": "0/21",
+          "missingTag": 0
+        },
+        "byCategory": {
+          "understands": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "misconception": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "copied": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "misread": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "improves": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "other_part": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "not_in_document": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "journey": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "paraphrase": {
+            "scenarios": 1,
+            "passed": 1
+          }
+        },
+        "failures": [
+          {
+            "id": "ho2-he-misconception",
+            "problems": [
+              "turn 1: approval language on an answer that was not correct"
+            ]
+          },
+          {
+            "id": "ho2-he-copied",
+            "problems": [
+              "turn 1: approval language on an answer that was not correct"
+            ]
+          },
+          {
+            "id": "ho2-he-improves",
+            "problems": [
+              "turn 1: approval language on an answer that was not correct"
+            ]
+          },
+          {
+            "id": "ho2-he-not-in-document",
+            "problems": [
+              "turn 1: action ask_again, wanted answer_question",
+              "turn 1: did not say the document does not cover it"
+            ]
+          },
+          {
+            "id": "ho2-he-journey",
+            "problems": [
+              "turn 1: approval language on an answer that was not correct"
+            ]
+          }
+        ]
+      }
+    },
+    "plain": {
+      "counts": {
+        "planned": 9,
+        "complete": 9,
+        "infraErrors": [],
+        "stoppedOnQuota": [],
+        "notRun": []
+      },
+      "modelCalls": {
+        "gemini-3.5-flash-lite": 22
+      },
+      "summary": {
+        "scenarios": 9,
+        "scenarioPass": 0.333,
+        "turns": 19,
+        "actionFit": 0.526,
+        "interventionFit": 0,
+        "unearnedMoves": 1,
+        "helpInFinalCheck": 0,
+        "endStateMatch": null,
+        "supportProblems": 0,
+        "returnTurnsFit": "1/2",
+        "lessonsCompleted": "0/1",
+        "latencyMs": {
+          "turns": 19,
+          "p50": 6419,
+          "p95": 26367
+        },
+        "grading": {
+          "answers": 17,
+          "verdictAccuracy": 0.706,
+          "falsePositives": "0/5",
+          "falseNegatives": "5/9",
+          "issueAccuracy": "0/2",
+          "misconceptionNamed": "0/1"
+        },
+        "paraphraseConsistency": "1/1",
+        "text": {
+          "replies": 19,
+          "approvalOnNotCorrect": 3,
+          "repeatedHelp": 0,
+          "endsWithQuestion": 1,
+          "citedReplies": 0.474,
+          "invalidCitationIds": 0,
+          "unverifiedQuotes": 0,
+          "citationSupportMean": 0.545,
+          "weaklySupportedCitations": "1/13",
+          "missingTag": 0
+        },
+        "byCategory": {
+          "understands": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "misconception": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "copied": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "misread": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "improves": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "other_part": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "not_in_document": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "journey": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "paraphrase": {
+            "scenarios": 1,
+            "passed": 1
+          }
+        },
+        "failures": [
+          {
+            "id": "ho2-he-misconception",
+            "problems": [
+              "turn 1: approval language on an answer that was not correct"
+            ]
+          },
+          {
+            "id": "ho2-he-copied",
+            "problems": [
+              "turn 1: action ask_again, wanted probe|hint",
+              "turn 1: approval language on an answer that was not correct",
+              "turn 2: action hint, wanted final_check"
+            ]
+          },
+          {
+            "id": "ho2-he-improves",
+            "problems": [
+              "turn 2: action next_step, wanted back_to_question|hint",
+              "turn 2: moved on without evidence",
+              "turn 3: action ask_again, wanted next_step"
+            ]
+          },
+          {
+            "id": "ho2-he-other-part",
+            "problems": [
+              "turn 1: action ask_again, wanted answer_question"
+            ]
+          },
+          {
+            "id": "ho2-he-not-in-document",
+            "problems": [
+              "turn 1: did not say the document does not cover it"
+            ]
+          },
+          {
+            "id": "ho2-he-journey",
+            "problems": [
+              "turn 1: approval language on an answer that was not correct",
+              "turn 5: action hint, wanted final_check|next_step",
+              "turn 6: action ask_again, wanted final_check",
+              "turn 7: action ask_again, wanted final_check",
+              "turn 8: action hint, wanted summary",
+              "turn 8: summary does not name the weak step"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

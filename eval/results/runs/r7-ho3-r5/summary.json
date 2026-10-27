@@ -1,0 +1,248 @@
+{
+  "meta": {
+    "label": "r7-ho3-r5",
+    "mode": "model",
+    "split": "holdout3",
+    "systems": [
+      "engine"
+    ],
+    "date": "2026-10-27T13:01:15.834Z",
+    "provider": "remote",
+    "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+    "models": {
+      "main": "gemini-3.5-flash-lite",
+      "backup": "gemini-3.5-flash-lite"
+    },
+    "commit": "021bdb43fbc52611d94e5a04f8da51beef456a28",
+    "uncommittedChanges": true,
+    "engineVersion": "8e0b6e286812",
+    "promptVersion": "1c1c8c728efc",
+    "node": "v24.22.1",
+    "scenariosVersion": "0799a00916a9",
+    "scenarioIds": [
+      "ho3-en-understands",
+      "ho3-en-misconception",
+      "ho3-en-narrowing",
+      "ho3-en-partial",
+      "ho3-en-copied",
+      "ho3-en-other-part",
+      "ho3-en-not-in-document",
+      "ho3-en-prerequisite",
+      "ho3-en-transfer",
+      "ho3-en-journey",
+      "ho3-en-paraphrase-correct",
+      "ho3-en-paraphrase-narrow",
+      "ho3-he-understands",
+      "ho3-he-misconception",
+      "ho3-he-narrowing",
+      "ho3-he-copied",
+      "ho3-he-other-part",
+      "ho3-he-not-in-document",
+      "ho3-he-prerequisite",
+      "ho3-he-journey",
+      "ho3-he-paraphrase-correct"
+    ],
+    "pauseMs": 4500
+  },
+  "systems": {
+    "engine": {
+      "counts": {
+        "planned": 21,
+        "complete": 21,
+        "infraErrors": [],
+        "stoppedOnQuota": [],
+        "notRun": []
+      },
+      "modelCalls": {
+        "gemini-3.5-flash-lite": 107
+      },
+      "summary": {
+        "scenarios": 21,
+        "scenarioPass": 0.429,
+        "turns": 49,
+        "actionFit": 0.653,
+        "interventionFit": null,
+        "unearnedMoves": 1,
+        "helpInFinalCheck": 0,
+        "endStateMatch": 0.722,
+        "supportProblems": 0,
+        "returnTurnsFit": "2/4",
+        "lessonsCompleted": "0/3",
+        "latencyMs": {
+          "turns": 49,
+          "p50": 13742,
+          "p95": 44129
+        },
+        "grading": {
+          "answers": 43,
+          "verdictAccuracy": 0.837,
+          "falsePositives": "0/13",
+          "falseNegatives": "7/26",
+          "issueAccuracy": "1/2",
+          "misconceptionNamed": "0/0"
+        },
+        "paraphraseConsistency": "2/3",
+        "text": {
+          "replies": 49,
+          "approvalOnNotCorrect": 3,
+          "repeatedHelp": 0,
+          "endsWithQuestion": 1,
+          "citedReplies": 0.673,
+          "invalidCitationIds": 0,
+          "unverifiedQuotes": 0,
+          "citationSupportMean": 0.639,
+          "weaklySupportedCitations": "2/66",
+          "missingTag": 0
+        },
+        "byCategory": {
+          "understands": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "misconception": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "narrowing": {
+            "scenarios": 2,
+            "passed": 1
+          },
+          "partial": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "copied": {
+            "scenarios": 2,
+            "passed": 1
+          },
+          "other_part": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "not_in_document": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "prerequisite": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "transfer": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "journey": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "paraphrase": {
+            "scenarios": 3,
+            "passed": 2
+          }
+        },
+        "failures": [
+          {
+            "id": "ho3-en-other-part",
+            "problems": [
+              "turn 1: action ask_again, wanted answer_question"
+            ]
+          },
+          {
+            "id": "ho3-en-not-in-document",
+            "problems": [
+              "turn 1: action ask_again, wanted answer_question",
+              "turn 1: did not say the document does not cover it"
+            ]
+          },
+          {
+            "id": "ho3-en-prerequisite",
+            "problems": [
+              "turn 1: action hint, wanted check_earlier",
+              "turn 2: action ask_again, wanted back_to_question",
+              "end: step 1 revisit null, wanted pass"
+            ]
+          },
+          {
+            "id": "ho3-en-transfer",
+            "problems": [
+              "turn 3: action ask_again, wanted final_check",
+              "turn 4: action ask_again, wanted summary",
+              "end: step 1 level shown, wanted applied",
+              "end: step 2 level shown, wanted needs_practice",
+              "end: step 3 level shown, wanted applied",
+              "end: status reviewing, wanted completed"
+            ]
+          },
+          {
+            "id": "ho3-en-journey",
+            "problems": [
+              "turn 8: action ask_again, wanted final_check",
+              "turn 9: action ask_again, wanted summary",
+              "end: step 1 level shown_with_help, wanted applied",
+              "end: step 2 level shown_with_help, wanted applied",
+              "end: step 3 level shown, wanted applied",
+              "end: status reviewing, wanted completed"
+            ]
+          },
+          {
+            "id": "ho3-en-paraphrase-narrow",
+            "problems": [
+              "verdicts partial, partial, incorrect"
+            ]
+          },
+          {
+            "id": "ho3-he-narrowing",
+            "problems": [
+              "turn 1: approval language on an answer that was not correct"
+            ]
+          },
+          {
+            "id": "ho3-he-copied",
+            "problems": [
+              "turn 1: action final_check, wanted probe|hint",
+              "turn 1: moved on without evidence",
+              "turn 1: approval language on an answer that was not correct",
+              "turn 2: action ask_again, wanted final_check"
+            ]
+          },
+          {
+            "id": "ho3-he-other-part",
+            "problems": [
+              "turn 1: action ask_again, wanted answer_question",
+              "turn 1: did not cite c5"
+            ]
+          },
+          {
+            "id": "ho3-he-not-in-document",
+            "problems": [
+              "turn 1: action ask_again, wanted answer_question",
+              "turn 1: did not say the document does not cover it"
+            ]
+          },
+          {
+            "id": "ho3-he-prerequisite",
+            "problems": [
+              "turn 1: action hint, wanted check_earlier",
+              "turn 2: action ask_again, wanted back_to_question",
+              "end: step 1 revisit null, wanted pass"
+            ]
+          },
+          {
+            "id": "ho3-he-journey",
+            "problems": [
+              "turn 3: action ask_again, wanted answer_question",
+              "turn 3: did not cite c5",
+              "turn 5: approval language on an answer that was not correct",
+              "turn 8: action ask_again, wanted final_check",
+              "turn 9: action ask_again, wanted summary",
+              "end: step 1 level shown_with_help, wanted applied",
+              "end: step 2 level shown, wanted needs_practice",
+              "end: step 3 level shown_with_help, wanted applied",
+              "end: status reviewing, wanted completed"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
