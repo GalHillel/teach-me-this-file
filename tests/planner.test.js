@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { maxStepsFor, minutesFromPrompt, validatePlan } from '../server/lesson/planner.js';
-import { PLAN_SYSTEM, buildPlanPrompt, buildTutorSystem, fence } from '../server/lesson/prompts.js';
+import { ASSESS_SYSTEM, PLAN_SYSTEM, buildAssessPrompt, buildPlanPrompt, buildTutorSystem, fence, moveInstructions } from '../server/lesson/prompts.js';
 import { createProgress } from '../server/lesson/progress.js';
 
 const chunks = [
@@ -162,5 +162,45 @@ describe('planned final-check questions', () => {
     const next = { ...progress, review: { ...progress.review, position: 1 } };
     const fallback = buildTutorSystem({ plan, progress: next, teacherPrompt: 'x', sources: [], move: 'final_next', assessment: { verdict: 'correct', conceptsShown: [], conceptsMissing: [], misconception: '' }, pace: 'normal' });
     expect(fallback).toContain('makes the student use the idea');
+  });
+});
+
+describe('grader context for earlier steps', () => {
+  const plan = {
+    audience: '7th grade',
+    steps: [
+      { id: 's1', title: 'Vibration', goal: 'Sound is made by something vibrating.', commonMistake: 'Thinking sound is the air that comes out of your mouth.', prerequisites: [] },
+      { id: 's2', title: 'Travel', goal: 'Sound needs a medium to travel.', checkQuestion: 'Why is there no sound in space?', successCriteria: 'No air to carry the vibration.', prerequisites: ['s1'] },
+    ],
+  };
+
+  it('shows the common mistake of each earlier step, so a repeated earlier mistake can be traced back to it', () => {
+    const prompt = buildAssessPrompt({ plan, step: plan.steps[1], tutorQuestion: 'Why?', studentMessage: 'Because sound is air from your mouth.', sources: [] });
+    expect(prompt).toContain('1. Vibration: Sound is made by something vibrating.\n   Common mistake there: Thinking sound is the air that comes out of your mouth.');
+    expect(ASSESS_SYSTEM).toContain('repeats the common mistake of that earlier step');
+  });
+
+  it('leaves the line out when the earlier step has no common mistake', () => {
+    const bare = { ...plan, steps: [{ ...plan.steps[0], commonMistake: '' }, plan.steps[1]] };
+    expect(buildAssessPrompt({ plan: bare, step: bare.steps[1], tutorQuestion: 'Why?', studentMessage: 'x', sources: [] })).not.toContain('Common mistake there');
+  });
+});
+
+describe('the follow-up to a copied answer', () => {
+  const assessment = { verdict: 'correct', issue: 'copied', conceptsShown: ['vibration'], conceptsMissing: [], misconception: '' };
+
+  it('asks for the student\'s own words without praising the answer or calling it wrong', () => {
+    const text = moveInstructions({ move: 'probe', assessment });
+    expect(text).toContain('in their own words');
+    expect(text).toContain('do not say it is wrong');
+    expect(text).toContain('Do not praise it or name any part of it as right');
+    expect(text).toContain('these are the words of the document');
+  });
+
+  it('lets the specific instruction override the general rule to name the right part', () => {
+    const plan = validatePlan(rawPlan, chunks, { fallbackTitle: 'file' });
+    const system = buildTutorSystem({ plan, progress: createProgress(plan), teacherPrompt: 'x', sources: [], move: 'probe', assessment, pace: 'normal' });
+    expect(system).toContain('unless "What to do now" says not to name any part as right');
+    expect(system).toContain('Do not praise it or name any part of it as right');
   });
 });
