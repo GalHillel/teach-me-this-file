@@ -266,6 +266,18 @@ export const policyRun = (lesson, scenario, system) => {
 
 const levelOf = (system, progress, index) => (system === 'naive' ? naiveLevel(progress, index) : stepEvidence(progress, index).level);
 
+const STATE_OF_LEVEL = { not_started: 'not_assessed', shown_with_help: 'developing', shown: 'demonstrated', applied: 'demonstrated' };
+
+export const stateOf = (system, progress, index) => {
+  const level = levelOf(system, progress, index);
+  const step = progress.steps[index];
+  if (level === 'in_progress') return step.attempts > 0 || step.hints > 0 ? 'emerging' : 'not_assessed';
+  if (level === 'needs_practice') return ['mastered', 'learned'].includes(step.outcome) ? 'needs_review' : 'developing';
+  return STATE_OF_LEVEL[level];
+};
+
+export const endStates = (scenario, system, progress) => Object.entries(scenario.end?.states ?? {}).map(([index, wanted]) => ({ step: Number(index), state: stateOf(system, progress, Number(index)), wanted }));
+
 export const checkTurn = ({ turn, row, mode, previousHelp }) => {
   const expect = turn.expect ?? {};
   const failures = [];
@@ -316,6 +328,9 @@ export const checkEnd = (scenario, system, progress) => {
     const level = levelOf(system, progress, Number(index));
     if (!levels.includes(level)) failures.push(`step ${Number(index) + 1} level ${level}, wanted ${levels.join('|')}`);
   }
+  for (const { step, state, wanted } of endStates(scenario, system, progress)) {
+    if (!wanted.includes(state)) failures.push(`step ${step + 1} state ${state}, wanted ${wanted.join('|')}`);
+  }
   for (const [index, revisit] of Object.entries(end.revisits ?? {})) {
     if (progress.steps[Number(index)]?.revisit !== revisit) failures.push(`step ${Number(index) + 1} revisit ${progress.steps[Number(index)]?.revisit}, wanted ${revisit}`);
   }
@@ -325,6 +340,14 @@ export const checkEnd = (scenario, system, progress) => {
   if (end.status && progress.status !== end.status) failures.push(`status ${progress.status}, wanted ${end.status}`);
   if (end.step !== undefined && progress.status === 'active' && progress.currentStep !== end.step) failures.push(`step ${progress.currentStep + 1}, wanted ${end.step + 1}`);
   return failures;
+};
+
+const PREREQUISITE_CATEGORIES = new Set(['prerequisite', 'fragile_prerequisite']);
+
+const recovered = (item) => {
+  const actions = item.turns.map((row) => row.action);
+  const back = actions.indexOf('check_earlier');
+  return back >= 0 && actions.indexOf('back_to_question', back) > back;
 };
 
 const share = (list, test) => (list.length ? Number((list.filter(test).length / list.length).toFixed(3)) : null);
@@ -348,6 +371,9 @@ export const summarize = (scenarios) => {
   const returns = turns.filter((row) => row.turn.expect?.actions?.includes('back_to_question'));
   const lessons = scenarios.filter((item) => item.turns.length && item.turns.at(-1).turn.expect?.actions?.includes('summary'));
   const latencies = turns.map((row) => row.totalMs).filter(Number.isFinite);
+  const states = scenarios.flatMap((item) => item.states ?? []);
+  const notDemonstrated = states.filter((item) => !item.wanted.includes('demonstrated'));
+  const recoveries = scenarios.filter((item) => PREREQUISITE_CATEGORIES.has(item.category) && item.turns.length);
   const byCategory = {};
   for (const item of scenarios) {
     const entry = byCategory[item.category] ?? { scenarios: 0, passed: 0 };
@@ -362,6 +388,9 @@ export const summarize = (scenarios) => {
     actionFit: share(turns.filter((row) => row.turn.expect?.actions), (row) => row.turn.expect.actions.includes(row.action)),
     interventionFit: share(withIntervention, (row) => row.turn.expect.interventions.includes(row.intervention)),
     unearnedMoves: turns.filter((row) => row.failures.includes('moved on without evidence')).length,
+    overclaims: notDemonstrated.length ? `${notDemonstrated.filter((item) => item.state === 'demonstrated').length}/${notDemonstrated.length}` : null,
+    stateMatch: ratio(states, (item) => item.wanted.includes(item.state)),
+    prerequisiteRecovery: ratio(recoveries, recovered),
     helpInFinalCheck: turns.filter((row) => row.failures.includes('help during the final check')).length,
     endStateMatch: share(scenarios.filter((item) => item.endFailures), (item) => !item.endFailures.length),
     supportProblems: scenarios.reduce((sum, item) => sum + (item.supportProblems?.length ?? 0), 0),

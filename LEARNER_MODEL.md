@@ -102,3 +102,12 @@ What this evaluation cannot measure: whether students learn more. The students a
 **Decision rule:** B is better than A1 if it has fewer overclaims, no more unsupported advancement, at least the same prerequisite recovery, and passes no fewer scenarios than A1 minus one. A1 against A0 shows the effect of the prompt fixes alone. Each comparison is reported with its denominators; differences of one or two scenarios are reported as no measurable difference.
 
 **Runs:** one run of all four systems; a second run of A1 and B if the free quota allows, since that comparison matters most. Every run saves per-scenario results with the model, prompt and code hashes.
+
+**Held-out-4 as committed** (before any learner-model code): 21 scenarios on `seasons-en` and `foodchain-he` in `eval/golden/`, 19 conversations and 2 paraphrase groups. How the measures are computed, in `eval/teaching-lib.js`:
+
+- A0 and A1 have no learner states, so their state for a step is read from their own level: `shown` or `applied` is `demonstrated`, `shown_with_help` is `developing`, `needs_practice` is `needs_review` if the step had been passed and `developing` otherwise, an active step with no answers is `not_assessed` and with answers `emerging`. B's state comes from its learner model.
+- Overclaims: labelled steps whose acceptable states do not include `demonstrated`, counted when the system's state is `demonstrated` (denominator 16).
+- Unsupported advancement: turns failed as "moved on without evidence".
+- Prerequisite recovery: scenarios in `prerequisite` and `fragile_prerequisite` where a check of an earlier step is followed by a return to the question (denominator 4).
+
+With the labelled grades (policy layer, no model), A0 passes 15 of 19 conversations. The 4 failures are the cases that encode B's rules, so A0 fails them by design: in the 2 `fragile_prerequisite` scenarios A0 keeps hinting where B should go back to the earlier step, and in the 2 `prerequisite` scenarios A0 still reports the earlier step as demonstrated after its gap showed (2 of 16 overclaims). Results are reported with and without these 4. The saved policy-layer result is `eval/results/teaching-policy-holdout4-a0.json`.

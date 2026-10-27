@@ -29,9 +29,9 @@ describe('teaching scenarios', () => {
     for (const definition of Object.values(categories)) expect(Object.keys(definition)).toEqual(['detect', 'intervene', 'evidence', 'success', 'failure']);
   });
 
-  it('keeps the dev and both held-out sets on different lessons', () => {
+  it('keeps the dev and every held-out set on different lessons', () => {
     const lessonsOf = (split) => new Set(scenarios.filter((scenario) => scenario.split === split).map((scenario) => lessons[scenario.lesson].title));
-    const splits = ['dev', 'holdout', 'holdout2'];
+    const splits = ['dev', 'holdout', 'holdout2', 'holdout3', 'holdout4'];
     for (const split of splits) expect(lessonsOf(split).size, split).toBeGreaterThan(0);
     for (const [index, left] of splits.entries()) {
       for (const right of splits.slice(index + 1)) expect([...lessonsOf(left)].filter((title) => lessonsOf(right).has(title)), `${left}/${right}`).toEqual([]);

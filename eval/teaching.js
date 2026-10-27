@@ -5,7 +5,7 @@ import { assessAnswer } from '../server/lesson/assessor.js';
 import { runTurn, toProviderMessages } from '../server/lesson/tutor.js';
 import { turnSources } from '../src/lesson/turnSources.js';
 import {
-  ACTION_OF_MOVE, checkEnd, supportProblems, checkTurn, citationSupport, labelGrade, loadLessons, loadScenarios, openingMessage,
+  ACTION_OF_MOVE, checkEnd, endStates, supportProblems, checkTurn, citationSupport, labelGrade, loadLessons, loadScenarios, openingMessage,
   planOf, plainSystem, policyRun, readTag, startProgress, summarize, turnApplies, verifyReply,
 } from './teaching-lib.js';
 import { evalProvider } from './remote-provider.js';
@@ -181,6 +181,7 @@ const modelScenario = async (scenario, system, partial) => {
     category: scenario.category,
     turns: rows,
     endFailures,
+    states: system === 'plain' ? null : endStates(scenario, system, progress),
     supportProblems: support,
     endState: { status: progress.status, currentStep: progress.currentStep, final: progress.final ?? null },
     passed: rows.every((row) => !row.failures.length) && !(endFailures ?? []).length && !(support ?? []).length,
@@ -198,7 +199,7 @@ const policyScenario = (scenario, system) => {
   });
   const endFailures = checkEnd(scenario, system, progress);
   const support = system === 'engine' ? supportProblems(rows) : null;
-  return { id: scenario.id, category: scenario.category, turns: rows, endFailures, supportProblems: support, passed: rows.every((row) => !row.failures.length) && !endFailures.length && !(support ?? []).length };
+  return { id: scenario.id, category: scenario.category, turns: rows, endFailures, states: endStates(scenario, system, progress), supportProblems: support, passed: rows.every((row) => !row.failures.length) && !endFailures.length && !(support ?? []).length };
 };
 
 const runPolicy = () => {
