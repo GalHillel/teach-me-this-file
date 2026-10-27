@@ -425,6 +425,8 @@ Production served `47f06c8` (`index-DE2YVcnZ.js`). I drove it with Playwright's 
 | Counter, saved state and screen | Agreed on all 11 turns; reload kept the completed lesson | Agreed on all 9 turns |
 | Models | Mostly `gemini-3.6-flash`; one turn on Flash-Lite (29.5 s), one on `gemini-2.5-flash` | Mostly `gemini-2.5-flash`, two turns on Flash-Lite |
 
+After deploying the fix (`2a6bfbf`, bundle `index-OM1nmP82.js`, the same as my local build) I started the English journey again at 14:09 UTC. The plan was created; the first reply timed out, and Try again got "The daily free quota for this API key is used up" with the Check the key option: every model on the site key had used its free quota for the day. So the fix is not verified on production with a real model.
+
 The path was completed in both languages on the live site with a real model, and step 6 found a bug that the scripted evals had not (fixed as AUDIT 89, verified in code and the policy layer, not yet on production with a real model). Other observations: three Hebrew replies opened with "שלום!" in the middle of the lesson (AUDIT 94), and no page errors in either run.
 
 ### Changes in round 7, chosen from the evidence

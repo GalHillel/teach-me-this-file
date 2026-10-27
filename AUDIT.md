@@ -211,7 +211,7 @@ What happened to each of these in round 7 is in the last column of the state map
 | Sev. | What | Next step |
 | --- | --- | --- |
 | High | The round-6 snapshot with a key copy (88) | Owner: delete the snapshot and rotate the key |
-| Medium | 89 is fixed in code and in the policy layer only; no real-model run after the fix | Rerun held-out-3 for the engine on the next quota reset; the production journey's step 2 |
+| Medium | 89 is fixed in code and in the policy layer only; no real-model run after the fix. I tried the production journey again at 14:09 UTC after deploying `2a6bfbf`: the plan was created, then every model on the site key was out of daily quota and the app said so | Rerun held-out-3 for the engine and the production journey's step 6 after the quota reset (07:00 UTC) |
 | Medium | The comparison used Flash-Lite for every system; nothing measured on the main model | A paid key or a day's main-model quota for one system at a time |
 | Medium | 95: a gap in an earlier step that the grader does not attribute | More prerequisite scenarios, then decide between a prompt change and a code rule |
 | Low | 93 and 94 | Measure on more Hebrew runs before changing anything |
