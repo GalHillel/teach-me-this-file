@@ -4,7 +4,8 @@ export const DISPLAY_LEVELS = ['not_started', 'in_progress', 'needs_review', 'ne
 
 export const stepView = (progress, index) => {
   const evidence = stepEvidence(progress, index);
-  return { ...evidence, display: evidence.level === 'needs_practice' && evidence.state === 'needs_review' ? 'needs_review' : evidence.level };
+  const helped = evidence.assisted && progress.steps[index].status === 'done' && !evidence.signals.some((signal) => signal === 'hints' || signal === 'explained');
+  return { ...evidence, signals: helped ? ['with_help', ...evidence.signals] : evidence.signals, display: evidence.level === 'needs_practice' && evidence.state === 'needs_review' ? 'needs_review' : evidence.level };
 };
 
 export const shownCount = (progress) => progress.steps.filter((_, index) => stepEvidence(progress, index).state === 'demonstrated').length;

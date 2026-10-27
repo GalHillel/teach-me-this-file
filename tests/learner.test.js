@@ -240,3 +240,14 @@ describe('what the learner sees', async () => {
     expect(nextAction(clean)).toEqual({ code: 'done' });
   });
 });
+
+describe('the help behind a finished step', async () => {
+  const { stepView } = await import('../src/lesson/progressView.js');
+
+  it('says a step was right after help even when the final check later showed it on a new question', () => {
+    const { progress: checking } = play(['incorrect', 'correct', 'correct', 'correct']);
+    const { progress } = play(['correct', 'correct', 'correct'], checking);
+    expect(stepView(progress, 0)).toMatchObject({ state: 'demonstrated', signals: ['with_help', 'final_pass'] });
+    expect(stepView(progress, 1).signals).toEqual(['first_try', 'final_pass']);
+  });
+});
