@@ -532,3 +532,28 @@ describe('rate limiting', () => {
     expect(statuses.at(-1)).toBe(429);
   });
 });
+
+describe('eval model route', () => {
+  const evalApp = () => createApp({
+    providerFor: withProvider(createMockProvider({ delayMs: 1 }), true),
+    serverKeyBudget: createServerKeyBudget(5),
+  });
+
+  it('refuses calls that do not come from a page of the app', async () => {
+    const response = await request(evalApp()).post('/api/eval/model').send({ op: 'text', system: 'x', messages: [{ role: 'user', content: 'hi' }] });
+    expect(response.status).toBe(403);
+  });
+
+  it('returns the whole reply and the models that answered', async () => {
+    const response = await request(evalApp()).post('/api/eval/model').set('Sec-Fetch-Site', 'same-origin')
+      .send({ op: 'text', system: 'You are a tutor.', messages: [{ role: 'user', content: 'Start the lesson.' }] });
+    expect(response.status).toBe(200);
+    expect(response.body.text.length).toBeGreaterThan(0);
+    expect(Array.isArray(response.body.metas)).toBe(true);
+  });
+
+  it('rejects a malformed call before using the key', async () => {
+    const response = await request(evalApp()).post('/api/eval/model').set('Sec-Fetch-Site', 'same-origin').send({ op: 'text', system: 'x', messages: [{ role: 'system', content: 'x' }] });
+    expect(response.status).toBe(400);
+  });
+});

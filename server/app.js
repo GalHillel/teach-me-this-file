@@ -1,6 +1,7 @@
 import express from 'express';
 import { config } from './config.js';
 import { AppError, errorBody, toAppError } from './errors.js';
+import { evalModelCall, readEvalCall } from './evalModel.js';
 import { createLessonPlan } from './lesson/planner.js';
 import { runTurn } from './lesson/tutor.js';
 import { count, metricsSnapshot } from './metrics.js';
@@ -92,6 +93,12 @@ export const createApp = ({ providerFor = providerFrom, serverKeyBudget = create
     } finally {
       stream.end();
     }
+  });
+
+  app.post('/api/eval/model', limiter, async (req, res) => {
+    const call = readEvalCall(req.body);
+    const provider = providerForRequest(req);
+    res.json(await evalModelCall({ provider, call, signal: abortOnClose(res) }));
   });
 
   app.use('/api', (req, res, next) => next(new AppError('invalid_request', 'Unknown API route.')));
