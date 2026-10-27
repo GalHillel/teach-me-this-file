@@ -268,6 +268,7 @@ const en = {
   'settings.mock': 'Mock (local testing only)',
   'settings.privacy': 'The key stays in this tab\'s memory and is cleared when you close or reload it. It is sent to this app\'s server with each request, passed to the provider, and never stored or logged.',
   'settings.serverKey': 'This server also has a limited demo key, so you can leave the field empty.',
+  'demo.banner': 'Offline demo: no AI model is used. The plan, grades and replies are scripted on this computer.',
   'settings.clear': 'Clear key',
   'settings.save': 'Save',
 
@@ -580,6 +581,7 @@ const he = {
   'settings.mock': 'מדומה (לבדיקות מקומיות בלבד)',
   'settings.privacy': 'המפתח נשמר רק בזיכרון של הלשונית ונמחק כשסוגרים או טוענים אותה מחדש. הוא נשלח לשרת של האפליקציה עם כל בקשה, מועבר לספק, ולעולם לא נשמר או נרשם ביומן.',
   'settings.serverKey': 'לשרת יש גם מפתח הדגמה מוגבל, כך שאפשר להשאיר את השדה ריק.',
+  'demo.banner': 'הדגמה לא מקוונת: אין כאן מודל AI. התוכנית, הציונים והתשובות מתוסרטים במחשב הזה.',
   'settings.clear': 'מחיקת המפתח',
   'settings.save': 'שמירה',
 
@@ -892,6 +894,7 @@ const fr = {
   'settings.mock': 'Simulé (tests locaux uniquement)',
   'settings.privacy': 'La clé reste dans la mémoire de cet onglet et est effacée à sa fermeture ou à son rechargement. Elle est envoyée au serveur de l\'application à chaque requête, transmise au fournisseur, et jamais stockée ni journalisée.',
   'settings.serverKey': 'Ce serveur dispose aussi d\'une clé de démonstration limitée ; vous pouvez laisser le champ vide.',
+  'demo.banner': 'Démo hors ligne : aucun modèle d\'IA n\'est utilisé. Le plan, les notes et les réponses sont scriptés sur cet ordinateur.',
   'settings.clear': 'Effacer la clé',
   'settings.save': 'Enregistrer',
 

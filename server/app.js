@@ -56,7 +56,7 @@ export const createApp = ({ providerFor = providerFrom, serverKeyBudget = create
   };
 
   app.get('/api/health', (req, res) => {
-    res.json({ ok: true, serverKey: Boolean(config.serverApiKey), metrics: metricsSnapshot() });
+    res.json({ ok: true, serverKey: Boolean(config.serverApiKey), demo: config.demoMode, metrics: metricsSnapshot() });
   });
 
   app.post('/api/lessons', limiter, async (req, res) => {

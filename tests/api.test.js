@@ -532,3 +532,11 @@ describe('rate limiting', () => {
     expect(statuses.at(-1)).toBe(429);
   });
 });
+
+describe('health', () => {
+  it('says whether the server runs the offline demo', async () => {
+    const response = await request(createApp()).get('/api/health');
+    expect(response.status).toBe(200);
+    expect(response.body.demo).toBe(false);
+  });
+});

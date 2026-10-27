@@ -13,6 +13,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "node server/index.js",
+    "demo": "vite build && node server/demo.js",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",

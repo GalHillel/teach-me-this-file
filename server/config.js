@@ -20,6 +20,7 @@ export const config = {
     openrouter: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free',
   },
   allowMockProvider: process.env.ALLOW_MOCK_PROVIDER === 'true',
+  demoMode: process.env.DEMO_MODE === 'true',
   providerTimeoutMs: numberFromEnv('PROVIDER_TIMEOUT_MS', 15000),
   providerDeadlineMs: numberFromEnv('PROVIDER_DEADLINE_MS', 40000),
   planTimeoutMs: numberFromEnv('PLAN_TIMEOUT_MS', 35000),

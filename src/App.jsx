@@ -16,6 +16,7 @@ export default function App() {
   const [settings, setSettings] = useState({ apiKey: '', provider: 'auto' });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [serverKey, setServerKey] = useState(null);
+  const [demo, setDemo] = useState(false);
   const [upload, setUpload] = useState(EMPTY_UPLOAD);
   const [teacherPrompt, setTeacherPrompt] = useState(DEFAULT_PROMPT);
   const [lessonLanguage, setLessonLanguage] = useState('');
@@ -23,10 +24,13 @@ export default function App() {
   const uploadRef = useRef(0);
 
   useEffect(() => {
-    fetchHealth().then((health) => setServerKey(Boolean(health.serverKey)));
+    fetchHealth().then((health) => {
+      setServerKey(Boolean(health.serverKey));
+      setDemo(health.demo === true);
+    });
   }, []);
 
-  const keyReady = Boolean(settings.apiKey) || serverKey === true || settings.provider === 'mock';
+  const keyReady = Boolean(settings.apiKey) || serverKey === true || demo || settings.provider === 'mock';
   const needsKey = !keyReady && serverKey === false;
 
   const readFile = async (file) => {
@@ -61,6 +65,7 @@ export default function App() {
 
   return (
     <div className="flex h-dvh flex-col">
+      {demo && <p className="border-b border-marker-edge bg-marker-soft px-4 py-2 text-center text-sm font-medium text-ink" role="status">{t('demo.banner')}</p>}
       <AppHeader keyReady={keyReady} onOpenSettings={() => setSettingsOpen(true)} onNewLesson={lesson ? leaveLesson : null} />
       {lesson ? (
         <Suspense fallback={<p className="p-6 text-sm text-muted" role="status">{t('lesson.opening')}</p>}>
