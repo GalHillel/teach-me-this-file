@@ -3,12 +3,12 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { assessAnswer } from '../server/lesson/assessor.js';
 import { runTurn, toProviderMessages } from '../server/lesson/tutor.js';
-import { resolveProvider } from '../server/providers/index.js';
 import { turnSources } from '../src/lesson/turnSources.js';
 import {
   ACTION_OF_MOVE, checkEnd, supportProblems, checkTurn, citationSupport, labelGrade, loadLessons, loadScenarios, openingMessage,
   planOf, plainSystem, policyRun, readTag, startProgress, summarize, turnApplies, verifyReply,
 } from './teaching-lib.js';
+import { evalProvider } from './remote-provider.js';
 import { latestRuns, readRun, runMeta, sameVersion, summarizeRun, turnRecord } from './teaching-store.js';
 
 const arg = (name, fallback) => process.argv.find((item) => item.startsWith(`--${name}=`))?.slice(name.length + 3) ?? fallback;
@@ -41,7 +41,7 @@ const labelProvider = {
   },
 };
 
-const provider = mode === 'policy' ? { name: 'none', model: null } : providerName === 'labels' ? labelProvider : resolveProvider({ apiKey: process.env.EVAL_API_KEY || '', provider: providerName }).provider;
+const provider = mode === 'policy' ? { name: 'none', model: null } : providerName === 'labels' ? labelProvider : await evalProvider({ name: providerName, apiKey: process.env.EVAL_API_KEY || '' });
 
 let calls = 0;
 let stopped = null;
@@ -230,8 +230,8 @@ const runModel = async () => {
     writeFileSync(metaFile, `${JSON.stringify(meta, null, 2)}\n`);
   }
   const done = new Set(latestRuns(readRun(linesFile)).filter((line) => line.status === 'complete').map((line) => `${line.system}/${line.id}`));
-  for (const system of systems) {
-    for (const scenario of selected) {
+  for (const scenario of selected) {
+    for (const system of systems) {
       if (stopped) break;
       if (done.has(`${system}/${scenario.id}`)) continue;
       const startedAt = new Date().toISOString();
@@ -261,6 +261,8 @@ if (mode === 'policy') {
     await runModel();
   } catch (error) {
     console.error(error.message);
-    process.exit(1);
+    process.exitCode = 1;
+  } finally {
+    await provider.close?.();
   }
 }

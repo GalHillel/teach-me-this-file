@@ -328,6 +328,12 @@ export const checkEnd = (scenario, system, progress) => {
 };
 
 const share = (list, test) => (list.length ? Number((list.filter(test).length / list.length).toFixed(3)) : null);
+const ratio = (list, test) => (list.length ? `${list.filter(test).length}/${list.length}` : null);
+const percentile = (values, fraction) => {
+  if (!values.length) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.min(sorted.length - 1, Math.floor(fraction * sorted.length))];
+};
 
 export const summarize = (scenarios) => {
   const turns = scenarios.flatMap((item) => item.turns);
@@ -339,6 +345,9 @@ export const summarize = (scenarios) => {
   const supports = turns.flatMap((row) => row.support ?? []);
   const replies = turns.filter((row) => row.text !== undefined);
   const groups = scenarios.filter((item) => item.variants);
+  const returns = turns.filter((row) => row.turn.expect?.actions?.includes('back_to_question'));
+  const lessons = scenarios.filter((item) => item.turns.length && item.turns.at(-1).turn.expect?.actions?.includes('summary'));
+  const latencies = turns.map((row) => row.totalMs).filter(Number.isFinite);
   const byCategory = {};
   for (const item of scenarios) {
     const entry = byCategory[item.category] ?? { scenarios: 0, passed: 0 };
@@ -356,6 +365,9 @@ export const summarize = (scenarios) => {
     helpInFinalCheck: turns.filter((row) => row.failures.includes('help during the final check')).length,
     endStateMatch: share(scenarios.filter((item) => item.endFailures), (item) => !item.endFailures.length),
     supportProblems: scenarios.reduce((sum, item) => sum + (item.supportProblems?.length ?? 0), 0),
+    returnTurnsFit: ratio(returns, (row) => row.turn.expect.actions.includes(row.action)),
+    lessonsCompleted: ratio(lessons, (item) => item.turns.at(-1).action === 'summary'),
+    latencyMs: latencies.length ? { turns: latencies.length, p50: percentile(latencies, 0.5), p95: percentile(latencies, 0.95) } : null,
     grading: graded.length ? {
       answers: graded.length,
       verdictAccuracy: share(graded, (row) => acceptOf(row.turn).verdict.includes(row.verdict)),

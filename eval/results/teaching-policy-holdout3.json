@@ -2,7 +2,7 @@
   "label": "policy-holdout3",
   "mode": "policy",
   "split": "holdout3",
-  "date": "2026-10-27T12:52:47.522Z",
+  "date": "2026-10-27T12:54:26.457Z",
   "systems": {
     "engine": {
       "summary": {
@@ -15,6 +15,9 @@
         "helpInFinalCheck": 0,
         "endStateMatch": 1,
         "supportProblems": 0,
+        "returnTurnsFit": "4/4",
+        "lessonsCompleted": "3/3",
+        "latencyMs": null,
         "grading": {
           "answers": 44,
           "verdictAccuracy": 1,
@@ -804,6 +807,9 @@
         "helpInFinalCheck": 0,
         "endStateMatch": 0.5,
         "supportProblems": 0,
+        "returnTurnsFit": "2/4",
+        "lessonsCompleted": "0/3",
+        "latencyMs": null,
         "grading": {
           "answers": 43,
           "verdictAccuracy": 1,

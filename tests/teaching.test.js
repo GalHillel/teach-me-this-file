@@ -5,8 +5,9 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   checkEnd, checkTurn, citationSupport, endsWithQuestion, hasPraise, loadLessons, loadScenarios, notesContradiction,
-  policyRun, readTag, saysNotInDocument, similarity, supportProblems, turnApplies,
+  policyRun, readTag, saysNotInDocument, similarity, summarize, supportProblems, turnApplies,
 } from '../eval/teaching-lib.js';
+import { callFromPage } from '../eval/remote-provider.js';
 
 const lessons = loadLessons();
 const { scenarios, categories } = loadScenarios();
@@ -128,5 +129,29 @@ describe('text checks used on model replies', () => {
     expect(supportProblems([{ step: 0, intervention: 'nudge' }, { step: 0, intervention: 'focused_hint' }, { step: 1, intervention: 'nudge' }])).toEqual([]);
     expect(supportProblems([{ step: 0, intervention: 'nudge' }, { step: 0, intervention: 'nudge' }])).toEqual(['turn 2: repeated nudge']);
     expect(supportProblems([{ step: 0, intervention: 'worked_example' }, { step: 0, intervention: 'nudge' }])).toEqual(['turn 2: less support (nudge) after more']);
+  });
+});
+
+describe('eval summary and remote calls', () => {
+  const row = (actions, action, totalMs) => ({ turn: { label: { verdict: 'correct' }, expect: { actions } }, action, failures: [], totalMs });
+
+  it('counts returns to the question, finished lessons and latency', () => {
+    const summary = summarize([
+      { id: 'a', passed: true, turns: [row(['back_to_question', 'hint'], 'hint', 1000), row(['summary'], 'summary', 3000)] },
+      { id: 'b', passed: false, turns: [row(['back_to_question'], 'next_step', 2000), row(['summary'], 'final_check', 4000)] },
+    ]);
+    expect(summary.returnTurnsFit).toBe('1/2');
+    expect(summary.lessonsCompleted).toBe('1/2');
+    expect(summary.latencyMs).toEqual({ turns: 4, p50: 3000, p95: 4000 });
+  });
+
+  it('keeps the error code of a failed remote model call', async () => {
+    const page = { evaluate: async () => ({ status: 429, body: { error: { code: 'quota_exhausted', message: 'Daily quota used up.' } } }) };
+    await expect(callFromPage(page)({ op: 'json' })).rejects.toMatchObject({ code: 'quota_exhausted', message: 'Daily quota used up.' });
+  });
+
+  it('reports a remote failure without a body as provider_unavailable', async () => {
+    const page = { evaluate: async () => ({ status: 504, body: null }) };
+    await expect(callFromPage(page)({ op: 'text' })).rejects.toMatchObject({ code: 'provider_unavailable', message: 'HTTP 504' });
   });
 });

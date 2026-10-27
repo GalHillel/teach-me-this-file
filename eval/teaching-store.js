@@ -27,6 +27,7 @@ const git = (command) => {
 export const versionInfo = (provider) => ({
   date: new Date().toISOString(),
   provider: provider.name,
+  remoteHost: provider.host ?? null,
   models: { main: process.env.GEMINI_MODELS || provider.model || null, backup: process.env.GEMINI_BACKUP_MODELS || null },
   commit: git('rev-parse HEAD') ?? process.env.EVAL_COMMIT ?? null,
   uncommittedChanges: git('status --porcelain -- server shared src eval') ? true : false,

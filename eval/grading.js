@@ -1,7 +1,7 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { assessAnswer } from '../server/lesson/assessor.js';
 import { createProgress } from '../server/lesson/progress.js';
-import { resolveProvider } from '../server/providers/index.js';
+import { evalProvider } from './remote-provider.js';
 import { readRun, versionInfo } from './teaching-store.js';
 
 const golden = JSON.parse(readFileSync(new URL('./golden/grading.json', import.meta.url), 'utf8'));
@@ -59,7 +59,7 @@ const summarize = (rows) => {
 };
 
 const run = async () => {
-  const { provider } = resolveProvider({ apiKey: process.env.EVAL_API_KEY || '', provider: process.env.EVAL_PROVIDER || '' });
+  const provider = await evalProvider({ name: process.env.EVAL_PROVIDER || '', apiKey: process.env.EVAL_API_KEY || '' });
   mkdirSync(new URL('./results/', import.meta.url), { recursive: true });
   const linesFile = new URL(`./results/grading-${label}.jsonl`, import.meta.url);
   if (existsSync(linesFile) && process.env.EVAL_RESUME !== '1') throw new Error(`${linesFile.pathname} exists; set EVAL_RESUME=1 to continue it or use another EVAL_LABEL`);
@@ -101,6 +101,7 @@ const run = async () => {
   const summary = { planned, notRun: planned - rows.length, ...summarize(rows) };
   console.log(JSON.stringify(summary));
   writeFileSync(new URL(`./results/grading-${label}.json`, import.meta.url), `${JSON.stringify({ label, ...versionInfo(provider), summary, rows }, null, 2)}\n`);
+  await provider.close?.();
 };
 
 try {
