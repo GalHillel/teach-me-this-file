@@ -1,0 +1,1731 @@
+{
+  "label": "policy-holdout3",
+  "mode": "policy",
+  "split": "holdout3",
+  "date": "2026-10-27T12:52:47.522Z",
+  "systems": {
+    "engine": {
+      "summary": {
+        "scenarios": 18,
+        "scenarioPass": 0.944,
+        "turns": 50,
+        "actionFit": 0.98,
+        "interventionFit": null,
+        "unearnedMoves": 0,
+        "helpInFinalCheck": 0,
+        "endStateMatch": 1,
+        "supportProblems": 0,
+        "grading": {
+          "answers": 44,
+          "verdictAccuracy": 1,
+          "falsePositives": "0/13",
+          "falseNegatives": "0/27",
+          "issueAccuracy": "2/2",
+          "misconceptionNamed": "0/0"
+        },
+        "paraphraseConsistency": null,
+        "text": null,
+        "byCategory": {
+          "understands": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "misconception": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "narrowing": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "partial": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "copied": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "other_part": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "not_in_document": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "prerequisite": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "transfer": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "journey": {
+            "scenarios": 2,
+            "passed": 1
+          }
+        },
+        "failures": [
+          {
+            "id": "ho3-en-journey",
+            "problems": [
+              "turn 2: action back_to_question, wanted next_step"
+            ]
+          }
+        ]
+      },
+      "runs": [
+        {
+          "id": "ho3-en-understands",
+          "category": "understands",
+          "turns": [
+            {
+              "student": "Something has to vibrate, moving back and forth really fast, like a guitar string after you pluck it.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 0,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-en-misconception",
+          "category": "misconception",
+          "turns": [
+            {
+              "student": "Sound is like light, it can fly through empty space. Space is just so big that the shout gets lost before it reaches the other astronaut.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "step": 1,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "sound can travel through empty space like light",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-en-narrowing",
+          "category": "narrowing",
+          "turns": [
+            {
+              "student": "Because their helmets block the sound.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "step": 1,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "the helmets stop the sound",
+              "failures": []
+            },
+            {
+              "student": "Sound is a vibration.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "focused_hint",
+              "step": 1,
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Sound is a vibration that gets passed from one particle to the next, and space has almost no particles, so the shout has nothing to travel through.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 1,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-en-partial",
+          "category": "partial",
+          "turns": [
+            {
+              "student": "Because steel is a solid.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 2,
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-en-copied",
+          "category": "copied",
+          "turns": [
+            {
+              "student": "In solids the particles are packed closely together, so each one passes the vibration to the next very quickly.",
+              "move": "probe",
+              "action": "probe",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "copied",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "In the rail the bits of steel are squashed right next to each other, so the shake jumps from one to the next much faster than between the far-apart bits of air.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-en-other-part",
+          "category": "other_part",
+          "turns": [
+            {
+              "student": "Can loud music in headphones hurt my ears?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "step": 0,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Okay. To make a sound something has to vibrate, move back and forth quickly.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 0,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-en-not-in-document",
+          "category": "not_in_document",
+          "turns": [
+            {
+              "student": "How fast does light travel?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "step": 0,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-en-prerequisite",
+          "category": "prerequisite",
+          "turns": [
+            {
+              "student": "Because sound is the air that comes out of your mouth, and in space their mouths are inside helmets.",
+              "move": "prerequisite_check",
+              "action": "check_earlier",
+              "intervention": "prerequisite",
+              "step": 1,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "sound is air coming out of the object",
+              "failures": []
+            },
+            {
+              "student": "A sound starts when something vibrates, it moves back and forth very fast.",
+              "move": "resume",
+              "action": "back_to_question",
+              "intervention": null,
+              "step": 1,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "The vibration has to be passed from particle to particle, and space has almost no particles, so the shout cannot travel.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 1,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-en-transfer",
+          "category": "transfer",
+          "turns": [
+            {
+              "student": "The particles in steel are packed close together, so they pass the vibration along faster than the spread-out air particles.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "My hand stops the string from vibrating, and without the vibration there is no sound.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "The string carries the voice because the sound turns into electricity inside the string.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "step": null,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "sound travels as electricity",
+              "failures": []
+            },
+            {
+              "student": "Faster in water, because the water particles are closer together than air particles, so they pass the vibration on more quickly.",
+              "move": "final_finish",
+              "action": "summary",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-en-journey",
+          "category": "journey",
+          "turns": [
+            {
+              "student": "Air comes out of the guitar and that air is the sound.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "step": 0,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "sound is air coming out of the object",
+              "failures": []
+            },
+            {
+              "student": "So the string has to move back and forth really fast, it vibrates, and that is what makes the sound.",
+              "move": "build_up",
+              "action": "back_to_question",
+              "intervention": null,
+              "step": 0,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action back_to_question, wanted next_step"
+              ]
+            },
+            {
+              "student": "To make a sound the object has to vibrate, moving back and forth very quickly.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 0,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Because space is empty.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 1,
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Sound is passed along from particle to particle, and space has almost no particles, so the vibration has nothing to travel through.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 1,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Can loud music in headphones hurt your ears?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "step": 2,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "In a steel rail the particles are packed close together, so they pass the vibration on faster than the spread-out particles in air.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "The hand stops the string from vibrating, so there is no vibration and no sound.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "My voice makes the cup vibrate, the vibration goes along the string to the other cup, and that cup shakes the air so my friend hears it.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Faster in water, because its particles are closer together than the particles in air.",
+              "move": "final_finish",
+              "action": "summary",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": false
+        },
+        {
+          "id": "ho3-he-understands",
+          "category": "understands",
+          "turns": [
+            {
+              "student": "חיכוך הוא כוח שנוצר כששני משטחים נוגעים זה בזה, והוא פועל נגד התנועה, ולכן דברים מאטים.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 0,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-he-misconception",
+          "category": "misconception",
+          "turns": [
+            {
+              "student": "חיכוך זה הכוח שדוחף את הכדור קדימה כשבועטים בו.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "step": 0,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "friction pushes objects forward",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-he-narrowing",
+          "category": "narrowing",
+          "turns": [
+            {
+              "student": "כי קרח זה קר.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "counterexample",
+              "step": 1,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "ice is slippery because it is cold",
+              "failures": []
+            },
+            {
+              "student": "הקרח חלק.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "focused_hint",
+              "step": 1,
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "הקרח חלק ולכן החיכוך בינו לבין הנעל קטן, והמדרכה מחוספסת אז יש בה יותר חיכוך ולא מחליקים.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 1,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-he-copied",
+          "category": "copied",
+          "turns": [
+            {
+              "student": "חיכוך הופך חלק מאנרגיית התנועה לחום. גם הבלמים של אופניים ושל מכונית מתחממים כשהם עוצרים את הגלגל.",
+              "move": "probe",
+              "action": "probe",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "copied",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "הבלמים נלחצים על הגלגל ומשפשפים אותו כדי לעצור, והשפשוף הזה הופך את התנועה של הגלגל לחום.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-he-other-part",
+          "category": "other_part",
+          "turns": [
+            {
+              "student": "למה חלליות צריכות מגן חום כשהן חוזרות לכדור הארץ?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "step": 0,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "בסדר. חיכוך הוא כוח בין שני משטחים שנוגעים, והוא פועל נגד התנועה ומאט אותה.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 0,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-he-not-in-document",
+          "category": "not_in_document",
+          "turns": [
+            {
+              "student": "מי היה המדען שגילה את החיכוך?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "step": 1,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-he-prerequisite",
+          "category": "prerequisite",
+          "turns": [
+            {
+              "student": "הבלמים מתחממים כי החיכוך דוחף את הגלגל קדימה מהר יותר.",
+              "move": "prerequisite_check",
+              "action": "check_earlier",
+              "intervention": "prerequisite",
+              "step": 2,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "friction pushes objects forward",
+              "failures": []
+            },
+            {
+              "student": "חיכוך הוא כוח בין משטחים שנוגעים, והוא פועל נגד התנועה ומאט אותה.",
+              "move": "resume",
+              "action": "back_to_question",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "הבלמים מאטים את הגלגל בעזרת חיכוך, והחיכוך הופך חלק מהתנועה לחום, ולכן הם מתחממים.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "ho3-he-journey",
+          "category": "journey",
+          "turns": [
+            {
+              "student": "זה כוח בין שני דברים שנוגעים.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 0,
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "והוא פועל נגד כיוון התנועה, ולכן הוא מאט את מה שזז.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 0,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "למה חלליות צריכות מגן חום?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "step": 1,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "הקרח חלק ולכן החיכוך בינו לבין הנעל קטן, ובמדרכה המחוספסת החיכוך גדול.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 1,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "כי יש חיכוך בבלמים.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 2,
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "החיכוך בבלמים הופך את התנועה של הגלגל לחום, ולכן הם מתחממים.",
+              "move": "final_check_start",
+              "action": "final_check",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "החיכוך בין הכדור לדשא פועל נגד התנועה ומאט אותו עד שהוא נעצר.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "כי החול חם יותר מהקרח ומפשיר אותו.",
+              "move": "final_next",
+              "action": "final_check",
+              "intervention": null,
+              "step": null,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "sand melts the ice",
+              "failures": []
+            },
+            {
+              "student": "השמן מקטין את החיכוך בין החלקים, אז נוצר פחות חום ופחות שחיקה.",
+              "move": "final_finish",
+              "action": "summary",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": [],
+          "passed": true
+        }
+      ]
+    },
+    "naive": {
+      "summary": {
+        "scenarios": 18,
+        "scenarioPass": 0.5,
+        "turns": 49,
+        "actionFit": 0.551,
+        "interventionFit": null,
+        "unearnedMoves": 4,
+        "helpInFinalCheck": 0,
+        "endStateMatch": 0.5,
+        "supportProblems": 0,
+        "grading": {
+          "answers": 43,
+          "verdictAccuracy": 1,
+          "falsePositives": "0/13",
+          "falseNegatives": "0/26",
+          "issueAccuracy": "2/2",
+          "misconceptionNamed": "0/0"
+        },
+        "paraphraseConsistency": null,
+        "text": null,
+        "byCategory": {
+          "understands": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "misconception": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "narrowing": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "partial": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "copied": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "other_part": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "not_in_document": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "prerequisite": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "transfer": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "journey": {
+            "scenarios": 2,
+            "passed": 0
+          }
+        },
+        "failures": [
+          {
+            "id": "ho3-en-narrowing",
+            "problems": [
+              "end: step 2 level shown, wanted shown_with_help"
+            ]
+          },
+          {
+            "id": "ho3-en-copied",
+            "problems": [
+              "turn 1: action summary, wanted probe|hint",
+              "turn 1: moved on without evidence",
+              "turn 2: action other, wanted final_check",
+              "end: status completed, wanted reviewing"
+            ]
+          },
+          {
+            "id": "ho3-en-prerequisite",
+            "problems": [
+              "turn 1: action hint, wanted check_earlier",
+              "turn 2: action next_step, wanted back_to_question",
+              "turn 2: moved on without evidence",
+              "turn 3: action summary, wanted next_step",
+              "end: step 2 level shown, wanted shown_with_help",
+              "end: step 1 revisit null, wanted pass"
+            ]
+          },
+          {
+            "id": "ho3-en-transfer",
+            "problems": [
+              "turn 1: action summary, wanted final_check",
+              "turn 2: action other, wanted final_check",
+              "turn 3: action other, wanted final_check",
+              "turn 4: action other, wanted summary",
+              "end: step 1 level shown, wanted applied",
+              "end: step 2 level shown, wanted needs_practice",
+              "end: step 3 level shown, wanted applied"
+            ]
+          },
+          {
+            "id": "ho3-en-journey",
+            "problems": [
+              "turn 6: action summary, wanted final_check",
+              "turn 7: action other, wanted final_check",
+              "turn 8: action other, wanted final_check",
+              "turn 9: action other, wanted summary",
+              "end: step 1 level shown, wanted applied",
+              "end: step 2 level shown, wanted applied",
+              "end: step 3 level shown, wanted applied"
+            ]
+          },
+          {
+            "id": "ho3-he-narrowing",
+            "problems": [
+              "end: step 2 level shown, wanted shown_with_help"
+            ]
+          },
+          {
+            "id": "ho3-he-copied",
+            "problems": [
+              "turn 1: action summary, wanted probe|hint",
+              "turn 1: moved on without evidence",
+              "turn 2: action other, wanted final_check",
+              "end: status completed, wanted reviewing"
+            ]
+          },
+          {
+            "id": "ho3-he-prerequisite",
+            "problems": [
+              "turn 1: action hint, wanted check_earlier",
+              "turn 2: action summary, wanted back_to_question",
+              "turn 2: moved on without evidence",
+              "turn 3: action other, wanted final_check",
+              "end: step 3 level shown, wanted shown_with_help",
+              "end: step 1 revisit null, wanted pass",
+              "end: status completed, wanted reviewing"
+            ]
+          },
+          {
+            "id": "ho3-he-journey",
+            "problems": [
+              "turn 6: action summary, wanted final_check",
+              "turn 7: action other, wanted final_check",
+              "turn 8: action other, wanted final_check",
+              "turn 9: action other, wanted summary",
+              "end: step 1 level shown, wanted applied",
+              "end: step 2 level shown, wanted needs_practice",
+              "end: step 3 level shown, wanted applied"
+            ]
+          }
+        ]
+      },
+      "runs": [
+        {
+          "id": "ho3-en-understands",
+          "category": "understands",
+          "turns": [
+            {
+              "student": "Something has to vibrate, moving back and forth really fast, like a guitar string after you pluck it.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 0,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": null,
+          "passed": true
+        },
+        {
+          "id": "ho3-en-misconception",
+          "category": "misconception",
+          "turns": [
+            {
+              "student": "Sound is like light, it can fly through empty space. Space is just so big that the shout gets lost before it reaches the other astronaut.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 1,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "sound can travel through empty space like light",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": null,
+          "passed": true
+        },
+        {
+          "id": "ho3-en-narrowing",
+          "category": "narrowing",
+          "turns": [
+            {
+              "student": "Because their helmets block the sound.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 1,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "the helmets stop the sound",
+              "failures": []
+            },
+            {
+              "student": "Sound is a vibration.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 1,
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Sound is a vibration that gets passed from one particle to the next, and space has almost no particles, so the shout has nothing to travel through.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 1,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [
+            "step 2 level shown, wanted shown_with_help"
+          ],
+          "supportProblems": null,
+          "passed": false
+        },
+        {
+          "id": "ho3-en-partial",
+          "category": "partial",
+          "turns": [
+            {
+              "student": "Because steel is a solid.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 2,
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": null,
+          "passed": true
+        },
+        {
+          "id": "ho3-en-copied",
+          "category": "copied",
+          "turns": [
+            {
+              "student": "In solids the particles are packed closely together, so each one passes the vibration to the next very quickly.",
+              "move": "final_finish",
+              "action": "summary",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "copied",
+              "misconception": "",
+              "failures": [
+                "action summary, wanted probe|hint",
+                "moved on without evidence"
+              ]
+            },
+            {
+              "student": "In the rail the bits of steel are squashed right next to each other, so the shake jumps from one to the next much faster than between the far-apart bits of air.",
+              "move": "free_chat",
+              "action": "other",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action other, wanted final_check"
+              ]
+            }
+          ],
+          "endFailures": [
+            "status completed, wanted reviewing"
+          ],
+          "supportProblems": null,
+          "passed": false
+        },
+        {
+          "id": "ho3-en-other-part",
+          "category": "other_part",
+          "turns": [
+            {
+              "student": "Can loud music in headphones hurt my ears?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "step": 0,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Okay. To make a sound something has to vibrate, move back and forth quickly.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 0,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": null,
+          "passed": true
+        },
+        {
+          "id": "ho3-en-not-in-document",
+          "category": "not_in_document",
+          "turns": [
+            {
+              "student": "How fast does light travel?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "step": 0,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": null,
+          "passed": true
+        },
+        {
+          "id": "ho3-en-prerequisite",
+          "category": "prerequisite",
+          "turns": [
+            {
+              "student": "Because sound is the air that comes out of your mouth, and in space their mouths are inside helmets.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 1,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "sound is air coming out of the object",
+              "failures": [
+                "action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "student": "A sound starts when something vibrates, it moves back and forth very fast.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 1,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action next_step, wanted back_to_question",
+                "moved on without evidence"
+              ]
+            },
+            {
+              "student": "The vibration has to be passed from particle to particle, and space has almost no particles, so the shout cannot travel.",
+              "move": "final_finish",
+              "action": "summary",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action summary, wanted next_step"
+              ]
+            }
+          ],
+          "endFailures": [
+            "step 2 level shown, wanted shown_with_help",
+            "step 1 revisit null, wanted pass"
+          ],
+          "supportProblems": null,
+          "passed": false
+        },
+        {
+          "id": "ho3-en-transfer",
+          "category": "transfer",
+          "turns": [
+            {
+              "student": "The particles in steel are packed close together, so they pass the vibration along faster than the spread-out air particles.",
+              "move": "final_finish",
+              "action": "summary",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action summary, wanted final_check"
+              ]
+            },
+            {
+              "student": "My hand stops the string from vibrating, and without the vibration there is no sound.",
+              "move": "free_chat",
+              "action": "other",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action other, wanted final_check"
+              ]
+            },
+            {
+              "student": "The string carries the voice because the sound turns into electricity inside the string.",
+              "move": "free_chat",
+              "action": "other",
+              "intervention": null,
+              "step": null,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "sound travels as electricity",
+              "failures": [
+                "action other, wanted final_check"
+              ]
+            },
+            {
+              "student": "Faster in water, because the water particles are closer together than air particles, so they pass the vibration on more quickly.",
+              "move": "free_chat",
+              "action": "other",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action other, wanted summary"
+              ]
+            }
+          ],
+          "endFailures": [
+            "step 1 level shown, wanted applied",
+            "step 2 level shown, wanted needs_practice",
+            "step 3 level shown, wanted applied"
+          ],
+          "supportProblems": null,
+          "passed": false
+        },
+        {
+          "id": "ho3-en-journey",
+          "category": "journey",
+          "turns": [
+            {
+              "student": "Air comes out of the guitar and that air is the sound.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 0,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "sound is air coming out of the object",
+              "failures": []
+            },
+            {
+              "student": "So the string has to move back and forth really fast, it vibrates, and that is what makes the sound.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 0,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Because space is empty.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 1,
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Sound is passed along from particle to particle, and space has almost no particles, so the vibration has nothing to travel through.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 1,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "Can loud music in headphones hurt your ears?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "step": 2,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "In a steel rail the particles are packed close together, so they pass the vibration on faster than the spread-out particles in air.",
+              "move": "final_finish",
+              "action": "summary",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action summary, wanted final_check"
+              ]
+            },
+            {
+              "student": "The hand stops the string from vibrating, so there is no vibration and no sound.",
+              "move": "free_chat",
+              "action": "other",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action other, wanted final_check"
+              ]
+            },
+            {
+              "student": "My voice makes the cup vibrate, the vibration goes along the string to the other cup, and that cup shakes the air so my friend hears it.",
+              "move": "free_chat",
+              "action": "other",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action other, wanted final_check"
+              ]
+            },
+            {
+              "student": "Faster in water, because its particles are closer together than the particles in air.",
+              "move": "free_chat",
+              "action": "other",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action other, wanted summary"
+              ]
+            }
+          ],
+          "endFailures": [
+            "step 1 level shown, wanted applied",
+            "step 2 level shown, wanted applied",
+            "step 3 level shown, wanted applied"
+          ],
+          "supportProblems": null,
+          "passed": false
+        },
+        {
+          "id": "ho3-he-understands",
+          "category": "understands",
+          "turns": [
+            {
+              "student": "חיכוך הוא כוח שנוצר כששני משטחים נוגעים זה בזה, והוא פועל נגד התנועה, ולכן דברים מאטים.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 0,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": null,
+          "passed": true
+        },
+        {
+          "id": "ho3-he-misconception",
+          "category": "misconception",
+          "turns": [
+            {
+              "student": "חיכוך זה הכוח שדוחף את הכדור קדימה כשבועטים בו.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 0,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "friction pushes objects forward",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": null,
+          "passed": true
+        },
+        {
+          "id": "ho3-he-narrowing",
+          "category": "narrowing",
+          "turns": [
+            {
+              "student": "כי קרח זה קר.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 1,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "ice is slippery because it is cold",
+              "failures": []
+            },
+            {
+              "student": "הקרח חלק.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 1,
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "הקרח חלק ולכן החיכוך בינו לבין הנעל קטן, והמדרכה מחוספסת אז יש בה יותר חיכוך ולא מחליקים.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 1,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [
+            "step 2 level shown, wanted shown_with_help"
+          ],
+          "supportProblems": null,
+          "passed": false
+        },
+        {
+          "id": "ho3-he-copied",
+          "category": "copied",
+          "turns": [
+            {
+              "student": "חיכוך הופך חלק מאנרגיית התנועה לחום. גם הבלמים של אופניים ושל מכונית מתחממים כשהם עוצרים את הגלגל.",
+              "move": "final_finish",
+              "action": "summary",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "copied",
+              "misconception": "",
+              "failures": [
+                "action summary, wanted probe|hint",
+                "moved on without evidence"
+              ]
+            },
+            {
+              "student": "הבלמים נלחצים על הגלגל ומשפשפים אותו כדי לעצור, והשפשוף הזה הופך את התנועה של הגלגל לחום.",
+              "move": "free_chat",
+              "action": "other",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action other, wanted final_check"
+              ]
+            }
+          ],
+          "endFailures": [
+            "status completed, wanted reviewing"
+          ],
+          "supportProblems": null,
+          "passed": false
+        },
+        {
+          "id": "ho3-he-other-part",
+          "category": "other_part",
+          "turns": [
+            {
+              "student": "למה חלליות צריכות מגן חום כשהן חוזרות לכדור הארץ?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "step": 0,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "בסדר. חיכוך הוא כוח בין שני משטחים שנוגעים, והוא פועל נגד התנועה ומאט אותה.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 0,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": null,
+          "passed": true
+        },
+        {
+          "id": "ho3-he-not-in-document",
+          "category": "not_in_document",
+          "turns": [
+            {
+              "student": "מי היה המדען שגילה את החיכוך?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "step": 1,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "supportProblems": null,
+          "passed": true
+        },
+        {
+          "id": "ho3-he-prerequisite",
+          "category": "prerequisite",
+          "turns": [
+            {
+              "student": "הבלמים מתחממים כי החיכוך דוחף את הגלגל קדימה מהר יותר.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 2,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "friction pushes objects forward",
+              "failures": [
+                "action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "student": "חיכוך הוא כוח בין משטחים שנוגעים, והוא פועל נגד התנועה ומאט אותה.",
+              "move": "final_finish",
+              "action": "summary",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action summary, wanted back_to_question",
+                "moved on without evidence"
+              ]
+            },
+            {
+              "student": "הבלמים מאטים את הגלגל בעזרת חיכוך, והחיכוך הופך חלק מהתנועה לחום, ולכן הם מתחממים.",
+              "move": "free_chat",
+              "action": "other",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action other, wanted final_check"
+              ]
+            }
+          ],
+          "endFailures": [
+            "step 3 level shown, wanted shown_with_help",
+            "step 1 revisit null, wanted pass",
+            "status completed, wanted reviewing"
+          ],
+          "supportProblems": null,
+          "passed": false
+        },
+        {
+          "id": "ho3-he-journey",
+          "category": "journey",
+          "turns": [
+            {
+              "student": "זה כוח בין שני דברים שנוגעים.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 0,
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "והוא פועל נגד כיוון התנועה, ולכן הוא מאט את מה שזז.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 0,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "למה חלליות צריכות מגן חום?",
+              "move": "answer_question",
+              "action": "answer_question",
+              "intervention": null,
+              "step": 1,
+              "verdict": "question",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "הקרח חלק ולכן החיכוך בינו לבין הנעל קטן, ובמדרכה המחוספסת החיכוך גדול.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 1,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "כי יש חיכוך בבלמים.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 2,
+              "verdict": "partial",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "החיכוך בבלמים הופך את התנועה של הגלגל לחום, ולכן הם מתחממים.",
+              "move": "final_finish",
+              "action": "summary",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action summary, wanted final_check"
+              ]
+            },
+            {
+              "student": "החיכוך בין הכדור לדשא פועל נגד התנועה ומאט אותו עד שהוא נעצר.",
+              "move": "free_chat",
+              "action": "other",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action other, wanted final_check"
+              ]
+            },
+            {
+              "student": "כי החול חם יותר מהקרח ומפשיר אותו.",
+              "move": "free_chat",
+              "action": "other",
+              "intervention": null,
+              "step": null,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "sand melts the ice",
+              "failures": [
+                "action other, wanted final_check"
+              ]
+            },
+            {
+              "student": "השמן מקטין את החיכוך בין החלקים, אז נוצר פחות חום ופחות שחיקה.",
+              "move": "free_chat",
+              "action": "other",
+              "intervention": null,
+              "step": null,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action other, wanted summary"
+              ]
+            }
+          ],
+          "endFailures": [
+            "step 1 level shown, wanted applied",
+            "step 2 level shown, wanted needs_practice",
+            "step 3 level shown, wanted applied"
+          ],
+          "supportProblems": null,
+          "passed": false
+        }
+      ]
+    }
+  }
+}
