@@ -213,3 +213,30 @@ describe('server checks on the log', () => {
     expect(() => validateTurnRequest(body(Array.from({ length: EVIDENCE_LIMIT + 1 }, (_, index) => ({ ...entry, n: index + 1 }))))).toThrow();
   });
 });
+
+describe('what the learner sees', async () => {
+  const { nextAction, shownCount, stepView } = await import('../src/lesson/progressView.js');
+  const { lessonSummary } = await import('../src/lesson/chatReducer.js');
+
+  it('shows a gap as worth another look, separate from steps that were never shown, and counts only steps shown alone', () => {
+    const { progress: atStep2 } = play(['correct']);
+    const { progress, moves } = play([['incorrect', { missingPrerequisite: 1 }], 'correct', 'incorrect', 'correct', 'correct'], atStep2);
+    expect(moves).toEqual(['prerequisite_check', 'resume', 'hint', 'build_up', 'advance']);
+    expect([0, 1, 2].map((index) => stepView(progress, index).display)).toEqual(['needs_review', 'shown_with_help', 'in_progress']);
+    expect(shownCount(progress)).toBe(0);
+    expect(lessonSummary(plan, progress).groups.needs_review.map((step) => step.index)).toEqual([0]);
+  });
+
+  it('names the next action from the lesson state', () => {
+    const start = createProgress(plan);
+    expect(nextAction(start)).toEqual({ code: 'step', step: 1 });
+    const { progress: atStep2 } = play(['correct']);
+    expect(nextAction(play([['incorrect', { missingPrerequisite: 1 }]], atStep2).progress)).toEqual({ code: 'detour', step: 1, back: 2 });
+    const { progress: checking } = play(['correct', 'correct', 'correct']);
+    expect(nextAction(checking)).toMatchObject({ code: 'final' });
+    const { progress: done } = play(['correct', 'incorrect', 'correct'], checking);
+    expect(nextAction(done)).toEqual({ code: 'practise', steps: '2' });
+    const { progress: clean } = play(['correct', 'correct', 'correct'], checking);
+    expect(nextAction(clean)).toEqual({ code: 'done' });
+  });
+});

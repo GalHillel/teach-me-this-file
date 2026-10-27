@@ -47,6 +47,8 @@ const bodyStyle = (move) => {
 
 const LABELLED_BY_INTERVENTION = new Set(['hint', 'reteach', 'prerequisite_check']);
 
+const WHY_REASONS = new Set(['first_wrong', 'second_wrong', 'misconception', 'no_knowledge', 'grader', 'weak_prerequisite', 'narrowed_question_right', 'copied_answer', 'hedged_answer', 'unjustified_answer', 'unsure_grade', 'attempts_used_up', 'right_with_help']);
+
 const SOURCE_STYLES = {
   cited: 'border-pen/40 text-pen hover:border-pen',
   based: 'border-line text-muted hover:border-pen hover:text-pen',
@@ -151,6 +153,7 @@ function TutorMessage({ message, chunkLabels, onOpenSource }) {
         {t('chat.tutor')}
         {label && <span className={`rounded-full px-2 py-0.5 font-normal ${moveStyle}`}>{label}</span>}
       </p>
+      {message.status === 'done' && WHY_REASONS.has(message.reason) && <p className="mb-1.5 text-xs text-muted">{t(`why.${message.reason}`)}</p>}
       <div dir="auto" className={`text-[15.5px] text-ink ${bodyStyle(message.move)} ${message.status === 'streaming' ? 'streaming-caret' : ''}`}>
         <Markdown onCite={message.status === 'done' ? cite : null}>{text}</Markdown>
       </div>

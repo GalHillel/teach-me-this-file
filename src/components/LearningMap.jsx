@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { stepEvidence } from '../../shared/lesson.js';
 import { useI18n } from '../i18n/translate.js';
+import { nextAction, stepView } from '../lesson/progressView.js';
 import { conceptInFile, stepDepths } from '../lesson/sources.js';
 import Dialog from './Dialog.jsx';
 import { LEVEL_STYLES } from './levels.js';
@@ -63,10 +63,16 @@ export default function LearningMap({ open, onClose, plan, progress, chunks, onS
     [plan.steps, chunks],
   );
   const edges = useEdges(containerRef, plan, open);
+  const next = nextAction(progress);
 
   return (
     <Dialog open={open} onClose={onClose} title={t('map.title')} variant="wide" labelId="map-title">
       <p className="text-sm text-muted">{t('map.intro')}</p>
+      <p className="mt-3 rounded-lg bg-pen-soft/60 px-3 py-2 text-sm" data-next-action={next.code}>
+        <span className="font-semibold">{t('map.next')}</span>
+        {' '}
+        {t(`next.${next.code}`, next)}
+      </p>
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
         <span>{t('map.legend')}</span>
         <span className="inline-flex items-center gap-1.5">
@@ -106,7 +112,7 @@ export default function LearningMap({ open, onClose, plan, progress, chunks, onS
             <li key={row.join('-')} className="flex flex-wrap justify-center gap-4">
               {row.map((index) => {
                 const step = plan.steps[index];
-                const { level } = stepEvidence(progress, index);
+                const { display: level, basis, state } = stepView(progress, index);
                 const style = LEVEL_STYLES[level];
                 const reachable = progress.steps[index].status !== 'pending';
                 return (
@@ -115,7 +121,8 @@ export default function LearningMap({ open, onClose, plan, progress, chunks, onS
                       <span className={`grid size-6 shrink-0 place-items-center rounded-full text-xs font-semibold ${style.marker}`}>{index + 1}</span>
                       <div className="min-w-0">
                         <p dir="auto" className="text-sm font-medium leading-snug">{step.title}</p>
-                        <p className="mt-0.5 text-xs text-muted">{t(`level.${level}`)}</p>
+                        <p className="mt-0.5 text-xs text-muted" data-state={state}>{t(`level.${level}`)}</p>
+                        {progress.steps[index].status !== 'pending' && basis !== 'no_answers' && <p className="mt-0.5 text-xs text-ink">{t(`basis.${basis}`)}</p>}
                         {builds[index].length > 0 && <p className="mt-0.5 text-xs text-muted">{t('map.buildsOn', { steps: builds[index].join(', ') })}</p>}
                       </div>
                     </div>

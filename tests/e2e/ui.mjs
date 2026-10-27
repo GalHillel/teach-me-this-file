@@ -189,7 +189,10 @@ const syncCheck = async (page, labels, name, { serverProgress = true } = {}) => 
   const progress = chat.progress;
   const lastTurn = turnLog.at(-1);
   const server = lastTurn?.events.find((item) => item.event === 'progress')?.data.progress;
-  if (serverProgress && JSON.stringify(server) !== JSON.stringify(progress)) problems.push(`${name}: saved state differs from the server's`);
+  const withoutIds = (value) => (value?.evidence ? { ...value, evidence: value.evidence.map(({ message, ...entry }) => entry) } : value);
+  if (serverProgress && JSON.stringify(withoutIds(server)) !== JSON.stringify(withoutIds(progress))) problems.push(`${name}: saved state differs from the server's`);
+  const studentIds = new Set(chat.messages.filter((message) => message.role === 'student').map((message) => message.id));
+  if ((progress.evidence ?? []).some((entry) => entry.message && !studentIds.has(entry.message))) problems.push(`${name}: evidence points to a missing message`);
   const ui = await page.evaluate(() => {
     const bar = document.querySelector('[role=progressbar]');
     const marked = [...document.querySelectorAll('li[aria-current="step"]')].find((item) => item.getBoundingClientRect().width > 0);
@@ -443,7 +446,8 @@ try {
       });
       await answer(page, 'there is a gap in this answer');
       const detourShown = await page.locator('[role=note]').filter({ hasText: language === 'he' ? 'רעיון קודם' : 'earlier idea' }).count() > 0;
-      record('detour', viewport, language, await audit(page), { detourShown });
+      const whyShown = await page.locator('article p').filter({ hasText: language === 'he' ? 'למה צעד קודם' : 'Why an earlier step' }).count() > 0;
+      record('detour', viewport, language, await audit(page), { detourShown, whyShown });
       const inFinal = async () => (await page.locator('#answer').getAttribute('placeholder')) === (language === 'he' ? 'תשובה מהזיכרון' : 'Answer from memory');
       for (let turn = 0; turn < 6 && !(await inFinal()); turn += 1) {
         await answer(page, 'Leaves take in carbon dioxide and roots take in water to make glucose and oxygen.');
@@ -620,6 +624,7 @@ const summary = {
   lessonCompleted: results.filter((row) => row.screen === 'lesson-complete').every((row) => row.completed),
   helpActions: results.filter((row) => row.screen === 'lesson-complete').every((row) => row.helped),
   detourShown: results.filter((row) => row.screen === 'detour').every((row) => row.detourShown),
+  whyShown: results.filter((row) => row.screen === 'detour').every((row) => row.whyShown),
   finalCheckShown: results.filter((row) => row.screen === 'final-check').every((row) => row.finalShown),
   lessonRestored: results.filter((row) => row.screen === 'lesson-restored').every((row) => row.restored),
   recheckShown: results.filter((row) => row.screen === 'lesson-progress').every((row) => row.recheckShown),
@@ -632,5 +637,5 @@ print(JSON.stringify(summary, null, 2));
 if (reportPath) writeFileSync(reportPath, `${JSON.stringify({ summary, results }, null, 2)}\n`);
 
 const serious = summary.axe.filter((violation) => violation.impact === 'serious' || violation.impact === 'critical');
-const failed = !coldStart?.started || coldStart?.settingsOpened || journeys.some((item) => item.problems.length || item.errors.length) || features.some((item) => item.error || !item.notesFile || !item.searchResults) || !keyboard?.escapeStops || !keyboard?.skipFocusesAnswer || !pdfStructure || pdfStructure.headerLeft || pdfStructure.footerLeft || pdfStructure.sections.length < 3 || !summary.recheckShown || !summary.reviewCompleted || !summary.helpActions || !summary.detourShown || !summary.finalCheckShown || summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
+const failed = !coldStart?.started || coldStart?.settingsOpened || journeys.some((item) => item.problems.length || item.errors.length) || features.some((item) => item.error || !item.notesFile || !item.searchResults) || !keyboard?.escapeStops || !keyboard?.skipFocusesAnswer || !pdfStructure || pdfStructure.headerLeft || pdfStructure.footerLeft || pdfStructure.sections.length < 3 || !summary.recheckShown || !summary.reviewCompleted || !summary.helpActions || !summary.detourShown || !summary.whyShown || !summary.finalCheckShown || summary.blocked.length || summary.overflow.length || summary.offscreen.length || serious.length || !summary.lessonCompleted || !summary.lessonRestored || summary.pageErrors.length;
 if (strict && failed) process.exit(1);

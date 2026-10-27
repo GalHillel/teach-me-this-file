@@ -1,5 +1,5 @@
-import { stepEvidence } from '../../shared/lesson.js';
 import { languageName, useI18n } from '../i18n/translate.js';
+import { shownCount, stepView } from '../lesson/progressView.js';
 import Icon from './Icon.jsx';
 import { LEVEL_STYLES } from './levels.js';
 
@@ -9,7 +9,7 @@ function StepMarker({ level, index }) {
   const icon = MARKER_ICONS[level];
   return (
     <span className={`grid size-6 shrink-0 place-items-center rounded-full text-xs font-semibold ${LEVEL_STYLES[level].marker}`}>
-      {icon ? <Icon name={icon} className="size-3.5" /> : level === 'needs_practice' ? '!' : index + 1}
+      {icon ? <Icon name={icon} className="size-3.5" /> : level === 'needs_practice' || level === 'needs_review' ? '!' : index + 1}
     </span>
   );
 }
@@ -27,6 +27,7 @@ export default function LessonPlanPanel({ plan, progress, onSelectStep }) {
         </p>
         <p>{t('plan.language', { language: languageName(plan.languageCode, language) })}</p>
         <p>{t('plan.done', { done, total: plan.steps.length })}</p>
+        <p>{t('plan.shown', { shown: shownCount(progress), total: plan.steps.length })}</p>
       </div>
 
       {(plan.warnings ?? []).map((warning) => (
@@ -57,7 +58,7 @@ export default function LessonPlanPanel({ plan, progress, onSelectStep }) {
             const state = progress.steps[index];
             const active = (state.status === 'active' && progress.status === 'active') || (progress.status === 'reviewing' && progress.review.queue[progress.review.position] === index);
             const reachable = state.status !== 'pending' && onSelectStep;
-            const { level, signals } = stepEvidence(progress, index);
+            const { display: level, signals } = stepView(progress, index);
             const content = (
               <>
                 <StepMarker level={level} index={index} />

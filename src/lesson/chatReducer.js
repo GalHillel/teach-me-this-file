@@ -1,4 +1,5 @@
-import { LEVELS, activeStepIndex, reviewQueue, reviewSchedule, stepEvidence } from '../../shared/lesson.js';
+import { activeStepIndex, reviewQueue, reviewSchedule } from '../../shared/lesson.js';
+import { DISPLAY_LEVELS, stepView } from './progressView.js';
 import { findMessageSources } from './sources.js';
 
 const IDLE_TURN = { status: 'idle', tutorId: null, studentId: null, pending: null, relatedIds: [] };
@@ -178,8 +179,8 @@ export const historyFor = (messages, excludeId) =>
     .slice(-20);
 
 export const lessonSummary = (plan, progress) => {
-  const steps = plan.steps.map((step, index) => ({ index, title: step.title, ...stepEvidence(progress, index) }));
-  const groups = Object.fromEntries(LEVELS.map((level) => [level, steps.filter((step) => step.level === level)]));
+  const steps = plan.steps.map((step, index) => ({ index, title: step.title, ...stepView(progress, index) }));
+  const groups = Object.fromEntries(DISPLAY_LEVELS.map((level) => [level, steps.filter((step) => step.display === level)]));
   const finalResults = Object.values(progress.final?.results ?? {});
   const practising = progress.review?.kind === 'practice';
   const practice = practising ? progress.review.queue : reviewQueue(progress);

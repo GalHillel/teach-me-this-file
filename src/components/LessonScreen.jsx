@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '../i18n/translate.js';
-import { inFinalCheck, stepEvidence } from '../../shared/lesson.js';
+import { inFinalCheck } from '../../shared/lesson.js';
 import { lessonSummary } from '../lesson/chatReducer.js';
 import { useTutor } from '../lesson/useTutor.js';
 import ChatMessage from './ChatMessage.jsx';
@@ -11,6 +11,7 @@ import Icon from './Icon.jsx';
 import LearningMap from './LearningMap.jsx';
 import LessonPlanPanel from './LessonPlanPanel.jsx';
 import { LEVEL_STYLES } from './levels.js';
+import { shownCount, stepView } from '../lesson/progressView.js';
 import SourcePanel from './SourcePanel.jsx';
 
 const PHASE_KEYS = {
@@ -21,7 +22,7 @@ const PHASE_KEYS = {
 
 const FINISH_MOVES = new Set(['final_finish', 'finish_skipped', 'review_finish', 'finish', 'review_and_finish']);
 
-const SUMMARY_LEVELS = ['applied', 'shown', 'shown_with_help', 'needs_practice'];
+const SUMMARY_LEVELS = ['applied', 'shown', 'shown_with_help', 'needs_review', 'needs_practice'];
 
 const DAY_MS = 86400000;
 
@@ -249,11 +250,11 @@ function StepCounter({ plan, progress }) {
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
       <span className="whitespace-nowrap text-sm font-medium tabular-nums">{label}</span>
-      <div className="flex h-2 w-14 gap-0.5 sm:w-36" role="progressbar" aria-label={t('lesson.progress')} aria-valuemin={0} aria-valuemax={plan.steps.length} aria-valuenow={done}>
+      <div className="flex h-2 w-14 gap-0.5 sm:w-36" role="progressbar" aria-label={t('lesson.progress')} aria-valuemin={0} aria-valuemax={plan.steps.length} aria-valuenow={done} aria-valuetext={`${t('plan.done', { done, total: plan.steps.length })}. ${t('plan.shown', { shown: shownCount(progress), total: plan.steps.length })}`}>
         {progress.steps.map((step, index) => (
           <span
             key={plan.steps[index].id}
-            className={`flex-1 rounded-full ${LEVEL_STYLES[stepEvidence(progress, index).level].dot}`}
+            className={`flex-1 rounded-full ${LEVEL_STYLES[stepView(progress, index).display].dot}`}
           />
         ))}
       </div>
