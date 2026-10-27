@@ -2,28 +2,27 @@
   "label": "policy-holdout",
   "mode": "policy",
   "split": "holdout",
-  "provider": "none",
-  "model": null,
-  "date": "2026-10-25T04:26:30.467Z",
-  "calls": 0,
-  "stopped": null,
+  "date": "2026-10-27T13:18:19.785Z",
   "systems": {
     "engine": {
       "summary": {
         "scenarios": 25,
         "scenarioPass": 1,
-        "turns": 55,
+        "turns": 57,
         "actionFit": 1,
         "interventionFit": 1,
         "unearnedMoves": 0,
         "helpInFinalCheck": 0,
         "endStateMatch": 1,
         "supportProblems": 0,
+        "returnTurnsFit": "5/5",
+        "lessonsCompleted": "3/3",
+        "latencyMs": null,
         "grading": {
-          "answers": 51,
+          "answers": 53,
           "verdictAccuracy": 1,
           "falsePositives": "0/20",
-          "falseNegatives": "0/25",
+          "falseNegatives": "0/27",
           "issueAccuracy": "5/5",
           "misconceptionNamed": "2/2"
         },
@@ -93,7 +92,6 @@
         },
         "failures": []
       },
-      "errors": [],
       "runs": [
         {
           "id": "ho-en-understands",
@@ -770,6 +768,17 @@
             },
             {
               "student": "אז הבועות הן המים עצמם שהפכו לגז, כי החלקיקים נעים כל כך מהר שהם עוזבים את הנוזל.",
+              "move": "build_up",
+              "action": "back_to_question",
+              "intervention": null,
+              "step": 1,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "הבועות הן אדי מים: המים עצמם הופכים לגז כשהחלקיקים נעים כל כך מהר שהם עוזבים את הנוזל.",
               "move": "advance",
               "action": "next_step",
               "intervention": null,
@@ -878,6 +887,17 @@
             },
             {
               "student": "No wait, the broken bulb opens the only loop, so no current flows and the second bulb goes out too.",
+              "move": "build_up",
+              "action": "back_to_question",
+              "intervention": null,
+              "step": 2,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "The second bulb goes out too, because the broken bulb breaks the only loop, so no current can flow anywhere.",
               "move": "final_check_start",
               "action": "final_check",
               "intervention": null,
@@ -938,6 +958,9 @@
         "helpInFinalCheck": 0,
         "endStateMatch": 0.56,
         "supportProblems": 0,
+        "returnTurnsFit": "1/5",
+        "lessonsCompleted": "0/3",
+        "latencyMs": null,
         "grading": {
           "answers": 51,
           "verdictAccuracy": 1,
@@ -1119,7 +1142,6 @@
           }
         ]
       },
-      "errors": [],
       "runs": [
         {
           "id": "ho-en-understands",

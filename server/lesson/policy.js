@@ -20,6 +20,7 @@ const LADDERS = {
 };
 
 export const NARROWING = new Set(['decompose', 'analogy', 'counterexample']);
+export const NARROWS_QUESTION = new Set([...NARROWING, 'focused_hint']);
 
 const WEAK_OUTCOMES = new Set(['recovered', 'review']);
 

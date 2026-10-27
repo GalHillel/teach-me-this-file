@@ -85,7 +85,9 @@ describe('lesson progress state machine', () => {
     expect(hinted.progress.steps[0]).toMatchObject({ attempts: 0, hints: 1, used: ['nudge'] });
     const second = request(hinted.progress, 'hint');
     expect(second.intervention).toBe('focused_hint');
-    expect(answer(second.progress, 'correct').progress.steps[0].outcome).toBe('learned');
+    const narrow = answer(second.progress, 'correct');
+    expect(narrow.move).toBe('build_up');
+    expect(answer(narrow.progress, 'correct').progress.steps[0].outcome).toBe('learned');
   });
 
   it('explains differently on request with an analogy first, then a worked example', () => {
@@ -330,6 +332,21 @@ describe('narrowed questions', () => {
     expect(answer(partial.progress, 'correct').move).toBe('advance');
   });
 
+  it('still asks the whole question when a focused hint follows the counter-example', () => {
+    const first = answer(createProgress(plan), 'incorrect', 'high', 'none', { misconception: 'space is too cold for sound' });
+    expect(first.intervention).toBe('counterexample');
+    const second = answer(first.progress, 'partial');
+    expect(second.intervention).toBe('focused_hint');
+    expect(answer(second.progress, 'correct').move).toBe('build_up');
+  });
+
+  it('asks the whole question after a fill-in-the-blank hint', () => {
+    const first = answer(createProgress(plan), 'incorrect');
+    const second = answer(first.progress, 'incorrect');
+    expect(second.intervention).toBe('focused_hint');
+    expect(answer(second.progress, 'correct').move).toBe('build_up');
+  });
+
   it('treats a requested sub-question the same way', () => {
     let progress = createProgress(plan);
     progress = request(progress, 'hint').progress;
@@ -349,7 +366,7 @@ describe('narrowed questions after the step already went back once', () => {
     progress = request(progress, 'hint').progress;
     const third = request(progress, 'hint');
     expect(['decompose', 'analogy', 'counterexample']).not.toContain(third.intervention);
-    expect(third.progress.steps[0].scaffold).toBe(false);
+    expect(answer(third.progress, 'correct').move).toBe('build_up');
     const explain = request(third.progress, 'explain');
     expect(['decompose', 'analogy', 'counterexample']).not.toContain(explain.intervention);
     const wrong = answer(explain.progress, 'incorrect', 'high', 'none', { misconception: 'cells are tiny animals' });

@@ -2,18 +2,18 @@
   "label": "policy-holdout3",
   "mode": "policy",
   "split": "holdout3",
-  "date": "2026-10-27T12:54:26.457Z",
+  "date": "2026-10-27T13:18:20.001Z",
   "systems": {
     "engine": {
       "summary": {
         "scenarios": 18,
-        "scenarioPass": 0.944,
+        "scenarioPass": 0.833,
         "turns": 50,
-        "actionFit": 0.98,
+        "actionFit": 0.94,
         "interventionFit": null,
         "unearnedMoves": 0,
         "helpInFinalCheck": 0,
-        "endStateMatch": 1,
+        "endStateMatch": 0.889,
         "supportProblems": 0,
         "returnTurnsFit": "4/4",
         "lessonsCompleted": "3/3",
@@ -39,7 +39,7 @@
           },
           "narrowing": {
             "scenarios": 2,
-            "passed": 2
+            "passed": 0
           },
           "partial": {
             "scenarios": 1,
@@ -72,9 +72,25 @@
         },
         "failures": [
           {
+            "id": "ho3-en-narrowing",
+            "problems": [
+              "turn 3: action back_to_question, wanted next_step",
+              "end: step 2 level in_progress, wanted shown_with_help",
+              "end: step 2, wanted 3"
+            ]
+          },
+          {
             "id": "ho3-en-journey",
             "problems": [
               "turn 2: action back_to_question, wanted next_step"
+            ]
+          },
+          {
+            "id": "ho3-he-narrowing",
+            "problems": [
+              "turn 3: action back_to_question, wanted next_step",
+              "end: step 2 level in_progress, wanted shown_with_help",
+              "end: step 2, wanted 3"
             ]
           }
         ]
@@ -148,19 +164,24 @@
             },
             {
               "student": "Sound is a vibration that gets passed from one particle to the next, and space has almost no particles, so the shout has nothing to travel through.",
-              "move": "advance",
-              "action": "next_step",
+              "move": "build_up",
+              "action": "back_to_question",
               "intervention": null,
               "step": 1,
               "verdict": "correct",
               "issue": "none",
               "misconception": "",
-              "failures": []
+              "failures": [
+                "action back_to_question, wanted next_step"
+              ]
             }
           ],
-          "endFailures": [],
+          "endFailures": [
+            "step 2 level in_progress, wanted shown_with_help",
+            "step 2, wanted 3"
+          ],
           "supportProblems": [],
-          "passed": true
+          "passed": false
         },
         {
           "id": "ho3-en-partial",
@@ -548,19 +569,24 @@
             },
             {
               "student": "הקרח חלק ולכן החיכוך בינו לבין הנעל קטן, והמדרכה מחוספסת אז יש בה יותר חיכוך ולא מחליקים.",
-              "move": "advance",
-              "action": "next_step",
+              "move": "build_up",
+              "action": "back_to_question",
               "intervention": null,
               "step": 1,
               "verdict": "correct",
               "issue": "none",
               "misconception": "",
-              "failures": []
+              "failures": [
+                "action back_to_question, wanted next_step"
+              ]
             }
           ],
-          "endFailures": [],
+          "endFailures": [
+            "step 2 level in_progress, wanted shown_with_help",
+            "step 2, wanted 3"
+          ],
           "supportProblems": [],
-          "passed": true
+          "passed": false
         },
         {
           "id": "ho3-he-copied",

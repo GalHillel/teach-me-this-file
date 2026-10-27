@@ -1,5 +1,5 @@
 import { NEEDS_REVIEW, activeStepIndex, finalCheckQueue, inFinalCheck, reviewQueue } from '../../shared/lesson.js';
-import { NARROWING, chooseIntervention, findPrerequisiteGap, remember } from './policy.js';
+import { NARROWS_QUESTION, chooseIntervention, findPrerequisiteGap, remember } from './policy.js';
 
 export { NEEDS_REVIEW, activeStepIndex, reviewQueue };
 
@@ -84,7 +84,7 @@ const wrongAnswer = (plan, progress, step, assessment) => {
   }
   const intervention = chooseIntervention({ situation: 'wrong', assessment, state: { ...step, attempts } });
   const move = assessment?.issue === 'no_knowledge' ? 'reteach' : 'hint';
-  return result(move, updateCurrent(counted, { used: remember(step.used, intervention), scaffold: NARROWING.has(intervention) }), { intervention });
+  return result(move, updateCurrent(counted, { used: remember(step.used, intervention), scaffold: step.scaffold || NARROWS_QUESTION.has(intervention) }), { intervention });
 };
 
 const handleAnswer = (plan, progress, step, assessment) => {
@@ -97,7 +97,7 @@ const handleAnswer = (plan, progress, step, assessment) => {
   }
 
   if (verdict === 'correct') {
-    if (step.scaffold && !step.built) {
+    if (step.scaffold) {
       return result('build_up', updateCurrent(progress, { scaffold: false, built: true, stalls: 0 }));
     }
     if ((confidence === 'low' || PROBE_ISSUES.has(issue)) && !step.probed) {
@@ -180,7 +180,7 @@ const helpRequest = (progress, kind) => {
   if (Number.isInteger(step.detour)) return result('clarify', progress);
   const situation = kind === 'hint' ? 'hint_request' : 'explain_request';
   const intervention = chooseIntervention({ situation, state: step });
-  const next = updateCurrent(progress, { hints: Math.min(step.hints + 1, 10), used: remember(step.used, intervention), scaffold: step.phase === 'learn' && NARROWING.has(intervention) });
+  const next = updateCurrent(progress, { hints: Math.min(step.hints + 1, 10), used: remember(step.used, intervention), scaffold: step.phase === 'learn' && (step.scaffold || NARROWS_QUESTION.has(intervention)) });
   return result(kind === 'hint' ? 'hint' : 'reteach', next, { intervention, requested: true });
 };
 
