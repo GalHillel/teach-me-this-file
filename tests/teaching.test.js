@@ -87,6 +87,10 @@ describe('text checks used on model replies', () => {
     expect(hasPraise('כל הכבוד, זו התשובה.')).toBe(true);
     expect(hasPraise('You\'re right that roots take in water, but what else?')).toBe(false);
     expect(hasPraise('Not quite. What else does the leaf take in?')).toBe(false);
+    expect(hasPraise('הבאת בדיוק את הפרטים הנכונים.')).toBe(true);
+    expect(hasPraise('זה נכון שהלב פועל כמו שריר, אבל לאן הוא דוחף את הדם?')).toBe(false);
+    expect(hasPraise('הלב פועל בדיוק כמו משאבה.')).toBe(false);
+    expect(hasPraise('מה בדיוק קורה בנימים?')).toBe(false);
   });
 
   it('recognises a reply that says the document does not cover a question', () => {

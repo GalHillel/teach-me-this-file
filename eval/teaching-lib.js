@@ -133,7 +133,7 @@ export const naiveLevel = (progress, index) => {
 const PRAISE = [
   /\b(that'?s|this is|you'?re|you are|it'?s)\s+(exactly |absolutely |totally |completely )?(correct|right)\b(?!\s+(that|about|to))/i,
   /\b(correct|exactly|perfect|excellent|spot on|well done|great job|nice work|nailed it)\s*[!.]/i,
-  /(נכון מאוד|תשובה נכונה|זה נכון|בדיוק|כל הכבוד|מצוין|מושלם|יפה מאוד)(?![\p{L}])/u,
+  /(נכון מאוד|תשובה נכונה|זה נכון(?!\s+ש)|(?<!מה\s)בדיוק(?!\s+כמו)|כל הכבוד|מצוין|מושלם|יפה מאוד)(?![\p{L}])/u,
   /\b(c'est (exactement |tout à fait )?(juste|correct|ça)|exactement|bravo|parfait|très bien)\b/i,
 ];
 
