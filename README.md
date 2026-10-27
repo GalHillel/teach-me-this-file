@@ -17,13 +17,14 @@ I built it as a home assignment for an AI Engineer role. The reasoning behind th
 - The server builds a structured lesson plan: objectives, the content type, 2 to 8 steps sized to the file and the time, and per step an approach (explanation, worked example or practice), a check question, success criteria, a common mistake, the steps it builds on, and the passages it is based on. Steps are put in an order where each comes after the steps it builds on.
 - Each student answer is graded first: verdict, completeness, concepts shown and missing, misconception, what kind of problem it is (misread the question, unsure, does not know, right without the reasoning, copied from the file), an evidence quote and a confidence level. The server checks the grade, then decides the next move in code.
 - The help after a wrong answer depends on the mistake: a small nudge first, then a focused hint, a counter-example when the grader names a misconception, smaller sub-questions, a worked example or an analogy when the student does not know, and the full explanation with one more check after three tries. The tutor picks a kind of help it has not used on the step yet, and repeats only after the options for that situation run out.
-- When the grader says a wrong answer comes from an idea of an earlier step this one builds on (the code checks that the step really is one), or an earlier step was weak, the tutor checks that step first with one short question, grades the answer against it, and comes back to the current question. A failed check marks the earlier step for practice.
+- When the grader says a wrong answer comes from an idea of an earlier step this one builds on (the code checks that the step really is one), the tutor checks that step first with one short question, grades the answer against it, and comes back to the current question. It also goes back without the grader when the earlier step is fragile: after the second wrong answer if the earlier step was only right with help, after the first if it needed the full explanation or a later answer already showed a gap in it. The grader is shown the common mistake of each earlier step and the wrong ideas this student showed there.
 - A right answer to a smaller question (a sub-question, a counter-example) is not counted as understanding the step: the tutor confirms it and asks the whole question again, unless the answer already covers it. After that, help on the step always asks the whole question.
 - An answer pasted from the document or from the tutor's last message is caught, also when it is several sentences, and the tutor asks for the same answer in the student's own words. A reply to an answer that is not right never opens with praise; the server drops a praise word at the start of the reply.
 - "Hint" and "Explain differently" buttons let the student ask for help before answering. A right answer after help counts as shown with help, not as understood on the first try.
 - After the last step comes a short final check: up to three steps, chosen by how weak they were, how many steps build on them and how long ago they were taught. Each gets the transfer question the plan wrote for that step in advance, a new case that asks the student to use the idea, answered without hints and graded against the criteria written with it. A copied answer, or one without the asked-for reason, gets one request to say it in their own words before it counts. It can be skipped.
 - Tutor answers stream token by token. Stop cancels the request on the server and the provider, keeps the partial text, and leaves the lesson state unchanged.
-- Progress shows what was shown for each step, not a percentage: applied to a new question, shown on your own, shown with help, or needs practice, with the reasons (first try, hints, full explanation, final check). The summary groups the steps this way, suggests when to review each one (1, 3, 7 or 14 days), offers a practice round for the weak ones, and downloads the notes as Markdown.
+- Every graded answer is logged with the question it answered (the step's question, a smaller question, a check of an earlier step, a final-check or practice question), the help behind it (none, a hint, a smaller question, a worked solution, a reminder), the grade, the passages and the move the engine made with its reason. A state per step is derived from that log by one function: not checked yet, just starting, developing, shown on your own, or worth another look when a later answer showed a gap. A right answer after help is never counted as shown on your own, and neither is a copied, unsure or unexplained one; only an answer without help can bring a step back. Details in [LEARNER_MODEL.md](LEARNER_MODEL.md).
+- Progress shows that state, not a percentage: the plan counts steps shown on your own next to steps done, each step says what it rests on ("you got it after a hint", "a later step showed this idea needs another look"), and help messages carry one line on why that help was given. The summary groups the steps by state, suggests when to review each one (1, 3, 7 or 14 days), offers a practice round for the weak ones, and downloads the notes as Markdown. The learning map also names the next action.
 - A learning map shows the steps and which ones build on which, and marks each key concept as found in the file or not found in it.
 - The student can ask a question at any point. The app finds the passages of the whole file that answer it and sends them with the turn, to the grader and to the tutor, so a question about a later part of the file is answered from the file instead of being treated as off-topic, and the lesson keeps its place.
 - A search panel lists the lesson's key concepts and the file's sections, highlights matches, and says which step teaches each passage.
@@ -33,20 +34,21 @@ I built it as a home assignment for an AI Engineer role. The reasoning behind th
 - If the main AI models are busy and a lighter backup model answers, the app says so.
 - Keyboard: Esc stops a reply, a skip link jumps to the answer box, and new messages are announced to screen readers.
 
-## A three-minute demo
+## A demo in under five minutes
 
 This path shows what a plain chat with the file would not do. It uses the photosynthesis sample on the setup screen.
 
-1. Start the lesson. The tutor teaches step 1 and asks what a plant takes in.
-2. Answer "Plants get their food from the soil." The reply comes in a tinted panel labelled "Counter-example": a case where your idea predicts something that does not happen, not the answer.
-3. Answer the counter-example correctly. The tutor does not move on; it says "Now the whole question" and asks the step's question again, because answering a smaller question is not the step.
-4. Answer fully. Step 1 is marked "shown with help" in the plan, not "shown on your own".
-5. Click a passage chip in any reply. The panel shows the exact text from the file, which the server checked the tutor was given.
-6. On the last step, answer with a mistake from an earlier step ("it uses the green light the leaf absorbs"). The tutor goes back to that step with one short question, then returns to the original question.
-7. After the last step comes the final check: new questions, no hints, the Hint button gone. Get one wrong.
-8. The summary separates "applied to a new question" from "needs practice", suggests review dates, and offers a practice round for the weak step. The learning map shows which steps build on which.
+1. **Upload.** Pick the photosynthesis sample (or drop a file) and start the lesson.
+2. **Concepts and prerequisites.** Open the learning map: each step, the steps it builds on, and each key concept marked as found in the file or not. The map also says what comes next.
+3. **A wrong answer.** Answer "Plants get their food from the soil."
+4. **The intervention.** The reply comes in a tinted panel labelled "Counter-example", with one line on why: one idea in the answer got mixed up. It is a case where your idea predicts something that does not happen, not the answer.
+5. **Help is not mastery.** Answer the counter-example. The tutor does not move on; it asks the whole question again ("you answered the smaller part"). Answer fully. The step closes with "Counted as shown with help, because a hint came first", and the plan shows "Shown with help" and "0 of 3 shown on your own".
+6. **Ask about another part.** Ask "What are the stomata?" The answer comes from the passage that covers it, cited, and the tutor returns to the current question.
+7. **An earlier idea.** On the last step, answer with a mistake from an earlier step ("it uses the green light the leaf absorbs"). The tutor checks that step with one short question, then returns. The earlier step is now "Worth another look" in the plan, even after the right answer to the check, because that answer came after a reminder.
+8. **Transfer on your own.** The final check asks new questions about the weakest steps, with no hints. Answer one correctly: that step becomes "shown on your own" with an independent answer behind it. Get one wrong.
+9. **The learner model and the summary.** Open the learning map: each step's state and what it rests on, and the next action (practise the weak step). The summary groups the steps by state and offers a practice round.
 
-Steps 3 and 6 depend on how the model grades the answer. The detour in step 6 happens only when the grader names the earlier step.
+Steps 4, 5 and 7 depend on how the model grades the answer. The detour in step 7 happens only when the grader names the earlier step, or when that step was fragile.
 
 I ran the same kind of path on the live site with a real model on 27 October, in English on a desktop and in Hebrew on a phone, writing each answer after reading the question the model had generated. Upload, plan, a right answer, a mistake, help that fit the mistake, a question about another section, the final check and an honest summary all worked in both languages. The return to the whole question failed once in English (a fill-in-the-blank hint, then a one-word answer, completed the step); that is fixed in the code, and the details are in [DECISIONS.md](DECISIONS.md#production-on-27-october).
 
@@ -57,7 +59,7 @@ npm install
 npm run demo        # http://localhost:4400
 ```
 
-This builds the app and serves it with scripted replies instead of a model, for when there is no key or no quota. Every screen shows a banner saying that no AI model is used. The scripted grader reads keywords: an answer containing "wrong" is a mistake with a misconception (a counter-example follows), "partly" is a partial answer, "gap" is a mistake from an earlier step (a detour from step 2 on), one ending with "?" is a question, and anything else is right. With these the demo steps above run in English or Hebrew. The replies are canned text: this shows the flow and the state machine, not the teaching.
+This builds the app and serves it with scripted replies instead of a model, for when there is no key or no quota. Every screen shows a banner saying that no AI model is used. The scripted grader reads keywords: an answer containing "wrong" is a mistake with a misconception (a counter-example follows), "partly" is a partial answer, "gap" is a mistake from an earlier step (a detour from step 2 on), one ending with "?" is a question, and anything else is right. With these the demo steps above run in English or Hebrew, including the learner states, the "why" lines and the next action. The replies are canned text: this shows the flow, the state machine and the learner model, not the teaching. Say so when you show it.
 
 When things go wrong, these are the paths I have seen on the live site and how the app recovers:
 
@@ -85,7 +87,7 @@ Student answer + plan + progress  -- POST /api/turns  -> assessor: grade the ans
 Commit the new progress on "done", match the reply to passages (BM25), save the chat to sessionStorage
 ```
 
-The server is stateless. The lesson plan, progress and messages live in a React reducer in the browser and are sent with each turn. The rules that move the lesson forward are plain functions in `server/lesson/progress.js`, not something the model is asked to remember.
+The server is stateless. The lesson plan, progress and messages live in a React reducer in the browser and are sent with each turn. The rules that move the lesson forward are plain functions in `server/lesson/progress.js`, not something the model is asked to remember. Each move comes with a reason code, and each graded answer is appended to an evidence log inside the progress object; the server validates the log like the rest of the progress, and the browser adds the id of the student message each entry came from. `shared/learner.js` turns the log into the learner state that the policy, the final check, the practice list and the interface all read.
 
 ## Project structure
 
@@ -108,13 +110,14 @@ server/
   lesson/ordering.js         prerequisite ordering of plan steps
   lesson/policy.js           which help to give, and when to check an earlier step
 shared/text.js               tokenizer, stopwords, BM25 ranking, text direction
-shared/lesson.js             evidence levels, final-check selection, review schedule (server and browser)
+shared/learner.js            learner state per step from the evidence log (server and browser)
+shared/lesson.js             levels read from the learner state, final-check selection, review schedule
 shared/citations.js          reads and checks the tutor's citations and quotes
 src/
   App.jsx                    screens, settings, file reading
   api/                       fetch client and SSE reader
   document/                  PDF, Word and text extraction, structure (headers, headings), chunking
-  lesson/                    chat reducer, useTutor hook, source matching and search, session storage
+  lesson/                    chat reducer, useTutor hook, what the progress view shows, source matching and search, session storage
   samples/                   the two sample files
   i18n/                      English, Hebrew and French strings, translator
   components/                UI
