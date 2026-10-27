@@ -252,8 +252,11 @@ const journey = async (viewport, language) => {
     await check('second wrong answer');
     if (firstHint === secondHint) problems.push('the second hint has the same label as the first');
     await answer(page, 'Plants make glucose from light.');
-    await check('correct answer');
-    if ((await progressNow()).currentStep !== 1) problems.push('did not move to step 2 after the correct answer');
+    await check('correct answer after narrowing help');
+    if (turnLog.at(-1).events.find((item) => item.event === 'progress')?.data.move !== 'build_up') problems.push('a right answer after narrowing help did not go back to the whole question');
+    await answer(page, 'Plants make glucose from light, the whole answer.');
+    await check('whole question answered');
+    if ((await progressNow()).currentStep !== 1) problems.push('did not move to step 2 after the whole answer');
 
     await answer(page, 'Where does the oxygen go?');
     const asked = turnLog.at(-1);
