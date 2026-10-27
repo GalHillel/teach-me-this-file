@@ -48,13 +48,24 @@ This path shows what a plain chat with the file would not do. It uses the photos
 
 Steps 3 and 6 depend on how the model grades the answer. The detour in step 6 happens only when the grader names the earlier step.
 
+I ran the same kind of path on the live site with a real model on 27 October, in English on a desktop and in Hebrew on a phone, writing each answer after reading the question the model had generated. Upload, plan, a right answer, a mistake, help that fit the mistake, a question about another section, the final check and an honest summary all worked in both languages. The return to the whole question failed once in English (a fill-in-the-blank hint, then a one-word answer, completed the step); that is fixed in the code, and the details are in [DECISIONS.md](DECISIONS.md#production-on-27-october).
+
+### Offline demo
+
+```bash
+npm install
+npm run demo        # http://localhost:4400
+```
+
+This builds the app and serves it with scripted replies instead of a model, for when there is no key or no quota. Every screen shows a banner saying that no AI model is used. The scripted grader reads keywords: an answer containing "wrong" is a mistake with a misconception (a counter-example follows), "partly" is a partial answer, "gap" is a mistake from an earlier step (a detour from step 2 on), one ending with "?" is a question, and anything else is right. With these the demo steps above run in English or Hebrew. The replies are canned text: this shows the flow and the state machine, not the teaching.
+
 When things go wrong, these are the paths I have seen on the live site and how the app recovers:
 
 - **An answer to a different question.** If the student answers something the tutor did not ask, the grader calls it a misread question. The tutor says so and asks again in simpler words, and the attempt is not counted. On 26 October this happened to my own scripted answers, which did not fit the first step the model had planned.
 - **A pasted answer.** Paste a sentence from the passage. The tutor asks for the same answer in your own words instead of moving on.
 - **A failed request.** Turn off the network, or hit the provider's rate limit, and send an answer. The message says what happened, and Try again sends the same answer once. The lesson state does not change in between.
 - **Stop.** Press Stop or Esc during a reply. The partial text stays, marked as stopped, and the step is not counted.
-- **The tutor's own mistake.** After a counter-example, the grader sometimes counted a narrow answer as the whole step (AUDIT 84). The app now always asks the whole question once after such help, so this costs one extra question instead of a false "understood".
+- **The tutor's own mistake.** After a counter-example, the grader sometimes counted a narrow answer as the whole step (AUDIT 84), and on 27 October a fill-in-the-blank hint let a one-word answer through (AUDIT 89). After any help that narrows the question, the app now asks the whole question before the step counts, so this costs one extra question instead of a false "understood".
 
 ## How it works
 
@@ -107,7 +118,8 @@ src/
   samples/                   the two sample files
   i18n/                      English, Hebrew and French strings, translator
   components/                UI
-eval/                        golden sets and runners for source matching, retrieval and grading; benchmark
+eval/                        golden sets and runners for source matching, retrieval, grading and teaching; benchmark
+pilot/                       protocol and documents for a small user pilot (not run yet)
 tests/                       Vitest unit, property and API tests
 tests/e2e/ui.mjs             browser harness: 15 viewports, English and Hebrew, axe-core, full lesson flow
 ```
@@ -124,7 +136,7 @@ npm run dev
 
 `npm run dev` starts the API on port 8787 and Vite on port 5173 (Vite proxies `/api`). Open http://localhost:5173, click "Add API key" and paste a key.
 
-Without a key you can still click through the whole flow: set `ALLOW_MOCK_PROVIDER=true` in `.env`, restart, and pick "Mock (local testing only)" in the settings. The mock returns canned text; it is there to test the UI and the lesson flow, not the teaching.
+Without a key you can still click through the whole flow with `npm run demo` (see "Offline demo" above), or set `ALLOW_MOCK_PROVIDER=true` in `.env`, restart, and pick "Mock (local testing only)" in the settings. The mock returns canned text; it is there to test the UI and the lesson flow, not the teaching.
 
 ## API keys
 
@@ -156,6 +168,7 @@ As an option, the server can have its own key: set `AI_API_KEY` (and `AI_PROVIDE
 | `PLAN_DEADLINE_MS` | `75000` | Total time planning may spend across all models |
 | `RATE_LIMIT_PER_MINUTE` | `30` | Requests per minute per IP on the AI endpoints |
 | `ALLOW_MOCK_PROVIDER` | `false` | Enables the mock provider, for local testing only |
+| `DEMO_MODE` | `false` | Set by `npm run demo`; the app shows the offline-demo banner |
 
 ## Tests
 
@@ -173,9 +186,11 @@ EVAL_API_KEY=your-key node eval/teaching.js --mode=model --split=holdout2 --syst
 EVAL_API_KEY=your-key EVAL_LABEL=mine node eval/grading.js # grading on 51 golden answers, real model calls; EVAL_RESUME=1 continues
 ```
 
+Both model evals can also run without a key on the machine: `--provider=remote` (or `EVAL_PROVIDER=remote`) with `EVAL_REMOTE_URL` set to a deployment of the `eval/remote-model` branch sends each model call from a browser page on that deployment, so the key stays in the deployment's environment. That branch adds the model-call route the eval needs and is not merged into `main`.
+
 `npm run test:e2e` uses the Chromium that Playwright installs (`npx playwright install chromium` once). It serves the build with the headers from `vercel.json`, checks every screen at 15 sizes from 320 to 2560 px in English and Hebrew for overflow, unreachable buttons, small targets and axe-core violations, runs a full lesson with help requests, a detour, a re-check, the final check and a practice round, reads a generated PDF, and fails on any problem. Two full journeys (English on desktop, Hebrew on a phone) also stop a reply, fail a provider call and retry it, reload during a reply and in the middle of the lesson, and check after every turn that the server's state, the saved state and what the screen shows agree. `--report=file.json` saves the details. It checks layout and flow with canned replies, not teaching quality.
 
-`eval/teaching.js` plays 74 written scenarios (a dev set and two held-out sets, each on different lessons; held-out-2 was written after the engine was frozen) through the engine and checks what the tutor should detect, which help it should give and what it may claim; the design and the results are in [DECISIONS.md](DECISIONS.md#how-i-evaluate-the-teaching). In short: with the labelled grades, the engine passes every scenario in all three sets. With a real model (Flash-Lite, the model with quota left) on the 9 held-out-2 scenarios that all three systems finished, this engine and the previous one each passed 8 and a plain single-prompt tutor 4. These are scripted students, not real ones, and one run each.
+`eval/teaching.js` plays 95 written scenarios (a dev set and three held-out sets, each on different lessons; held-out-2 and held-out-3 were written after the engine was frozen) through the engine and checks what the tutor should detect, which help it should give and what it may claim; the design and the results are in [DECISIONS.md](DECISIONS.md#how-i-evaluate-the-teaching). In short: on held-out-3, written and committed before any run in round 7, with Flash-Lite for every call, the round-6 engine passed 19 of 21 scenarios, the round-5 engine 9 and a plain single-prompt tutor 9; no system graded a wrong answer correct. These are scripted students, not real ones, one run each, on scenarios I wrote.
 
 A model run saves each scenario as it finishes to `eval/results/runs/<label>/results.jsonl`, with every turn, next to a meta file (commit, engine, prompt and scenario hashes, models) and a summary that counts complete, failed and not-run scenarios. It never overwrites a run, and `--resume` refuses to continue if the code, prompts, scenarios or models changed.
 
@@ -203,6 +218,6 @@ Any Node host works too: run `npm run build`, serve `dist/` as static files, and
 - The leak check on the tutor's output catches only a verbatim copy of a marker in the instructions. It does not stop a model that paraphrases its instructions.
 - Heading detection in PDFs uses font size, so a PDF that marks headings only with bold text of normal size gets no sections.
 - The live app's own Gemini key is on the free tier and only answers requests from the site itself. If its daily quota is used up, the server falls back to Flash-Lite and says so, and when that is used up too, the app says the daily quota is used up. Adding your own key in the settings avoids this.
-- Teaching quality is measured on 74 scenarios I wrote, with scripted students, and on a real model only with Flash-Lite. No study with students has been run.
+- Teaching quality is measured on 95 scenarios I wrote, with scripted students, and system comparisons only with Flash-Lite. No study with students has been run; `pilot/PROTOCOL.md` is ready for one.
 
 More in [DECISIONS.md](DECISIONS.md#weaknesses-i-know-about).

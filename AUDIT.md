@@ -168,6 +168,55 @@ Every finding below was reproduced in code or with a test before the fix. The te
 | Low | Praise later in the opening sentence ("You found the exact explanation from our notes! That is a great start.") passes the filter. | The filter only drops a praise word at the very start | Measure how often it happens before adding more rules |
 | Low | The held-out set and the main model (`gemini-3.6-flash`, 3 of 19 scenarios before its quota ran out) have no complete round-6 run. | Quota | As above |
 
+What happened to each of these in round 7 is in the last column of the state map below.
+
+## Seventh round: evidence on a real model, 27 October
+
+### State at the start of the round
+
+| Question | Answer, checked on 27 October |
+| --- | --- |
+| What is deployed | `47f06c8` on https://teach-me-this-file.vercel.app (bundle `index-DE2YVcnZ.js`), the same commit as `main` |
+| Which tests use a model | `npm test` (275 tests) and the browser harness use the mock provider; the policy layer of the teaching eval uses labelled grades. Only `eval/teaching.js --mode=model`, `eval/grading.js` and the live journeys call a real model |
+| Reproducible | Every policy-layer result; round-6 model results only where `eval/results/runs/` or `eval/results/*.json` has the per-turn file |
+| Lost or incomplete | The first Flash-Lite held-out-2 run and the morning production notes of 26 October (87); held-out-2 Hebrew for the round-6 engine; the grading set after round 5 and 6 |
+| Highest-impact open item | No end-to-end production run with a real model past step 1 |
+
+| Open item from round 6 | Round 7 |
+| --- | --- |
+| End-to-end on production | Done in English on a desktop and in Hebrew on a phone, with answers written after reading each generated question (DECISIONS, "Production on 27 October"). It found 89 |
+| Grading set not rerun | Rerun: 48/51, no wrong answer graded correct |
+| Hebrew half of held-out-2 | Run for the round-6 engine and the plain tutor |
+| `build_up` change made after seeing held-out-2 | Tested on held-out-3, written and frozen before any run |
+| Praise later in a reply | Measured: 0 of 15 replies on held-out-3 and 1 of 7 on the Hebrew half of held-out-2 after correcting the check (92); not changed |
+| No complete run on the main model | Still open: the comparison runs used Flash-Lite for every system (the main model's free quota is about 25 calls a day) |
+
+### Findings
+
+| # | Sev. | Area | Problem | Root cause | Fix | Verification | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 88 | High | Security | A sandbox snapshot from round 6 holds a copy of the site's Gemini key, which I had copied into the sandbox to run the eval. | Model evals ran in a sandbox and needed the key there. | I deleted every local copy and copied no key in this round. Evals now call the model through a deployment of the app, so the key stays in Vercel's environment (90). Deleting the snapshot and rotating the key are the owner's actions. | No key in the repository, results or logs (`git grep` for the key prefix finds only the detection code) | Open: owner action |
+| 89 | High | Teaching | On production, a counter-example, then a focused hint with a blank ("it has almost no ________ to pass the sound vibrations along"), then the one-word answer "Particles." completed the step. The student never stated the whole idea. | The flag that sends a right answer back to the whole question was overwritten by the next help: the counter-example set it, the focused hint cleared it. A focused hint may leave a blank, which narrows the question as much as a sub-question. | The flag stays set until the student answers the whole question, and a focused hint sets it too. A right answer after narrowing help always goes back to the whole question, also after an earlier `build_up`. | Two new progress tests fail on `47f06c8` and pass; policy layer: dev 23/23, held-out 25/25, held-out-2 17/17 unchanged; held-out-3 17/18 to 15/18, both on the cost below. The browser harness journey (Hint, Explain, two wrong answers, then a right one) expected the step to end; it now expects the whole question first, then the next step | Fixed after seeing it; real-model effect not measured |
+| 90 | Medium | Eval | Model evals needed the key in the place they ran, and Flash-Lite and the main model could only be pinned in that copy of the code. | The eval called the provider directly. | `--provider=remote` sends each model call from a browser page on a deployment of the app to `/api/eval/model`, a route that exists only on the `eval/remote-model` branch. The branch's preview deployment pins the model with preview-only variables; the route has the same origin check, key budget and rate limit as the lesson routes, and the preview is behind Vercel's login. | API tests for the route; remote-provider tests; three model runs and the grading set ran this way | Fixed |
+| 91 | Low | Eval | When a run stopped on the quota, systems had finished different scenarios, so only a common subset could be compared (round 6). | Runs went system by system. | Runs go scenario by scenario, every system in turn. Reports add return-to-question turns, finished lessons and latency per turn. | Test for the new summary fields | Fixed |
+| 92 | Low | Eval | The Hebrew approval check counted "זה נכון ש..." (acknowledging the right part, which the prompt allows), "בדיוק כמו" (a comparison) and "מה בדיוק" (a question) as praise: 3 of the 4 Hebrew replies it flagged on held-out-2 were not praise. | The English pattern excluded "you're right that"; the Hebrew one had no such exception. | The same exceptions in Hebrew. The run files keep the original flags; the reports give both counts. | 4 cases in `tests/teaching.test.js` | Fixed |
+| 93 | Low | Feedback | On a pasted Hebrew answer, the follow-up opened "הבאת בדיוק את הפרטים הנכונים" ("you brought exactly the right details") before asking for the student's own words. | The filter drops listed praise words at the start; this sentence is not one. | None yet: one case in 22 replies where praise was not allowed. | Held-out-2 Hebrew, `ho2-he-copied` | Open |
+| 94 | Low | Feedback | Hebrew replies on production opened with "שלום!" in the middle of the lesson (3 of 9 replies, `gemini-2.5-flash`). | Not found. The prompt asks for a greeting only on the first message. | None: not seen in 70 Flash-Lite replies after the first, so the evidence is one run on one model. | Production, 27 October | Open |
+| 95 | Medium | Teaching | "Because sound is the air that comes out of your mouth" did not lead back to the earlier step (vibration); the tutor gave a hint on the current step. | The grader did not name the earlier step as the missing idea. Same in the round-5 engine and the plain tutor. | None yet. | Held-out-3, `ho3-en-prerequisite` | Open |
+| 96 | Low | Teaching | A complete answer given right after narrowing help is asked again once. | The cost of 84 and 89: the engine does not tell a complete answer from a narrow one; the grader's flag for that was unreliable (84). | Accepted: one extra question instead of a step marked shown without evidence. | Held-out-3 real model: `ho3-en-journey` turn 2 | Accepted |
+| 97 | Medium | Reliability | On production, the provider timed out after part of a reply to a question about another section. | Provider latency. | None needed: the partial reply stayed marked as failed, the error offered Try again, and the retry answered from the right passage. | Production, 27 October | Working as designed |
+
+### Open after round 7
+
+| Sev. | What | Next step |
+| --- | --- | --- |
+| High | The round-6 snapshot with a key copy (88) | Owner: delete the snapshot and rotate the key |
+| Medium | 89 is fixed in code and in the policy layer only; no real-model run after the fix | Rerun held-out-3 for the engine on the next quota reset; the production journey's step 2 |
+| Medium | The comparison used Flash-Lite for every system; nothing measured on the main model | A paid key or a day's main-model quota for one system at a time |
+| Medium | 95: a gap in an earlier step that the grader does not attribute | More prerequisite scenarios, then decide between a prompt change and a code rule |
+| Low | 93 and 94 | Measure on more Hebrew runs before changing anything |
+| Low | No real users | Run the pilot in `pilot/PROTOCOL.md` |
+
 ## Requirements matrix
 
 Status after the upgrade. "Live" refers to the browser runs against production on 24 October, listed in [DECISIONS.md](DECISIONS.md#live-checks-24-october-morning).

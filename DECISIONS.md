@@ -172,15 +172,14 @@ Text the app stores (system notes, file warnings, errors) is stored as a code wi
 - Source matching and question retrieval are lexical. A paraphrase with different words is missed, and a translated lesson always falls back to the step's passage. Retrieval was tuned on 20 English questions and checked on 11 held-out Hebrew and French ones; that is enough to see a direction, not to promise a number.
 - The rate limit, the server-key budget, the cooldowns and the metrics are in memory per serverless instance.
 - Prompt-injection defences reduce the risk but do not remove it.
-- The teaching scenarios and their expected behaviour are mine. They encode what I think good tutoring is; a teacher writing them might disagree with some expectations, and 55 scenarios on four lessons are a small sample.
-- Whether the tutor goes back to an earlier step depends on the grader naming it. The code only checks that the named step is a real, finished prerequisite.
+- The teaching scenarios and their expected behaviour are mine. They encode what I think good tutoring is; a teacher writing them might disagree with some expectations, and 95 scenarios on eight lessons are a small sample. I wrote held-out-3 knowing what round 6 had changed.
+- Whether the tutor goes back to an earlier step depends on the grader naming it. The code only checks that the named step is a real, finished prerequisite; on held-out-3 the grader missed one such gap in all three systems (AUDIT 95).
+- After narrowing help the tutor asks the whole question once, even when the student has just answered it in full (AUDIT 96).
 - The review days are fixed intervals, not fitted to the student, and nothing reminds the student.
-- Almost every real-model result comes from the backup model, Flash-Lite; the main model's free quota covered 3 of 19 held-out-2 scenarios before running out.
-- The round-6 model comparison rests on 9 English scenarios, one run per system. The Hebrew half has no result for the new engine.
-- The `build_up` rule (AUDIT 84) was changed after seeing held-out-2, so no fresh set has tested it yet.
-- Not rerun on a real model after the last changes: the 51-answer grading set after this round's grader prompt change (`meetsCriteria`, `missingPrerequisite`), and the teaching eval after removing passage ids from the history. Both ran out of daily quota. The policy layer and the tests cover the code paths; whether the grader got worse on the old answers is not measured.
-- The grader calls some questions about other parts of the file off-topic (AUDIT 75), and the scripted final-check answers in the eval sometimes do not fit the question the model asks, so the transfer scenario and the two journeys did not reach the summary on a real model.
-- The per-turn rows of the first model runs were lost when the sandbox timed out; only the printed summaries are in `eval/results/`.
+- Every comparison of systems used Flash-Lite, the backup model; the main model's free quota is about 25 calls a day. One run per system.
+- The narrowing fix of round 7 (AUDIT 89) is verified in code and the policy layer, not on a real model.
+- No real learner has used the app; the pilot protocol is ready but not run.
+- The per-turn rows of the first model runs (round 5 and one round-6 run) were lost when the sandbox timed out; only the printed summaries are in `eval/results/`.
 
 ## What I would do next
 
@@ -356,6 +355,89 @@ Production served the round-6 build. The script uploaded the photosynthesis text
 | Opening approval | One reply to a misread answer began "You're absolutely right" (fixed as finding 85) |
 
 Not verified on production with a real model: the detour, a question about another part of the file, the final check, the summary and reload. The mock harness covers that path on every build (two journeys, 179 checks).
+
+### Round 7: model runs without the key leaving the server
+
+Round 6 ran the model evals in a sandbox with a copy of the site's key, and a snapshot of that sandbox still holds it (AUDIT 88). In round 7 no key was copied anywhere. The evals call the model through a deployment of the app instead:
+
+- `eval/remote-provider.js` implements the provider interface by opening a page of the deployment in headless Chromium and posting each model call with `fetch` from that page, so the request is same-origin like any student's.
+- `/api/eval/model` takes a system prompt and either a prompt (JSON) or messages (text), calls the server's provider and returns the whole reply with the models that answered. It exists only on the `eval/remote-model` branch, never on `main`; it has the lesson routes' origin check, key budget and rate limit, and preview deployments are behind Vercel's login, reached with a share link that expires after 23 hours.
+- The branch's preview deployment pins the model with preview-only variables (`GEMINI_MODELS` and `GEMINI_BACKUP_MODELS` both `gemini-3.5-flash-lite`, the round-6 timeouts), so every system gets the same model.
+- The engine code runs where the eval runs; only model calls go to the deployment. The round-5 engine is the same checkout with `server/lesson` from `8fa9b77`; the meta file of each run records the engine and prompt hashes, so the two engines cannot be confused.
+
+Costs: each call's latency includes a round trip to the deployment, so latency numbers are upper bounds for the engine; and the evals share the site key's daily quota with real users.
+
+**Held-out-3.** Held-out-2 had been seen before the `build_up` change (AUDIT 84). I wrote held-out-3 before any run this round and committed it (`964fd7b`) with the engine unchanged since `47f06c8`: how sound travels (English) and friction (Hebrew), 21 scenarios including a new category for narrowed questions. A policy-layer dry run before freezing found two authoring errors in my own scenarios (a narrowed answer that, together with the first answer, already completed the step; two narrowed answers labelled differently), which I fixed before the first model run.
+
+### Results: held-out-3 on a real model, 27 October
+
+All three systems with `gemini-3.5-flash-lite` for every call, one run each, all 21 scenarios completed, no infrastructure errors. The engines are the round-6 engine at `47f06c8` (before 89 in AUDIT) and the round-5 engine at `8fa9b77`; the plain tutor gets one prompt with the plan, the whole document and the same teaching rules. Files: `eval/results/runs/r7-ho3-current/` and `r7-ho3-r5/`.
+
+| Held-out-3, 21 scenarios | Engine, round 6 | Engine, round 5 | Plain tutor |
+| --- | --- | --- | --- |
+| Scenarios passed | 19/21 | 9/21 | 9/21 |
+| Verdicts within the accepted grades | 43/44 | 36/43 | 33/42 |
+| Wrong or partial answer graded correct | 0/13 | 0/13 | 0/13 |
+| Correct answer not graded correct | 1/27 | 7/26 | 9/26 |
+| Actions that fit | 46/50 | 32/49 | 26/49 |
+| Moved on without evidence | 0 | 1 | 0 |
+| Help during the final check | 0 | 0 | 1 |
+| Turns that should return to the question, and did | 3/4 | 2/4 | 1/4 |
+| Whole lessons that reached the summary | 3/3 | 0/3 | 0/3 |
+| Paraphrase groups graded the same | 3/3 | 2/3 | 3/3 |
+| Approval on an answer that was not right (after correcting the Hebrew check, AUDIT 92) | 0/15 | 2/15 | 0/14 |
+| Replies citing a passage | 37/50 | 33/49 | 33/49 |
+| Cited ids the tutor was not given | 0 | 0 | 0 |
+| Cited sentences with under 20% of their words in the passage | 2/71 | 2/66 | 4/40 |
+| Time per turn, p50 / p95 | 15.8 s / 40.3 s | 13.7 s / 44.1 s | 7.2 s / 25.7 s |
+| Model calls | 109 | 107 | 58 |
+
+Where the round-5 engine and the plain tutor lost: questions about another part of the file and questions the document does not answer (graded off-topic, so the tutor re-asked: 0/4 for both), the final check (re-asked instead of grading the planned question: 0/3 lessons finished), copied answers, and the prerequisite scenarios. These are the round-6 changes, so this is the first time they were measured on scenarios written after them and not used to tune them.
+
+The round-6 engine failed two scenarios. `ho3-en-prerequisite`: the grader did not name the earlier step for "sound is the air that comes out of your mouth", so the tutor hinted instead of going back (AUDIT 95; all three systems failed it). `ho3-en-journey`: after a counter-example the student gave the whole answer, and the tutor asked the whole question again, the known cost of `build_up` (AUDIT 96).
+
+What these numbers support, and what they do not:
+- **On scenarios written after the round-6 changes, the round-6 engine did better than both the round-5 engine and the plain tutor**, with the same model: 19 against 9 and 9 scenarios, 1 against 7 and 9 missed correct answers, and the only system that finished the lessons. One run per system, 21 scenarios I wrote: a direction with large differences, not a measured effect size.
+- **No system graded a wrong answer correct** (0/13 each). The difference is in correct answers that were missed and in what happens next.
+- **The plain tutor is about twice as fast per turn** because it makes one call, not two (grader and tutor).
+- **I wrote held-out-3 knowing what round 6 changed.** It uses the same 16 categories as the earlier sets plus "narrowing", and its expected behaviour was fixed before any run, but the categories are the ones the engine was built for. It shows that the changes generalise to new lessons and wording, not that the engine is better at teaching in general.
+
+### Results: other model runs on 27 October
+
+| Run | Result | Compared with |
+| --- | --- | --- |
+| Grading set, 51 answers, Flash-Lite | 48/51 within the accepted grades, no wrong or partial answer graded correct, all 51 answered by Flash-Lite. Misses: "Donne-moi juste la réponse" graded off-topic instead of question; two whole-process answers to a narrowed sub-question graded misread (`grading-r7.json`) | Round 4 on the same set and model: 49/51, no false correct. One answer apart, one run each: no measurable change from the round-5 and round-6 grader changes |
+| Held-out-2, Hebrew half (9 scenarios), round-6 engine and plain tutor | Engine 4/9 as recorded, 7/9 after correcting the Hebrew approval check (AUDIT 92); 18/18 verdicts within the accepted grades. Remaining failures: a question the document does not answer, re-asked (`ho2-he-not-in-document`), and approval on a pasted answer (AUDIT 93). Plain tutor 3/9 recorded, 4/9 corrected; 12/17 verdicts | Round 5 engine in round 6: 4 of the 7 Hebrew scenarios it finished |
+
+### Production on 27 October
+
+Production served `47f06c8` (`index-DE2YVcnZ.js`). I drove it with Playwright's Chromium in a Vercel Sandbox with no key in it: the site used its own key and its normal model order. A small driver let me read each generated question and the plan, then send an answer I wrote for that question: correct answers from the step's success criteria in my own words, mistakes from the plan's common mistake, a partial answer, a question about a section no step covered, and a wrong answer in the final check. Every turn was saved with the answer, its purpose, the grade, the move, the reply, citations, models and timing (`eval/results/production-r7.json`).
+
+| Demo step | English, desktop (`sound.md`) | Hebrew, 390 px phone (`friction.md`) |
+| --- | --- | --- |
+| 1-2. Upload and plan | Plan in 23 s, 3 steps with transfer questions | Plan in 16 s, 3 steps, right-to-left, no horizontal overflow |
+| 3. First question, right answer | Correct, next step | Correct, next step |
+| 4. Mistake or partial answer | The plan's common mistake: graded incorrect with the misconception named | Half of a two-part question: graded partial |
+| 5. Help that fits | Counter-example ("people can still hear each other on a snowy mountain"), then a focused hint | A nudge naming the missing half |
+| 6. Back to the whole question | **Failed**: a fill-in-the-blank hint, then "Particles." completed the step (AUDIT 89) | The student completed the missing half; next step |
+| 7. Question about another part | Answered from the right passage after one provider timeout and Try again; back to the step's question | Answered from the spacecraft passage; back to the step's question |
+| 8. Final check and summary | 3 planned questions, no hints, one wrong on purpose; summary "2 of 3 shown on new questions" with the weak step under "Needs practice" | Same, in Hebrew |
+| Counter, saved state and screen | Agreed on all 11 turns; reload kept the completed lesson | Agreed on all 9 turns |
+| Models | Mostly `gemini-3.6-flash`; one turn on Flash-Lite (29.5 s), one on `gemini-2.5-flash` | Mostly `gemini-2.5-flash`, two turns on Flash-Lite |
+
+The path was completed in both languages on the live site with a real model, and step 6 found a bug that the scripted evals had not (fixed as AUDIT 89, verified in code and the policy layer, not yet on production with a real model). Other observations: three Hebrew replies opened with "שלום!" in the middle of the lesson (AUDIT 94), and no page errors in either run.
+
+### Changes in round 7, chosen from the evidence
+
+At most three, each tied to something observed:
+
+| | Observed problem | Who it hurts | Hypothesis | Measure | Guard against breaking something |
+| --- | --- | --- | --- | --- | --- |
+| 1 | A fill-in-the-blank hint after a counter-example let a one-word answer complete the step (production) | A student marked "shown with help" without stating the idea; the final check may catch it, the summary may not | The engine forgets that the question was narrowed when the next help is not a "narrowing" kind, and a focused hint can narrow | Steps completed on an answer to a narrowed question: 1 on production; 0 by construction now | Two tests that fail on the old code; policy layer unchanged on dev, held-out and held-out-2; on held-out-3 two narrowing scenarios now get one extra question (the cost, AUDIT 96) |
+| 2 | 3 of 4 Hebrew "approval" flags were acknowledgements or comparisons | Anyone reading the eval: it reported failures that were not there | The Hebrew pattern lacked the exceptions the English one has | Flags on held-out-2 Hebrew that I confirm by reading: 1 of 1 after, 1 of 4 before | Four new cases in the heuristic's tests, including real praise that must still be caught |
+| 3 | The model can be unavailable for a demo or an interview | Anyone showing the product without quota | A deterministic offline demo is better than a broken live one, as long as it cannot be mistaken for the model | `npm run demo` walks the 8 demo steps with scripted replies; the banner shows in English and Hebrew, desktop and phone | Health test for the demo flag. I walked both journeys with a script and checked the banner on every screen; that walk is not part of the test suite |
+
+Not changed, and why: praise later in a reply (0 of 15 on held-out-3, 1 real case of 7 on the Hebrew half of held-out-2); the mid-lesson Hebrew greeting (one production run on one model); the prerequisite miss (needs more scenarios to choose between a prompt and a code rule).
 
 ## The experiment that would settle it
 
@@ -573,3 +655,17 @@ The findings are in [AUDIT.md](AUDIT.md), 77 to 87, with the open list after the
 | Durable, resumable eval runs, held-out-2, conditional follow-up turns | Round 5 lost its per-turn results; the held-out set had been seen | Two of three model runs on 26 October survived; the third was lost in transfer (AUDIT 87) |
 | Tailwind reads only `src` | Eval text changed the client bundle | Harness |
 
+
+## What changed in the seventh round (27 October)
+
+The findings are in [AUDIT.md](AUDIT.md), 88 to 97, with the open list after them; the runs are in "Round 7" above.
+
+| Change | Why | Measured effect |
+| --- | --- | --- |
+| Model evals call the model through a deployment of the app (`--provider=remote`, a route only on the `eval/remote-model` branch) | Round 6 had to copy the key into a sandbox, and a snapshot of it kept the key | Three model runs and the grading set with no key outside Vercel |
+| Runs go scenario by scenario across systems; reports add return-to-question turns, finished lessons and latency | A quota stop left systems with different scenarios | All 21 held-out-3 scenarios finished for all three systems |
+| Held-out-3, written and committed before any run | Held-out-2 had been seen before the round-6 `build_up` change | Round-6 engine 19/21, round-5 engine 9/21, plain tutor 9/21 |
+| Narrowing help is remembered until the whole question is answered, and a focused hint counts as narrowing | A one-word answer to a fill-in-the-blank completed a step on production | Tests and policy layer; cost: two held-out-3 scenarios get one extra question |
+| Hebrew approval check no longer counts acknowledgements, comparisons or "what exactly" | 3 of 4 Hebrew flags were wrong | Held-out-2 Hebrew: engine 7/9 instead of 4/9 as recorded |
+| `npm run demo`: offline demo with scripted replies and a banner that says so | A demo should not depend on the free quota | Banner checked in English and Hebrew, desktop and phone |
+| `pilot/PROTOCOL.md` with the two documents and questions written in advance | No real learner has used the app | Not run |
