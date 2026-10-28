@@ -540,3 +540,51 @@ describe('health', () => {
     expect(response.body.demo).toBe(false);
   });
 });
+
+describe('round 9: grading a narrowed answer against the whole question (AUDIT 96)', () => {
+  const narrowed = () => {
+    const progress = createProgress(plan);
+    return { ...progress, steps: progress.steps.map((step, index) => (index === 0 ? { ...step, attempts: 1, scaffold: true, used: ['counterexample'] } : step)) };
+  };
+  const right = { verdict: 'correct', completeness: 1, confidence: 'high', issue: 'none' };
+  const partial = { verdict: 'partial', completeness: 0.5, confidence: 'high', issue: 'none' };
+  const graders = (grades) => {
+    const prompts = [];
+    const base = createMockProvider({ delayMs: 1 });
+    return { prompts, provider: { ...base, generateJson: async (options) => { prompts.push(options.prompt); return grades[prompts.length - 1]; } } };
+  };
+  const send = (provider, progress, studentMessage = 'It is the smallest unit of life, and every living thing is made of them.') => request(createApp({ providerFor: withProvider(provider) }))
+    .post('/api/turns')
+    .send(turn({ kind: 'reply', progress, studentMessage, history: [{ role: 'tutor', content: 'Think of a single bacterium. Is it alive?' }] }));
+  const moveOf = (response) => parseEvents(response.text).find((item) => item.event === 'progress').data;
+
+  it('grades again against the step\'s check question and ends the step when that grade is right too', async () => {
+    const { prompts, provider } = graders([right, right]);
+    const update = moveOf(await send(provider, narrowed()));
+    expect(prompts).toHaveLength(2);
+    expect(prompts[0]).toContain('Think of a single bacterium');
+    expect(prompts[1]).toContain('<tutor_question>\nWhat is a cell?\n</tutor_question>');
+    expect(update).toMatchObject({ move: 'advance', reason: 'right_with_help' });
+  });
+
+  it('asks the whole question when the answer is not right against it', async () => {
+    const { prompts, provider } = graders([right, partial]);
+    expect(moveOf(await send(provider, narrowed())).move).toBe('build_up');
+    expect(prompts).toHaveLength(2);
+  });
+
+  it('grades once when the step was not narrowed or the first answer was not right', async () => {
+    const plain = graders([right, right]);
+    await send(plain.provider, createProgress(plan));
+    expect(plain.prompts).toHaveLength(1);
+    const wrong = graders([partial, right]);
+    await send(wrong.provider, narrowed());
+    expect(wrong.prompts).toHaveLength(1);
+  });
+
+  it('does not end the step on a copied or unsure first answer', async () => {
+    const { prompts, provider } = graders([{ ...right, issue: 'hedged' }, right]);
+    expect(moveOf(await send(provider, narrowed(), 'Maybe it is the smallest unit of life?')).move).toBe('build_up');
+    expect(prompts).toHaveLength(1);
+  });
+});

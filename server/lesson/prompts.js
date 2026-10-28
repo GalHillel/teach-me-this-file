@@ -103,12 +103,12 @@ More rules:
 - "evidence" must be copied word for word from the student's message.
 - Set "confidence" to "low" when the answer is ambiguous, could be a guess, or you are unsure how to read it.
 - Set "issue" to describe how the student answered:
-  - "misread_question": the student answered a different question than the one asked, for example described another part of the lesson.
+  - "misread_question": the student answered a different question than the one asked, for example described another part of the lesson. An attempt at the question that was asked, with a wrong or missing reason, is not "misread_question": grade it "incorrect" or "partial" with issue "none", and write the wrong idea in "misconception".
   - "hedged": the content is right, but the student says they are guessing or unsure.
   - "no_knowledge": the student says they do not know, or makes no attempt.
   - "unjustified": the question asks for a reason or an explanation, and the student gives only the final answer.
   - "none": none of these.
-- If the answer is wrong because an idea from one of the earlier steps listed under "Earlier steps this step builds on" is missing or misunderstood, set "missingPrerequisite" to that step's number. That includes an answer that repeats the common mistake of that earlier step, or that contradicts its goal. Otherwise 0.
+- If the answer is wrong because an idea from one of the earlier steps listed under "Earlier steps this step builds on" is missing or misunderstood, set "missingPrerequisite" to that step's number. That includes an answer that repeats the common mistake of that earlier step, or that contradicts its goal. Leave it 0 when the current step's goal or success criteria cover the missing idea, because then the current step is where it is taught. Otherwise 0.
 - Write the short notes in English.
 
 Return only JSON:
@@ -170,7 +170,9 @@ const APPROACH = {
   practice: 'give a one-sentence reminder of the method, then ask the student to try the check question on their own',
 };
 
-const teachCurrentStep = (step) => `teach the current step: ${APPROACH[step.approach] ?? APPROACH.explain}.`;
+const NO_ANSWER_IN_TEACHING = 'Do not answer the check question while teaching: explain the idea on a different case from the one the question asks about, and do not list the examples, items or reasons the question asks for, even if the sources list them, so the student has to work them out.';
+
+const teachCurrentStep = (step) => `teach the current step: ${APPROACH[step.approach] ?? APPROACH.explain}. ${NO_ANSWER_IN_TEACHING}`;
 
 const privateNotes = (assessment) => {
   if (!assessment) return '';

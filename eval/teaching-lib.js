@@ -4,7 +4,7 @@ import { stepState } from '../shared/learner.js';
 import { stepEvidence } from '../shared/lesson.js';
 import { termGroups } from '../shared/text.js';
 import { normalizeAssessment } from '../server/lesson/assessor.js';
-import { createProgress, planMove } from '../server/lesson/progress.js';
+import { createProgress, needsWholeQuestionGrade, planMove } from '../server/lesson/progress.js';
 import { CITATION_RULE, formatPassages, languageName } from '../server/lesson/prompts.js';
 import { turnSources } from '../src/lesson/turnSources.js';
 
@@ -80,6 +80,8 @@ export const ACTION_OF_MOVE = {
 export const ACTIONS = ['teach', 'hint', 'probe', 'explain', 'ask_again', 'check_earlier', 'back_to_question', 'next_step', 'final_check', 'summary', 'answer_question'];
 const PROGRESS_ACTIONS = new Set(['next_step', 'final_check', 'summary']);
 const HELP_ACTIONS = new Set(['hint', 'explain', 'probe']);
+
+export const wholeLabel = (label = {}) => (label.whole ? { ...label, verdict: 'correct', issue: 'none' } : { ...label, verdict: 'partial', issue: 'none' });
 
 export const labelGrade = (label = {}) => ({
   verdict: label.verdict,
@@ -255,7 +257,8 @@ export const policyRun = (lesson, scenario, system) => {
     if (!turnApplies(turn, turns.at(-1)?.action)) continue;
     const state = { plan, chunks: lesson.chunks, progress };
     const sources = turnSources(state, turn.kind ?? 'reply', turn.student);
-    const assessment = normalizeAssessment(labelGrade(turn.label), turn.student, sources.current);
+    const graded = normalizeAssessment(labelGrade(turn.label), turn.student, sources.current);
+    const assessment = system === 'engine' && needsWholeQuestionGrade(progress, graded) ? { ...graded, wholeQuestion: turn.label?.whole === true } : graded;
     const decide = system === 'engine' ? planMove : naivePlanMove;
     const step = progress.status === 'active' ? progress.currentStep : null;
     const result = decide(progress, { kind: turn.kind ?? 'reply', assessment, plan });

@@ -65,7 +65,9 @@ export const createMockProvider = ({ delayMs = 40 } = {}) => {
       throw new AppError('provider_unavailable');
     }
     onMeta?.({ model: 'mock', backup: false, fallbacks: 0 });
-    return task === 'plan' ? mockPlan(prompt) : mockAssessment(prompt);
+    if (task === 'plan') return mockPlan(prompt);
+    if (task === 'assessment_whole' && !/whole/i.test(answer)) return { ...mockAssessment(prompt), verdict: 'partial', completeness: 0.5, conceptsMissing: ['the rest of the check question'] };
+    return mockAssessment(prompt);
   },
 
   async *streamText({ system, messages = [], signal, onMeta }) {

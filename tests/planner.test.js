@@ -225,3 +225,25 @@ describe('the final check gives no help', () => {
     expect(text).toContain('claim nothing beyond these two lists');
   });
 });
+
+describe('round 9: teaching does not give away the check question', () => {
+  it('tells the tutor not to answer the check question while teaching the step, for every approach (AUDIT 96)', () => {
+    for (const approach of ['explain', 'worked_example', 'practice']) {
+      for (const move of ['introduce', 'advance', 'review_and_advance']) {
+        const text = moveInstructions({ move, step: { approach } });
+        expect(text).toContain('Do not answer the check question while teaching');
+        expect(text).toContain('do not list the examples, items or reasons the question asks for');
+      }
+    }
+  });
+});
+
+describe('round 9: grader rules for earlier steps and other questions', () => {
+  it('names an earlier step only when the missing idea is not taught by the current step (AUDIT 104)', () => {
+    expect(ASSESS_SYSTEM).toContain('Leave it 0 when the current step\'s goal or success criteria cover the missing idea');
+  });
+
+  it('keeps an attempt at the asked question with a wrong reason out of misread_question (AUDIT 105)', () => {
+    expect(ASSESS_SYSTEM).toContain('An attempt at the question that was asked, with a wrong or missing reason, is not "misread_question"');
+  });
+});

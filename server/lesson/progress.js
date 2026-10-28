@@ -100,7 +100,7 @@ const handleAnswer = (plan, progress, step, assessment) => {
   }
 
   if (verdict === 'correct') {
-    if (step.scaffold) {
+    if (step.scaffold && !assessment.wholeQuestion) {
       return result('build_up', updateCurrent(progress, { scaffold: false, built: true, stalls: 0 }), 'narrowed_question_right');
     }
     if ((confidence === 'low' || PROBE_ISSUES.has(issue)) && !step.probed) {
@@ -112,6 +112,11 @@ const handleAnswer = (plan, progress, step, assessment) => {
   }
 
   return wrongAnswer(plan, progress, step, assessment);
+};
+
+export const needsWholeQuestionGrade = (progress, assessment) => {
+  const step = progress.status === 'active' ? progress.steps[progress.currentStep] : null;
+  return Boolean(step?.scaffold && step.phase === 'learn' && !Number.isInteger(step.detour) && assessment?.verdict === 'correct' && assessment.issue === 'none' && assessment.confidence !== 'low');
 };
 
 const nonAnswerMove = (verdict, issue) => {
@@ -211,6 +216,7 @@ const decide = (progress, { kind, assessment, plan }) => {
     misconception: assessment?.misconception ?? '',
     conceptsMissing: assessment?.conceptsMissing ?? [],
     missingPrerequisite: assessment?.missingPrerequisite ?? 0,
+    wholeQuestion: assessment?.wholeQuestion === true,
   };
 
   if (progress.status === 'reviewing') return planReviewMove(progress, grade);

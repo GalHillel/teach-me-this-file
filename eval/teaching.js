@@ -5,7 +5,7 @@ import { assessAnswer } from '../server/lesson/assessor.js';
 import { runTurn, toProviderMessages } from '../server/lesson/tutor.js';
 import { turnSources } from '../src/lesson/turnSources.js';
 import {
-  ACTION_OF_MOVE, checkEnd, endStates, supportProblems, checkTurn, citationSupport, labelGrade, loadLessons, loadScenarios, openingMessage,
+  ACTION_OF_MOVE, checkEnd, endStates, supportProblems, checkTurn, citationSupport, labelGrade, wholeLabel, loadLessons, loadScenarios, openingMessage,
   planOf, plainSystem, policyRun, readTag, startProgress, summarize, turnApplies, verifyReply,
 } from './teaching-lib.js';
 import { evalProvider } from './remote-provider.js';
@@ -30,9 +30,9 @@ let currentLabel = null;
 const labelProvider = {
   name: 'labels',
   model: 'labels',
-  async generateJson({ onMeta }) {
+  async generateJson({ task, onMeta }) {
     onMeta?.({ model: 'labels', backup: false });
-    return labelGrade(currentLabel);
+    return labelGrade(task === 'assessment_whole' ? wholeLabel(currentLabel) : currentLabel);
   },
   async *streamText({ system, onMeta }) {
     onMeta?.({ model: 'labels', backup: false });
@@ -76,9 +76,9 @@ const engineTurn = async ({ lesson, plan, progress, history, turn }) => {
       send: (event, data) => events.push({ event, data }),
     });
   });
-  calls += kind === 'reply' ? 2 : 1;
   const update = events.find((item) => item.event === 'progress').data;
   const done = events.find((item) => item.event === 'done').data;
+  calls += done.models.length;
   const text = events.filter((item) => item.event === 'delta').map((item) => item.data.text).join('');
   const given = [...new Map([...sources.current, ...sources.next, ...sources.upcoming, ...sources.related].map((chunk) => [chunk.id, chunk])).values()];
   return {

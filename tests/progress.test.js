@@ -462,3 +462,24 @@ describe('final check', () => {
     expect(answer(progress, 'correct').move).toBe('free_chat');
   });
 });
+
+describe('round 9: a narrowed answer that also answers the whole question (AUDIT 96)', () => {
+  it('ends the step when the server found the answer right against the whole check question', () => {
+    const first = answer(createProgress(plan), 'incorrect', 'high', 'none', { misconception: 'cells are tiny animals' });
+    const whole = answer(first.progress, 'correct', 'high', 'none', { wholeQuestion: true });
+    expect(whole).toMatchObject({ move: 'advance', reason: 'right_with_help' });
+    expect(whole.progress.steps[0]).toMatchObject({ status: 'done', outcome: 'learned' });
+  });
+
+  it('still asks the whole question when the answer covers only the smaller question', () => {
+    const first = answer(createProgress(plan), 'incorrect', 'high', 'none', { misconception: 'cells are tiny animals' });
+    expect(answer(first.progress, 'correct', 'high', 'none', { wholeQuestion: false }).move).toBe('build_up');
+  });
+
+  it('records the answer as given after narrowing help, so the step is not shown on its own', () => {
+    const first = answer(createProgress(plan), 'incorrect', 'high', 'none', { misconception: 'cells are tiny animals' });
+    const whole = answer(first.progress, 'correct', 'high', 'none', { wholeQuestion: true });
+    expect(whole.progress.evidence.at(-1)).toMatchObject({ step: 0, question: 'narrowed', support: 'narrowed', verdict: 'correct' });
+    expect(stepEvidence(whole.progress, 0).level).toBe('shown_with_help');
+  });
+});
