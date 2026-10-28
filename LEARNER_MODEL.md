@@ -113,3 +113,19 @@ What this evaluation cannot measure: whether students learn more. The students a
 - Prerequisite recovery: scenarios in `prerequisite` and `fragile_prerequisite` where a check of an earlier step is followed by a return to the question (denominator 4).
 
 With the labelled grades (policy layer, no model), A0 passes 15 of 19 conversations. The 4 failures are the cases that encode B's rules, so A0 fails them by design: in the 2 `fragile_prerequisite` scenarios A0 keeps hinting where B should go back to the earlier step, and in the 2 `prerequisite` scenarios A0 still reports the earlier step as demonstrated after its gap showed (2 of 16 overclaims). Results are reported with and without these 4. The saved policy-layer result is `eval/results/teaching-policy-holdout4-a0.json`.
+
+## Results (added after the runs)
+
+Held-out-4 on `gemini-3.5-flash-lite`, one run per system, 21 of 21 scenarios completed for each (full table and caveats in DECISIONS.md, "Results: held-out-4 on a real model"):
+
+| | A0 | A1 | B | Plain |
+| --- | --- | --- | --- | --- |
+| Overclaims | 2/16 | 2/16 | 0/16 | n/a |
+| Unsupported advancement | 0 | 0 | 0 | 0 |
+| Prerequisite recovery | 1/4 | 2/4 | 3/4 | 1/4 |
+| Scenarios passed | 14/21 | 14/21 | 17/21 | 10/21 |
+| Passed, without the 4 scenarios that encode B's rules | 14/17 | 14/17 | 14/17 | 9/17 |
+
+By the decision rule above, B is better than A1. The difference comes from the scenarios that test B's rules; elsewhere the three engines pass the same number. One run of 21 scenarios is a direction, not a measured effect, and none of this says whether students learn more.
+
+Changes after B was frozen, each found on held-out-4 or on production and covered by a regression test (AUDIT 99 to 103): Hebrew forms of "do" became stopwords; a final-check fail forced by repeated non-answers is logged; an earlier step whose last check was passed waits for the second wrong answer before it is checked again, and copied, unsure or unexplained answers never trigger that check; the final check gives no hint when it asks again; the closing message claims nothing beyond what was shown. Held-out-4 is not independent evidence for these changes.
