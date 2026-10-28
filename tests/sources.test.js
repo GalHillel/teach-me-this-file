@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
@@ -66,6 +67,12 @@ describe('findRelatedPassages', () => {
     expect(findRelatedPassages('What happened in the Russian Revolution?', history)).toEqual([]);
     expect(findRelatedPassages('How do black holes form?', history)).toEqual([]);
     expect(findRelatedPassages('', history)).toEqual([]);
+  });
+
+  it('does not count a Hebrew form of "do" as a topic word the document lacks', () => {
+    const { chunks } = JSON.parse(readFileSync(new URL('../eval/golden/teaching-lessons.json', import.meta.url), 'utf8'))['foodchain-he'];
+    expect(findRelatedPassages('מה עושות הפטריות בטבע?', chunks).map((chunk) => chunk.id)).toContain('c5');
+    expect(findRelatedPassages('כמה שנים חי זאב בטבע?', chunks)).toEqual([]);
   });
 
   it('leaves out passages the tutor already has', () => {
