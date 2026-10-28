@@ -1,6 +1,12 @@
 # Pilot with 3 to 5 learners
 
-A protocol for watching real people learn with the app, with a simple comparison. It has not been run yet; there are no results in this repository. Five people cannot show that the app improves learning. The pilot can show where people get confused, which help works, whether they trust what the app says about their understanding, and whether learning with the app looks different from reading the same kind of document alone.
+A protocol for watching real people learn with the app, with a simple comparison.
+
+**Status: NOT RUN.** No participant has taken part; there are no results in this repository. Scripted scenarios, the mock provider and the evaluation runner are not a substitute for this pilot.
+
+Files to use: [participant-sheet-en.md](participant-sheet-en.md) or [participant-sheet-he.md](participant-sheet-he.md) is handed to each participant (what happens, data, consent); [observer-sheet.csv](observer-sheet.csv) is the per-turn log; [results-form.csv](results-form.csv) has one anonymous row per participant and topic, with scores, time, help requests and questionnaire answers.
+
+Five people cannot show that the app improves learning. The pilot can show where people get confused, which help works, whether they trust what the app says about their understanding, and whether learning with the app looks different from reading the same kind of document alone.
 
 ## What it should answer
 
