@@ -1,0 +1,568 @@
+{
+ "date": "2026-10-28",
+ "site": "https://teach-me-this-file.vercel.app",
+ "commit": "58d7f26",
+ "document": "pilot/friction.md",
+ "viewport": "phone 390, Hebrew interface",
+ "turns": [
+  {
+   "at": "2026-10-28T08:34:43.668Z",
+   "run": "he",
+   "label": "page",
+   "bundle": "/assets/index-CrdjGov2.js",
+   "csp": true,
+   "viewport": "phone 390"
+  },
+  {
+   "label": "plan",
+   "ms": 57435,
+   "status": "active",
+   "step": 0,
+   "review": null,
+   "detour": null,
+   "final": null,
+   "counterAgrees": true,
+   "grade": null,
+   "move": "introduce",
+   "reason": "lesson_start",
+   "intervention": null,
+   "whyLine": null,
+   "cited": [
+    "c2"
+   ],
+   "models": [
+    "gemini-2.5-flash"
+   ],
+   "firstTokenMs": 1054,
+   "evidence": [],
+   "planPanel": "הבנת חיכוךמבוגר מתחיל, כ-15 דקותהשיעור בעברית0 מתוך 3 צעדים הושלמו0 מתוך 3 הודגמו לבדמטרות למידהלהגדיר מהו חיכוך וכיצד הוא משפיע על תנועה.להבין כיצד סוגי משטחים משפיעים על חיכוך וכי חיכוך מייצר חום.לזהות מתי חיכוך מועיל ומתי הוא מזיק, ולתאר דרכים לניהולו.צעדים1מהו חיכוך?2חיכוך, משטחים וחוםנשען על צעד 13הצדדים הטובים והרעים של חיכוךנשען על צעד 1, 2",
+   "summary": null,
+   "layout": {
+    "dir": "rtl",
+    "overflow": 0,
+    "composerVisible": true
+   },
+   "tutor": "שלום לך! בשיעור הזה נלמד על כוח חשוב מאוד שמשפיע על חיי היומיום שלנו – חיכוך.\n\nחיכוך הוא כוח שנוצר כששני משטחים נוגעים זה בזה [c2]. הוא תמיד פועל בכיוון ההפוך לכיוון התנועה ומאט אותה [c2]. לדוגמה, אם כדור מתגלגל קדימה, כוח החיכוך פועל אחורה ומנסה לעצור אותו.\n\nנסה לחשוב בעצמך: כדור מתגלגל על הרצפה ולבסוף נעצר. איזה כוח גורם לו לעצור, ובאיזה כיוון הוא פועל ביחס לתנועת הכדור?"
+  },
+  {
+   "label": "copied",
+   "sent": "כשחפץ זז, החיכוך פועל בכיוון ההפוך לתנועה ומאט אותה.",
+   "ms": 4068,
+   "status": "active",
+   "step": 0,
+   "review": null,
+   "detour": null,
+   "final": null,
+   "counterAgrees": true,
+   "grade": {
+    "verdict": "partial",
+    "issue": "copied",
+    "misconception": "",
+    "checks": [
+     "copied_from_source"
+    ]
+   },
+   "move": "hint",
+   "reason": "first_wrong",
+   "intervention": "nudge",
+   "whyLine": "למה רמז: התשובה עוד לא שלמה.",
+   "cited": [
+    "c2"
+   ],
+   "models": [
+    "gemini-3.5-flash-lite",
+    "gemini-3.5-flash-lite"
+   ],
+   "firstTokenMs": 3370,
+   "evidence": [
+    "0:check:independent:partial:copied"
+   ],
+   "planPanel": "הבנת חיכוךמבוגר מתחיל, כ-15 דקותהשיעור בעברית0 מתוך 3 צעדים הושלמו0 מתוך 3 הודגמו לבדמטרות למידהלהגדיר מהו חיכוך וכיצד הוא משפיע על תנועה.להבין כיצד סוגי משטחים משפיעים על חיכוך וכי חיכוך מייצר חום.לזהות מתי חיכוך מועיל ומתי הוא מזיק, ולתאר דרכים לניהולו.צעדים1מהו חיכוך?ניסיון 22חיכוך, משטחים וחוםנשען על צעד 13הצדדים הטובים והרעים של חיכוךנשען על צעד 1, 2",
+   "summary": null,
+   "layout": {
+    "dir": "rtl",
+    "overflow": 0,
+    "composerVisible": true
+   },
+   "tutor": "ציינת נכון שהכוח פועל בכיוון ההפוך לתנועה ומאט אותה [c2]. \n\nעם זאת, שאלנו איזה כוח בדיוק גורם לכדור שמתגלגל על הרצפה לעצור [c2]. מה שמו של הכוח הזה?"
+  },
+  {
+   "label": "own",
+   "sent": "זה החיכוך בין הכדור לרצפה. הכדור מתגלגל קדימה והחיכוך פועל אחורה, נגד התנועה, ולכן הוא מאט אותו עד שהוא נעצר.",
+   "ms": 5801,
+   "status": "active",
+   "step": 1,
+   "review": null,
+   "detour": null,
+   "final": null,
+   "counterAgrees": true,
+   "grade": {
+    "verdict": "correct",
+    "issue": "none",
+    "misconception": "",
+    "checks": []
+   },
+   "move": "advance",
+   "reason": "right_with_help",
+   "intervention": null,
+   "whyLine": "נספר כהודגם בעזרה, כי קודם הייתה עזרה בצעד הזה.",
+   "cited": [
+    "c3",
+    "c4"
+   ],
+   "models": [
+    "gemini-3.5-flash-lite",
+    "gemini-3.5-flash-lite"
+   ],
+   "firstTokenMs": 4889,
+   "evidence": [
+    "0:check:independent:partial:copied",
+    "0:check:hinted:correct:none"
+   ],
+   "planPanel": "הבנת חיכוךמבוגר מתחיל, כ-15 דקותהשיעור בעברית1 מתוך 3 צעדים הושלמו0 מתוך 3 הודגמו לבדמטרות למידהלהגדיר מהו חיכוך וכיצד הוא משפיע על תנועה.להבין כיצד סוגי משטחים משפיעים על חיכוך וכי חיכוך מייצר חום.לזהות מתי חיכוך מועיל ומתי הוא מזיק, ולתאר דרכים לניהולו.צעדיםמהו חיכוך?הודגם בעזרה: נכון אחרי עזרה2חיכוך, משטחים וחוםנשען על צעד 13הצדדים הטובים והרעים של חיכוךנשען על צעד 1, 2",
+   "summary": null,
+   "layout": {
+    "dir": "rtl",
+    "overflow": 0,
+    "composerVisible": true
+   },
+   "tutor": "בדיוק, זהו כוח החיכוך בין הכדור לרצפה. \n\nכעת נראה כיצד סוג המשטח משפיע על החיכוך. ככל שהמשטחים מחוספסים יותר, כך החיכוך ביניהם גדול יותר, ואילו על משטח חלק החיכוך קטן [c3]. מעבר לכך, פעולת החיכוך עושה דבר נוסף ומעניין: היא הופכת חלק מאנרגיית התנועה לחום [c4]. \n\nלמה לדעתך אנחנו משפשפים את הידיים זו בזו כשקר לנו בחורף?"
+  },
+  {
+   "label": "other",
+   "sent": "מה עושה השמן במנוע של מכונית?",
+   "ms": 4733,
+   "status": "active",
+   "step": 1,
+   "review": null,
+   "detour": null,
+   "final": null,
+   "counterAgrees": true,
+   "grade": {
+    "verdict": "question",
+    "issue": "none",
+    "misconception": "",
+    "checks": []
+   },
+   "move": "answer_question",
+   "reason": "student_question",
+   "intervention": null,
+   "whyLine": null,
+   "cited": [
+    "c5"
+   ],
+   "models": [
+    "gemini-3.5-flash-lite",
+    "gemini-3.5-flash-lite"
+   ],
+   "firstTokenMs": 4035,
+   "evidence": [
+    "0:check:independent:partial:copied",
+    "0:check:hinted:correct:none"
+   ],
+   "planPanel": "הבנת חיכוךמבוגר מתחיל, כ-15 דקותהשיעור בעברית1 מתוך 3 צעדים הושלמו0 מתוך 3 הודגמו לבדמטרות למידהלהגדיר מהו חיכוך וכיצד הוא משפיע על תנועה.להבין כיצד סוגי משטחים משפיעים על חיכוך וכי חיכוך מייצר חום.לזהות מתי חיכוך מועיל ומתי הוא מזיק, ולתאר דרכים לניהולו.צעדיםמהו חיכוך?הודגם בעזרה: נכון אחרי עזרה2חיכוך, משטחים וחוםנשען על צעד 13הצדדים הטובים והרעים של חיכוךנשען על צעד 1, 2",
+   "summary": null,
+   "layout": {
+    "dir": "rtl",
+    "overflow": 0,
+    "composerVisible": true
+   },
+   "tutor": "השמן במנוע יוצר שכבה חלקה בין החלקים כדי להקטין את החיכוך ביניהם [c5]. \n\nולגבי השאלה שלנו – חשוב על מה שקורה לידיים שלך כשאתה משפשף אותן זו בזו בחורף. למה הפעולה הזו גורמת להן להתחמם?"
+  },
+  {
+   "label": "s2",
+   "sent": "כי כשמשפשפים נוצר חיכוך בין הידיים, והחיכוך הופך חלק מאנרגיית התנועה לחום.",
+   "ms": 4612,
+   "status": "active",
+   "step": 2,
+   "review": null,
+   "detour": null,
+   "final": null,
+   "counterAgrees": true,
+   "grade": {
+    "verdict": "correct",
+    "issue": "none",
+    "misconception": "",
+    "checks": []
+   },
+   "move": "advance",
+   "reason": "right_without_help",
+   "intervention": null,
+   "whyLine": null,
+   "cited": [
+    "c5",
+    "c6"
+   ],
+   "models": [
+    "gemini-3.5-flash-lite",
+    "gemini-3.5-flash-lite"
+   ],
+   "firstTokenMs": 3384,
+   "evidence": [
+    "0:check:independent:partial:copied",
+    "0:check:hinted:correct:none",
+    "1:check:independent:correct:none"
+   ],
+   "planPanel": "הבנת חיכוךמבוגר מתחיל, כ-15 דקותהשיעור בעברית2 מתוך 3 צעדים הושלמו1 מתוך 3 הודגמו לבדמטרות למידהלהגדיר מהו חיכוך וכיצד הוא משפיע על תנועה.להבין כיצד סוגי משטחים משפיעים על חיכוך וכי חיכוך מייצר חום.לזהות מתי חיכוך מועיל ומתי הוא מזיק, ולתאר דרכים לניהולו.צעדיםמהו חיכוך?הודגם בעזרה: נכון אחרי עזרהחיכוך, משטחים וחוםנשען על צעד 1הודגם לבד: נענה בניסיון הראשון3הצדדים הטובים והרעים של חיכוךנשען על צעד 1, 2",
+   "summary": null,
+   "layout": {
+    "dir": "rtl",
+    "overflow": 0,
+    "composerVisible": true
+   },
+   "tutor": "ציינת נכון ששפשוף הידיים יוצר חיכוך, ושהחיכוך הופך את אנרגיית התנועה לחום.\n\nלכוח החיכוך יש צדדים טובים ורעים. מצד אחד, חיכוך הוא מועיל מאוד – בזכותו אנחנו יכולים ללכת בלי להחליק ולעצור אופניים [c5]. מצד שני, הוא מזיק כשהוא שוחק חלקים במכונות ומבזבז אנרגיה [c5]. כדי להתמודד עם החיכוך, אנחנו מנהלים אותו: למשל, מוסיפים שמן במנוע כדי להקטין את החיכוך בין חלקים [c5], או נעזרים במגן חום מיוחד לחלליות שמתחממות מהחיכוך עם האוויר בחזרתן לכדור הארץ [c6].\n\nתן דוגמה אחת שבה חיכוך מועיל לנו, ודוגמה אחת שבה הוא מזיק."
+  },
+  {
+   "label": "s3wrong",
+   "sent": "חיכוך תמיד מזיק, כי הוא רק מאט דברים.",
+   "ms": 4096,
+   "status": "active",
+   "step": 2,
+   "review": null,
+   "detour": null,
+   "final": null,
+   "counterAgrees": true,
+   "grade": {
+    "verdict": "incorrect",
+    "issue": "none",
+    "misconception": "התלמיד חושב שחיכוך תמיד מזיק כי הוא רק מאט דברים.",
+    "checks": []
+   },
+   "move": "hint",
+   "reason": "misconception",
+   "intervention": "counterexample",
+   "whyLine": "למה דוגמה: רעיון אחד בתשובה התערבב.",
+   "cited": [
+    "c5"
+   ],
+   "models": [
+    "gemini-3.5-flash-lite",
+    "gemini-3.5-flash-lite"
+   ],
+   "firstTokenMs": 3231,
+   "evidence": [
+    "0:check:independent:partial:copied",
+    "0:check:hinted:correct:none",
+    "1:check:independent:correct:none",
+    "2:check:independent:incorrect:none"
+   ],
+   "planPanel": "הבנת חיכוךמבוגר מתחיל, כ-15 דקותהשיעור בעברית2 מתוך 3 צעדים הושלמו1 מתוך 3 הודגמו לבדמטרות למידהלהגדיר מהו חיכוך וכיצד הוא משפיע על תנועה.להבין כיצד סוגי משטחים משפיעים על חיכוך וכי חיכוך מייצר חום.לזהות מתי חיכוך מועיל ומתי הוא מזיק, ולתאר דרכים לניהולו.צעדיםמהו חיכוך?הודגם בעזרה: נכון אחרי עזרהחיכוך, משטחים וחוםנשען על צעד 1הודגם לבד: נענה בניסיון הראשון3הצדדים הטובים והרעים של חיכוךנשען על צעד 1, 2ניסיון 2",
+   "summary": null,
+   "layout": {
+    "dir": "rtl",
+    "overflow": 0,
+    "composerVisible": true
+   },
+   "tutor": "כאשר אתה מנסה ללכת על רצפה חלקה לגמרי או על משטח קרח שאין בו כמעט חיכוך, אתה מחליק ומתקשה מאוד לעמוד או ללכת. \n\nהמקורות מזכירים שחיכוך עוזר לנו בדיוק בדברים האלה – בזכותו אפשר ללכת בלי להחליק ולעצור אופניים [c5]. \n\nמה זה אומר על הרעיון שחיכוך תמיד מזיק?"
+  },
+  {
+   "label": "s3",
+   "sent": "מועיל: בזכות החיכוך אפשר ללכת בלי להחליק ולעצור אופניים. מזיק: הוא שוחק חלקים במכונות ומבזבז אנרגיה.",
+   "ms": 5968,
+   "status": "active",
+   "step": 2,
+   "review": null,
+   "detour": null,
+   "final": null,
+   "counterAgrees": true,
+   "grade": {
+    "verdict": "correct",
+    "issue": "none",
+    "misconception": "",
+    "checks": [
+     "issue_does_not_fit_verdict"
+    ]
+   },
+   "move": "build_up",
+   "reason": "narrowed_question_right",
+   "intervention": null,
+   "whyLine": "למה שוב השאלה: ענית על החלק הקטן; עכשיו השאלה כולה.",
+   "cited": [
+    "c5"
+   ],
+   "models": [
+    "gemini-3.5-flash-lite",
+    "gemini-3.5-flash-lite"
+   ],
+   "firstTokenMs": 5036,
+   "evidence": [
+    "0:check:independent:partial:copied",
+    "0:check:hinted:correct:none",
+    "1:check:independent:correct:none",
+    "2:check:independent:incorrect:none",
+    "2:narrowed:narrowed:correct:none"
+   ],
+   "planPanel": "הבנת חיכוךמבוגר מתחיל, כ-15 דקותהשיעור בעברית2 מתוך 3 צעדים הושלמו1 מתוך 3 הודגמו לבדמטרות למידהלהגדיר מהו חיכוך וכיצד הוא משפיע על תנועה.להבין כיצד סוגי משטחים משפיעים על חיכוך וכי חיכוך מייצר חום.לזהות מתי חיכוך מועיל ומתי הוא מזיק, ולתאר דרכים לניהולו.צעדיםמהו חיכוך?הודגם בעזרה: נכון אחרי עזרהחיכוך, משטחים וחוםנשען על צעד 1הודגם לבד: נענה בניסיון הראשון3הצדדים הטובים והרעים של חיכוךנשען על צעד 1, 2ניסיון 2",
+   "summary": null,
+   "layout": {
+    "dir": "rtl",
+    "overflow": 0,
+    "composerVisible": true
+   },
+   "tutor": "ציינת נכון את הדוגמאות לכך שחיכוך מועיל בהליכה ובעצירה, ושהוא מזיק כאשר הוא שוחק חלקים במכונות ומבזבז אנרגיה [c5]. ההבחנה הזו בין הצדדים השונים עוזרת לנו להבין את התפקיד הכפול של החיכוך בחיי היומיום.\n\nכדי לוודא שהנושא ברור לגמרי, האם תוכל לתת דוגמה משלך שבה החיכוך מועיל לנו, ודוגמה נוספת שבה הוא מזיק?"
+  },
+  {
+   "label": "s3b",
+   "sent": "מועיל: סוליה מחוספסת של נעל שמחזיקה אותי על מדרכה רטובה. מזיק: צמיגים של מכונית שנשחקים מהשפשוף בכביש.",
+   "ms": 30786,
+   "status": "reviewing",
+   "step": 2,
+   "review": {
+    "kind": "final",
+    "position": 0,
+    "queue": [
+     0,
+     1,
+     2
+    ]
+   },
+   "detour": null,
+   "final": null,
+   "counterAgrees": true,
+   "grade": {
+    "verdict": "correct",
+    "issue": "none",
+    "misconception": "",
+    "checks": []
+   },
+   "move": "final_check_start",
+   "reason": "right_with_help",
+   "intervention": null,
+   "whyLine": "נספר כהודגם בעזרה, כי קודם הייתה עזרה בצעד הזה.",
+   "cited": [],
+   "models": [
+    "gemini-3.8-flash",
+    "gemini-3.5-flash-lite"
+   ],
+   "firstTokenMs": 29939,
+   "evidence": [
+    "0:check:independent:partial:copied",
+    "0:check:hinted:correct:none",
+    "1:check:independent:correct:none",
+    "2:check:independent:incorrect:none",
+    "2:narrowed:narrowed:correct:none",
+    "2:check:narrowed:correct:none"
+   ],
+   "planPanel": "הבנת חיכוךמבוגר מתחיל, כ-15 דקותהשיעור בעברית3 מתוך 3 צעדים הושלמו1 מתוך 3 הודגמו לבדמטרות למידהלהגדיר מהו חיכוך וכיצד הוא משפיע על תנועה.להבין כיצד סוגי משטחים משפיעים על חיכוך וכי חיכוך מייצר חום.לזהות מתי חיכוך מועיל ומתי הוא מזיק, ולתאר דרכים לניהולו.צעדיםמהו חיכוך?הודגם בעזרה: נכון אחרי עזרהחיכוך, משטחים וחוםנשען על צעד 1הודגם לבד: נענה בניסיון הראשוןהצדדים הטובים והרעים של חיכוךנשען על צעד 1, 2הודגם בעזרה: נכון אחרי עזרה",
+   "summary": null,
+   "layout": {
+    "dir": "rtl",
+    "overflow": 0,
+    "composerVisible": true
+   },
+   "tutor": "ציינת נכון שהסוליה המחוספסת שעוזרת לנו לא להחליק היא דוגמה לחיכוך מועיל, וששחיקת הצמיגים היא דוגמה לחיכוך מזיק. \n\nכעת, לפני הסיכום, יש לנו מבחן סופי קצר: 3 שאלות שעונים עליהן מהזיכרון וללא רמזים. \n\nאם היית מנסה ללכת על משטח חלק לחלוטין ללא חיכוך, מה היה קורה?"
+  },
+  {
+   "label": "f1",
+   "sent": "כי החיכוך בין הכדור לשטיח פועל נגד התנועה ומאט אותו עד שהוא נעצר.",
+   "ms": 3704,
+   "status": "reviewing",
+   "step": 2,
+   "review": {
+    "kind": "final",
+    "position": 0,
+    "queue": [
+     0,
+     1,
+     2
+    ]
+   },
+   "detour": null,
+   "final": null,
+   "counterAgrees": true,
+   "grade": {
+    "verdict": "incorrect",
+    "issue": "misread_question",
+    "misconception": "התלמיד חזר על הסבר קודם לגבי כדור ושטיח במקום לענות על השאתר לגבי הליכה על משטח ללא חיכוך.",
+    "checks": []
+   },
+   "move": "rephrase",
+   "reason": "answered_another_question",
+   "intervention": null,
+   "whyLine": null,
+   "cited": [],
+   "models": [
+    "gemini-3.5-flash-lite",
+    "gemini-3.5-flash-lite"
+   ],
+   "firstTokenMs": 2966,
+   "evidence": [
+    "0:check:independent:partial:copied",
+    "0:check:hinted:correct:none",
+    "1:check:independent:correct:none",
+    "2:check:independent:incorrect:none",
+    "2:narrowed:narrowed:correct:none",
+    "2:check:narrowed:correct:none"
+   ],
+   "planPanel": "הבנת חיכוךמבוגר מתחיל, כ-15 דקותהשיעור בעברית3 מתוך 3 צעדים הושלמו1 מתוך 3 הודגמו לבדמטרות למידהלהגדיר מהו חיכוך וכיצד הוא משפיע על תנועה.להבין כיצד סוגי משטחים משפיעים על חיכוך וכי חיכוך מייצר חום.לזהות מתי חיכוך מועיל ומתי הוא מזיק, ולתאר דרכים לניהולו.צעדיםמהו חיכוך?הודגם בעזרה: נכון אחרי עזרהחיכוך, משטחים וחוםנשען על צעד 1הודגם לבד: נענה בניסיון הראשוןהצדדים הטובים והרעים של חיכוךנשען על צעד 1, 2הודגם בעזרה: נכון אחרי עזרה",
+   "summary": null,
+   "layout": {
+    "dir": "rtl",
+    "overflow": 0,
+    "composerVisible": true
+   },
+   "tutor": "נראה לי שענית על שאלה קודמת במקום על השאלה הנוכחית. \n\nבוא ננסה שוב: מה לדעתך היה קורה אם היית מנסה ללכת על משטח חלק לגמרי שאין בו שום חיכוך בכלל?"
+  },
+  {
+   "label": "f1b",
+   "sent": "הייתי מחליק ולא הייתי יכול להתקדם, כי בלי חיכוך אין כוח שמחזיק את הנעל על הרצפה.",
+   "ms": 3089,
+   "status": "reviewing",
+   "step": 2,
+   "review": {
+    "kind": "final",
+    "position": 1,
+    "queue": [
+     0,
+     1,
+     2
+    ]
+   },
+   "detour": null,
+   "final": null,
+   "counterAgrees": true,
+   "grade": {
+    "verdict": "correct",
+    "issue": "none",
+    "misconception": "",
+    "checks": []
+   },
+   "move": "final_next",
+   "reason": "right_without_help",
+   "intervention": null,
+   "whyLine": null,
+   "cited": [],
+   "models": [
+    "gemini-3.5-flash-lite",
+    "gemini-3.5-flash-lite"
+   ],
+   "firstTokenMs": 2370,
+   "evidence": [
+    "0:check:independent:partial:copied",
+    "0:check:hinted:correct:none",
+    "1:check:independent:correct:none",
+    "2:check:independent:incorrect:none",
+    "2:narrowed:narrowed:correct:none",
+    "2:check:narrowed:correct:none",
+    "0:transfer:independent:correct:none"
+   ],
+   "planPanel": "הבנת חיכוךמבוגר מתחיל, כ-15 דקותהשיעור בעברית3 מתוך 3 צעדים הושלמו2 מתוך 3 הודגמו לבדמטרות למידהלהגדיר מהו חיכוך וכיצד הוא משפיע על תנועה.להבין כיצד סוגי משטחים משפיעים על חיכוך וכי חיכוך מייצר חום.לזהות מתי חיכוך מועיל ומתי הוא מזיק, ולתאר דרכים לניהולו.צעדיםמהו חיכוך?יושם בשאלה חדשה: נכון אחרי עזרהחיכוך, משטחים וחוםנשען על צעד 1הודגם לבד: נענה בניסיון הראשוןהצדדים הטובים והרעים של חיכוךנשען על צעד 1, 2הודגם בעזרה: נכון אחרי עזרה",
+   "summary": null,
+   "layout": {
+    "dir": "rtl",
+    "overflow": 0,
+    "composerVisible": true
+   },
+   "tutor": "ציינת נכון שהיית מחליק ושיהיה קשה או בלתי אפשרי להתקדם בלי חיכוך.\n\nמדוע בלמי אופניים מתחממים מאוד לאחר ירידה ארוכה ותלולה?"
+  },
+  {
+   "label": "f2",
+   "sent": "כי השמש מחממת אותם בזמן הרכיבה.",
+   "ms": 5273,
+   "status": "reviewing",
+   "step": 2,
+   "review": {
+    "kind": "final",
+    "position": 2,
+    "queue": [
+     0,
+     1,
+     2
+    ]
+   },
+   "detour": null,
+   "final": null,
+   "counterAgrees": true,
+   "grade": {
+    "verdict": "incorrect",
+    "issue": "none",
+    "misconception": "התלמיד חושב שבלמי האופניים מתחממים בגלל השמש ולא בגלל החיכוך.",
+    "checks": []
+   },
+   "move": "final_next",
+   "reason": "not_right",
+   "intervention": null,
+   "whyLine": null,
+   "cited": [],
+   "models": [
+    "gemini-3.5-flash-lite",
+    "gemini-3.5-flash-lite"
+   ],
+   "firstTokenMs": 4508,
+   "evidence": [
+    "0:check:independent:partial:copied",
+    "0:check:hinted:correct:none",
+    "1:check:independent:correct:none",
+    "2:check:independent:incorrect:none",
+    "2:narrowed:narrowed:correct:none",
+    "2:check:narrowed:correct:none",
+    "0:transfer:independent:correct:none",
+    "1:transfer:independent:incorrect:none"
+   ],
+   "planPanel": "הבנת חיכוךמבוגר מתחיל, כ-15 דקותהשיעור בעברית3 מתוך 3 צעדים הושלמו1 מתוך 3 הודגמו לבדמטרות למידהלהגדיר מהו חיכוך וכיצד הוא משפיע על תנועה.להבין כיצד סוגי משטחים משפיעים על חיכוך וכי חיכוך מייצר חום.לזהות מתי חיכוך מועיל ומתי הוא מזיק, ולתאר דרכים לניהולו.צעדיםמהו חיכוך?יושם בשאלה חדשה: נכון אחרי עזרה!חיכוך, משטחים וחוםנשען על צעד 1כדאי לחזור אליו: נענה בניסיון הראשוןהצדדים הטובים והרעים של חיכוךנשען על צעד 1, 2הודגם בעזרה: נכון אחרי עזרה",
+   "summary": null,
+   "layout": {
+    "dir": "rtl",
+    "overflow": 0,
+    "composerVisible": true
+   },
+   "tutor": "בלמי האופניים מתחממים לא בגלל השמש, אלא מפני שהחיכוך שנוצר בזמן הבלימה הופך את אנרגיית התנועה לחום.\n\nמדוע מהנדסים מתכננים סוליות נעלי ספורט עם דוגמאות מחוספסות, אך מנסים להפוך חלקי מנוע לחלקים ככל האפשר?"
+  },
+  {
+   "label": "f3",
+   "sent": "בנעל רוצים חיכוך גדול כדי לא להחליק, ומשטח מחוספס נותן יותר חיכוך. במנוע רוצים מעט חיכוך כדי שהחלקים לא יישחקו ולא יבזבזו אנרגיה, ומשטח חלק נותן פחות חיכוך.",
+   "ms": 20884,
+   "status": "completed",
+   "step": 2,
+   "review": null,
+   "detour": null,
+   "final": {
+    "results": {
+     "0": "pass",
+     "1": "fail",
+     "2": "pass"
+    },
+    "skipped": false
+   },
+   "counterAgrees": true,
+   "grade": {
+    "verdict": "correct",
+    "issue": "none",
+    "misconception": "",
+    "checks": []
+   },
+   "move": "final_finish",
+   "reason": "right_without_help",
+   "intervention": null,
+   "whyLine": null,
+   "cited": [
+    "c5",
+    "c6"
+   ],
+   "models": [
+    "gemini-3.5-flash-lite",
+    "gemini-3.5-flash-lite"
+   ],
+   "firstTokenMs": 19705,
+   "evidence": [
+    "0:check:independent:partial:copied",
+    "0:check:hinted:correct:none",
+    "1:check:independent:correct:none",
+    "2:check:independent:incorrect:none",
+    "2:narrowed:narrowed:correct:none",
+    "2:check:narrowed:correct:none",
+    "0:transfer:independent:correct:none",
+    "1:transfer:independent:incorrect:none",
+    "2:transfer:independent:correct:none"
+   ],
+   "planPanel": "הבנת חיכוךמבוגר מתחיל, כ-15 דקותהשיעור בעברית3 מתוך 3 צעדים הושלמו2 מתוך 3 הודגמו לבדמטרות למידהלהגדיר מהו חיכוך וכיצד הוא משפיע על תנועה.להבין כיצד סוגי משטחים משפיעים על חיכוך וכי חיכוך מייצר חום.לזהות מתי חיכוך מועיל ומתי הוא מזיק, ולתאר דרכים לניהולו.צעדיםמהו חיכוך?יושם בשאלה חדשה: נכון אחרי עזרה, עבר את הבדיקה המסכמת!חיכוך, משטחים וחוםנשען על צעד 1כדאי לחזור אליו: נענה בניסיון הראשון, לא עבר את הבדיקה המסכמתהצדדים הטובים והרעים של חיכוךנשען על צעד 1, 2יושם בשאלה חדשה: נכון אחרי עזרה, עבר את הבדיקה המסכמת",
+   "summary": "השיעור הסתיים לפי התשובות שלך בשיעור הזה, לא לפי ציון במבחן. בדיקה מסכמת: 2 מתוך 3 הודגמו בשאלות חדשות. יושם בשאלה חדשה מהו חיכוך? נכון אחרי עזרה, עבר את הבדיקה המסכמת הצדדים הטובים והרעים של חיכוך נכון אחרי עזרה, עבר את הבדיקה המסכמת כדאי לחזור אליו חיכוך, משטחים וחום נענה בניסיון הראשון, לא עבר את הבדיקה המסכמת חזרה מומלצת מחריום ה׳, 29 באוק׳ חיכוך, משטחים וחום בעוד 14 ימיםיום ד׳, 11 בנוב׳ מהו חיכוך? בעוד 14 ימיםיום ד׳, 11 בנוב׳ הצדדים הטובים והרעים של חיכוך הצעה על סמך השיעור הזה בלבד. חזרה בימים האלה עוזרת לרעיונות להישאר. לתרגל את הצעד הזה העתקת הסיכום הורדת סיכום שיעור חדש אפשר להמשיך לשאול שאלות על החומר למטה.",
+   "layout": {
+    "dir": "rtl",
+    "overflow": 0,
+    "composerVisible": true
+   },
+   "tutor": "ציינת נכון שסוליות מחוספסות מגבירות חיכוך למניעת החלקה, ושחלקי מנוע חלקים מפחיתים חיכוך למניעת שחיקה ובזבוז אנרגיה.\n\nהנה סיכום של הרעיונות המרכזיים שלמדנו:\n* חיכוך הוא כוח שפועל בין משטחים נוגעים ומאט תנועה [c5].\n* משטחים מחוספסים יוצרים חיכוך רב, ומשטחים חלקים מפחיתים אותו.\n* חיכוך מייצר חום [c6].\n* חיכוך יכול להיות מועיל (כמו הליכה) או מזיק (כמו שחיקה), ואפשר לנהל אותו בעזרת שמן או מגני חום [c5, c6].\n\nבמהלך השיעור הראית הבנה בנושאים: מהו חיכוך?; הצדדים הטובים והרעים של חיכוך.\nהנושא שעדיין דורש תרגול הוא: חיכוך, משטחים וחום.\n\nשיעור אחד הוא רק התחלה, וחזרה על הרעיונות הללו בעוד כמה ימים תעזור להם להישאר בזיכרון. האם יש נקודה אחת מכל זה שתרצה שנחדד עוד קצת?"
+  }
+ ]
+}
