@@ -1,0 +1,159 @@
+{
+  "meta": {
+    "label": "r8-ho4-b",
+    "mode": "model",
+    "split": "holdout4",
+    "systems": [
+      "engine"
+    ],
+    "date": "2026-10-28T07:25:41.047Z",
+    "provider": "remote",
+    "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+    "models": {
+      "main": "gemini-3.5-flash-lite",
+      "backup": "gemini-3.5-flash-lite"
+    },
+    "commit": "615ac2fee9bd7cf88a2cf80b4a3174e4a457289d",
+    "uncommittedChanges": false,
+    "engineVersion": "64e1d394459d",
+    "promptVersion": "3c5344e6507b",
+    "node": "v24.22.1",
+    "scenariosVersion": "6cf9b2af8e58",
+    "scenarioIds": [
+      "ho4-en-understands"
+    ],
+    "pauseMs": 4500
+  },
+  "systems": {
+    "engine": {
+      "counts": {
+        "planned": 1,
+        "complete": 21,
+        "infraErrors": [],
+        "stoppedOnQuota": [],
+        "notRun": []
+      },
+      "modelCalls": {
+        "gemini-3.5-flash-lite": 104
+      },
+      "summary": {
+        "scenarios": 21,
+        "scenarioPass": 0.81,
+        "turns": 49,
+        "actionFit": 0.959,
+        "interventionFit": null,
+        "unearnedMoves": 0,
+        "overclaims": "0/16",
+        "stateMatch": "25/25",
+        "prerequisiteRecovery": "3/4",
+        "helpInFinalCheck": 0,
+        "endStateMatch": 1,
+        "supportProblems": 0,
+        "returnTurnsFit": "10/10",
+        "lessonsCompleted": "2/2",
+        "latencyMs": {
+          "turns": 49,
+          "p50": 3463,
+          "p95": 5573
+        },
+        "grading": {
+          "answers": 45,
+          "verdictAccuracy": 1,
+          "falsePositives": "0/14",
+          "falseNegatives": "0/26",
+          "issueAccuracy": "3/3",
+          "misconceptionNamed": "0/0"
+        },
+        "paraphraseConsistency": "2/2",
+        "text": {
+          "replies": 49,
+          "approvalOnNotCorrect": 1,
+          "repeatedHelp": 0,
+          "endsWithQuestion": 0.915,
+          "citedReplies": 0.796,
+          "invalidCitationIds": 0,
+          "unverifiedQuotes": 0,
+          "citationSupportMean": 0.629,
+          "weaklySupportedCitations": "7/73",
+          "missingTag": 0
+        },
+        "byCategory": {
+          "understands": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "misconception": {
+            "scenarios": 2,
+            "passed": 1
+          },
+          "copied": {
+            "scenarios": 2,
+            "passed": 1
+          },
+          "ambiguous": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "other_part": {
+            "scenarios": 2,
+            "passed": 1
+          },
+          "not_in_document": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "prerequisite": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "fragile_prerequisite": {
+            "scenarios": 2,
+            "passed": 1
+          },
+          "student_instruction": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "journey": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "paraphrase": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "narrowing": {
+            "scenarios": 1,
+            "passed": 1
+          }
+        },
+        "failures": [
+          {
+            "id": "ho4-en-misconception",
+            "problems": [
+              "turn 1: action check_earlier, wanted hint"
+            ]
+          },
+          {
+            "id": "ho4-he-copied",
+            "problems": [
+              "turn 1: approval language on an answer that was not correct"
+            ]
+          },
+          {
+            "id": "ho4-he-other-part",
+            "problems": [
+              "turn 1: did not cite c5"
+            ]
+          },
+          {
+            "id": "ho4-he-fragile-prerequisite",
+            "problems": [
+              "turn 2: action ask_again, wanted check_earlier"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

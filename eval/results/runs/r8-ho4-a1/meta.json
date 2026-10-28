@@ -1,0 +1,25 @@
+{
+  "label": "r8-ho4-a1",
+  "mode": "model",
+  "split": "holdout4",
+  "systems": [
+    "engine"
+  ],
+  "date": "2026-10-28T07:10:05.920Z",
+  "provider": "remote",
+  "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+  "models": {
+    "main": "gemini-3.5-flash-lite",
+    "backup": "gemini-3.5-flash-lite"
+  },
+  "commit": "28b8f2ee72f498eceaf8827985709b40b7af1ef9",
+  "uncommittedChanges": true,
+  "engineVersion": "636e74161c92",
+  "promptVersion": "92c866cd3696",
+  "node": "v24.22.1",
+  "scenariosVersion": "6cf9b2af8e58",
+  "scenarioIds": [
+    "ho4-en-understands"
+  ],
+  "pauseMs": 4500
+}

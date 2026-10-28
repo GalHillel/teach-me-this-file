@@ -1,0 +1,183 @@
+{
+  "meta": {
+    "label": "r8-ho4-a1",
+    "mode": "model",
+    "split": "holdout4",
+    "systems": [
+      "engine"
+    ],
+    "date": "2026-10-28T07:10:05.920Z",
+    "provider": "remote",
+    "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+    "models": {
+      "main": "gemini-3.5-flash-lite",
+      "backup": "gemini-3.5-flash-lite"
+    },
+    "commit": "28b8f2ee72f498eceaf8827985709b40b7af1ef9",
+    "uncommittedChanges": true,
+    "engineVersion": "636e74161c92",
+    "promptVersion": "92c866cd3696",
+    "node": "v24.22.1",
+    "scenariosVersion": "6cf9b2af8e58",
+    "scenarioIds": [
+      "ho4-en-understands"
+    ],
+    "pauseMs": 4500
+  },
+  "systems": {
+    "engine": {
+      "counts": {
+        "planned": 1,
+        "complete": 21,
+        "infraErrors": [],
+        "stoppedOnQuota": [],
+        "notRun": []
+      },
+      "modelCalls": {
+        "gemini-3.5-flash-lite": 106
+      },
+      "summary": {
+        "scenarios": 21,
+        "scenarioPass": 0.667,
+        "turns": 50,
+        "actionFit": 0.9,
+        "interventionFit": null,
+        "unearnedMoves": 0,
+        "overclaims": "2/16",
+        "stateMatch": "21/25",
+        "prerequisiteRecovery": "2/4",
+        "helpInFinalCheck": 0,
+        "endStateMatch": 0.789,
+        "supportProblems": 0,
+        "returnTurnsFit": "9/9",
+        "lessonsCompleted": "2/2",
+        "latencyMs": {
+          "turns": 50,
+          "p50": 3444,
+          "p95": 6196
+        },
+        "grading": {
+          "answers": 46,
+          "verdictAccuracy": 0.957,
+          "falsePositives": "0/14",
+          "falseNegatives": "2/27",
+          "issueAccuracy": "3/3",
+          "misconceptionNamed": "0/0"
+        },
+        "paraphraseConsistency": "2/2",
+        "text": {
+          "replies": 50,
+          "approvalOnNotCorrect": 1,
+          "repeatedHelp": 0,
+          "endsWithQuestion": 0.917,
+          "citedReplies": 0.8,
+          "invalidCitationIds": 1,
+          "unverifiedQuotes": 0,
+          "citationSupportMean": 0.669,
+          "weaklySupportedCitations": "3/71",
+          "missingTag": 0
+        },
+        "byCategory": {
+          "understands": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "misconception": {
+            "scenarios": 2,
+            "passed": 1
+          },
+          "copied": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "ambiguous": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "other_part": {
+            "scenarios": 2,
+            "passed": 1
+          },
+          "not_in_document": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "prerequisite": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "fragile_prerequisite": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "student_instruction": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "journey": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "paraphrase": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "narrowing": {
+            "scenarios": 1,
+            "passed": 0
+          }
+        },
+        "failures": [
+          {
+            "id": "ho4-en-misconception",
+            "problems": [
+              "turn 1: action check_earlier, wanted hint"
+            ]
+          },
+          {
+            "id": "ho4-en-prerequisite",
+            "problems": [
+              "end: step 1 state demonstrated, wanted needs_review"
+            ]
+          },
+          {
+            "id": "ho4-en-fragile-prerequisite",
+            "problems": [
+              "turn 2: action hint, wanted check_earlier"
+            ]
+          },
+          {
+            "id": "ho4-he-other-part",
+            "problems": [
+              "turn 1: did not cite c5"
+            ]
+          },
+          {
+            "id": "ho4-he-prerequisite",
+            "problems": [
+              "end: step 1 state demonstrated, wanted needs_review"
+            ]
+          },
+          {
+            "id": "ho4-he-narrowing",
+            "problems": [
+              "turn 4: action ask_again, wanted next_step",
+              "end: step 2 state emerging, wanted developing",
+              "end: step 2, wanted 3"
+            ]
+          },
+          {
+            "id": "ho4-he-fragile-prerequisite",
+            "problems": [
+              "turn 1: approval language on an answer that was not correct",
+              "turn 2: action ask_again, wanted check_earlier",
+              "turn 4: action ask_again, wanted final_check",
+              "end: step 3 state emerging, wanted developing",
+              "end: status active, wanted reviewing"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

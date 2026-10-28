@@ -1,0 +1,211 @@
+{
+  "meta": {
+    "label": "r8-ho4-plain",
+    "mode": "model",
+    "split": "holdout4",
+    "systems": [
+      "plain"
+    ],
+    "date": "2026-10-28T07:33:14.172Z",
+    "provider": "remote",
+    "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+    "models": {
+      "main": "gemini-3.5-flash-lite",
+      "backup": "gemini-3.5-flash-lite"
+    },
+    "commit": "615ac2fee9bd7cf88a2cf80b4a3174e4a457289d",
+    "uncommittedChanges": true,
+    "engineVersion": "64e1d394459d",
+    "promptVersion": "3c5344e6507b",
+    "node": "v24.22.1",
+    "scenariosVersion": "6cf9b2af8e58",
+    "scenarioIds": [
+      "ho4-en-understands"
+    ],
+    "pauseMs": 4500
+  },
+  "systems": {
+    "plain": {
+      "counts": {
+        "planned": 1,
+        "complete": 21,
+        "infraErrors": [],
+        "stoppedOnQuota": [],
+        "notRun": []
+      },
+      "modelCalls": {
+        "gemini-3.5-flash-lite": 53
+      },
+      "summary": {
+        "scenarios": 21,
+        "scenarioPass": 0.476,
+        "turns": 47,
+        "actionFit": 0.681,
+        "interventionFit": null,
+        "unearnedMoves": 0,
+        "overclaims": null,
+        "stateMatch": null,
+        "prerequisiteRecovery": "1/4",
+        "helpInFinalCheck": 2,
+        "endStateMatch": null,
+        "supportProblems": 0,
+        "returnTurnsFit": "7/9",
+        "lessonsCompleted": "0/2",
+        "latencyMs": {
+          "turns": 47,
+          "p50": 2349,
+          "p95": 3466
+        },
+        "grading": {
+          "answers": 43,
+          "verdictAccuracy": 0.93,
+          "falsePositives": "0/14",
+          "falseNegatives": "3/24",
+          "issueAccuracy": "0/3",
+          "misconceptionNamed": "0/0"
+        },
+        "paraphraseConsistency": "2/2",
+        "text": {
+          "replies": 47,
+          "approvalOnNotCorrect": 2,
+          "repeatedHelp": 0,
+          "endsWithQuestion": 1,
+          "citedReplies": 0.787,
+          "invalidCitationIds": 0,
+          "unverifiedQuotes": 0,
+          "citationSupportMean": 0.599,
+          "weaklySupportedCitations": "5/42",
+          "missingTag": 0
+        },
+        "byCategory": {
+          "understands": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "misconception": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "copied": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "ambiguous": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "other_part": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "not_in_document": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "prerequisite": {
+            "scenarios": 2,
+            "passed": 1
+          },
+          "fragile_prerequisite": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "student_instruction": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "journey": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "paraphrase": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "narrowing": {
+            "scenarios": 1,
+            "passed": 1
+          }
+        },
+        "failures": [
+          {
+            "id": "ho4-en-copied",
+            "problems": [
+              "turn 1: action teach, wanted probe|hint"
+            ]
+          },
+          {
+            "id": "ho4-en-other-part",
+            "problems": [
+              "turn 1: action ask_again, wanted answer_question"
+            ]
+          },
+          {
+            "id": "ho4-en-not-in-document",
+            "problems": [
+              "turn 1: action ask_again, wanted answer_question",
+              "turn 1: did not say the document does not cover it"
+            ]
+          },
+          {
+            "id": "ho4-en-prerequisite",
+            "problems": [
+              "turn 1: action hint, wanted check_earlier",
+              "turn 2: action ask_again, wanted back_to_question",
+              "turn 3: action probe, wanted next_step"
+            ]
+          },
+          {
+            "id": "ho4-en-fragile-prerequisite",
+            "problems": [
+              "turn 2: action hint, wanted check_earlier"
+            ]
+          },
+          {
+            "id": "ho4-en-journey",
+            "problems": [
+              "turn 8: action hint, wanted summary",
+              "turn 8: help during the final check"
+            ]
+          },
+          {
+            "id": "ho4-he-copied",
+            "problems": [
+              "turn 1: action ask_again, wanted probe|hint",
+              "turn 1: approval language on an answer that was not correct"
+            ]
+          },
+          {
+            "id": "ho4-he-other-part",
+            "problems": [
+              "turn 1: action ask_again, wanted answer_question"
+            ]
+          },
+          {
+            "id": "ho4-he-not-in-document",
+            "problems": [
+              "turn 1: action ask_again, wanted answer_question"
+            ]
+          },
+          {
+            "id": "ho4-he-fragile-prerequisite",
+            "problems": [
+              "turn 1: approval language on an answer that was not correct",
+              "turn 2: action hint, wanted check_earlier",
+              "turn 3: action ask_again, wanted final_check|back_to_question"
+            ]
+          },
+          {
+            "id": "ho4-he-journey",
+            "problems": [
+              "turn 6: action hint, wanted final_check",
+              "turn 6: help during the final check",
+              "turn 7: action ask_again, wanted summary",
+              "turn 7: summary does not name the weak step"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
