@@ -123,7 +123,7 @@ describe('the evidence the policy records', () => {
   });
 
   it('does not record questions, unclear or off-topic messages, or help requests as evidence', () => {
-    const { progress } = play(['question', 'unclear', 'off_topic', { kind: 'hint' }, ['partial', { issue: 'misread_question' }]]);
+    const { progress } = play(['question', 'unclear', { kind: 'hint' }, 'off_topic']);
     expect(progress.evidence).toEqual([]);
   });
 
@@ -249,5 +249,30 @@ describe('the help behind a finished step', async () => {
     const { progress } = play(['correct', 'correct', 'correct'], checking);
     expect(stepView(progress, 0)).toMatchObject({ state: 'demonstrated', signals: ['with_help', 'final_pass'] });
     expect(stepView(progress, 1).signals).toEqual(['first_try', 'final_pass']);
+  });
+});
+
+describe('found on production, 28 October', () => {
+  it('logs a final-check answer that failed after repeated non-answers, so the miss reaches the learner state', () => {
+    const { progress: checking } = play(['correct', 'incorrect', 'correct', 'correct']);
+    const misread = ['incorrect', { issue: 'misread_question' }];
+    const { progress, moves } = play([misread, misread, misread], checking);
+    expect(moves.at(-1)).toBe('final_next');
+    expect(progress.evidence.at(-1)).toMatchObject({ step: checking.review.queue[0], question: 'transfer', verdict: 'incorrect', reason: 'no_answer' });
+    expect(stepState(progress, checking.review.queue[0]).state).toBe('needs_review');
+  });
+
+  it('does not go back to an earlier step again right after its check was passed, nor on a copied answer', () => {
+    const fromFirst = { ...plan, steps: plan.steps.map((step, index) => (index === 2 ? { ...step, prerequisites: ['s1'] } : step)) };
+    const entry = (n, extra) => ({ n, step: 0, question: 'check', support: 'independent', verdict: 'correct', issue: 'none', misconception: '', sources: [], move: 'advance', reason: 'x', ...extra });
+    const gap = { n: 2, step: 0, gap: true, from: 1, move: 'prerequisite_check', reason: 'grader' };
+    const atStep3 = (evidence) => ({ ...createProgress(fromFirst), currentStep: 2, evidence, steps: createProgress(fromFirst).steps.map((step, index) => ({ ...step, status: index < 2 ? 'done' : 'active', outcome: index < 2 ? 'mastered' : null })) });
+    const move = (progress, assessment) => planMove(progress, { kind: 'reply', assessment, plan: fromFirst }).move;
+    const gapOnly = atStep3([entry(1), gap]);
+    const rechecked = atStep3([entry(1), gap, entry(3, { question: 'detour', support: 'reminded', move: 'resume' })]);
+    expect(stepState(rechecked, 0).state).toBe('needs_review');
+    expect(move(gapOnly, grade('partial'))).toBe('prerequisite_check');
+    expect(move(gapOnly, grade('partial', { issue: 'copied' }))).toBe('hint');
+    expect(move(rechecked, grade('partial'))).toBe('hint');
   });
 });

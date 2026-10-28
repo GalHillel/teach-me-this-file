@@ -24,8 +24,10 @@ const LADDERS = {
 export const NARROWING = new Set(['decompose', 'analogy', 'counterexample']);
 export const NARROWS_QUESTION = new Set([...NARROWING, 'focused_hint']);
 
-const fragileAfter = (model) => {
-  if (model.state === 'needs_review' || (['developing', 'emerging'].includes(model.state) && model.worked)) return 1;
+const QUALIFIED = new Set(['copied', 'hedged', 'unjustified']);
+
+const fragileAfter = (model, rechecked) => {
+  if (!rechecked && (model.state === 'needs_review' || (['developing', 'emerging'].includes(model.state) && model.worked))) return 1;
   if (['developing', 'emerging'].includes(model.state)) return 2;
   return Infinity;
 };
@@ -42,9 +44,15 @@ export const findPrerequisiteGap = ({ plan, progress, stepIndex, assessment }) =
   const named = Number.isInteger(assessment?.missingPrerequisite) ? assessment.missingPrerequisite - 1 : -1;
   if (candidates.includes(named)) return { index: named, reason: 'grader' };
 
-  const fragile = candidates.filter((index) => state.attempts >= fragileAfter(stepState(progress, index)));
+  if (QUALIFIED.has(assessment?.issue)) return null;
+  const fragile = candidates.filter((index) => state.attempts >= fragileAfter(stepState(progress, index), recheckedLast(progress, index)));
   if (fragile.length) return { index: fragile[fragile.length - 1], reason: 'weak_prerequisite' };
   return null;
+};
+
+const recheckedLast = (progress, index) => {
+  const last = (progress.evidence ?? []).filter((entry) => entry.step === index).at(-1);
+  return last?.question === 'detour' && last.verdict === 'correct';
 };
 
 export const ladderOf = (situation, assessment, attempts = 0) => {

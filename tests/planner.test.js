@@ -210,3 +210,18 @@ describe('the follow-up to a copied answer', () => {
     expect(system).toContain('Do not praise it or name any part of it as right');
   });
 });
+
+describe('the final check gives no help', () => {
+  it('asks again without a hint when the student answered another question or was unclear', () => {
+    for (const move of ['rephrase', 'clarify']) {
+      expect(moveInstructions({ move, finalCheck: true })).toContain('give no hint');
+      expect(moveInstructions({ move, finalCheck: false })).not.toContain('give no hint');
+    }
+  });
+
+  it('closes the lesson without claiming more than the two lists', () => {
+    const text = moveInstructions({ move: 'final_finish', closingLists: { shownTitles: ['A'], practiceTitles: ['B'] } });
+    expect(text).toContain('not as what the student mastered');
+    expect(text).toContain('claim nothing beyond these two lists');
+  });
+});

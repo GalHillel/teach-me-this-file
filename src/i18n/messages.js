@@ -351,7 +351,7 @@ const en = {
   'why.unjustified_answer': 'Why another question: the question asks for the reason too.',
   'why.unsure_grade': 'Why another question: the answer could be read in more than one way.',
   'why.attempts_used_up': 'Why the full answer: after three tries, seeing it worked out helps more.',
-  'why.right_with_help': 'Counted as shown with help, because a hint came first.',
+  'why.right_with_help': 'Counted as shown with help, because there was help on this step first.',
 };
 
 const he = {
@@ -707,7 +707,7 @@ const he = {
   'why.unjustified_answer': 'למה עוד שאלה: השאלה מבקשת גם את הסיבה.',
   'why.unsure_grade': 'למה עוד שאלה: אפשר להבין את התשובה ביותר מדרך אחת.',
   'why.attempts_used_up': 'למה התשובה המלאה: אחרי שלושה ניסיונות, עדיף לראות את הפתרון.',
-  'why.right_with_help': 'נספר כהודגם בעזרה, כי קודם היה רמז.',
+  'why.right_with_help': 'נספר כהודגם בעזרה, כי קודם הייתה עזרה בצעד הזה.',
 };
 
 const fr = {
@@ -1063,7 +1063,7 @@ const fr = {
   'why.unjustified_answer': 'Pourquoi une autre question : la question demande aussi la raison.',
   'why.unsure_grade': 'Pourquoi une autre question : la réponse peut se lire de plusieurs façons.',
   'why.attempts_used_up': 'Pourquoi la réponse complète : après trois essais, voir la solution aide davantage.',
-  'why.right_with_help': 'Compté comme montré avec de l’aide, car un indice est venu avant.',
+  'why.right_with_help': 'Compté comme montré avec de l’aide, car il y a eu de l’aide sur cette étape avant.',
 };
 
 export const MESSAGES = { en, he, fr };

@@ -249,16 +249,16 @@ const subjectOf = (progress) => {
   return { step: progress.currentStep, question: step.scaffold ? 'narrowed' : 'check', support: supportOf(step) };
 };
 
-const isEvidence = (kind, before, grade) => kind === 'reply' && before.status !== 'completed' && grade && !isNonAnswer(grade.verdict, grade.issue ?? 'none');
+const isEvidence = (kind, before, grade, reason) => kind === 'reply' && before.status !== 'completed' && grade && (reason === 'no_answer' || !isNonAnswer(grade.verdict, grade.issue ?? 'none'));
 
 const recordEvidence = (before, decision, { kind, assessment, sourceIds = [] }) => {
   const log = before.evidence;
-  if (!Array.isArray(log) || !isEvidence(kind, before, assessment)) return decision.progress;
+  if (!Array.isArray(log) || !isEvidence(kind, before, assessment, decision.reason)) return decision.progress;
   const last = log.at(-1)?.n ?? 0;
   const entries = [{
     n: last + 1,
     ...subjectOf(before),
-    verdict: assessment.verdict,
+    verdict: decision.reason === 'no_answer' ? 'incorrect' : assessment.verdict,
     issue: assessment.issue ?? 'none',
     misconception: (assessment.misconception ?? '').slice(0, 160),
     sources: sourceIds.slice(0, 6),
