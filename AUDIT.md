@@ -217,6 +217,44 @@ What happened to each of these in round 7 is in the last column of the state map
 | Low | 93 and 94 | Measure on more Hebrew runs before changing anything |
 | Low | No real users | Run the pilot in `pilot/PROTOCOL.md` |
 
+## Eighth round: a learner model, 27 and 28 October
+
+### State at the start of the round
+
+| Question | Answer, checked on 27 October |
+| --- | --- |
+| What is deployed | `af59c33` on https://teach-me-this-file.vercel.app (bundle `index-OM1nmP82.js`), the same as `main` |
+| Tests | 278 unit, property and API tests and the browser harness pass; lint clean |
+| Policy layer | dev 23/23, held-out 25/25, held-out-2 17/17, held-out-3 15/18 |
+| Secrets | No key-shaped string in the repository, its history, the build, the results or the logs. The round-6 snapshot `snap_ZcBcR8V0UWWgBppIXRvLfCZmGWBa` still exists and holds a key copy (88); deleting it is the owner's action. The round-7 snapshot holds no key |
+| Highest-impact open items | 95 (a gap in an earlier step not traced back), 89 not checked on a real model, 93 |
+
+### Findings
+
+| # | Sev. | Area | Problem | Root cause | Fix | Verification | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 93 | Low | Feedback | Praise of a pasted Hebrew answer before asking for the student's own words. | The general rule told the tutor to name the right part of an answer; the follow-up to a copied answer said only "without saying it is right yet". | The follow-up says neutrally that these are the document's words, without praise and without calling the answer wrong; the general rule yields to it. Prompt change (A1). | Prompt tests; held-out-4 on Flash-Lite: the three engines' replies to the Hebrew pasted answer are neutral when read (the automatic check flagged two of them for the word "בדיוק" in "the words exactly as in the document") | Fixed |
+| 95 | Medium | Teaching | "Sound is the air from your mouth" was not traced back to the earlier step. | The grader saw only the title and goal of earlier steps. | The grader sees each earlier step's common mistake (A1) and, in B, the wrong ideas this student showed there. | Prompt tests; production 28 October: the same answer led back to step 1 (`grader`) | Fixed |
+| 89 | High | Teaching | A narrow answer after a fill-in-the-blank hint completed the step (round 7). | See round 7. | See round 7. | Production 28 October: a counter-example, the narrow answer "It has to keep vibrating.", then `build_up`; the step ended only after the whole answer, as shown with help | Fixed, checked live |
+| 98 | Medium | Teaching | A step's level did not record that a later answer showed a gap in it; a level could not say which answers it rested on. | No per-answer record. | Evidence log and learner states (LEARNER_MODEL.md). | `tests/learner.test.js`, property test | Fixed |
+| 99 | Medium | Retrieval | "מה עושות הפטריות בטבע?" found no passage, and every engine said the document does not cover fungi. | The verb counted as a topic word missing from the document, which pulled the coverage under the threshold. | Forms of עשה are stopwords. | Regression test on the lesson's passages; retrieval golden set unchanged. Found on held-out-4 | Fixed |
+| 100 | Medium | State | A final-check answer that failed after repeated non-answers was not logged, so the step kept its earlier state. | The log skipped non-answers, including the one forced to a fail. | The forced fail is logged as a wrong answer. | Regression test; found on production | Fixed |
+| 101 | Medium | Teaching | A pasted, partial answer on step 3 sent the student back to step 1 a second time, right after its check was passed. | The fragile-prerequisite rule looked only at the state, which stays `needs_review` after a reminded answer. | After a passed check the rule waits for the second wrong answer; copied, unsure or unexplained answers never trigger it. | Regression test; found on production | Fixed |
+| 102 | Medium | Teaching | Asking a final-check question again after an off-target answer gave a hint. | The rephrase and clarify instructions did not know about the final check. | No hint in either during the final check. | Prompt test; found on production | Fixed in the prompt, not rechecked live |
+| 103 | Medium | Honesty | The closing message called the lesson's ideas "what you mastered" while a step had just been missed. | The closing asked for a summary of main ideas without saying whose. | The closing claims nothing beyond the shown and practice lists. | Prompt test; found on production | Fixed in the prompt, not rechecked live |
+| 104 | Low | Grading | An answer that repeats an earlier step's common mistake is now traced to that step even when the scenario expected a hint ("Australia is closer to the Sun in December" sent the student back to the step about direct light). | The intended effect of 95. | None: one held-out case in two; going back is defensible because the earlier step is about exactly that idea. | Held-out-4, `ho4-en-misconception`, A1 and B | Accepted, watched |
+| 105 | Low | Grading | A wrong final-check answer ("the Moon is too far away") was graded as answering another question twice, so the step failed by the stall rule. | Grader. | None; the step still failed and is now logged (100). | Production 28 October | Open |
+
+### Open after round 8
+
+| Sev. | What | Next step |
+| --- | --- | --- |
+| High | The round-6 snapshot with a key copy (88) | Owner: delete `snap_ZcBcR8V0UWWgBppIXRvLfCZmGWBa` and rotate the key |
+| Medium | B against A1 rests on one model run of 21 scenarios; four of the differences come from scenarios that encode B's rules | Repeat A1 and B on held-out-4 and a fresh set on another day's quota |
+| Medium | Fixes 99 to 103 came after held-out-4 and production; no fresh held-out run since | A new held-out set before the next change to the engine |
+| Medium | No real learners | Run `pilot/PROTOCOL.md` |
+| Low | 104, 105 | More prerequisite and final-check scenarios |
+
 ## Requirements matrix
 
 Status after the upgrade. "Live" refers to the browser runs against production on 24 October, listed in [DECISIONS.md](DECISIONS.md#live-checks-24-october-morning).
@@ -250,6 +288,7 @@ Status after the upgrade. "Live" refers to the browser runs against production o
 | Production matches `main` | deploy on push to `main` (Git connection, since 25 October) | served bundle compared with the build; `1f2dc5e` checked on 24 October, evening, `6ba634f` on 25 October, `f5a649e` (bundle `index-2GHhOVXu.js`, unchanged since `011b768`) the same afternoon | Done |
 | Help that depends on the mistake; step back to a prerequisite and return | `policy.js`, `progress.js` | `tests/progress.test.js`, `tests/properties.test.js`; harness (mock) | Done |
 | Final check and evidence levels instead of a pass mark | `shared/lesson.js`, `progress.js`, `CompletionCard` | state-machine tests; harness (mock); live run in DECISIONS | Done |
+| Learner model from logged evidence; reasons for every move | `shared/learner.js`, `progress.js`, `policy.js`, `src/lesson/progressView.js` | `tests/learner.test.js` (states, policy, properties, server checks); harness (mock); held-out-4 on Flash-Lite; production 28 October | Done |
 | Citations checked by the server | `shared/citations.js`, `tutor.js` | `tests/citations.test.js`, API tests; live counts in DECISIONS | Done |
 | Learning map with concept provenance | `LearningMap.jsx`, `conceptInFile` | harness feature check | Done |
 | Review schedule only from what the lesson showed | `reviewSchedule` | state-machine test | Done; days are fixed, not fitted to the student |

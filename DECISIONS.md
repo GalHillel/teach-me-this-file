@@ -441,6 +441,54 @@ At most three, each tied to something observed:
 
 Not changed, and why: praise later in a reply (0 of 15 on held-out-3, 1 real case of 7 on the Hebrew half of held-out-2); the mid-lesson Hebrew greeting (one production run on one model); the prerequisite miss (needs more scenarios to choose between a prompt and a code rule).
 
+### Round 8: a learner model
+
+The design, the options I rejected and the evaluation plan are in [LEARNER_MODEL.md](LEARNER_MODEL.md), written and committed before the code. In short: every graded answer is logged in the progress object with the question it answered and the help behind it, and one pure function (`shared/learner.js`) turns that log into a state per step (not checked yet, just starting, developing, shown on your own, worth another look) with a confidence word. The policy reads the states (an earlier step that is only right with help is checked before more hints), every move carries a reason, and the interface shows the states, the reasons and the next action.
+
+Why this design and not a probability per concept: there are no real learners to fit a model to, and a number would suggest a precision I cannot back. Why a log in the progress object and not a database: the server is stateless and the browser already sends the progress with each turn; the log is validated like the rest of it, capped at 60 entries, and holds no student text, only the id of the student message it came from.
+
+Four systems, so the prompt changes and the policy changes can be told apart: **A0** the engine at the start of the round (`af59c33`), **A1** A0 plus the two prompt fixes (copied answers, earlier steps' common mistakes; `28b8f2e`), **B** A1 plus the learner model and the policy (`eb0afe5`), and **C** the plain tutor. Held-out-4 (21 scenarios, seasons in English and food chains in Hebrew) was committed before B existed, with the expected learner state of each step at the end, and run only after B was frozen.
+
+### Results: held-out-4 on a real model, 28 October
+
+`gemini-3.5-flash-lite` for every call through the eval deployment, one run of each system, all 21 scenarios completed, no infrastructure errors, 367 model calls. Files: `eval/results/runs/r8-ho4-a0/`, `r8-ho4-a1/`, `r8-ho4-b/`, `r8-ho4-plain/`.
+
+| Held-out-4, 21 scenarios | A0 | A1 | B | Plain |
+| --- | --- | --- | --- | --- |
+| Overclaims: steps reported as shown on your own that the label says are not | 2/16 | 2/16 | 0/16 | n/a |
+| Moved on without evidence | 0 | 0 | 0 | 0 |
+| Prerequisite recovery: went back to the earlier step and returned | 1/4 | 2/4 | 3/4 | 1/4 |
+| Scenarios passed | 14/21 | 14/21 | 17/21 | 10/21 |
+| Scenarios passed, without the 4 that encode B's rules | 14/17 | 14/17 | 14/17 | 9/17 |
+| End states matching the labels | 22/25 | 21/25 | 25/25 | n/a |
+| Verdicts within the accepted grades | 43/45 | 44/46 | 45/45 | 40/43 |
+| Wrong or partial answer graded correct | 0/14 | 0/14 | 0/14 | 0/14 |
+| Correct answer not graded correct | 2/26 | 2/27 | 0/26 | 3/24 |
+| Turns that should return to the question, and did | 8/9 | 9/9 | 10/10 | 7/9 |
+| Whole lessons that reached the summary | 2/2 | 2/2 | 2/2 | 0/2 |
+| Help during the final check | 0 | 0 | 0 | 2 |
+| Approval on an answer that was not right, flagged by the check / when every reply is read | 1 / 1 | 1 / 0 | 1 / 0 | 2 / 2 |
+| Cited ids the tutor was not given | 1 | 1 | 0 | 0 |
+| Cited sentences with under 20% of their words in the passage | 7/74 | 3/71 | 7/73 | 5/42 |
+| Time per turn, p50 / p95 | 3.5 s / 5.0 s | 3.4 s / 6.2 s | 3.5 s / 5.6 s | 2.3 s / 3.5 s |
+| Model calls | 104 | 106 | 104 | 53 |
+
+The decision rule fixed before the run: B is better than A1 if it has fewer overclaims, no more unsupported advancement, at least the same prerequisite recovery, and passes no fewer than A1 minus one scenario. **By that rule B is better than A1** (0 against 2 overclaims, 0 and 0, 3/4 against 2/4, 17 against 14). What that rests on:
+
+- **The difference comes from the scenarios that test B's rules.** The two overclaims are the prerequisite scenarios, where A0 and A1 still call the earlier step shown on your own after its gap appeared; the third recovery is a fragile prerequisite. Outside those four scenarios all three engines pass 14 of 17. B does what it was built to do on new lessons with a real model, and it costs nothing measurable elsewhere; it is not evidence that students learn more.
+- **One run of 21 scenarios.** A difference of one or two scenarios is noise at this size. I did not repeat the run: the day's free quota was spent, and a second day would also have used held-out-4 a second time after I had read its failures.
+- **A1 against A0: no measurable change** (14 and 14). The prompt fix for earlier steps' common mistakes had a cost on one scenario: "Australia is closer to the Sun in December" now leads back to the step about direct light, where the label expected a hint (AUDIT 104). Going back is defensible; I left the label as written.
+- **The Hebrew approval check is wrong in both directions.** It flagged the neutral replies to the pasted answer ("these are the words that appear exactly in the document", A0 and B) because of "בדיוק", and missed "נכון מאוד" opening a reply to a partial answer (A0 and the plain tutor), which it only checks where a scenario asks for it. Read by hand: A0 1, A1 0, B 0, plain 2. I report both and did not change the check after the run.
+- **All four systems failed the Hebrew question about another part.** No passage was found for "מה עושות הפטריות בטבע?" and every engine said the document does not cover fungi (AUDIT 99). I fixed the retrieval after the run; held-out-4 no longer counts as independent evidence for that fix.
+
+### Production on 28 October
+
+After held-out-4 I deployed B (`8b7bded`, bundle `index-DAe6GHC2.js`, the same as my local build) and taught a whole lesson on the live site with the site key: `pilot/sound.md`, English, desktop, answers written after reading each generated question (`eval/results/production-r8.json`). The production models were `gemini-3.6-flash` with `gemini-2.5-flash` as backup.
+
+What worked: a mistake from the plan's common mistakes got a counter-example; the narrow answer "It has to keep vibrating." got "now the whole question" (`build_up`), so AUDIT 89 holds on a real model; the step then closed as "shown with help", and the plan said "0 of 3 shown on your own". "Sound is just the air that comes out of your mouth" on step 2 led back to step 1 (`grader`), the round-7 failure (AUDIT 95), and step 1 became "worth another look". A question about another section was answered from that section with its citation, and the lesson returned. The final check's independent pass on step 1 moved it to shown on your own; the summary separated the steps by state.
+
+What it found, all fixed and covered by regression tests (AUDIT 100 to 103): a final-check fail forced by repeated non-answers was not logged, so the step missed in the final check kept "shown with help"; a pasted partial answer on step 3 sent the student back to step 1 a second time right after its check was passed; re-asking a final-check question gave a hint; and the closing message called the main ideas "what you mastered". The last two are prompt changes I have not yet seen on a real model.
+
 ## The experiment that would settle it
 
 The tests and evals show that the policy does what it says and that grading did not get worse. They do not show that students learn more. That needs an experiment:
@@ -671,3 +719,12 @@ The findings are in [AUDIT.md](AUDIT.md), 88 to 97, with the open list after the
 | Hebrew approval check no longer counts acknowledgements, comparisons or "what exactly" | 3 of 4 Hebrew flags were wrong | Held-out-2 Hebrew: engine 7/9 instead of 4/9 as recorded |
 | `npm run demo`: offline demo with scripted replies and a banner that says so | A demo should not depend on the free quota | Banner checked in English and Hebrew, desktop and phone |
 | `pilot/PROTOCOL.md` with the two documents and questions written in advance | No real learner has used the app | Not run |
+
+## What changed in the eighth round (27 and 28 October)
+
+- A learner model: an evidence log in the progress object, learner states and confidence from one function, reasons for every move, and policy rules that use the states (LEARNER_MODEL.md).
+- The grader sees earlier steps' common mistakes and this student's wrong ideas there; the follow-up to a copied answer is neutral (AUDIT 93, 95).
+- The interface shows steps shown on your own next to steps done, why each help was given, what each state rests on and the next action.
+- Held-out-4, run for four systems on Flash-Lite; a production lesson with the new engine; five fixes from what they showed (AUDIT 99 to 103).
+- The pilot protocol compares the app with reading alone, with two topics per language.
+
