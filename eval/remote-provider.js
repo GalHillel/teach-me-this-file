@@ -24,17 +24,26 @@ export const createRemoteProvider = async ({ url, models = null }) => {
   const page = await browser.newPage();
   await page.goto(url);
   const call = callFromPage(page);
+  const usage = { calls: 0, charsIn: 0, charsOut: 0 };
+  const count = (sent, received) => {
+    usage.calls += 1;
+    usage.charsIn += sent;
+    usage.charsOut += received;
+  };
   return {
     name: 'remote',
     model: models,
     host: new URL(page.url()).host,
+    usage,
     async generateJson({ task, system, prompt, onMeta }) {
       const body = await call({ op: 'json', task, system, prompt });
+      count(system.length + prompt.length, JSON.stringify(body.result ?? '').length);
       for (const meta of body.metas) onMeta?.(meta);
       return body.result;
     },
     async *streamText({ system, messages, onMeta }) {
       const body = await call({ op: 'text', system, messages });
+      count(system.length + messages.reduce((sum, message) => sum + message.content.length, 0), (body.text ?? '').length);
       for (const meta of body.metas) onMeta?.(meta);
       yield body.text;
     },

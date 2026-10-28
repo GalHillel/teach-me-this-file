@@ -1,0 +1,1259 @@
+{
+  "split": "holdout4",
+  "planned": 21,
+  "runs": [
+    {
+      "system": "a0",
+      "repeat": 1,
+      "commit": "af59c3316b68e3e6b9d471ffef2a04f011433e7b",
+      "engineVersion": "6cb55dd3317a",
+      "promptVersion": "c6d31f9f9bec",
+      "scenariosVersion": "6cf9b2af8e58",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "complete": 21,
+      "notComplete": [],
+      "notRun": [],
+      "groups": {
+        "all": {
+          "conversations": "12/19",
+          "passedIds": [
+            "ho4-en-understands",
+            "ho4-en-misconception",
+            "ho4-en-copied",
+            "ho4-en-ambiguous",
+            "ho4-en-other-part",
+            "ho4-en-not-in-document",
+            "ho4-en-student-instruction",
+            "ho4-en-journey",
+            "ho4-he-understands",
+            "ho4-he-misconception",
+            "ho4-he-narrowing",
+            "ho4-he-journey"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "0/14",
+          "falseRejection": "2/26",
+          "overclaims": "2/16",
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": "1/4",
+          "teachingLeakage": "4/5",
+          "helpLeakage": "5/11",
+          "unnecessaryRepetition": "1/19",
+          "leaksAt": [
+            {
+              "id": "ho4-en-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-en-ambiguous",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-en-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                3
+              ]
+            },
+            {
+              "id": "ho4-en-journey",
+              "teaching": [
+                1
+              ],
+              "help": [
+                3
+              ]
+            },
+            {
+              "id": "ho4-he-prerequisite",
+              "teaching": [],
+              "help": [
+                2
+              ]
+            },
+            {
+              "id": "ho4-he-narrowing",
+              "teaching": [
+                3
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                2,
+                3
+              ]
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "turns": [
+                4
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 1,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 1,
+          "weaklySupportedCitations": "7/74",
+          "latencyMs": {
+            "turns": 49,
+            "p50": 3465,
+            "p95": 4956
+          },
+          "modelCalls": 104,
+          "charsIn": 0,
+          "charsOut": 0,
+          "failures": [
+            {
+              "id": "ho4-en-prerequisite",
+              "problems": [
+                "turn 1: action hint, wanted check_earlier",
+                "turn 2: action ask_again, wanted back_to_question",
+                "end: step 1 state demonstrated, wanted needs_review",
+                "end: step 1 revisit null, wanted pass"
+              ]
+            },
+            {
+              "id": "ho4-en-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "id": "ho4-he-copied",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct"
+              ]
+            },
+            {
+              "id": "ho4-he-other-part",
+              "problems": [
+                "turn 1: did not cite c5"
+              ]
+            },
+            {
+              "id": "ho4-he-not-in-document",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question"
+              ]
+            },
+            {
+              "id": "ho4-he-prerequisite",
+              "problems": [
+                "end: step 1 state demonstrated, wanted needs_review"
+              ]
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier",
+                "turn 4: action ask_again, wanted final_check",
+                "end: step 3 state emerging, wanted developing",
+                "end: status active, wanted reviewing"
+              ]
+            }
+          ]
+        },
+        "targeted": {
+          "conversations": "0/0",
+          "passedIds": [],
+          "paraphraseConsistency": null,
+          "falseAcceptance": null,
+          "falseRejection": null,
+          "overclaims": null,
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": null,
+          "teachingLeakage": "0/0",
+          "helpLeakage": "0/0",
+          "unnecessaryRepetition": "0/0",
+          "leaksAt": [],
+          "repeatsAt": [],
+          "approvalOnNotCorrect": null,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": null,
+          "weaklySupportedCitations": null,
+          "latencyMs": null,
+          "modelCalls": 0,
+          "charsIn": 0,
+          "charsOut": 0,
+          "failures": []
+        },
+        "not_targeted": {
+          "conversations": "12/19",
+          "passedIds": [
+            "ho4-en-understands",
+            "ho4-en-misconception",
+            "ho4-en-copied",
+            "ho4-en-ambiguous",
+            "ho4-en-other-part",
+            "ho4-en-not-in-document",
+            "ho4-en-student-instruction",
+            "ho4-en-journey",
+            "ho4-he-understands",
+            "ho4-he-misconception",
+            "ho4-he-narrowing",
+            "ho4-he-journey"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "0/14",
+          "falseRejection": "2/26",
+          "overclaims": "2/16",
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": "1/4",
+          "teachingLeakage": "4/5",
+          "helpLeakage": "5/11",
+          "unnecessaryRepetition": "1/19",
+          "leaksAt": [
+            {
+              "id": "ho4-en-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-en-ambiguous",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-en-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                3
+              ]
+            },
+            {
+              "id": "ho4-en-journey",
+              "teaching": [
+                1
+              ],
+              "help": [
+                3
+              ]
+            },
+            {
+              "id": "ho4-he-prerequisite",
+              "teaching": [],
+              "help": [
+                2
+              ]
+            },
+            {
+              "id": "ho4-he-narrowing",
+              "teaching": [
+                3
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                2,
+                3
+              ]
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "turns": [
+                4
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 1,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 1,
+          "weaklySupportedCitations": "7/74",
+          "latencyMs": {
+            "turns": 49,
+            "p50": 3465,
+            "p95": 4956
+          },
+          "modelCalls": 104,
+          "charsIn": 0,
+          "charsOut": 0,
+          "failures": [
+            {
+              "id": "ho4-en-prerequisite",
+              "problems": [
+                "turn 1: action hint, wanted check_earlier",
+                "turn 2: action ask_again, wanted back_to_question",
+                "end: step 1 state demonstrated, wanted needs_review",
+                "end: step 1 revisit null, wanted pass"
+              ]
+            },
+            {
+              "id": "ho4-en-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "id": "ho4-he-copied",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct"
+              ]
+            },
+            {
+              "id": "ho4-he-other-part",
+              "problems": [
+                "turn 1: did not cite c5"
+              ]
+            },
+            {
+              "id": "ho4-he-not-in-document",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question"
+              ]
+            },
+            {
+              "id": "ho4-he-prerequisite",
+              "problems": [
+                "end: step 1 state demonstrated, wanted needs_review"
+              ]
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier",
+                "turn 4: action ask_again, wanted final_check",
+                "end: step 3 state emerging, wanted developing",
+                "end: status active, wanted reviewing"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "system": "a1",
+      "repeat": 1,
+      "commit": "28b8f2ee72f498eceaf8827985709b40b7af1ef9",
+      "engineVersion": "636e74161c92",
+      "promptVersion": "92c866cd3696",
+      "scenariosVersion": "6cf9b2af8e58",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "complete": 21,
+      "notComplete": [],
+      "notRun": [],
+      "groups": {
+        "all": {
+          "conversations": "12/19",
+          "passedIds": [
+            "ho4-en-understands",
+            "ho4-en-copied",
+            "ho4-en-ambiguous",
+            "ho4-en-other-part",
+            "ho4-en-not-in-document",
+            "ho4-en-student-instruction",
+            "ho4-en-journey",
+            "ho4-he-understands",
+            "ho4-he-misconception",
+            "ho4-he-copied",
+            "ho4-he-not-in-document",
+            "ho4-he-journey"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "0/14",
+          "falseRejection": "2/27",
+          "overclaims": "2/16",
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": "2/4",
+          "teachingLeakage": "4/4",
+          "helpLeakage": "4/10",
+          "unnecessaryRepetition": "2/20",
+          "leaksAt": [
+            {
+              "id": "ho4-en-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-en-ambiguous",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-en-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                3
+              ]
+            },
+            {
+              "id": "ho4-en-journey",
+              "teaching": [
+                1
+              ],
+              "help": [
+                3
+              ]
+            },
+            {
+              "id": "ho4-he-prerequisite",
+              "teaching": [],
+              "help": [
+                2
+              ]
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                3
+              ]
+            },
+            {
+              "id": "ho4-he-journey",
+              "teaching": [
+                3
+              ],
+              "help": []
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "ho4-he-narrowing",
+              "turns": [
+                4
+              ]
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "turns": [
+                4
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 1,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 1,
+          "weaklySupportedCitations": "3/71",
+          "latencyMs": {
+            "turns": 50,
+            "p50": 3444,
+            "p95": 6196
+          },
+          "modelCalls": 106,
+          "charsIn": 0,
+          "charsOut": 0,
+          "failures": [
+            {
+              "id": "ho4-en-misconception",
+              "problems": [
+                "turn 1: action check_earlier, wanted hint"
+              ]
+            },
+            {
+              "id": "ho4-en-prerequisite",
+              "problems": [
+                "end: step 1 state demonstrated, wanted needs_review"
+              ]
+            },
+            {
+              "id": "ho4-en-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "id": "ho4-he-other-part",
+              "problems": [
+                "turn 1: did not cite c5"
+              ]
+            },
+            {
+              "id": "ho4-he-prerequisite",
+              "problems": [
+                "end: step 1 state demonstrated, wanted needs_review"
+              ]
+            },
+            {
+              "id": "ho4-he-narrowing",
+              "problems": [
+                "turn 4: action ask_again, wanted next_step",
+                "end: step 2 state emerging, wanted developing",
+                "end: step 2, wanted 3"
+              ]
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct",
+                "turn 2: action ask_again, wanted check_earlier",
+                "turn 4: action ask_again, wanted final_check",
+                "end: step 3 state emerging, wanted developing",
+                "end: status active, wanted reviewing"
+              ]
+            }
+          ]
+        },
+        "targeted": {
+          "conversations": "0/0",
+          "passedIds": [],
+          "paraphraseConsistency": null,
+          "falseAcceptance": null,
+          "falseRejection": null,
+          "overclaims": null,
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": null,
+          "teachingLeakage": "0/0",
+          "helpLeakage": "0/0",
+          "unnecessaryRepetition": "0/0",
+          "leaksAt": [],
+          "repeatsAt": [],
+          "approvalOnNotCorrect": null,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": null,
+          "weaklySupportedCitations": null,
+          "latencyMs": null,
+          "modelCalls": 0,
+          "charsIn": 0,
+          "charsOut": 0,
+          "failures": []
+        },
+        "not_targeted": {
+          "conversations": "12/19",
+          "passedIds": [
+            "ho4-en-understands",
+            "ho4-en-copied",
+            "ho4-en-ambiguous",
+            "ho4-en-other-part",
+            "ho4-en-not-in-document",
+            "ho4-en-student-instruction",
+            "ho4-en-journey",
+            "ho4-he-understands",
+            "ho4-he-misconception",
+            "ho4-he-copied",
+            "ho4-he-not-in-document",
+            "ho4-he-journey"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "0/14",
+          "falseRejection": "2/27",
+          "overclaims": "2/16",
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": "2/4",
+          "teachingLeakage": "4/4",
+          "helpLeakage": "4/10",
+          "unnecessaryRepetition": "2/20",
+          "leaksAt": [
+            {
+              "id": "ho4-en-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-en-ambiguous",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-en-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                3
+              ]
+            },
+            {
+              "id": "ho4-en-journey",
+              "teaching": [
+                1
+              ],
+              "help": [
+                3
+              ]
+            },
+            {
+              "id": "ho4-he-prerequisite",
+              "teaching": [],
+              "help": [
+                2
+              ]
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                3
+              ]
+            },
+            {
+              "id": "ho4-he-journey",
+              "teaching": [
+                3
+              ],
+              "help": []
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "ho4-he-narrowing",
+              "turns": [
+                4
+              ]
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "turns": [
+                4
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 1,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 1,
+          "weaklySupportedCitations": "3/71",
+          "latencyMs": {
+            "turns": 50,
+            "p50": 3444,
+            "p95": 6196
+          },
+          "modelCalls": 106,
+          "charsIn": 0,
+          "charsOut": 0,
+          "failures": [
+            {
+              "id": "ho4-en-misconception",
+              "problems": [
+                "turn 1: action check_earlier, wanted hint"
+              ]
+            },
+            {
+              "id": "ho4-en-prerequisite",
+              "problems": [
+                "end: step 1 state demonstrated, wanted needs_review"
+              ]
+            },
+            {
+              "id": "ho4-en-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "id": "ho4-he-other-part",
+              "problems": [
+                "turn 1: did not cite c5"
+              ]
+            },
+            {
+              "id": "ho4-he-prerequisite",
+              "problems": [
+                "end: step 1 state demonstrated, wanted needs_review"
+              ]
+            },
+            {
+              "id": "ho4-he-narrowing",
+              "problems": [
+                "turn 4: action ask_again, wanted next_step",
+                "end: step 2 state emerging, wanted developing",
+                "end: step 2, wanted 3"
+              ]
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct",
+                "turn 2: action ask_again, wanted check_earlier",
+                "turn 4: action ask_again, wanted final_check",
+                "end: step 3 state emerging, wanted developing",
+                "end: status active, wanted reviewing"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "system": "b",
+      "repeat": 1,
+      "commit": "615ac2fee9bd7cf88a2cf80b4a3174e4a457289d",
+      "engineVersion": "64e1d394459d",
+      "promptVersion": "3c5344e6507b",
+      "scenariosVersion": "6cf9b2af8e58",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "complete": 21,
+      "notComplete": [],
+      "notRun": [],
+      "groups": {
+        "all": {
+          "conversations": "15/19",
+          "passedIds": [
+            "ho4-en-understands",
+            "ho4-en-copied",
+            "ho4-en-ambiguous",
+            "ho4-en-other-part",
+            "ho4-en-not-in-document",
+            "ho4-en-prerequisite",
+            "ho4-en-fragile-prerequisite",
+            "ho4-en-student-instruction",
+            "ho4-en-journey",
+            "ho4-he-understands",
+            "ho4-he-misconception",
+            "ho4-he-not-in-document",
+            "ho4-he-prerequisite",
+            "ho4-he-narrowing",
+            "ho4-he-journey"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "0/14",
+          "falseRejection": "0/26",
+          "overclaims": "0/16",
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": "3/4",
+          "teachingLeakage": "5/5",
+          "helpLeakage": "2/9",
+          "unnecessaryRepetition": "0/18",
+          "leaksAt": [
+            {
+              "id": "ho4-en-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-en-ambiguous",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-en-journey",
+              "teaching": [
+                1
+              ],
+              "help": [
+                4
+              ]
+            },
+            {
+              "id": "ho4-he-narrowing",
+              "teaching": [
+                3
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "ho4-he-journey",
+              "teaching": [
+                3
+              ],
+              "help": []
+            }
+          ],
+          "repeatsAt": [],
+          "approvalOnNotCorrect": 1,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "7/73",
+          "latencyMs": {
+            "turns": 49,
+            "p50": 3463,
+            "p95": 5573
+          },
+          "modelCalls": 104,
+          "charsIn": 0,
+          "charsOut": 0,
+          "failures": [
+            {
+              "id": "ho4-en-misconception",
+              "problems": [
+                "turn 1: action check_earlier, wanted hint"
+              ]
+            },
+            {
+              "id": "ho4-he-copied",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct"
+              ]
+            },
+            {
+              "id": "ho4-he-other-part",
+              "problems": [
+                "turn 1: did not cite c5"
+              ]
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "problems": [
+                "turn 2: action ask_again, wanted check_earlier"
+              ]
+            }
+          ]
+        },
+        "targeted": {
+          "conversations": "0/0",
+          "passedIds": [],
+          "paraphraseConsistency": null,
+          "falseAcceptance": null,
+          "falseRejection": null,
+          "overclaims": null,
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": null,
+          "teachingLeakage": "0/0",
+          "helpLeakage": "0/0",
+          "unnecessaryRepetition": "0/0",
+          "leaksAt": [],
+          "repeatsAt": [],
+          "approvalOnNotCorrect": null,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": null,
+          "weaklySupportedCitations": null,
+          "latencyMs": null,
+          "modelCalls": 0,
+          "charsIn": 0,
+          "charsOut": 0,
+          "failures": []
+        },
+        "not_targeted": {
+          "conversations": "15/19",
+          "passedIds": [
+            "ho4-en-understands",
+            "ho4-en-copied",
+            "ho4-en-ambiguous",
+            "ho4-en-other-part",
+            "ho4-en-not-in-document",
+            "ho4-en-prerequisite",
+            "ho4-en-fragile-prerequisite",
+            "ho4-en-student-instruction",
+            "ho4-en-journey",
+            "ho4-he-understands",
+            "ho4-he-misconception",
+            "ho4-he-not-in-document",
+            "ho4-he-prerequisite",
+            "ho4-he-narrowing",
+            "ho4-he-journey"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "0/14",
+          "falseRejection": "0/26",
+          "overclaims": "0/16",
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": "3/4",
+          "teachingLeakage": "5/5",
+          "helpLeakage": "2/9",
+          "unnecessaryRepetition": "0/18",
+          "leaksAt": [
+            {
+              "id": "ho4-en-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-en-ambiguous",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-en-journey",
+              "teaching": [
+                1
+              ],
+              "help": [
+                4
+              ]
+            },
+            {
+              "id": "ho4-he-narrowing",
+              "teaching": [
+                3
+              ],
+              "help": []
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "ho4-he-journey",
+              "teaching": [
+                3
+              ],
+              "help": []
+            }
+          ],
+          "repeatsAt": [],
+          "approvalOnNotCorrect": 1,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "7/73",
+          "latencyMs": {
+            "turns": 49,
+            "p50": 3463,
+            "p95": 5573
+          },
+          "modelCalls": 104,
+          "charsIn": 0,
+          "charsOut": 0,
+          "failures": [
+            {
+              "id": "ho4-en-misconception",
+              "problems": [
+                "turn 1: action check_earlier, wanted hint"
+              ]
+            },
+            {
+              "id": "ho4-he-copied",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct"
+              ]
+            },
+            {
+              "id": "ho4-he-other-part",
+              "problems": [
+                "turn 1: did not cite c5"
+              ]
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "problems": [
+                "turn 2: action ask_again, wanted check_earlier"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "system": "plain",
+      "repeat": 1,
+      "commit": "615ac2fee9bd7cf88a2cf80b4a3174e4a457289d",
+      "engineVersion": "64e1d394459d",
+      "promptVersion": "3c5344e6507b",
+      "scenariosVersion": "6cf9b2af8e58",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "complete": 21,
+      "notComplete": [],
+      "notRun": [],
+      "groups": {
+        "all": {
+          "conversations": "8/19",
+          "passedIds": [
+            "ho4-en-understands",
+            "ho4-en-misconception",
+            "ho4-en-ambiguous",
+            "ho4-en-student-instruction",
+            "ho4-he-understands",
+            "ho4-he-misconception",
+            "ho4-he-prerequisite",
+            "ho4-he-narrowing"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "0/14",
+          "falseRejection": "3/24",
+          "overclaims": null,
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": "1/4",
+          "teachingLeakage": "0/5",
+          "helpLeakage": "0/9",
+          "unnecessaryRepetition": "2/17",
+          "leaksAt": [],
+          "repeatsAt": [
+            {
+              "id": "ho4-en-prerequisite",
+              "turns": [
+                3
+              ]
+            },
+            {
+              "id": "ho4-he-journey",
+              "turns": [
+                7
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 2,
+          "notInDocumentMissed": 1,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "5/42",
+          "latencyMs": {
+            "turns": 47,
+            "p50": 2349,
+            "p95": 3466
+          },
+          "modelCalls": 53,
+          "charsIn": 0,
+          "charsOut": 0,
+          "failures": [
+            {
+              "id": "ho4-en-copied",
+              "problems": [
+                "turn 1: action teach, wanted probe|hint"
+              ]
+            },
+            {
+              "id": "ho4-en-other-part",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question"
+              ]
+            },
+            {
+              "id": "ho4-en-not-in-document",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question",
+                "turn 1: did not say the document does not cover it"
+              ]
+            },
+            {
+              "id": "ho4-en-prerequisite",
+              "problems": [
+                "turn 1: action hint, wanted check_earlier",
+                "turn 2: action ask_again, wanted back_to_question",
+                "turn 3: action probe, wanted next_step"
+              ]
+            },
+            {
+              "id": "ho4-en-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "id": "ho4-en-journey",
+              "problems": [
+                "turn 8: action hint, wanted summary",
+                "turn 8: help during the final check"
+              ]
+            },
+            {
+              "id": "ho4-he-copied",
+              "problems": [
+                "turn 1: action ask_again, wanted probe|hint",
+                "turn 1: approval language on an answer that was not correct"
+              ]
+            },
+            {
+              "id": "ho4-he-other-part",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question"
+              ]
+            },
+            {
+              "id": "ho4-he-not-in-document",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question"
+              ]
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct",
+                "turn 2: action hint, wanted check_earlier",
+                "turn 3: action ask_again, wanted final_check|back_to_question"
+              ]
+            },
+            {
+              "id": "ho4-he-journey",
+              "problems": [
+                "turn 6: action hint, wanted final_check",
+                "turn 6: help during the final check",
+                "turn 7: action ask_again, wanted summary",
+                "turn 7: summary does not name the weak step"
+              ]
+            }
+          ]
+        },
+        "targeted": {
+          "conversations": "0/0",
+          "passedIds": [],
+          "paraphraseConsistency": null,
+          "falseAcceptance": null,
+          "falseRejection": null,
+          "overclaims": null,
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": null,
+          "teachingLeakage": "0/0",
+          "helpLeakage": "0/0",
+          "unnecessaryRepetition": "0/0",
+          "leaksAt": [],
+          "repeatsAt": [],
+          "approvalOnNotCorrect": null,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": null,
+          "weaklySupportedCitations": null,
+          "latencyMs": null,
+          "modelCalls": 0,
+          "charsIn": 0,
+          "charsOut": 0,
+          "failures": []
+        },
+        "not_targeted": {
+          "conversations": "8/19",
+          "passedIds": [
+            "ho4-en-understands",
+            "ho4-en-misconception",
+            "ho4-en-ambiguous",
+            "ho4-en-student-instruction",
+            "ho4-he-understands",
+            "ho4-he-misconception",
+            "ho4-he-prerequisite",
+            "ho4-he-narrowing"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "0/14",
+          "falseRejection": "3/24",
+          "overclaims": null,
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": "1/4",
+          "teachingLeakage": "0/5",
+          "helpLeakage": "0/9",
+          "unnecessaryRepetition": "2/17",
+          "leaksAt": [],
+          "repeatsAt": [
+            {
+              "id": "ho4-en-prerequisite",
+              "turns": [
+                3
+              ]
+            },
+            {
+              "id": "ho4-he-journey",
+              "turns": [
+                7
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 2,
+          "notInDocumentMissed": 1,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "5/42",
+          "latencyMs": {
+            "turns": 47,
+            "p50": 2349,
+            "p95": 3466
+          },
+          "modelCalls": 53,
+          "charsIn": 0,
+          "charsOut": 0,
+          "failures": [
+            {
+              "id": "ho4-en-copied",
+              "problems": [
+                "turn 1: action teach, wanted probe|hint"
+              ]
+            },
+            {
+              "id": "ho4-en-other-part",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question"
+              ]
+            },
+            {
+              "id": "ho4-en-not-in-document",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question",
+                "turn 1: did not say the document does not cover it"
+              ]
+            },
+            {
+              "id": "ho4-en-prerequisite",
+              "problems": [
+                "turn 1: action hint, wanted check_earlier",
+                "turn 2: action ask_again, wanted back_to_question",
+                "turn 3: action probe, wanted next_step"
+              ]
+            },
+            {
+              "id": "ho4-en-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "id": "ho4-en-journey",
+              "problems": [
+                "turn 8: action hint, wanted summary",
+                "turn 8: help during the final check"
+              ]
+            },
+            {
+              "id": "ho4-he-copied",
+              "problems": [
+                "turn 1: action ask_again, wanted probe|hint",
+                "turn 1: approval language on an answer that was not correct"
+              ]
+            },
+            {
+              "id": "ho4-he-other-part",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question"
+              ]
+            },
+            {
+              "id": "ho4-he-not-in-document",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question"
+              ]
+            },
+            {
+              "id": "ho4-he-fragile-prerequisite",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct",
+                "turn 2: action hint, wanted check_earlier",
+                "turn 3: action ask_again, wanted final_check|back_to_question"
+              ]
+            },
+            {
+              "id": "ho4-he-journey",
+              "problems": [
+                "turn 6: action hint, wanted final_check",
+                "turn 6: help during the final check",
+                "turn 7: action ask_again, wanted summary",
+                "turn 7: summary does not name the weak step"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "flipsBetweenRepeats": {}
+}

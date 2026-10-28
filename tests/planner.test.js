@@ -238,6 +238,12 @@ describe('round 9: teaching does not give away the check question', () => {
   });
 });
 
+describe('round 9: going back to the whole question does not answer it', () => {
+  it('links the smaller answer to the whole question without stating the rest of the answer (AUDIT 96, held-out-4 journey)', () => {
+    expect(moveInstructions({ move: 'build_up', assessment: { verdict: 'correct', conceptsShown: [], conceptsMissing: [], misconception: '' } })).toContain('without giving the parts of the answer the student has not said yet');
+  });
+});
+
 describe('round 9: grader rules for earlier steps and other questions', () => {
   it('names an earlier step only when the missing idea is not taught by the current step (AUDIT 104)', () => {
     expect(ASSESS_SYSTEM).toContain('Leave it 0 when the current step\'s goal or success criteria cover the missing idea');

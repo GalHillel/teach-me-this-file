@@ -65,7 +65,7 @@ export const latestRuns = (lines) => [...new Map(lines.map((line) => [`${line.sy
 
 export const turnRecord = ({ progress, ...row }) => ({
   ...row,
-  ...(progress ? { progressAfter: { status: progress.status, currentStep: progress.currentStep, review: progress.review ? { kind: progress.review.kind, position: progress.review.position, results: progress.review.results } : null, final: progress.final ?? null } } : {}),
+  ...(progress ? { progressAfter: { status: progress.status, currentStep: progress.currentStep, review: progress.review ? { kind: progress.review.kind, queue: progress.review.queue, position: progress.review.position, results: progress.review.results } : null, final: progress.final ?? null } } : {}),
 });
 
 const modelCounts = (lines) => {

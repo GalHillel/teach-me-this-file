@@ -4,7 +4,7 @@ import { stepState } from '../shared/learner.js';
 import { stepEvidence } from '../shared/lesson.js';
 import { termGroups } from '../shared/text.js';
 import { normalizeAssessment } from '../server/lesson/assessor.js';
-import { createProgress, needsWholeQuestionGrade, planMove } from '../server/lesson/progress.js';
+import * as engine from '../server/lesson/progress.js';
 import { CITATION_RULE, formatPassages, languageName } from '../server/lesson/prompts.js';
 import { turnSources } from '../src/lesson/turnSources.js';
 
@@ -35,6 +35,9 @@ export const planOf = (lesson) => ({
   objectives: lesson.objectives,
   steps: lesson.steps,
 });
+
+const { createProgress, planMove } = engine;
+const needsWholeQuestionGrade = engine.needsWholeQuestionGrade ?? (() => false);
 
 export const startProgress = (plan, scenario) => {
   const progress = createProgress(plan);
@@ -249,11 +252,19 @@ ${formatPassages(lesson.chunks)}
 
 export const turnApplies = (turn, previousAction) => !turn.when || turn.when.includes(previousAction);
 
+export const takeTurn = (pending, progress) => {
+  const asked = progress?.status === 'reviewing' && progress.review?.kind === 'final' ? progress.review.queue[progress.review.position] : null;
+  const index = Number.isInteger(asked) && pending[0].about !== undefined ? pending.findIndex((turn) => turn.about === asked) : -1;
+  return pending.splice(index > 0 ? index : 0, 1)[0];
+};
+
 export const policyRun = (lesson, scenario, system) => {
   const plan = planOf(lesson);
   let progress = startProgress(plan, scenario);
   const turns = [];
-  for (const turn of scenario.turns) {
+  const pending = [...scenario.turns];
+  while (pending.length) {
+    const turn = takeTurn(pending, progress);
     if (!turnApplies(turn, turns.at(-1)?.action)) continue;
     const state = { plan, chunks: lesson.chunks, progress };
     const sources = turnSources(state, turn.kind ?? 'reply', turn.student);
@@ -429,3 +440,42 @@ export const summarize = (scenarios) => {
 };
 
 export const verifyReply = (text, chunks) => verifyCitations(text, chunks);
+
+const plainText = (text) => String(text ?? '').normalize('NFKC').toLowerCase().replace(/[’‘]/g, "'").replace(/\[c\d+(?:,\s*c\d+)*\]/g, ' ');
+
+export const markerGroupsFound = (text, spec) => {
+  const body = plainText(text);
+  return spec.groups.filter((group) => group.some((marker) => body.includes(marker.toLowerCase()))).length;
+};
+
+const REPEAT_ACTIONS = new Set(['back_to_question', 'probe', 'ask_again']);
+const LEAK_HELP_ACTIONS = new Set(['hint', 'back_to_question']);
+
+export const textMeasures = (line, scenario, markers = {}) => {
+  const lessonMarkers = markers[scenario.lesson] ?? {};
+  const result = { teachingReplies: 0, teachingLeaks: [], helpReplies: 0, helpLeaks: [], repeatChances: 0, repeats: [] };
+  let step = scenario.at ?? 0;
+  (line.turns ?? []).forEach((row, index) => {
+    const turn = row.turn ?? {};
+    const allowed = turn.expect?.actions ?? [];
+    if (turn.label?.verdict === 'correct' && (turn.label.issue ?? 'none') === 'none' && !allowed.some((action) => REPEAT_ACTIONS.has(action))) {
+      result.repeatChances += 1;
+      if (REPEAT_ACTIONS.has(row.action)) result.repeats.push(index + 1);
+    }
+    if (row.action === 'next_step') {
+      step += 1;
+      const spec = lessonMarkers[step];
+      if (spec && row.text !== undefined) {
+        result.teachingReplies += 1;
+        if (markerGroupsFound(row.text, spec) >= spec.min) result.teachingLeaks.push(index + 1);
+      }
+      return;
+    }
+    const spec = lessonMarkers[step];
+    if (spec && LEAK_HELP_ACTIONS.has(row.action) && row.text !== undefined) {
+      result.helpReplies += 1;
+      if (markerGroupsFound(row.text, spec) === spec.groups.length) result.helpLeaks.push(index + 1);
+    }
+  });
+  return result;
+};

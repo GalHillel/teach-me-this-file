@@ -5,7 +5,7 @@ import { assessAnswer } from '../server/lesson/assessor.js';
 import { runTurn, toProviderMessages } from '../server/lesson/tutor.js';
 import { turnSources } from '../src/lesson/turnSources.js';
 import {
-  ACTION_OF_MOVE, checkEnd, endStates, supportProblems, checkTurn, citationSupport, labelGrade, wholeLabel, loadLessons, loadScenarios, openingMessage,
+  ACTION_OF_MOVE, checkEnd, endStates, supportProblems, checkTurn, citationSupport, labelGrade, wholeLabel, takeTurn, loadLessons, loadScenarios, openingMessage,
   planOf, plainSystem, policyRun, readTag, startProgress, summarize, turnApplies, verifyReply,
 } from './teaching-lib.js';
 import { evalProvider } from './remote-provider.js';
@@ -44,6 +44,8 @@ const labelProvider = {
 const provider = mode === 'policy' ? { name: 'none', model: null } : providerName === 'labels' ? labelProvider : await evalProvider({ name: providerName, apiKey: process.env.EVAL_API_KEY || '' });
 
 let calls = 0;
+
+const usageSince = (before) => Object.fromEntries(Object.entries(provider.usage ?? {}).map(([key, value]) => [key, value - (before[key] ?? 0)]));
 let stopped = null;
 
 const withRetry = async (work) => {
@@ -159,11 +161,15 @@ const modelScenario = async (scenario, system, partial) => {
   const history = [{ role: 'tutor', content: openingMessage(plan, scenario.at ?? 0) }];
   const rows = [];
   let previousHelp = null;
-  for (const turn of scenario.turns) {
+  const pending = [...scenario.turns];
+  while (pending.length) {
+    const turn = takeTurn(pending, progress);
     if (!turnApplies(turn, rows.at(-1)?.action)) continue;
+    const at = new Date().toISOString();
     const row = system === 'plain'
       ? await plainTurn({ lesson, plan, scenario, history, turn })
       : await engineTurn({ lesson, plan, progress, history, turn });
+    row.at = at;
     row.step = progress.status === 'active' ? progress.currentStep : null;
     if (row.progress) progress = row.progress;
     row.failures = checkTurn({ turn, row, mode, previousHelp });
@@ -237,14 +243,15 @@ const runModel = async () => {
       if (done.has(`${system}/${scenario.id}`)) continue;
       const startedAt = new Date().toISOString();
       const before = calls;
+      const usageBefore = { ...(provider.usage ?? {}) };
       const partial = [];
       let line;
       try {
         const run = await modelScenario(scenario, system, partial);
-        line = { system, split: scenario.split, status: 'complete', startedAt, finishedAt: new Date().toISOString(), calls: calls - before, ...run, turns: run.turns.map(turnRecord) };
+        line = { system, split: scenario.split, status: 'complete', startedAt, finishedAt: new Date().toISOString(), calls: calls - before, usage: usageSince(usageBefore), ...run, turns: run.turns.map(turnRecord) };
       } catch (error) {
         console.log(`ERR  ${system} ${scenario.id} ${error.code ?? error.message}`);
-        line = { system, id: scenario.id, category: scenario.category, split: scenario.split, status: error.code === 'quota_exhausted' ? 'stopped_quota' : 'infra_error', error: error.code ?? error.message, startedAt, finishedAt: new Date().toISOString(), calls: calls - before, partialTurns: partial };
+        line = { system, id: scenario.id, category: scenario.category, split: scenario.split, status: error.code === 'quota_exhausted' ? 'stopped_quota' : 'infra_error', error: error.code ?? error.message, startedAt, finishedAt: new Date().toISOString(), calls: calls - before, usage: usageSince(usageBefore), partialTurns: partial };
       }
       appendFileSync(linesFile, `${JSON.stringify(line)}\n`);
     }

@@ -5,12 +5,12 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   checkEnd, checkTurn, citationSupport, endsWithQuestion, hasPraise, loadLessons, loadScenarios, notesContradiction,
-  policyRun, readTag, saysNotInDocument, similarity, summarize, supportProblems, turnApplies,
+  markerGroupsFound, policyRun, readTag, saysNotInDocument, similarity, summarize, supportProblems, takeTurn, textMeasures, turnApplies,
 } from '../eval/teaching-lib.js';
 import { callFromPage } from '../eval/remote-provider.js';
 
 const lessons = loadLessons();
-const { scenarios, categories } = loadScenarios();
+const { scenarios, categories, leakMarkers } = loadScenarios();
 const dev = scenarios.filter((scenario) => scenario.split === 'dev' && !scenario.variants);
 
 describe('teaching scenarios', () => {
@@ -19,7 +19,7 @@ describe('teaching scenarios', () => {
       expect(categories[scenario.category], scenario.id).toBeTruthy();
       const lesson = lessons[scenario.lesson];
       expect(lesson, scenario.id).toBeTruthy();
-      expect(lesson.split).toBe(scenario.split);
+      if (scenario.split !== 'regress9') expect(lesson.split).toBe(scenario.split);
       expect(scenario.at ?? 0).toBeLessThan(lesson.steps.length);
       const ids = new Set(lesson.chunks.map((chunk) => chunk.id));
       for (const turn of scenario.turns ?? []) {
@@ -31,7 +31,7 @@ describe('teaching scenarios', () => {
 
   it('keeps the dev and every held-out set on different lessons', () => {
     const lessonsOf = (split) => new Set(scenarios.filter((scenario) => scenario.split === split).map((scenario) => lessons[scenario.lesson].title));
-    const splits = ['dev', 'holdout', 'holdout2', 'holdout3', 'holdout4'];
+    const splits = ['dev', 'holdout', 'holdout2', 'holdout3', 'holdout4', 'final9'];
     for (const split of splits) expect(lessonsOf(split).size, split).toBeGreaterThan(0);
     for (const [index, left] of splits.entries()) {
       for (const right of splits.slice(index + 1)) expect([...lessonsOf(left)].filter((title) => lessonsOf(right).has(title)), `${left}/${right}`).toEqual([]);
@@ -157,5 +157,61 @@ describe('eval summary and remote calls', () => {
   it('reports a remote failure without a body as provider_unavailable', async () => {
     const page = { evaluate: async () => ({ status: 504, body: null }) };
     await expect(callFromPage(page)({ op: 'text' })).rejects.toMatchObject({ code: 'provider_unavailable', message: 'HTTP 504' });
+  });
+});
+
+describe('round 9: the final evaluation set', () => {
+  const final = scenarios.filter((scenario) => scenario.split === 'final9');
+
+  it('tags every scenario as targeted or not, and labels and expects every turn', () => {
+    expect(final).toHaveLength(26);
+    expect(final.filter((scenario) => scenario.targets.length)).toHaveLength(6);
+    for (const scenario of final) {
+      expect(Array.isArray(scenario.targets), scenario.id).toBe(true);
+      for (const turn of scenario.turns ?? []) {
+        expect(turn.label?.verdict, scenario.id).toBeTruthy();
+        expect(turn.expect?.actions?.length, scenario.id).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('has answer markers for every step of its lessons, none of them already in the check question', () => {
+    for (const id of ['magnets-en', 'spoilage-he']) {
+      lessons[id].steps.forEach((step, index) => {
+        const spec = leakMarkers[id][index];
+        expect(spec.groups.length, `${id} ${index}`).toBeGreaterThanOrEqual(spec.min);
+        expect(markerGroupsFound(step.checkQuestion, spec), `${id} ${index}`).toBe(0);
+      });
+    }
+  });
+});
+
+describe('round 9: text measures', () => {
+  const spec = { 'magnets-en': { 1: { min: 2, groups: [['iron'], ['not attracted', 'not magnetic']] } } };
+  const scenario = { lesson: 'magnets-en', at: 0 };
+  const row = (action, text, label = { verdict: 'correct' }, actions = ['next_step']) => ({ action, text, turn: { label, expect: { actions } } });
+
+  it('counts a move to the next step whose message already answers its check question', () => {
+    const leak = textMeasures({ turns: [row('next_step', 'Right! Magnets pull iron [c2], but aluminium is not magnetic. How does the plant sort cans?')] }, scenario, spec);
+    expect(leak).toMatchObject({ teachingReplies: 1, teachingLeaks: [1] });
+    const clean = textMeasures({ turns: [row('next_step', 'Right! Some things stick to magnets and some do not. How does the plant sort cans?')] }, scenario, spec);
+    expect(clean).toMatchObject({ teachingReplies: 1, teachingLeaks: [] });
+  });
+
+  it('counts help that gives every part of the answer, and a correct answer asked again', () => {
+    const turns = [
+      row('next_step', 'Next: how does the plant sort cans?'),
+      row('hint', 'Iron is pulled, and aluminium is not attracted. So?', { verdict: 'partial' }, ['hint']),
+      row('back_to_question', 'Now the whole question again?', { verdict: 'correct' }, ['next_step']),
+    ];
+    expect(textMeasures({ turns }, scenario, spec)).toMatchObject({ helpReplies: 2, helpLeaks: [2], repeatChances: 2, repeats: [3] });
+  });
+
+  it('answers the final-check question the engine asked, whatever the written order', () => {
+    const pending = [{ about: 1, student: 'b' }, { about: 0, student: 'a' }, { about: 2, student: 'c' }];
+    const progress = { status: 'reviewing', review: { kind: 'final', queue: [0, 1, 2], position: 0 } };
+    expect(takeTurn(pending, progress).student).toBe('a');
+    expect(takeTurn(pending, { status: 'active' }).student).toBe('b');
+    expect(pending.map((turn) => turn.student)).toEqual(['c']);
   });
 });

@@ -253,7 +253,7 @@ export const moveInstructions = ({ move, assessment, step, intervention, request
     case 'prerequisite_check':
       return `${notes}\nThe answer suggests a gap in an earlier idea: "${fence(prerequisite?.title ?? '')}" (${fence(prerequisite?.goal ?? '')}). Do not call the answer right. Say kindly that you will quickly check that earlier idea first. In two or three sentences, remind them of it with one concrete example, then ask one short question that checks only that earlier idea.`;
     case 'build_up':
-      return `${notes}\nThe student answered your smaller question correctly, but has not yet answered the whole check question. Confirm that part in one specific sentence, show in one sentence how it leads to the bigger question, then ask the step's check question again in your own words. Do not say the step is done.`;
+      return `${notes}\nThe student answered your smaller question correctly, but has not yet answered the whole check question. Confirm that part in one specific sentence, show in one sentence how it leads to the bigger question without giving the parts of the answer the student has not said yet, then ask the step's check question again in your own words. Do not say the step is done.`;
     case 'resume':
       return `${notes}\nThe student answered the quick check on the earlier idea correctly. Confirm it in one sentence and connect it to the current step in one sentence. Then ask the current check question again, in new words.`;
     case 'resume_after_reteach':
