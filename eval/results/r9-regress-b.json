@@ -1,0 +1,245 @@
+{
+  "system": "b",
+  "commit": "feab2be",
+  "model": "gemini-3.5-flash-lite",
+  "scenarios": [
+    {
+      "id": "r9-en-final-wrong-reason",
+      "passed": true,
+      "failures": [],
+      "actions": [
+        "final_check",
+        "final_check",
+        "final_check",
+        "summary"
+      ],
+      "checks": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "teachingReplies": 0,
+      "teachingLeaks": [],
+      "helpReplies": 0,
+      "helpLeaks": [],
+      "repeatChances": 2,
+      "repeats": []
+    },
+    {
+      "id": "r9-en-leak-seasons",
+      "passed": true,
+      "failures": [],
+      "actions": [
+        "next_step"
+      ],
+      "checks": [
+        []
+      ],
+      "teachingReplies": 1,
+      "teachingLeaks": [
+        1
+      ],
+      "helpReplies": 0,
+      "helpLeaks": [],
+      "repeatChances": 1,
+      "repeats": []
+    },
+    {
+      "id": "r9-en-leak-sound",
+      "passed": true,
+      "failures": [],
+      "actions": [
+        "next_step"
+      ],
+      "checks": [
+        []
+      ],
+      "teachingReplies": 1,
+      "teachingLeaks": [
+        1
+      ],
+      "helpReplies": 0,
+      "helpLeaks": [],
+      "repeatChances": 1,
+      "repeats": []
+    },
+    {
+      "id": "r9-he-leak-foodchain",
+      "passed": true,
+      "failures": [],
+      "actions": [
+        "next_step"
+      ],
+      "checks": [
+        []
+      ],
+      "teachingReplies": 1,
+      "teachingLeaks": [],
+      "helpReplies": 0,
+      "helpLeaks": [],
+      "repeatChances": 1,
+      "repeats": []
+    },
+    {
+      "id": "ho4-en-misconception",
+      "passed": false,
+      "failures": [
+        "turn 1: action check_earlier, wanted hint"
+      ],
+      "actions": [
+        "check_earlier"
+      ],
+      "checks": [
+        []
+      ],
+      "teachingReplies": 0,
+      "teachingLeaks": [],
+      "helpReplies": 0,
+      "helpLeaks": [],
+      "repeatChances": 0,
+      "repeats": []
+    },
+    {
+      "id": "ho3-en-narrowing",
+      "passed": true,
+      "failures": [],
+      "actions": [
+        "hint",
+        "hint",
+        "next_step"
+      ],
+      "checks": [
+        [],
+        [],
+        [
+          "whole_question_right"
+        ]
+      ],
+      "teachingReplies": 1,
+      "teachingLeaks": [
+        3
+      ],
+      "helpReplies": 0,
+      "helpLeaks": [],
+      "repeatChances": 1,
+      "repeats": []
+    },
+    {
+      "id": "ho3-en-journey",
+      "passed": true,
+      "failures": [],
+      "actions": [
+        "hint",
+        "next_step",
+        "hint",
+        "next_step",
+        "answer_question",
+        "final_check",
+        "final_check",
+        "final_check",
+        "summary"
+      ],
+      "checks": [
+        [],
+        [
+          "whole_question_right"
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "teachingReplies": 1,
+      "teachingLeaks": [
+        4
+      ],
+      "helpReplies": 0,
+      "helpLeaks": [],
+      "repeatChances": 6,
+      "repeats": []
+    },
+    {
+      "id": "ho3-he-narrowing",
+      "passed": true,
+      "failures": [],
+      "actions": [
+        "hint",
+        "hint",
+        "next_step"
+      ],
+      "checks": [
+        [],
+        [],
+        [
+          "whole_question_right"
+        ]
+      ],
+      "teachingReplies": 0,
+      "teachingLeaks": [],
+      "helpReplies": 0,
+      "helpLeaks": [],
+      "repeatChances": 1,
+      "repeats": []
+    },
+    {
+      "id": "ho4-he-narrowing",
+      "passed": true,
+      "failures": [],
+      "actions": [
+        "hint",
+        "hint",
+        "next_step"
+      ],
+      "checks": [
+        [],
+        [],
+        [
+          "whole_question_right"
+        ]
+      ],
+      "teachingReplies": 1,
+      "teachingLeaks": [],
+      "helpReplies": 0,
+      "helpLeaks": [],
+      "repeatChances": 0,
+      "repeats": []
+    },
+    {
+      "id": "ho3-he-journey",
+      "passed": true,
+      "failures": [],
+      "actions": [
+        "hint",
+        "next_step",
+        "answer_question",
+        "next_step",
+        "hint",
+        "final_check",
+        "final_check",
+        "final_check",
+        "summary"
+      ],
+      "checks": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "teachingReplies": 0,
+      "teachingLeaks": [],
+      "helpReplies": 0,
+      "helpLeaks": [],
+      "repeatChances": 5,
+      "repeats": []
+    }
+  ]
+}

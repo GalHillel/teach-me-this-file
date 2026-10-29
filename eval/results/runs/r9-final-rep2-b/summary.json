@@ -1,0 +1,163 @@
+{
+  "meta": {
+    "label": "r9-final-rep2-b",
+    "mode": "model",
+    "split": "final9",
+    "systems": [
+      "engine"
+    ],
+    "date": "2026-10-29T07:34:15.727Z",
+    "provider": "remote",
+    "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+    "models": {
+      "main": "gemini-3.5-flash-lite",
+      "backup": "gemini-3.5-flash-lite"
+    },
+    "commit": "feab2bed22a9a843a3ee3e11b70fd8f784b25583",
+    "uncommittedChanges": false,
+    "engineVersion": "01ce0017aef5",
+    "promptVersion": "22cf52e5cd15",
+    "node": "v24.22.1",
+    "scenariosVersion": "696b74f68208",
+    "scenarioIds": [
+      "f9-en-understands"
+    ],
+    "pauseMs": 4500
+  },
+  "systems": {
+    "engine": {
+      "counts": {
+        "planned": 1,
+        "complete": 22,
+        "infraErrors": [],
+        "stoppedOnQuota": [
+          "f9-he-prerequisite"
+        ],
+        "notRun": []
+      },
+      "modelCalls": {
+        "gemini-3.5-flash-lite": 87
+      },
+      "summary": {
+        "scenarios": 22,
+        "scenarioPass": 0.909,
+        "turns": 41,
+        "actionFit": 0.927,
+        "interventionFit": null,
+        "unearnedMoves": 0,
+        "overclaims": "0/15",
+        "stateMatch": "23/23",
+        "prerequisiteRecovery": "1/2",
+        "helpInFinalCheck": 0,
+        "endStateMatch": 1,
+        "supportProblems": 0,
+        "returnTurnsFit": "1/2",
+        "lessonsCompleted": "1/1",
+        "latencyMs": {
+          "turns": 41,
+          "p50": 3597,
+          "p95": 7241
+        },
+        "grading": {
+          "answers": 37,
+          "verdictAccuracy": 0.919,
+          "falsePositives": "0/14",
+          "falseNegatives": "3/20",
+          "issueAccuracy": "4/4",
+          "misconceptionNamed": "0/0"
+        },
+        "paraphraseConsistency": "1/1",
+        "text": {
+          "replies": 41,
+          "approvalOnNotCorrect": 0,
+          "repeatedHelp": 0,
+          "endsWithQuestion": 0.925,
+          "citedReplies": 0.585,
+          "invalidCitationIds": 2,
+          "unverifiedQuotes": 0,
+          "citationSupportMean": 0.623,
+          "weaklySupportedCitations": "3/40",
+          "missingTag": 0
+        },
+        "byCategory": {
+          "understands": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "misconception": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "partial": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "copied": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "not_in_document": {
+            "scenarios": 2,
+            "passed": 1
+          },
+          "other_part": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "student_instruction": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "ambiguous": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "narrowing": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "prerequisite": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "fragile_prerequisite": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "journey": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "paraphrase": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "wrong_reasoning": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "misread": {
+            "scenarios": 1,
+            "passed": 1
+          }
+        },
+        "failures": [
+          {
+            "id": "f9-en-fragile-prerequisite",
+            "problems": [
+              "turn 3: action ask_again, wanted back_to_question",
+              "turn 4: action ask_again, wanted final_check"
+            ]
+          },
+          {
+            "id": "f9-he-not-in-document",
+            "problems": [
+              "turn 1: action ask_again, wanted answer_question",
+              "turn 1: did not say the document does not cover it"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -107,3 +107,60 @@ Repeats are separate run directories (`r9-final-rep1`, ...). A repeat that does 
 ## What the scripted student does in the final check
 
 The final check asks about steps in an order each engine chooses. A turn with `about` is the scripted answer to the final-check question about that step. When the engine asks about a different step than the next scripted answer, the runner sends the pending answer whose `about` matches the step asked, as a real student would answer the question in front of them. Plain has no visible queue, so its answers go in the written order. This rule is new in round 9 and applies to all systems and all sets.
+
+## Results (added after the runs; incomplete)
+
+Runs on 28 October (16:20 to 17:23 UTC, stopped by the quota) and 29 October (07:12 to 08:14 UTC, stopped by the quota). Every call was answered by `gemini-3.5-flash-lite`. B ran at `feab2be`; A1 at `28b8f2e` with the round-9 harness. Raw results: `eval/results/runs/r9-final-rep1-*`, `r9-final-rep2-*`, `r9-regress-b`; the comparison is `eval/results/r9-final-compare.json`, the regression summary `eval/results/r9-regress-b.json`.
+
+**What is complete:** repeat 1 for all three systems (Plain is missing one paraphrase group, refused by the provider as `blocked`). Repeat 2 stopped on the quota after 23 of 26 scenarios for A1 and 22 for B and Plain; the three missing Hebrew scenarios are two targeted ones and the Hebrew journey. Repeat 3 and the A1 regression run have not run. This comparison is not complete.
+
+### final9, conversations passed
+
+| | A1 rep 1 | A1 rep 2 | B rep 1 | B rep 2 | Plain rep 1 | Plain rep 2 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Not targeted | 16/18 | 16/17 | 14/18 | 16/17 | 10/18 | 12/17 |
+| Targeted | 0/6 | 0/5 | 6/6 | 3/4 | 2/6 | 2/4 |
+| All | 16/24 | 16/22 | 20/24 | 19/21 | 12/24 | 14/21 |
+
+### Other measures, both repeats together
+
+| | A1 | B | Plain |
+| --- | --- | --- | --- |
+| False acceptance | 1/34 | 1/33 | 0/33 |
+| False rejection | 5/48 | 4/49 | 3/43 |
+| Overclaims | 4/37 | 0/35 | n/a |
+| Unsupported advancement | 1 | 1 | 0 |
+| Prerequisite recovery | 2/7 | 5/6 | 0/6 |
+| Answer leakage in teaching (automatic) | 11/18 | 8/22 | 0/22 |
+| Answer leakage in help (automatic) | 12/34 | 5/26 | 5/33 |
+| Unnecessary repetition | 10/44 | 2/43 | 4/43 |
+| Approval on a wrong answer: automatic / read by hand | 3 / 1 | 2 / 1 | 1 / 1 |
+| "Not in the document" missing | 0 | 2 | 0 |
+| Invalid citation ids | 0 | 2 | 0 |
+| Weakly supported citations | 6/116 | 5/96 | 6/71 |
+| Model calls | 201 | 205 | 96 |
+| Time per turn, median / 95th percentile, repeat 2 | 3.8 s / 6.9 s | 3.6 s / 7.2 s | 2.4 s / 4.0 s |
+| Scenarios that changed pass or fail between repeats | 0 | 3 | 2 |
+
+Repeat 1's 95th percentile was 41 to 44 s for the engines and 20 s for Plain: the provider was slow on the evening of 28 October.
+
+All 8 leaks the automatic check flagged in B's teaching replies were read by hand and are real: the reply states the idea that answers the new step's check question (for example "Earth acts like a giant magnet ... a small magnet ... opposite poles attract", then "Why does a compass needle point north?"). The "approval" flags on `f9-he-copied` for A1 and B are false: "במילים שמופיעות בדיוק במקור" ("in the words exactly as in the source"); the one real case for each engine is "נכון מאוד" to the answer "זה עובש", which both graded correct and the label calls partial.
+
+### Decision rules
+
+- Rule 1 (B better in general): no. On not-targeted scenarios B passed fewer than A1 in repeat 1 (14 against 16) and the same in repeat 2 (16 and 16).
+- Rule 2 (B worse in general): no. A1 did not pass more in every repeat.
+- Rule 3: **no measurable difference outside the targeted cases.** The repeat-1 difference of 2 is smaller than the 3 scenarios that flipped for B between repeats.
+- Rule 4: **B's rules work in the targeted cases:** 9 of 10 targeted runs passed, against 0 of 11 for A1.
+- Where B lost on not-targeted scenarios: `f9-he-not-in-document` in both repeats (the grader called a question about eggs in the fridge `off_topic`, so the tutor redirected without saying the document does not cover it; A1 called it a question in both repeats), and `f9-en-copied` in repeat 1 (the pasted rule graded as answering another question).
+
+### The round-9 fixes on a real model (B, regression run, one repeat)
+
+| Fix | Scenarios | Result |
+| --- | --- | --- |
+| 96, a whole answer after narrowing asked again | `ho3-en-narrowing`, `ho3-en-journey`, `ho3-he-narrowing`, `ho4-he-narrowing`; final9 `whole_answer` scenarios in both repeats | Closed in these runs: 4 of 4 and 4 of 4, each with the second grade `whole_question_right` |
+| 96, the teaching answers the check question | `r9-en-leak-seasons`, `r9-en-leak-sound`, `r9-he-leak-foodchain`, and every next-step reply | Not closed: 2 of 3 leak scenarios still leak; over final9, 8 of 22 next-step replies against 11 of 18 for A1 |
+| 104, back to an earlier step when the current step teaches the idea | `ho4-en-misconception` | Not closed: the grader still named the earlier step, and the reminder then gave that step's answer before asking it |
+| 105, a wrong reason graded as answering another question | `r9-en-final-wrong-reason`, `ho3-he-journey` | Closed in these runs: both wrong-reason final answers graded `incorrect` with no issue, and the check moved on |
+
+None of this says whether students learn more.

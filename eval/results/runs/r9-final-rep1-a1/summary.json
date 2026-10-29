@@ -1,0 +1,209 @@
+{
+  "meta": {
+    "label": "r9-final-rep1-a1",
+    "mode": "model",
+    "split": "final9",
+    "systems": [
+      "engine"
+    ],
+    "date": "2026-10-28T16:22:14.437Z",
+    "provider": "remote",
+    "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+    "models": {
+      "main": "gemini-3.5-flash-lite",
+      "backup": "gemini-3.5-flash-lite"
+    },
+    "commit": "28b8f2ee72f498eceaf8827985709b40b7af1ef9",
+    "uncommittedChanges": true,
+    "engineVersion": "636e74161c92",
+    "promptVersion": "92c866cd3696",
+    "node": "v24.22.1",
+    "scenariosVersion": "696b74f68208",
+    "scenarioIds": [
+      "f9-en-understands"
+    ],
+    "pauseMs": 4500
+  },
+  "systems": {
+    "engine": {
+      "counts": {
+        "planned": 1,
+        "complete": 26,
+        "infraErrors": [],
+        "stoppedOnQuota": [],
+        "notRun": []
+      },
+      "modelCalls": {
+        "gemini-3.5-flash-lite": 112
+      },
+      "summary": {
+        "scenarios": 26,
+        "scenarioPass": 0.692,
+        "turns": 53,
+        "actionFit": 0.811,
+        "interventionFit": null,
+        "unearnedMoves": 1,
+        "overclaims": "2/20",
+        "stateMatch": "23/30",
+        "prerequisiteRecovery": "1/4",
+        "helpInFinalCheck": 0,
+        "endStateMatch": 0.75,
+        "supportProblems": 0,
+        "returnTurnsFit": "1/2",
+        "lessonsCompleted": "2/2",
+        "latencyMs": {
+          "turns": 53,
+          "p50": 4812,
+          "p95": 41483
+        },
+        "grading": {
+          "answers": 49,
+          "verdictAccuracy": 0.918,
+          "falsePositives": "1/19",
+          "falseNegatives": "3/27",
+          "issueAccuracy": "4/4",
+          "misconceptionNamed": "0/0"
+        },
+        "paraphraseConsistency": "2/2",
+        "text": {
+          "replies": 53,
+          "approvalOnNotCorrect": 2,
+          "repeatedHelp": 0,
+          "endsWithQuestion": 0.922,
+          "citedReplies": 0.698,
+          "invalidCitationIds": 0,
+          "unverifiedQuotes": 0,
+          "citationSupportMean": 0.651,
+          "weaklySupportedCitations": "3/66",
+          "missingTag": 0
+        },
+        "byCategory": {
+          "understands": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "misconception": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "partial": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "copied": {
+            "scenarios": 2,
+            "passed": 1
+          },
+          "not_in_document": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "other_part": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "student_instruction": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "ambiguous": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "narrowing": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "prerequisite": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "fragile_prerequisite": {
+            "scenarios": 2,
+            "passed": 0
+          },
+          "journey": {
+            "scenarios": 2,
+            "passed": 1
+          },
+          "paraphrase": {
+            "scenarios": 2,
+            "passed": 2
+          },
+          "wrong_reasoning": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "misread": {
+            "scenarios": 1,
+            "passed": 1
+          }
+        },
+        "failures": [
+          {
+            "id": "f9-en-whole-after-help",
+            "problems": [
+              "turn 2: action back_to_question, wanted next_step",
+              "end: step 1 state emerging, wanted developing",
+              "end: step 1, wanted 2"
+            ]
+          },
+          {
+            "id": "f9-en-prerequisite",
+            "problems": [
+              "turn 2: action ask_again, wanted back_to_question",
+              "turn 3: action ask_again, wanted final_check",
+              "end: step 1 state demonstrated, wanted needs_review",
+              "end: step 3 state emerging, wanted developing"
+            ]
+          },
+          {
+            "id": "f9-en-fragile-prerequisite",
+            "problems": [
+              "turn 2: action hint, wanted check_earlier",
+              "turn 3: action back_to_question, wanted final_check",
+              "end: step 3 state emerging, wanted developing"
+            ]
+          },
+          {
+            "id": "f9-he-copied",
+            "problems": [
+              "turn 1: approval language on an answer that was not correct"
+            ]
+          },
+          {
+            "id": "f9-he-whole-after-help",
+            "problems": [
+              "turn 2: action back_to_question, wanted next_step",
+              "end: step 2 state emerging, wanted developing",
+              "end: step 2, wanted 3"
+            ]
+          },
+          {
+            "id": "f9-he-prerequisite",
+            "problems": [
+              "end: step 1 state demonstrated, wanted needs_review"
+            ]
+          },
+          {
+            "id": "f9-he-fragile-prerequisite",
+            "problems": [
+              "turn 2: action hint, wanted check_earlier",
+              "turn 3: action back_to_question, wanted final_check",
+              "end: step 3 state emerging, wanted developing"
+            ]
+          },
+          {
+            "id": "f9-he-journey",
+            "problems": [
+              "turn 1: action next_step, wanted hint",
+              "turn 1: moved on without evidence",
+              "turn 1: approval language on an answer that was not correct",
+              "turn 2: action ask_again, wanted next_step"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

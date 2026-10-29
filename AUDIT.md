@@ -255,6 +255,59 @@ What happened to each of these in round 7 is in the last column of the state map
 | Medium | No real learners | Run `pilot/PROTOCOL.md` |
 | Low | 104, 105; a step introduction that gives away the check question's answer (production, Hebrew, step 3) | More prerequisite and final-check scenarios; a check in the tutor prompt that the introduction does not answer the check question |
 
+## Ninth round: evidence before more engine, 28 and 29 October
+
+### State at the start of the round
+
+| Question | Answer, checked on 28 October, 15:45 UTC |
+| --- | --- |
+| What is deployed | Production deployment `dpl_9BRgZkyZUvsAPQtKzvHfi5B87Nxi` at `7545a6b`, the same as `main` and `round8`; the served bundle `index-CrdjGov2.js` matches a fresh build |
+| Working tree | Clean; branch `round9` made from `round8` |
+| Tests | 314 unit, property and API tests pass; lint clean |
+| Secrets | `snap_ZcBcR8V0UWWgBppIXRvLfCZmGWBa` (round 6, holds a key copy) still listed with status `created`, expiring 2 November; the other two snapshots hold no key. `/api/health` reports `serverKey: true`. Whether the key was rotated cannot be seen without reading environment values, which I did not do |
+
+### Findings list before any change
+
+| # | Status at the start | Evidence |
+| --- | --- | --- |
+| 89, 95, 99, 102, 103 | Fixed, checked live in round 8 | Production runs of 28 October (`eval/results/production-r8*.json`); not re-run in round 9 |
+| 93, 100, 101 | Fixed in round 8 with regression tests; 93 read by hand on held-out-4 | Tests; not re-checked live |
+| 94 | Open, not reproducible | Seen 3 times on `gemini-2.5-flash` on 27 October, never on Flash-Lite |
+| 96, intro | Confirmed, and wider than recorded | Production Hebrew step 3 listed the examples its check question asked for. Re-reading the round-8 held-out-4 runs with the leak measure of round 9: a move to the next step answered the new step's check question in 4 of 5 replies for A0, 4 of 4 for A1 and 5 of 5 for B (0 of 5 for Plain, which asks without teaching) |
+| 96, repeat | Confirmed | Held-out-3 policy layer: 3 of 18 fail on it; production Hebrew step 3 asked again after a whole answer |
+| 104 | Confirmed | Held-out-4, `ho4-en-misconception`, A1 and B |
+| 105 | Two of three cases confirmed, one not a defect | On production, "the Moon is too far away" and "too weak to be heard that far away" were attempts at the asked question graded as answers to another question. The third, "water is denser", was sent by my production driver while the tutor was asking a different final-check question, so `misread_question` was the right grade |
+| 88 | Open, owner action | Snapshot above |
+
+### Findings
+
+Each fix began with a test that failed on `7545a6b` (7 tests; `eval/results/r9-failing-before.txt`) and passes on `c48640b`. Prompt tests only show that the instruction is there; whether the model follows it is in the last column.
+
+| # | Sev. | Area | Problem | Root cause | Fix | Verification | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 96 | Medium | Teaching | A whole answer given right after narrowing help was asked again. | The engine sent every right answer after narrowing help back to the whole question, because the grader graded it against the narrowed question and its "meets the step" flag was unreliable (84). | When a right, unqualified answer follows narrowing help, the server grades it a second time against the step's planned check question, in a separate call. If that grade is also right, with no issue and not low confidence, the step ends as shown with help. | 3 progress tests, 4 API tests with a mock grader. Real model (B, Flash-Lite): 4 of 4 regression scenarios and 4 of 4 final9 `whole_answer` runs moved on after the second grade | Fixed, checked on the model |
+| 96 | Medium | Teaching | Teaching a new step answered its check question (production, and 13 of 14 next-step replies in the round-8 held-out-4 runs). | The instruction "teach its idea with one concrete example, then ask its check question" puts the answer and the question in one message. | The teaching instruction says not to answer the check question, to use a different case and not to list what the question asks for; going back to the whole question no longer states the rest of the answer. | Prompt tests. Real model: less but not gone. Next-step replies that answer the check question: 8 of 22 for B against 11 of 18 for A1 on final9; 2 of 3 leak regression scenarios still leak. Read by hand, the leaks are real: the reply teaches the principle the question asks for | Partly fixed; open |
+| 104 | Low | Grading | An answer that repeats an earlier step's common mistake sent the student back to that step when the current step itself teaches the idea. | The grader rule named the earlier step for any repeat of its common mistake. | The grader leaves `missingPrerequisite` at 0 when the current step's goal or success criteria cover the missing idea. | Prompt test. Real model: `ho4-en-misconception` still went back to the earlier step, and the reminder gave the earlier step's answer before asking it | Not fixed on the model |
+| 105 | Low | Grading | A wrong-reason final-check answer was graded as answering another question twice, and the step failed by the stall rule. | `misread_question` had no rule for an attempt at the asked question with a wrong reason. | Such an attempt is `incorrect` or `partial` with issue `none`, and the wrong idea goes in `misconception`. The harness now answers the final-check question the engine actually asks, which removes the third production case (a driver error, not a grading error). | Prompt test. Real model: 2 of 2 wrong-reason final answers graded `incorrect` with no issue, and the check moved on | Fixed in the runs so far |
+| 106 | Medium | Grading | A question related to the topic but not covered by the document ("how long can eggs stay in the fridge?") was graded `off_topic` by B in both repeats, so the tutor redirected without saying the document does not cover it. A1 graded it a question in both repeats. | The grader's verdict depends on wording it should not depend on; the only difference between the A1 and B grader prompts is the two round-9 rules. The server turns `off_topic` into a question only when a related passage was found. | None yet; B is frozen until the evaluation ends. Proposed: a message shaped as a question, with no grading instruction, is a question even without a related passage | final9 `f9-he-not-in-document`, both repeats | Open |
+| 107 | Low | Teaching | A check of an earlier step can state that step's answer and then ask it (`ho4-en-misconception`, `f9-en-fragile-prerequisite` repeat 2). | The instruction asks for a reminder with an example, then a question about the same idea. | None yet | Real model, read by hand | Open |
+| 108 | Low | Eval | The approval check flags "בדיוק במקור" ("exactly as in the source") as praise (also 92, 93). | Pattern | None; counted as written, with the hand count next to it | final9 | Accepted |
+
+### Evaluation
+
+Pre-registered in `eval/PREREGISTRATION.md` and committed with a new set (final9, 26 scenarios on two new lessons) before any run. Results so far, on Flash-Lite with repeat 1 complete and repeat 2 at 22 to 23 of 26 scenarios: on scenarios not written for B's rules, A1 passed 16/18 and 16/17, B 14/18 and 16/17, Plain 10/18 and 12/17, which by the pre-registered rule is no measurable difference. On the 6 targeted scenarios B passed 9 of 10 runs and A1 0 of 11. B claimed no step as shown that was not (0/35 against 4/37) and asked again after a whole answer less (2/43 against 10/44). Details and the decision rules are in the pre-registration's results section.
+
+### Open after round 9
+
+| Sev. | What | Next step |
+| --- | --- | --- |
+| High | The round-6 snapshot with a key copy (88) still exists | Owner: delete `snap_ZcBcR8V0UWWgBppIXRvLfCZmGWBa` and rotate the key |
+| Medium | final9 repeats 2 and 3 and the A1 regression run are incomplete | Continue on the next quota day with the same code and model |
+| Medium | Teaching still answers the check question in about a third of next-step replies (96) | Separate teaching from checking: ask the check question after the student has replied to the teaching, or have the plan's check question need more than the taught sentence |
+| Medium | 106 | The proposed rule, after the evaluation ends, with its own regression scenario |
+| Medium | No real learners | Run `pilot/PROTOCOL.md`; it is NOT RUN |
+| Low | 104, 107 | More prerequisite scenarios; read the grader's reason on each |
+
 ## Requirements matrix
 
 Status after the upgrade. "Live" refers to the browser runs against production on 24 October, listed in [DECISIONS.md](DECISIONS.md#live-checks-24-october-morning).

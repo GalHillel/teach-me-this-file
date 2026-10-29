@@ -1,0 +1,8 @@
+     × grades again against the step's check question and ends the step when that grade is right too 35ms
+     × asks the whole question when the answer is not right against it 27ms
+     × ends the step when the server found the answer right against the whole check question 13ms
+     × records the answer as given after narrowing help, so the step is not shown on its own 2ms
+     × tells the tutor not to answer the check question while teaching the step, for every approach (AUDIT 96) 10ms
+     × names an earlier step only when the missing idea is not taught by the current step (AUDIT 104) 7ms
+     × keeps an attempt at the asked question with a wrong reason out of misread_question (AUDIT 105) 5ms
+      Tests  7 failed | 115 passed (122)

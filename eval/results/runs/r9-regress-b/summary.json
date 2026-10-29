@@ -1,0 +1,113 @@
+{
+  "meta": {
+    "label": "r9-regress-b",
+    "mode": "model",
+    "split": "all",
+    "systems": [
+      "engine"
+    ],
+    "date": "2026-10-29T07:28:30.022Z",
+    "provider": "remote",
+    "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+    "models": {
+      "main": "gemini-3.5-flash-lite",
+      "backup": "gemini-3.5-flash-lite"
+    },
+    "commit": "feab2bed22a9a843a3ee3e11b70fd8f784b25583",
+    "uncommittedChanges": false,
+    "engineVersion": "01ce0017aef5",
+    "promptVersion": "22cf52e5cd15",
+    "node": "v24.22.1",
+    "scenariosVersion": "696b74f68208",
+    "scenarioIds": [
+      "r9-en-final-wrong-reason"
+    ],
+    "pauseMs": 4500
+  },
+  "systems": {
+    "engine": {
+      "counts": {
+        "planned": 1,
+        "complete": 10,
+        "infraErrors": [],
+        "stoppedOnQuota": [],
+        "notRun": []
+      },
+      "modelCalls": {
+        "gemini-3.5-flash-lite": 74
+      },
+      "summary": {
+        "scenarios": 10,
+        "scenarioPass": 0.9,
+        "turns": 35,
+        "actionFit": 0.971,
+        "interventionFit": null,
+        "unearnedMoves": 0,
+        "overclaims": "0/2",
+        "stateMatch": "2/2",
+        "prerequisiteRecovery": null,
+        "helpInFinalCheck": 0,
+        "endStateMatch": 1,
+        "supportProblems": 0,
+        "returnTurnsFit": "4/4",
+        "lessonsCompleted": "3/3",
+        "latencyMs": {
+          "turns": 35,
+          "p50": 4124,
+          "p95": 9282
+        },
+        "grading": {
+          "answers": 33,
+          "verdictAccuracy": 1,
+          "falsePositives": "0/11",
+          "falseNegatives": "0/19",
+          "issueAccuracy": "2/2",
+          "misconceptionNamed": "0/0"
+        },
+        "paraphraseConsistency": null,
+        "text": {
+          "replies": 35,
+          "approvalOnNotCorrect": 0,
+          "repeatedHelp": 0,
+          "endsWithQuestion": 0.875,
+          "citedReplies": 0.714,
+          "invalidCitationIds": 0,
+          "unverifiedQuotes": 0,
+          "citationSupportMean": 0.664,
+          "weaklySupportedCitations": "2/44",
+          "missingTag": 0
+        },
+        "byCategory": {
+          "transfer": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "understands": {
+            "scenarios": 3,
+            "passed": 3
+          },
+          "misconception": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "narrowing": {
+            "scenarios": 3,
+            "passed": 3
+          },
+          "journey": {
+            "scenarios": 2,
+            "passed": 2
+          }
+        },
+        "failures": [
+          {
+            "id": "ho4-en-misconception",
+            "problems": [
+              "turn 1: action check_earlier, wanted hint"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
