@@ -1,0 +1,25 @@
+{
+  "label": "r9-final-rep3-plain",
+  "mode": "model",
+  "split": "final9",
+  "systems": [
+    "plain"
+  ],
+  "date": "2026-10-30T07:14:23.504Z",
+  "provider": "remote",
+  "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+  "models": {
+    "main": "gemini-3.5-flash-lite",
+    "backup": "gemini-3.5-flash-lite"
+  },
+  "commit": "feab2bed22a9a843a3ee3e11b70fd8f784b25583",
+  "uncommittedChanges": false,
+  "engineVersion": "01ce0017aef5",
+  "promptVersion": "22cf52e5cd15",
+  "node": "v24.22.1",
+  "scenariosVersion": "696b74f68208",
+  "scenarioIds": [
+    "f9-en-understands"
+  ],
+  "pauseMs": 4500
+}

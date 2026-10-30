@@ -28,22 +28,17 @@
     "plain": {
       "counts": {
         "planned": 1,
-        "complete": 25,
-        "infraErrors": [
-          {
-            "id": "f9-he-paraphrase",
-            "error": "blocked"
-          }
-        ],
+        "complete": 26,
+        "infraErrors": [],
         "stoppedOnQuota": [],
         "notRun": []
       },
       "modelCalls": {
-        "gemini-3.5-flash-lite": 54
+        "gemini-3.5-flash-lite": 57
       },
       "summary": {
-        "scenarios": 25,
-        "scenarioPass": 0.52,
+        "scenarios": 26,
+        "scenarioPass": 0.538,
         "turns": 51,
         "actionFit": 0.686,
         "interventionFit": null,
@@ -69,7 +64,7 @@
           "issueAccuracy": "0/4",
           "misconceptionNamed": "0/0"
         },
-        "paraphraseConsistency": "1/1",
+        "paraphraseConsistency": "2/2",
         "text": {
           "replies": 51,
           "approvalOnNotCorrect": 0,
@@ -132,8 +127,8 @@
             "passed": 0
           },
           "paraphrase": {
-            "scenarios": 1,
-            "passed": 1
+            "scenarios": 2,
+            "passed": 2
           },
           "wrong_reasoning": {
             "scenarios": 1,

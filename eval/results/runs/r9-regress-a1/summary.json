@@ -1,0 +1,127 @@
+{
+  "meta": {
+    "label": "r9-regress-a1",
+    "mode": "model",
+    "split": "all",
+    "systems": [
+      "engine"
+    ],
+    "date": "2026-10-30T07:36:07.971Z",
+    "provider": "remote",
+    "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+    "models": {
+      "main": "gemini-3.5-flash-lite",
+      "backup": "gemini-3.5-flash-lite"
+    },
+    "commit": "28b8f2ee72f498eceaf8827985709b40b7af1ef9",
+    "uncommittedChanges": true,
+    "engineVersion": "636e74161c92",
+    "promptVersion": "92c866cd3696",
+    "node": "v24.22.1",
+    "scenariosVersion": "696b74f68208",
+    "scenarioIds": [
+      "r9-en-final-wrong-reason"
+    ],
+    "pauseMs": 4500
+  },
+  "systems": {
+    "engine": {
+      "counts": {
+        "planned": 1,
+        "complete": 10,
+        "infraErrors": [],
+        "stoppedOnQuota": [],
+        "notRun": []
+      },
+      "modelCalls": {
+        "gemini-3.5-flash-lite": 72
+      },
+      "summary": {
+        "scenarios": 10,
+        "scenarioPass": 0.7,
+        "turns": 36,
+        "actionFit": 0.917,
+        "interventionFit": null,
+        "unearnedMoves": 0,
+        "overclaims": "0/2",
+        "stateMatch": "2/2",
+        "prerequisiteRecovery": null,
+        "helpInFinalCheck": 0,
+        "endStateMatch": 0.9,
+        "supportProblems": 0,
+        "returnTurnsFit": "4/4",
+        "lessonsCompleted": "3/3",
+        "latencyMs": {
+          "turns": 36,
+          "p50": 3414,
+          "p95": 5056
+        },
+        "grading": {
+          "answers": 34,
+          "verdictAccuracy": 1,
+          "falsePositives": "0/11",
+          "falseNegatives": "0/20",
+          "issueAccuracy": "2/2",
+          "misconceptionNamed": "0/0"
+        },
+        "paraphraseConsistency": null,
+        "text": {
+          "replies": 36,
+          "approvalOnNotCorrect": 0,
+          "repeatedHelp": 0,
+          "endsWithQuestion": 0.939,
+          "citedReplies": 0.75,
+          "invalidCitationIds": 0,
+          "unverifiedQuotes": 0,
+          "citationSupportMean": 0.672,
+          "weaklySupportedCitations": "3/55",
+          "missingTag": 0
+        },
+        "byCategory": {
+          "transfer": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "understands": {
+            "scenarios": 3,
+            "passed": 3
+          },
+          "misconception": {
+            "scenarios": 1,
+            "passed": 0
+          },
+          "narrowing": {
+            "scenarios": 3,
+            "passed": 2
+          },
+          "journey": {
+            "scenarios": 2,
+            "passed": 1
+          }
+        },
+        "failures": [
+          {
+            "id": "ho4-en-misconception",
+            "problems": [
+              "turn 1: action check_earlier, wanted hint"
+            ]
+          },
+          {
+            "id": "ho3-en-narrowing",
+            "problems": [
+              "turn 3: action back_to_question, wanted next_step",
+              "end: step 2 level in_progress, wanted shown_with_help",
+              "end: step 2, wanted 3"
+            ]
+          },
+          {
+            "id": "ho3-en-journey",
+            "problems": [
+              "turn 2: action back_to_question, wanted next_step"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

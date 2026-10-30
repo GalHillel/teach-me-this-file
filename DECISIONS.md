@@ -731,10 +731,10 @@ The findings are in [AUDIT.md](AUDIT.md), 88 to 97, with the open list after the
 - The pilot protocol compares the app with reading alone, with two topics per language.
 
 
-## What changed in the ninth round (28 and 29 October)
+## What changed in the ninth round (28 to 30 October)
 
 - No new engine layer. Three known defects worked on, each from a failing test (AUDIT 96, 104, 105). A right answer after narrowing help is graded again against the step's check question, so a whole answer ends the step instead of being asked again; teaching a step is told not to answer its check question; two grader rules for earlier steps and wrong reasons.
 - An evaluation pre-registered before any run (`eval/PREREGISTRATION.md`): a new set of 26 scenarios on two new lessons, each tagged as targeted at a rule only B has or not, two new measures (answer leakage, unnecessary repetition), a comparison script that reports targeted and not-targeted scenarios apart, and decision rules fixed in advance.
-- Results so far on Flash-Lite, repeat 1 complete and repeat 2 mostly: outside the targeted scenarios A1 and B pass about the same (16/18 and 16/17 against 14/18 and 16/17), which the rules call no measurable difference; on the targeted ones B passes 9 of 10 and A1 0 of 11. Two of the three fixes hold on the model (96 repetition, 105); the teaching still answers the check question in a third of next-step replies, and 104 did not change. B newly graded an uncovered question as off topic in both repeats (AUDIT 106).
+- Results on Flash-Lite, three complete repeats: outside the targeted scenarios A1 passed 16, 16 and 16 of 18 and B 14, 17 and 15, which the rules call no measurable difference; on the targeted ones B passed 17 of 18 and A1 0 of 18. On the model, 96 repetition is closed (B 6 of 6 final9 runs, A1 0 of 6); the teaching still answers the check question in about 4 of 10 next-step replies (16 of 36, A1 23 of 30); 104 did not change; 105 was not reproduced, because A1 without the rule also grades the regression answers correctly. Two of B's not-targeted losses come from grading that differs from A1 only by the round-9 rules (AUDIT 106, 109).
 - The pilot has forms and participant sheets and is still NOT RUN.
 - Production is unchanged at `7545a6b`; the round's work is on branch `round9`.

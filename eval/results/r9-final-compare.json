@@ -460,6 +460,1012 @@
       }
     },
     {
+      "system": "a1",
+      "repeat": 2,
+      "commit": "28b8f2ee72f498eceaf8827985709b40b7af1ef9",
+      "engineVersion": "636e74161c92",
+      "promptVersion": "92c866cd3696",
+      "scenariosVersion": "696b74f68208",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "complete": 26,
+      "notComplete": [],
+      "notRun": [],
+      "groups": {
+        "all": {
+          "conversations": "16/24",
+          "passedIds": [
+            "f9-en-understands",
+            "f9-en-misconception",
+            "f9-en-partial",
+            "f9-en-copied",
+            "f9-en-not-in-document",
+            "f9-en-other-part",
+            "f9-en-student-instruction",
+            "f9-en-hedged",
+            "f9-en-journey",
+            "f9-he-understands",
+            "f9-he-misconception",
+            "f9-he-partial",
+            "f9-he-not-in-document",
+            "f9-he-other-part",
+            "f9-he-wrong-reasoning",
+            "f9-he-misread"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "1/19",
+          "falseRejection": "3/27",
+          "overclaims": "2/20",
+          "unsupportedAdvancement": 1,
+          "prerequisiteRecovery": "1/4",
+          "teachingLeakage": "7/10",
+          "helpLeakage": "8/18",
+          "unnecessaryRepetition": "6/25",
+          "leaksAt": [
+            {
+              "id": "f9-en-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-en-misconception",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-en-partial",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-en-copied",
+              "teaching": [
+                2
+              ],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-en-whole-after-help",
+              "teaching": [],
+              "help": [
+                1,
+                2
+              ]
+            },
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                3
+              ]
+            },
+            {
+              "id": "f9-he-partial",
+              "teaching": [
+                2
+              ],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-he-other-part",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-whole-after-help",
+              "teaching": [],
+              "help": [
+                2
+              ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                3
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "teaching": [
+                1,
+                3
+              ],
+              "help": []
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "f9-en-whole-after-help",
+              "turns": [
+                2
+              ]
+            },
+            {
+              "id": "f9-en-prerequisite",
+              "turns": [
+                3
+              ]
+            },
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "turns": [
+                3
+              ]
+            },
+            {
+              "id": "f9-he-whole-after-help",
+              "turns": [
+                2
+              ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "turns": [
+                3
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "turns": [
+                2
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 2,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "4/62",
+          "latencyMs": {
+            "turns": 53,
+            "p50": 3863,
+            "p95": 6909
+          },
+          "modelCalls": 112,
+          "charsIn": 606295,
+          "charsOut": 39735,
+          "failures": [
+            {
+              "id": "f9-en-whole-after-help",
+              "problems": [
+                "turn 2: action back_to_question, wanted next_step",
+                "end: step 1 state emerging, wanted developing",
+                "end: step 1, wanted 2"
+              ]
+            },
+            {
+              "id": "f9-en-prerequisite",
+              "problems": [
+                "turn 2: action ask_again, wanted back_to_question",
+                "turn 3: action ask_again, wanted final_check",
+                "end: step 1 state demonstrated, wanted needs_review",
+                "end: step 3 state emerging, wanted developing"
+              ]
+            },
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "problems": [
+                "turn 2: action ask_again, wanted check_earlier",
+                "turn 3: action back_to_question, wanted final_check",
+                "end: step 3 state emerging, wanted developing"
+              ]
+            },
+            {
+              "id": "f9-he-copied",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct"
+              ]
+            },
+            {
+              "id": "f9-he-whole-after-help",
+              "problems": [
+                "turn 2: action back_to_question, wanted next_step",
+                "end: step 2 state emerging, wanted developing",
+                "end: step 2, wanted 3"
+              ]
+            },
+            {
+              "id": "f9-he-prerequisite",
+              "problems": [
+                "end: step 1 state demonstrated, wanted needs_review"
+              ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier",
+                "turn 3: action back_to_question, wanted final_check",
+                "end: step 3 state emerging, wanted developing"
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "problems": [
+                "turn 1: action next_step, wanted hint",
+                "turn 1: moved on without evidence",
+                "turn 1: approval language on an answer that was not correct",
+                "turn 2: action ask_again, wanted next_step"
+              ]
+            }
+          ]
+        },
+        "targeted": {
+          "conversations": "0/6",
+          "passedIds": [],
+          "paraphraseConsistency": null,
+          "falseAcceptance": "0/8",
+          "falseRejection": "2/8",
+          "overclaims": "2/10",
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": "1/4",
+          "teachingLeakage": "0/0",
+          "helpLeakage": "5/10",
+          "unnecessaryRepetition": "5/6",
+          "leaksAt": [
+            {
+              "id": "f9-en-whole-after-help",
+              "teaching": [],
+              "help": [
+                1,
+                2
+              ]
+            },
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                3
+              ]
+            },
+            {
+              "id": "f9-he-whole-after-help",
+              "teaching": [],
+              "help": [
+                2
+              ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                3
+              ]
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "f9-en-whole-after-help",
+              "turns": [
+                2
+              ]
+            },
+            {
+              "id": "f9-en-prerequisite",
+              "turns": [
+                3
+              ]
+            },
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "turns": [
+                3
+              ]
+            },
+            {
+              "id": "f9-he-whole-after-help",
+              "turns": [
+                2
+              ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "turns": [
+                3
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 0,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "2/21",
+          "latencyMs": {
+            "turns": 16,
+            "p50": 3932,
+            "p95": 6538
+          },
+          "modelCalls": 32,
+          "charsIn": 166583,
+          "charsOut": 10970,
+          "failures": [
+            {
+              "id": "f9-en-whole-after-help",
+              "problems": [
+                "turn 2: action back_to_question, wanted next_step",
+                "end: step 1 state emerging, wanted developing",
+                "end: step 1, wanted 2"
+              ]
+            },
+            {
+              "id": "f9-en-prerequisite",
+              "problems": [
+                "turn 2: action ask_again, wanted back_to_question",
+                "turn 3: action ask_again, wanted final_check",
+                "end: step 1 state demonstrated, wanted needs_review",
+                "end: step 3 state emerging, wanted developing"
+              ]
+            },
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "problems": [
+                "turn 2: action ask_again, wanted check_earlier",
+                "turn 3: action back_to_question, wanted final_check",
+                "end: step 3 state emerging, wanted developing"
+              ]
+            },
+            {
+              "id": "f9-he-whole-after-help",
+              "problems": [
+                "turn 2: action back_to_question, wanted next_step",
+                "end: step 2 state emerging, wanted developing",
+                "end: step 2, wanted 3"
+              ]
+            },
+            {
+              "id": "f9-he-prerequisite",
+              "problems": [
+                "end: step 1 state demonstrated, wanted needs_review"
+              ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier",
+                "turn 3: action back_to_question, wanted final_check",
+                "end: step 3 state emerging, wanted developing"
+              ]
+            }
+          ]
+        },
+        "not_targeted": {
+          "conversations": "16/18",
+          "passedIds": [
+            "f9-en-understands",
+            "f9-en-misconception",
+            "f9-en-partial",
+            "f9-en-copied",
+            "f9-en-not-in-document",
+            "f9-en-other-part",
+            "f9-en-student-instruction",
+            "f9-en-hedged",
+            "f9-en-journey",
+            "f9-he-understands",
+            "f9-he-misconception",
+            "f9-he-partial",
+            "f9-he-not-in-document",
+            "f9-he-other-part",
+            "f9-he-wrong-reasoning",
+            "f9-he-misread"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "1/11",
+          "falseRejection": "1/19",
+          "overclaims": "0/10",
+          "unsupportedAdvancement": 1,
+          "prerequisiteRecovery": null,
+          "teachingLeakage": "7/10",
+          "helpLeakage": "3/8",
+          "unnecessaryRepetition": "1/19",
+          "leaksAt": [
+            {
+              "id": "f9-en-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-en-misconception",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-en-partial",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-en-copied",
+              "teaching": [
+                2
+              ],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-he-partial",
+              "teaching": [
+                2
+              ],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-he-other-part",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-journey",
+              "teaching": [
+                1,
+                3
+              ],
+              "help": []
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "f9-he-journey",
+              "turns": [
+                2
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 2,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "2/41",
+          "latencyMs": {
+            "turns": 37,
+            "p50": 3775,
+            "p95": 7551
+          },
+          "modelCalls": 80,
+          "charsIn": 439712,
+          "charsOut": 28765,
+          "failures": [
+            {
+              "id": "f9-he-copied",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct"
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "problems": [
+                "turn 1: action next_step, wanted hint",
+                "turn 1: moved on without evidence",
+                "turn 1: approval language on an answer that was not correct",
+                "turn 2: action ask_again, wanted next_step"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "system": "a1",
+      "repeat": 3,
+      "commit": "28b8f2ee72f498eceaf8827985709b40b7af1ef9",
+      "engineVersion": "636e74161c92",
+      "promptVersion": "92c866cd3696",
+      "scenariosVersion": "696b74f68208",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "complete": 26,
+      "notComplete": [],
+      "notRun": [],
+      "groups": {
+        "all": {
+          "conversations": "16/24",
+          "passedIds": [
+            "f9-en-understands",
+            "f9-en-misconception",
+            "f9-en-partial",
+            "f9-en-copied",
+            "f9-en-not-in-document",
+            "f9-en-other-part",
+            "f9-en-student-instruction",
+            "f9-en-hedged",
+            "f9-en-journey",
+            "f9-he-understands",
+            "f9-he-misconception",
+            "f9-he-partial",
+            "f9-he-not-in-document",
+            "f9-he-other-part",
+            "f9-he-wrong-reasoning",
+            "f9-he-misread"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "1/19",
+          "falseRejection": "3/27",
+          "overclaims": "2/20",
+          "unsupportedAdvancement": 1,
+          "prerequisiteRecovery": "1/4",
+          "teachingLeakage": "10/10",
+          "helpLeakage": "5/18",
+          "unnecessaryRepetition": "6/25",
+          "leaksAt": [
+            {
+              "id": "f9-en-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-en-misconception",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-en-partial",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-en-copied",
+              "teaching": [
+                2
+              ],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-en-whole-after-help",
+              "teaching": [],
+              "help": [
+                1,
+                2
+              ]
+            },
+            {
+              "id": "f9-en-journey",
+              "teaching": [
+                1,
+                3
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-partial",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-other-part",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                3
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "teaching": [
+                1,
+                3
+              ],
+              "help": []
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "f9-en-whole-after-help",
+              "turns": [
+                2
+              ]
+            },
+            {
+              "id": "f9-en-prerequisite",
+              "turns": [
+                3
+              ]
+            },
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "turns": [
+                3
+              ]
+            },
+            {
+              "id": "f9-he-whole-after-help",
+              "turns": [
+                2
+              ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "turns": [
+                3
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "turns": [
+                2
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 1,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "1/60",
+          "latencyMs": {
+            "turns": 53,
+            "p50": 3660,
+            "p95": 5743
+          },
+          "modelCalls": 112,
+          "charsIn": 576974,
+          "charsOut": 39100,
+          "failures": [
+            {
+              "id": "f9-en-whole-after-help",
+              "problems": [
+                "turn 2: action back_to_question, wanted next_step",
+                "end: step 1 state emerging, wanted developing",
+                "end: step 1, wanted 2"
+              ]
+            },
+            {
+              "id": "f9-en-prerequisite",
+              "problems": [
+                "turn 2: action ask_again, wanted back_to_question",
+                "turn 3: action ask_again, wanted final_check",
+                "end: step 1 state demonstrated, wanted needs_review",
+                "end: step 3 state emerging, wanted developing"
+              ]
+            },
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "problems": [
+                "turn 2: action ask_again, wanted check_earlier",
+                "turn 3: action back_to_question, wanted final_check",
+                "end: step 3 state emerging, wanted developing"
+              ]
+            },
+            {
+              "id": "f9-he-copied",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct"
+              ]
+            },
+            {
+              "id": "f9-he-whole-after-help",
+              "problems": [
+                "turn 2: action back_to_question, wanted next_step",
+                "end: step 2 state emerging, wanted developing",
+                "end: step 2, wanted 3"
+              ]
+            },
+            {
+              "id": "f9-he-prerequisite",
+              "problems": [
+                "end: step 1 state demonstrated, wanted needs_review"
+              ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier",
+                "turn 3: action back_to_question, wanted final_check",
+                "end: step 3 state emerging, wanted developing"
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "problems": [
+                "turn 1: action next_step, wanted hint",
+                "turn 1: moved on without evidence",
+                "turn 2: action ask_again, wanted next_step"
+              ]
+            }
+          ]
+        },
+        "targeted": {
+          "conversations": "0/6",
+          "passedIds": [],
+          "paraphraseConsistency": null,
+          "falseAcceptance": "0/8",
+          "falseRejection": "2/8",
+          "overclaims": "2/10",
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": "1/4",
+          "teachingLeakage": "0/0",
+          "helpLeakage": "3/10",
+          "unnecessaryRepetition": "5/6",
+          "leaksAt": [
+            {
+              "id": "f9-en-whole-after-help",
+              "teaching": [],
+              "help": [
+                1,
+                2
+              ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                3
+              ]
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "f9-en-whole-after-help",
+              "turns": [
+                2
+              ]
+            },
+            {
+              "id": "f9-en-prerequisite",
+              "turns": [
+                3
+              ]
+            },
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "turns": [
+                3
+              ]
+            },
+            {
+              "id": "f9-he-whole-after-help",
+              "turns": [
+                2
+              ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "turns": [
+                3
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 0,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "0/17",
+          "latencyMs": {
+            "turns": 16,
+            "p50": 3794,
+            "p95": 5743
+          },
+          "modelCalls": 32,
+          "charsIn": 166694,
+          "charsOut": 10840,
+          "failures": [
+            {
+              "id": "f9-en-whole-after-help",
+              "problems": [
+                "turn 2: action back_to_question, wanted next_step",
+                "end: step 1 state emerging, wanted developing",
+                "end: step 1, wanted 2"
+              ]
+            },
+            {
+              "id": "f9-en-prerequisite",
+              "problems": [
+                "turn 2: action ask_again, wanted back_to_question",
+                "turn 3: action ask_again, wanted final_check",
+                "end: step 1 state demonstrated, wanted needs_review",
+                "end: step 3 state emerging, wanted developing"
+              ]
+            },
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "problems": [
+                "turn 2: action ask_again, wanted check_earlier",
+                "turn 3: action back_to_question, wanted final_check",
+                "end: step 3 state emerging, wanted developing"
+              ]
+            },
+            {
+              "id": "f9-he-whole-after-help",
+              "problems": [
+                "turn 2: action back_to_question, wanted next_step",
+                "end: step 2 state emerging, wanted developing",
+                "end: step 2, wanted 3"
+              ]
+            },
+            {
+              "id": "f9-he-prerequisite",
+              "problems": [
+                "end: step 1 state demonstrated, wanted needs_review"
+              ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier",
+                "turn 3: action back_to_question, wanted final_check",
+                "end: step 3 state emerging, wanted developing"
+              ]
+            }
+          ]
+        },
+        "not_targeted": {
+          "conversations": "16/18",
+          "passedIds": [
+            "f9-en-understands",
+            "f9-en-misconception",
+            "f9-en-partial",
+            "f9-en-copied",
+            "f9-en-not-in-document",
+            "f9-en-other-part",
+            "f9-en-student-instruction",
+            "f9-en-hedged",
+            "f9-en-journey",
+            "f9-he-understands",
+            "f9-he-misconception",
+            "f9-he-partial",
+            "f9-he-not-in-document",
+            "f9-he-other-part",
+            "f9-he-wrong-reasoning",
+            "f9-he-misread"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "1/11",
+          "falseRejection": "1/19",
+          "overclaims": "0/10",
+          "unsupportedAdvancement": 1,
+          "prerequisiteRecovery": null,
+          "teachingLeakage": "10/10",
+          "helpLeakage": "2/8",
+          "unnecessaryRepetition": "1/19",
+          "leaksAt": [
+            {
+              "id": "f9-en-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-en-misconception",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-en-partial",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-en-copied",
+              "teaching": [
+                2
+              ],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-en-journey",
+              "teaching": [
+                1,
+                3
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-partial",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-other-part",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-journey",
+              "teaching": [
+                1,
+                3
+              ],
+              "help": []
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "f9-he-journey",
+              "turns": [
+                2
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 1,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "1/43",
+          "latencyMs": {
+            "turns": 37,
+            "p50": 3452,
+            "p95": 5992
+          },
+          "modelCalls": 80,
+          "charsIn": 410280,
+          "charsOut": 28260,
+          "failures": [
+            {
+              "id": "f9-he-copied",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct"
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "problems": [
+                "turn 1: action next_step, wanted hint",
+                "turn 1: moved on without evidence",
+                "turn 2: action ask_again, wanted next_step"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
       "system": "b",
       "repeat": 1,
       "commit": "feab2bed22a9a843a3ee3e11b70fd8f784b25583",
@@ -762,6 +1768,673 @@
       }
     },
     {
+      "system": "b",
+      "repeat": 2,
+      "commit": "feab2bed22a9a843a3ee3e11b70fd8f784b25583",
+      "engineVersion": "01ce0017aef5",
+      "promptVersion": "22cf52e5cd15",
+      "scenariosVersion": "696b74f68208",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "complete": 26,
+      "notComplete": [],
+      "notRun": [],
+      "groups": {
+        "all": {
+          "conversations": "22/24",
+          "passedIds": [
+            "f9-en-understands",
+            "f9-en-misconception",
+            "f9-en-partial",
+            "f9-en-copied",
+            "f9-en-not-in-document",
+            "f9-en-other-part",
+            "f9-en-student-instruction",
+            "f9-en-hedged",
+            "f9-en-whole-after-help",
+            "f9-en-prerequisite",
+            "f9-en-journey",
+            "f9-he-understands",
+            "f9-he-misconception",
+            "f9-he-partial",
+            "f9-he-copied",
+            "f9-he-other-part",
+            "f9-he-wrong-reasoning",
+            "f9-he-misread",
+            "f9-he-whole-after-help",
+            "f9-he-prerequisite",
+            "f9-he-fragile-prerequisite",
+            "f9-he-journey"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "0/19",
+          "falseRejection": "3/29",
+          "overclaims": "0/20",
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": "3/4",
+          "teachingLeakage": "6/12",
+          "helpLeakage": "3/15",
+          "unnecessaryRepetition": "1/25",
+          "leaksAt": [
+            {
+              "id": "f9-en-misconception",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-en-partial",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-en-whole-after-help",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-en-journey",
+              "teaching": [
+                3
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-partial",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-whole-after-help",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                3
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "teaching": [
+                2
+              ],
+              "help": []
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "turns": [
+                4
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 0,
+          "notInDocumentMissed": 1,
+          "invalidCitationIds": 2,
+          "weaklySupportedCitations": "4/56",
+          "latencyMs": {
+            "turns": 55,
+            "p50": 3836,
+            "p95": 7241
+          },
+          "modelCalls": 118,
+          "charsIn": 636544,
+          "charsOut": 41612,
+          "failures": [
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "problems": [
+                "turn 3: action ask_again, wanted back_to_question",
+                "turn 4: action ask_again, wanted final_check"
+              ]
+            },
+            {
+              "id": "f9-he-not-in-document",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question",
+                "turn 1: did not say the document does not cover it"
+              ]
+            }
+          ]
+        },
+        "targeted": {
+          "conversations": "5/6",
+          "passedIds": [
+            "f9-en-whole-after-help",
+            "f9-en-prerequisite",
+            "f9-he-whole-after-help",
+            "f9-he-prerequisite",
+            "f9-he-fragile-prerequisite"
+          ],
+          "paraphraseConsistency": null,
+          "falseAcceptance": "0/8",
+          "falseRejection": "3/10",
+          "overclaims": "0/10",
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": "3/4",
+          "teachingLeakage": "1/2",
+          "helpLeakage": "2/7",
+          "unnecessaryRepetition": "1/6",
+          "leaksAt": [
+            {
+              "id": "f9-en-whole-after-help",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-he-whole-after-help",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "teaching": [],
+              "help": [
+                3
+              ]
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "turns": [
+                4
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 0,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 2,
+          "weaklySupportedCitations": "0/17",
+          "latencyMs": {
+            "turns": 18,
+            "p50": 3836,
+            "p95": 4614
+          },
+          "modelCalls": 38,
+          "charsIn": 205432,
+          "charsOut": 13687,
+          "failures": [
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "problems": [
+                "turn 3: action ask_again, wanted back_to_question",
+                "turn 4: action ask_again, wanted final_check"
+              ]
+            }
+          ]
+        },
+        "not_targeted": {
+          "conversations": "17/18",
+          "passedIds": [
+            "f9-en-understands",
+            "f9-en-misconception",
+            "f9-en-partial",
+            "f9-en-copied",
+            "f9-en-not-in-document",
+            "f9-en-other-part",
+            "f9-en-student-instruction",
+            "f9-en-hedged",
+            "f9-en-journey",
+            "f9-he-understands",
+            "f9-he-misconception",
+            "f9-he-partial",
+            "f9-he-copied",
+            "f9-he-other-part",
+            "f9-he-wrong-reasoning",
+            "f9-he-misread",
+            "f9-he-journey"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "0/11",
+          "falseRejection": "0/19",
+          "overclaims": "0/10",
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": null,
+          "teachingLeakage": "5/10",
+          "helpLeakage": "1/8",
+          "unnecessaryRepetition": "0/19",
+          "leaksAt": [
+            {
+              "id": "f9-en-misconception",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-en-partial",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-en-journey",
+              "teaching": [
+                3
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-partial",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-journey",
+              "teaching": [
+                2
+              ],
+              "help": []
+            }
+          ],
+          "repeatsAt": [],
+          "approvalOnNotCorrect": 0,
+          "notInDocumentMissed": 1,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "4/39",
+          "latencyMs": {
+            "turns": 37,
+            "p50": 3886,
+            "p95": 8299
+          },
+          "modelCalls": 80,
+          "charsIn": 431112,
+          "charsOut": 27925,
+          "failures": [
+            {
+              "id": "f9-he-not-in-document",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question",
+                "turn 1: did not say the document does not cover it"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "system": "b",
+      "repeat": 3,
+      "commit": "feab2bed22a9a843a3ee3e11b70fd8f784b25583",
+      "engineVersion": "01ce0017aef5",
+      "promptVersion": "22cf52e5cd15",
+      "scenariosVersion": "696b74f68208",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "complete": 26,
+      "notComplete": [],
+      "notRun": [],
+      "groups": {
+        "all": {
+          "conversations": "21/24",
+          "passedIds": [
+            "f9-en-understands",
+            "f9-en-misconception",
+            "f9-en-partial",
+            "f9-en-not-in-document",
+            "f9-en-other-part",
+            "f9-en-student-instruction",
+            "f9-en-hedged",
+            "f9-en-whole-after-help",
+            "f9-en-prerequisite",
+            "f9-en-fragile-prerequisite",
+            "f9-en-journey",
+            "f9-he-understands",
+            "f9-he-misconception",
+            "f9-he-partial",
+            "f9-he-copied",
+            "f9-he-other-part",
+            "f9-he-wrong-reasoning",
+            "f9-he-misread",
+            "f9-he-whole-after-help",
+            "f9-he-prerequisite",
+            "f9-he-fragile-prerequisite"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "1/19",
+          "falseRejection": "1/29",
+          "overclaims": "0/20",
+          "unsupportedAdvancement": 1,
+          "prerequisiteRecovery": "4/4",
+          "teachingLeakage": "7/12",
+          "helpLeakage": "3/15",
+          "unnecessaryRepetition": "1/25",
+          "leaksAt": [
+            {
+              "id": "f9-en-misconception",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-en-partial",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-en-copied",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-en-prerequisite",
+              "teaching": [],
+              "help": [
+                2
+              ]
+            },
+            {
+              "id": "f9-en-journey",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-partial",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-he-other-part",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-whole-after-help",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-journey",
+              "teaching": [
+                1
+              ],
+              "help": []
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "f9-he-journey",
+              "turns": [
+                2
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 1,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "5/59",
+          "latencyMs": {
+            "turns": 55,
+            "p50": 3640,
+            "p95": 7569
+          },
+          "modelCalls": 118,
+          "charsIn": 658406,
+          "charsOut": 43093,
+          "failures": [
+            {
+              "id": "f9-en-copied",
+              "problems": [
+                "turn 1: action ask_again, wanted probe|hint"
+              ]
+            },
+            {
+              "id": "f9-he-not-in-document",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question"
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "problems": [
+                "turn 1: action next_step, wanted hint",
+                "turn 1: moved on without evidence",
+                "turn 1: approval language on an answer that was not correct",
+                "turn 2: action ask_again, wanted next_step"
+              ]
+            }
+          ]
+        },
+        "targeted": {
+          "conversations": "6/6",
+          "passedIds": [
+            "f9-en-whole-after-help",
+            "f9-en-prerequisite",
+            "f9-en-fragile-prerequisite",
+            "f9-he-whole-after-help",
+            "f9-he-prerequisite",
+            "f9-he-fragile-prerequisite"
+          ],
+          "paraphraseConsistency": null,
+          "falseAcceptance": "0/8",
+          "falseRejection": "0/10",
+          "overclaims": "0/10",
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": "4/4",
+          "teachingLeakage": "1/2",
+          "helpLeakage": "1/8",
+          "unnecessaryRepetition": "0/6",
+          "leaksAt": [
+            {
+              "id": "f9-en-prerequisite",
+              "teaching": [],
+              "help": [
+                2
+              ]
+            },
+            {
+              "id": "f9-he-whole-after-help",
+              "teaching": [
+                2
+              ],
+              "help": []
+            }
+          ],
+          "repeatsAt": [],
+          "approvalOnNotCorrect": 0,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "1/20",
+          "latencyMs": {
+            "turns": 18,
+            "p50": 3812,
+            "p95": 4984
+          },
+          "modelCalls": 38,
+          "charsIn": 219497,
+          "charsOut": 14539,
+          "failures": []
+        },
+        "not_targeted": {
+          "conversations": "15/18",
+          "passedIds": [
+            "f9-en-understands",
+            "f9-en-misconception",
+            "f9-en-partial",
+            "f9-en-not-in-document",
+            "f9-en-other-part",
+            "f9-en-student-instruction",
+            "f9-en-hedged",
+            "f9-en-journey",
+            "f9-he-understands",
+            "f9-he-misconception",
+            "f9-he-partial",
+            "f9-he-copied",
+            "f9-he-other-part",
+            "f9-he-wrong-reasoning",
+            "f9-he-misread"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "1/11",
+          "falseRejection": "1/19",
+          "overclaims": "0/10",
+          "unsupportedAdvancement": 1,
+          "prerequisiteRecovery": null,
+          "teachingLeakage": "6/10",
+          "helpLeakage": "2/7",
+          "unnecessaryRepetition": "1/19",
+          "leaksAt": [
+            {
+              "id": "f9-en-misconception",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-en-partial",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-en-copied",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-en-journey",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-understands",
+              "teaching": [
+                1
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-partial",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-he-other-part",
+              "teaching": [
+                2
+              ],
+              "help": []
+            },
+            {
+              "id": "f9-he-journey",
+              "teaching": [
+                1
+              ],
+              "help": []
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "f9-he-journey",
+              "turns": [
+                2
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 1,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "4/39",
+          "latencyMs": {
+            "turns": 37,
+            "p50": 3640,
+            "p95": 16297
+          },
+          "modelCalls": 80,
+          "charsIn": 438909,
+          "charsOut": 28554,
+          "failures": [
+            {
+              "id": "f9-en-copied",
+              "problems": [
+                "turn 1: action ask_again, wanted probe|hint"
+              ]
+            },
+            {
+              "id": "f9-he-not-in-document",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question"
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "problems": [
+                "turn 1: action next_step, wanted hint",
+                "turn 1: moved on without evidence",
+                "turn 1: approval language on an answer that was not correct",
+                "turn 2: action ask_again, wanted next_step"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
       "system": "plain",
       "repeat": 1,
       "commit": "feab2bed22a9a843a3ee3e11b70fd8f784b25583",
@@ -771,14 +2444,8 @@
       "models": [
         "gemini-3.5-flash-lite"
       ],
-      "complete": 25,
-      "notComplete": [
-        {
-          "id": "f9-he-paraphrase",
-          "status": "infra_error",
-          "error": "blocked"
-        }
-      ],
+      "complete": 26,
+      "notComplete": [],
       "notRun": [],
       "groups": {
         "all": {
@@ -797,7 +2464,7 @@
             "f9-he-misread",
             "f9-he-whole-after-help"
           ],
-          "paraphraseConsistency": "1/1",
+          "paraphraseConsistency": "2/2",
           "falseAcceptance": "0/19",
           "falseRejection": "2/25",
           "overclaims": null,
@@ -851,9 +2518,9 @@
             "p50": 2820,
             "p95": 20267
           },
-          "modelCalls": 54,
-          "charsIn": 343433,
-          "charsOut": 13946,
+          "modelCalls": 57,
+          "charsIn": 359274,
+          "charsOut": 14579,
           "failures": [
             {
               "id": "f9-en-copied",
@@ -1014,7 +2681,7 @@
             "f9-he-wrong-reasoning",
             "f9-he-misread"
           ],
-          "paraphraseConsistency": "1/1",
+          "paraphraseConsistency": "2/2",
           "falseAcceptance": "0/11",
           "falseRejection": "2/19",
           "overclaims": null,
@@ -1061,9 +2728,9 @@
             "p50": 2818,
             "p95": 19546
           },
-          "modelCalls": 40,
-          "charsIn": 257191,
-          "charsOut": 10383,
+          "modelCalls": 43,
+          "charsIn": 273032,
+          "charsOut": 11016,
           "failures": [
             {
               "id": "f9-en-copied",
@@ -1123,723 +2790,6 @@
       }
     },
     {
-      "system": "a1",
-      "repeat": 2,
-      "commit": "28b8f2ee72f498eceaf8827985709b40b7af1ef9",
-      "engineVersion": "636e74161c92",
-      "promptVersion": "92c866cd3696",
-      "scenariosVersion": "696b74f68208",
-      "models": [
-        "gemini-3.5-flash-lite"
-      ],
-      "complete": 23,
-      "notComplete": [],
-      "notRun": [
-        "f9-he-fragile-prerequisite",
-        "f9-he-journey",
-        "f9-he-paraphrase"
-      ],
-      "groups": {
-        "all": {
-          "conversations": "16/22",
-          "passedIds": [
-            "f9-en-understands",
-            "f9-en-misconception",
-            "f9-en-partial",
-            "f9-en-copied",
-            "f9-en-not-in-document",
-            "f9-en-other-part",
-            "f9-en-student-instruction",
-            "f9-en-hedged",
-            "f9-en-journey",
-            "f9-he-understands",
-            "f9-he-misconception",
-            "f9-he-partial",
-            "f9-he-not-in-document",
-            "f9-he-other-part",
-            "f9-he-wrong-reasoning",
-            "f9-he-misread"
-          ],
-          "paraphraseConsistency": "1/1",
-          "falseAcceptance": "0/15",
-          "falseRejection": "2/21",
-          "overclaims": "2/17",
-          "unsupportedAdvancement": 0,
-          "prerequisiteRecovery": "1/3",
-          "teachingLeakage": "5/8",
-          "helpLeakage": "7/15",
-          "unnecessaryRepetition": "4/19",
-          "leaksAt": [
-            {
-              "id": "f9-en-understands",
-              "teaching": [
-                1
-              ],
-              "help": []
-            },
-            {
-              "id": "f9-en-misconception",
-              "teaching": [],
-              "help": [
-                1
-              ]
-            },
-            {
-              "id": "f9-en-partial",
-              "teaching": [
-                2
-              ],
-              "help": []
-            },
-            {
-              "id": "f9-en-copied",
-              "teaching": [
-                2
-              ],
-              "help": [
-                1
-              ]
-            },
-            {
-              "id": "f9-en-whole-after-help",
-              "teaching": [],
-              "help": [
-                1,
-                2
-              ]
-            },
-            {
-              "id": "f9-en-fragile-prerequisite",
-              "teaching": [],
-              "help": [
-                3
-              ]
-            },
-            {
-              "id": "f9-he-partial",
-              "teaching": [
-                2
-              ],
-              "help": [
-                1
-              ]
-            },
-            {
-              "id": "f9-he-other-part",
-              "teaching": [
-                2
-              ],
-              "help": []
-            },
-            {
-              "id": "f9-he-whole-after-help",
-              "teaching": [],
-              "help": [
-                2
-              ]
-            }
-          ],
-          "repeatsAt": [
-            {
-              "id": "f9-en-whole-after-help",
-              "turns": [
-                2
-              ]
-            },
-            {
-              "id": "f9-en-prerequisite",
-              "turns": [
-                3
-              ]
-            },
-            {
-              "id": "f9-en-fragile-prerequisite",
-              "turns": [
-                3
-              ]
-            },
-            {
-              "id": "f9-he-whole-after-help",
-              "turns": [
-                2
-              ]
-            }
-          ],
-          "approvalOnNotCorrect": 1,
-          "notInDocumentMissed": 0,
-          "invalidCitationIds": 0,
-          "weaklySupportedCitations": "3/50",
-          "latencyMs": {
-            "turns": 43,
-            "p50": 3775,
-            "p95": 6909
-          },
-          "modelCalls": 89,
-          "charsIn": 479098,
-          "charsOut": 32222,
-          "failures": [
-            {
-              "id": "f9-en-whole-after-help",
-              "problems": [
-                "turn 2: action back_to_question, wanted next_step",
-                "end: step 1 state emerging, wanted developing",
-                "end: step 1, wanted 2"
-              ]
-            },
-            {
-              "id": "f9-en-prerequisite",
-              "problems": [
-                "turn 2: action ask_again, wanted back_to_question",
-                "turn 3: action ask_again, wanted final_check",
-                "end: step 1 state demonstrated, wanted needs_review",
-                "end: step 3 state emerging, wanted developing"
-              ]
-            },
-            {
-              "id": "f9-en-fragile-prerequisite",
-              "problems": [
-                "turn 2: action ask_again, wanted check_earlier",
-                "turn 3: action back_to_question, wanted final_check",
-                "end: step 3 state emerging, wanted developing"
-              ]
-            },
-            {
-              "id": "f9-he-copied",
-              "problems": [
-                "turn 1: approval language on an answer that was not correct"
-              ]
-            },
-            {
-              "id": "f9-he-whole-after-help",
-              "problems": [
-                "turn 2: action back_to_question, wanted next_step",
-                "end: step 2 state emerging, wanted developing",
-                "end: step 2, wanted 3"
-              ]
-            },
-            {
-              "id": "f9-he-prerequisite",
-              "problems": [
-                "end: step 1 state demonstrated, wanted needs_review"
-              ]
-            }
-          ]
-        },
-        "targeted": {
-          "conversations": "0/5",
-          "passedIds": [],
-          "paraphraseConsistency": null,
-          "falseAcceptance": "0/6",
-          "falseRejection": "2/7",
-          "overclaims": "2/8",
-          "unsupportedAdvancement": 0,
-          "prerequisiteRecovery": "1/3",
-          "teachingLeakage": "0/0",
-          "helpLeakage": "4/7",
-          "unnecessaryRepetition": "4/5",
-          "leaksAt": [
-            {
-              "id": "f9-en-whole-after-help",
-              "teaching": [],
-              "help": [
-                1,
-                2
-              ]
-            },
-            {
-              "id": "f9-en-fragile-prerequisite",
-              "teaching": [],
-              "help": [
-                3
-              ]
-            },
-            {
-              "id": "f9-he-whole-after-help",
-              "teaching": [],
-              "help": [
-                2
-              ]
-            }
-          ],
-          "repeatsAt": [
-            {
-              "id": "f9-en-whole-after-help",
-              "turns": [
-                2
-              ]
-            },
-            {
-              "id": "f9-en-prerequisite",
-              "turns": [
-                3
-              ]
-            },
-            {
-              "id": "f9-en-fragile-prerequisite",
-              "turns": [
-                3
-              ]
-            },
-            {
-              "id": "f9-he-whole-after-help",
-              "turns": [
-                2
-              ]
-            }
-          ],
-          "approvalOnNotCorrect": 0,
-          "notInDocumentMissed": 0,
-          "invalidCitationIds": 0,
-          "weaklySupportedCitations": "2/19",
-          "latencyMs": {
-            "turns": 13,
-            "p50": 3847,
-            "p95": 6538
-          },
-          "modelCalls": 26,
-          "charsIn": 137374,
-          "charsOut": 9339,
-          "failures": [
-            {
-              "id": "f9-en-whole-after-help",
-              "problems": [
-                "turn 2: action back_to_question, wanted next_step",
-                "end: step 1 state emerging, wanted developing",
-                "end: step 1, wanted 2"
-              ]
-            },
-            {
-              "id": "f9-en-prerequisite",
-              "problems": [
-                "turn 2: action ask_again, wanted back_to_question",
-                "turn 3: action ask_again, wanted final_check",
-                "end: step 1 state demonstrated, wanted needs_review",
-                "end: step 3 state emerging, wanted developing"
-              ]
-            },
-            {
-              "id": "f9-en-fragile-prerequisite",
-              "problems": [
-                "turn 2: action ask_again, wanted check_earlier",
-                "turn 3: action back_to_question, wanted final_check",
-                "end: step 3 state emerging, wanted developing"
-              ]
-            },
-            {
-              "id": "f9-he-whole-after-help",
-              "problems": [
-                "turn 2: action back_to_question, wanted next_step",
-                "end: step 2 state emerging, wanted developing",
-                "end: step 2, wanted 3"
-              ]
-            },
-            {
-              "id": "f9-he-prerequisite",
-              "problems": [
-                "end: step 1 state demonstrated, wanted needs_review"
-              ]
-            }
-          ]
-        },
-        "not_targeted": {
-          "conversations": "16/17",
-          "passedIds": [
-            "f9-en-understands",
-            "f9-en-misconception",
-            "f9-en-partial",
-            "f9-en-copied",
-            "f9-en-not-in-document",
-            "f9-en-other-part",
-            "f9-en-student-instruction",
-            "f9-en-hedged",
-            "f9-en-journey",
-            "f9-he-understands",
-            "f9-he-misconception",
-            "f9-he-partial",
-            "f9-he-not-in-document",
-            "f9-he-other-part",
-            "f9-he-wrong-reasoning",
-            "f9-he-misread"
-          ],
-          "paraphraseConsistency": "1/1",
-          "falseAcceptance": "0/9",
-          "falseRejection": "0/14",
-          "overclaims": "0/9",
-          "unsupportedAdvancement": 0,
-          "prerequisiteRecovery": null,
-          "teachingLeakage": "5/8",
-          "helpLeakage": "3/8",
-          "unnecessaryRepetition": "0/14",
-          "leaksAt": [
-            {
-              "id": "f9-en-understands",
-              "teaching": [
-                1
-              ],
-              "help": []
-            },
-            {
-              "id": "f9-en-misconception",
-              "teaching": [],
-              "help": [
-                1
-              ]
-            },
-            {
-              "id": "f9-en-partial",
-              "teaching": [
-                2
-              ],
-              "help": []
-            },
-            {
-              "id": "f9-en-copied",
-              "teaching": [
-                2
-              ],
-              "help": [
-                1
-              ]
-            },
-            {
-              "id": "f9-he-partial",
-              "teaching": [
-                2
-              ],
-              "help": [
-                1
-              ]
-            },
-            {
-              "id": "f9-he-other-part",
-              "teaching": [
-                2
-              ],
-              "help": []
-            }
-          ],
-          "repeatsAt": [],
-          "approvalOnNotCorrect": 1,
-          "notInDocumentMissed": 0,
-          "invalidCitationIds": 0,
-          "weaklySupportedCitations": "1/31",
-          "latencyMs": {
-            "turns": 30,
-            "p50": 3771,
-            "p95": 7551
-          },
-          "modelCalls": 63,
-          "charsIn": 341724,
-          "charsOut": 22883,
-          "failures": [
-            {
-              "id": "f9-he-copied",
-              "problems": [
-                "turn 1: approval language on an answer that was not correct"
-              ]
-            }
-          ]
-        }
-      }
-    },
-    {
-      "system": "b",
-      "repeat": 2,
-      "commit": "feab2bed22a9a843a3ee3e11b70fd8f784b25583",
-      "engineVersion": "01ce0017aef5",
-      "promptVersion": "22cf52e5cd15",
-      "scenariosVersion": "696b74f68208",
-      "models": [
-        "gemini-3.5-flash-lite"
-      ],
-      "complete": 22,
-      "notComplete": [
-        {
-          "id": "f9-he-prerequisite",
-          "status": "stopped_quota",
-          "error": "quota_exhausted"
-        }
-      ],
-      "notRun": [
-        "f9-he-fragile-prerequisite",
-        "f9-he-journey",
-        "f9-he-paraphrase"
-      ],
-      "groups": {
-        "all": {
-          "conversations": "19/21",
-          "passedIds": [
-            "f9-en-understands",
-            "f9-en-misconception",
-            "f9-en-partial",
-            "f9-en-copied",
-            "f9-en-not-in-document",
-            "f9-en-other-part",
-            "f9-en-student-instruction",
-            "f9-en-hedged",
-            "f9-en-whole-after-help",
-            "f9-en-prerequisite",
-            "f9-en-journey",
-            "f9-he-understands",
-            "f9-he-misconception",
-            "f9-he-partial",
-            "f9-he-copied",
-            "f9-he-other-part",
-            "f9-he-wrong-reasoning",
-            "f9-he-misread",
-            "f9-he-whole-after-help"
-          ],
-          "paraphraseConsistency": "1/1",
-          "falseAcceptance": "0/14",
-          "falseRejection": "3/20",
-          "overclaims": "0/15",
-          "unsupportedAdvancement": 0,
-          "prerequisiteRecovery": "1/2",
-          "teachingLeakage": "5/10",
-          "helpLeakage": "2/11",
-          "unnecessaryRepetition": "1/18",
-          "leaksAt": [
-            {
-              "id": "f9-en-misconception",
-              "teaching": [],
-              "help": [
-                1
-              ]
-            },
-            {
-              "id": "f9-en-partial",
-              "teaching": [
-                2
-              ],
-              "help": []
-            },
-            {
-              "id": "f9-en-whole-after-help",
-              "teaching": [],
-              "help": [
-                1
-              ]
-            },
-            {
-              "id": "f9-en-journey",
-              "teaching": [
-                3
-              ],
-              "help": []
-            },
-            {
-              "id": "f9-he-understands",
-              "teaching": [
-                1
-              ],
-              "help": []
-            },
-            {
-              "id": "f9-he-partial",
-              "teaching": [
-                2
-              ],
-              "help": []
-            },
-            {
-              "id": "f9-he-whole-after-help",
-              "teaching": [
-                2
-              ],
-              "help": []
-            }
-          ],
-          "repeatsAt": [
-            {
-              "id": "f9-en-fragile-prerequisite",
-              "turns": [
-                4
-              ]
-            }
-          ],
-          "approvalOnNotCorrect": 0,
-          "notInDocumentMissed": 1,
-          "invalidCitationIds": 2,
-          "weaklySupportedCitations": "3/40",
-          "latencyMs": {
-            "turns": 41,
-            "p50": 3597,
-            "p95": 7241
-          },
-          "modelCalls": 87,
-          "charsIn": 474146,
-          "charsOut": 32140,
-          "failures": [
-            {
-              "id": "f9-en-fragile-prerequisite",
-              "problems": [
-                "turn 3: action ask_again, wanted back_to_question",
-                "turn 4: action ask_again, wanted final_check"
-              ]
-            },
-            {
-              "id": "f9-he-not-in-document",
-              "problems": [
-                "turn 1: action ask_again, wanted answer_question",
-                "turn 1: did not say the document does not cover it"
-              ]
-            }
-          ]
-        },
-        "targeted": {
-          "conversations": "3/4",
-          "passedIds": [
-            "f9-en-whole-after-help",
-            "f9-en-prerequisite",
-            "f9-he-whole-after-help"
-          ],
-          "paraphraseConsistency": null,
-          "falseAcceptance": "0/5",
-          "falseRejection": "3/6",
-          "overclaims": "0/6",
-          "unsupportedAdvancement": 0,
-          "prerequisiteRecovery": "1/2",
-          "teachingLeakage": "1/2",
-          "helpLeakage": "1/4",
-          "unnecessaryRepetition": "1/4",
-          "leaksAt": [
-            {
-              "id": "f9-en-whole-after-help",
-              "teaching": [],
-              "help": [
-                1
-              ]
-            },
-            {
-              "id": "f9-he-whole-after-help",
-              "teaching": [
-                2
-              ],
-              "help": []
-            }
-          ],
-          "repeatsAt": [
-            {
-              "id": "f9-en-fragile-prerequisite",
-              "turns": [
-                4
-              ]
-            }
-          ],
-          "approvalOnNotCorrect": 0,
-          "notInDocumentMissed": 0,
-          "invalidCitationIds": 2,
-          "weaklySupportedCitations": "0/11",
-          "latencyMs": {
-            "turns": 11,
-            "p50": 3552,
-            "p95": 4614
-          },
-          "modelCalls": 24,
-          "charsIn": 132590,
-          "charsOut": 9418,
-          "failures": [
-            {
-              "id": "f9-en-fragile-prerequisite",
-              "problems": [
-                "turn 3: action ask_again, wanted back_to_question",
-                "turn 4: action ask_again, wanted final_check"
-              ]
-            }
-          ]
-        },
-        "not_targeted": {
-          "conversations": "16/17",
-          "passedIds": [
-            "f9-en-understands",
-            "f9-en-misconception",
-            "f9-en-partial",
-            "f9-en-copied",
-            "f9-en-not-in-document",
-            "f9-en-other-part",
-            "f9-en-student-instruction",
-            "f9-en-hedged",
-            "f9-en-journey",
-            "f9-he-understands",
-            "f9-he-misconception",
-            "f9-he-partial",
-            "f9-he-copied",
-            "f9-he-other-part",
-            "f9-he-wrong-reasoning",
-            "f9-he-misread"
-          ],
-          "paraphraseConsistency": "1/1",
-          "falseAcceptance": "0/9",
-          "falseRejection": "0/14",
-          "overclaims": "0/9",
-          "unsupportedAdvancement": 0,
-          "prerequisiteRecovery": null,
-          "teachingLeakage": "4/8",
-          "helpLeakage": "1/7",
-          "unnecessaryRepetition": "0/14",
-          "leaksAt": [
-            {
-              "id": "f9-en-misconception",
-              "teaching": [],
-              "help": [
-                1
-              ]
-            },
-            {
-              "id": "f9-en-partial",
-              "teaching": [
-                2
-              ],
-              "help": []
-            },
-            {
-              "id": "f9-en-journey",
-              "teaching": [
-                3
-              ],
-              "help": []
-            },
-            {
-              "id": "f9-he-understands",
-              "teaching": [
-                1
-              ],
-              "help": []
-            },
-            {
-              "id": "f9-he-partial",
-              "teaching": [
-                2
-              ],
-              "help": []
-            }
-          ],
-          "repeatsAt": [],
-          "approvalOnNotCorrect": 0,
-          "notInDocumentMissed": 1,
-          "invalidCitationIds": 0,
-          "weaklySupportedCitations": "3/29",
-          "latencyMs": {
-            "turns": 30,
-            "p50": 3886,
-            "p95": 8299
-          },
-          "modelCalls": 63,
-          "charsIn": 341556,
-          "charsOut": 22722,
-          "failures": [
-            {
-              "id": "f9-he-not-in-document",
-              "problems": [
-                "turn 1: action ask_again, wanted answer_question",
-                "turn 1: did not say the document does not cover it"
-              ]
-            }
-          ]
-        }
-      }
-    },
-    {
       "system": "plain",
       "repeat": 2,
       "commit": "feab2bed22a9a843a3ee3e11b70fd8f784b25583",
@@ -1849,17 +2799,12 @@
       "models": [
         "gemini-3.5-flash-lite"
       ],
-      "complete": 22,
+      "complete": 26,
       "notComplete": [],
-      "notRun": [
-        "f9-he-prerequisite",
-        "f9-he-fragile-prerequisite",
-        "f9-he-journey",
-        "f9-he-paraphrase"
-      ],
+      "notRun": [],
       "groups": {
         "all": {
-          "conversations": "14/21",
+          "conversations": "14/24",
           "passedIds": [
             "f9-en-understands",
             "f9-en-misconception",
@@ -1876,15 +2821,15 @@
             "f9-he-misread",
             "f9-he-whole-after-help"
           ],
-          "paraphraseConsistency": "1/1",
-          "falseAcceptance": "0/14",
-          "falseRejection": "1/18",
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "0/19",
+          "falseRejection": "2/25",
           "overclaims": null,
           "unsupportedAdvancement": 0,
-          "prerequisiteRecovery": "0/2",
-          "teachingLeakage": "0/10",
-          "helpLeakage": "3/14",
-          "unnecessaryRepetition": "1/18",
+          "prerequisiteRecovery": "0/4",
+          "teachingLeakage": "0/12",
+          "helpLeakage": "3/19",
+          "unnecessaryRepetition": "3/25",
           "leaksAt": [
             {
               "id": "f9-en-misconception",
@@ -1914,20 +2859,32 @@
               "turns": [
                 7
               ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "turns": [
+                3
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "turns": [
+                7
+              ]
             }
           ],
-          "approvalOnNotCorrect": 1,
+          "approvalOnNotCorrect": 2,
           "notInDocumentMissed": 0,
           "invalidCitationIds": 0,
-          "weaklySupportedCitations": "1/30",
+          "weaklySupportedCitations": "2/38",
           "latencyMs": {
-            "turns": 39,
-            "p50": 2371,
+            "turns": 51,
+            "p50": 2385,
             "p95": 3955
           },
-          "modelCalls": 42,
-          "charsIn": 273828,
-          "charsOut": 11376,
+          "modelCalls": 57,
+          "charsIn": 358161,
+          "charsOut": 14567,
           "failures": [
             {
               "id": "f9-en-copied",
@@ -1973,24 +2930,46 @@
                 "turn 1: action ask_again, wanted answer_question",
                 "turn 1: did not cite c5"
               ]
+            },
+            {
+              "id": "f9-he-prerequisite",
+              "problems": [
+                "turn 1: action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct",
+                "turn 2: action hint, wanted check_earlier",
+                "turn 3: action probe, wanted final_check"
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "problems": [
+                "turn 6: action hint, wanted final_check",
+                "turn 6: help during the final check",
+                "turn 7: action ask_again, wanted summary"
+              ]
             }
           ]
         },
         "targeted": {
-          "conversations": "2/4",
+          "conversations": "2/6",
           "passedIds": [
             "f9-en-whole-after-help",
             "f9-he-whole-after-help"
           ],
           "paraphraseConsistency": null,
-          "falseAcceptance": "0/5",
-          "falseRejection": "0/4",
+          "falseAcceptance": "0/8",
+          "falseRejection": "0/6",
           "overclaims": null,
           "unsupportedAdvancement": 0,
-          "prerequisiteRecovery": "0/2",
+          "prerequisiteRecovery": "0/4",
           "teachingLeakage": "0/2",
-          "helpLeakage": "1/5",
-          "unnecessaryRepetition": "0/4",
+          "helpLeakage": "1/8",
+          "unnecessaryRepetition": "1/6",
           "leaksAt": [
             {
               "id": "f9-en-whole-after-help",
@@ -2000,19 +2979,26 @@
               ]
             }
           ],
-          "repeatsAt": [],
-          "approvalOnNotCorrect": 0,
+          "repeatsAt": [
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "turns": [
+                3
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 1,
           "notInDocumentMissed": 0,
           "invalidCitationIds": 0,
-          "weaklySupportedCitations": "0/10",
+          "weaklySupportedCitations": "1/15",
           "latencyMs": {
-            "turns": 9,
-            "p50": 2162,
-            "p95": 2725
+            "turns": 14,
+            "p50": 2371,
+            "p95": 5261
           },
-          "modelCalls": 9,
-          "charsIn": 58975,
-          "charsOut": 2338,
+          "modelCalls": 14,
+          "charsIn": 86269,
+          "charsOut": 3391,
           "failures": [
             {
               "id": "f9-en-prerequisite",
@@ -2025,11 +3011,25 @@
               "problems": [
                 "turn 2: action hint, wanted check_earlier"
               ]
+            },
+            {
+              "id": "f9-he-prerequisite",
+              "problems": [
+                "turn 1: action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct",
+                "turn 2: action hint, wanted check_earlier",
+                "turn 3: action probe, wanted final_check"
+              ]
             }
           ]
         },
         "not_targeted": {
-          "conversations": "12/17",
+          "conversations": "12/18",
           "passedIds": [
             "f9-en-understands",
             "f9-en-misconception",
@@ -2044,15 +3044,15 @@
             "f9-he-wrong-reasoning",
             "f9-he-misread"
           ],
-          "paraphraseConsistency": "1/1",
-          "falseAcceptance": "0/9",
-          "falseRejection": "1/14",
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "0/11",
+          "falseRejection": "2/19",
           "overclaims": null,
           "unsupportedAdvancement": 0,
           "prerequisiteRecovery": null,
-          "teachingLeakage": "0/8",
-          "helpLeakage": "2/9",
-          "unnecessaryRepetition": "1/14",
+          "teachingLeakage": "0/10",
+          "helpLeakage": "2/11",
+          "unnecessaryRepetition": "2/19",
           "leaksAt": [
             {
               "id": "f9-en-misconception",
@@ -2075,20 +3075,26 @@
               "turns": [
                 7
               ]
+            },
+            {
+              "id": "f9-he-journey",
+              "turns": [
+                7
+              ]
             }
           ],
           "approvalOnNotCorrect": 1,
           "notInDocumentMissed": 0,
           "invalidCitationIds": 0,
-          "weaklySupportedCitations": "1/20",
+          "weaklySupportedCitations": "1/23",
           "latencyMs": {
-            "turns": 30,
-            "p50": 2467,
+            "turns": 37,
+            "p50": 2400,
             "p95": 3955
           },
-          "modelCalls": 33,
-          "charsIn": 214853,
-          "charsOut": 9038,
+          "modelCalls": 43,
+          "charsIn": 271892,
+          "charsOut": 11176,
           "failures": [
             {
               "id": "f9-en-copied",
@@ -2121,6 +3127,375 @@
               "problems": [
                 "turn 1: action ask_again, wanted answer_question",
                 "turn 1: did not cite c5"
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "problems": [
+                "turn 6: action hint, wanted final_check",
+                "turn 6: help during the final check",
+                "turn 7: action ask_again, wanted summary"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "system": "plain",
+      "repeat": 3,
+      "commit": "feab2bed22a9a843a3ee3e11b70fd8f784b25583",
+      "engineVersion": "01ce0017aef5",
+      "promptVersion": "22cf52e5cd15",
+      "scenariosVersion": "696b74f68208",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "complete": 26,
+      "notComplete": [],
+      "notRun": [],
+      "groups": {
+        "all": {
+          "conversations": "12/24",
+          "passedIds": [
+            "f9-en-understands",
+            "f9-en-misconception",
+            "f9-en-partial",
+            "f9-en-student-instruction",
+            "f9-en-hedged",
+            "f9-en-whole-after-help",
+            "f9-he-understands",
+            "f9-he-misconception",
+            "f9-he-not-in-document",
+            "f9-he-wrong-reasoning",
+            "f9-he-misread",
+            "f9-he-whole-after-help"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "0/19",
+          "falseRejection": "2/25",
+          "overclaims": null,
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": "0/4",
+          "teachingLeakage": "0/12",
+          "helpLeakage": "2/19",
+          "unnecessaryRepetition": "3/25",
+          "leaksAt": [
+            {
+              "id": "f9-en-misconception",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            },
+            {
+              "id": "f9-en-whole-after-help",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "f9-en-other-part",
+              "turns": [
+                2
+              ]
+            },
+            {
+              "id": "f9-en-journey",
+              "turns": [
+                7
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "turns": [
+                7
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 2,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "2/39",
+          "latencyMs": {
+            "turns": 51,
+            "p50": 2239,
+            "p95": 3695
+          },
+          "modelCalls": 57,
+          "charsIn": 358681,
+          "charsOut": 14404,
+          "failures": [
+            {
+              "id": "f9-en-copied",
+              "problems": [
+                "turn 1: action ask_again, wanted probe|hint"
+              ]
+            },
+            {
+              "id": "f9-en-not-in-document",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question"
+              ]
+            },
+            {
+              "id": "f9-en-other-part",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question",
+                "turn 2: action ask_again, wanted final_check"
+              ]
+            },
+            {
+              "id": "f9-en-prerequisite",
+              "problems": [
+                "turn 1: action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "id": "f9-en-journey",
+              "problems": [
+                "turn 5: action ask_again, wanted final_check",
+                "turn 7: action ask_again, wanted summary"
+              ]
+            },
+            {
+              "id": "f9-he-partial",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct"
+              ]
+            },
+            {
+              "id": "f9-he-copied",
+              "problems": [
+                "turn 1: action ask_again, wanted probe|hint",
+                "turn 2: action next_step, wanted final_check"
+              ]
+            },
+            {
+              "id": "f9-he-other-part",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question",
+                "turn 1: did not cite c5"
+              ]
+            },
+            {
+              "id": "f9-he-prerequisite",
+              "problems": [
+                "turn 1: action hint, wanted check_earlier",
+                "turn 2: action next_step, wanted final_check"
+              ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier",
+                "turn 3: action next_step, wanted final_check"
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct",
+                "turn 6: action hint, wanted final_check",
+                "turn 6: help during the final check",
+                "turn 7: action ask_again, wanted summary"
+              ]
+            }
+          ]
+        },
+        "targeted": {
+          "conversations": "2/6",
+          "passedIds": [
+            "f9-en-whole-after-help",
+            "f9-he-whole-after-help"
+          ],
+          "paraphraseConsistency": null,
+          "falseAcceptance": "0/8",
+          "falseRejection": "0/6",
+          "overclaims": null,
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": "0/4",
+          "teachingLeakage": "0/2",
+          "helpLeakage": "1/8",
+          "unnecessaryRepetition": "0/6",
+          "leaksAt": [
+            {
+              "id": "f9-en-whole-after-help",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            }
+          ],
+          "repeatsAt": [],
+          "approvalOnNotCorrect": 0,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "0/13",
+          "latencyMs": {
+            "turns": 14,
+            "p50": 2446,
+            "p95": 4084
+          },
+          "modelCalls": 14,
+          "charsIn": 86424,
+          "charsOut": 3616,
+          "failures": [
+            {
+              "id": "f9-en-prerequisite",
+              "problems": [
+                "turn 1: action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "id": "f9-en-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "id": "f9-he-prerequisite",
+              "problems": [
+                "turn 1: action hint, wanted check_earlier",
+                "turn 2: action next_step, wanted final_check"
+              ]
+            },
+            {
+              "id": "f9-he-fragile-prerequisite",
+              "problems": [
+                "turn 2: action hint, wanted check_earlier",
+                "turn 3: action next_step, wanted final_check"
+              ]
+            }
+          ]
+        },
+        "not_targeted": {
+          "conversations": "10/18",
+          "passedIds": [
+            "f9-en-understands",
+            "f9-en-misconception",
+            "f9-en-partial",
+            "f9-en-student-instruction",
+            "f9-en-hedged",
+            "f9-he-understands",
+            "f9-he-misconception",
+            "f9-he-not-in-document",
+            "f9-he-wrong-reasoning",
+            "f9-he-misread"
+          ],
+          "paraphraseConsistency": "2/2",
+          "falseAcceptance": "0/11",
+          "falseRejection": "2/19",
+          "overclaims": null,
+          "unsupportedAdvancement": 0,
+          "prerequisiteRecovery": null,
+          "teachingLeakage": "0/10",
+          "helpLeakage": "1/11",
+          "unnecessaryRepetition": "3/19",
+          "leaksAt": [
+            {
+              "id": "f9-en-misconception",
+              "teaching": [],
+              "help": [
+                1
+              ]
+            }
+          ],
+          "repeatsAt": [
+            {
+              "id": "f9-en-other-part",
+              "turns": [
+                2
+              ]
+            },
+            {
+              "id": "f9-en-journey",
+              "turns": [
+                7
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "turns": [
+                7
+              ]
+            }
+          ],
+          "approvalOnNotCorrect": 2,
+          "notInDocumentMissed": 0,
+          "invalidCitationIds": 0,
+          "weaklySupportedCitations": "2/26",
+          "latencyMs": {
+            "turns": 37,
+            "p50": 2210,
+            "p95": 3695
+          },
+          "modelCalls": 43,
+          "charsIn": 272257,
+          "charsOut": 10788,
+          "failures": [
+            {
+              "id": "f9-en-copied",
+              "problems": [
+                "turn 1: action ask_again, wanted probe|hint"
+              ]
+            },
+            {
+              "id": "f9-en-not-in-document",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question"
+              ]
+            },
+            {
+              "id": "f9-en-other-part",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question",
+                "turn 2: action ask_again, wanted final_check"
+              ]
+            },
+            {
+              "id": "f9-en-journey",
+              "problems": [
+                "turn 5: action ask_again, wanted final_check",
+                "turn 7: action ask_again, wanted summary"
+              ]
+            },
+            {
+              "id": "f9-he-partial",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct"
+              ]
+            },
+            {
+              "id": "f9-he-copied",
+              "problems": [
+                "turn 1: action ask_again, wanted probe|hint",
+                "turn 2: action next_step, wanted final_check"
+              ]
+            },
+            {
+              "id": "f9-he-other-part",
+              "problems": [
+                "turn 1: action ask_again, wanted answer_question",
+                "turn 1: did not cite c5"
+              ]
+            },
+            {
+              "id": "f9-he-journey",
+              "problems": [
+                "turn 1: approval language on an answer that was not correct",
+                "turn 6: action hint, wanted final_check",
+                "turn 6: help during the final check",
+                "turn 7: action ask_again, wanted summary"
               ]
             }
           ]
@@ -2133,10 +3508,12 @@
     "b": [
       "f9-en-copied",
       "f9-en-fragile-prerequisite",
-      "f9-he-copied"
+      "f9-he-copied",
+      "f9-he-journey"
     ],
     "plain": [
       "f9-en-not-in-document",
+      "f9-he-partial",
       "f9-he-not-in-document"
     ]
   }

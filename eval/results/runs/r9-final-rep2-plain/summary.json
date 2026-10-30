@@ -28,53 +28,53 @@
     "plain": {
       "counts": {
         "planned": 1,
-        "complete": 22,
+        "complete": 26,
         "infraErrors": [],
         "stoppedOnQuota": [],
         "notRun": []
       },
       "modelCalls": {
-        "gemini-3.5-flash-lite": 42
+        "gemini-3.5-flash-lite": 57
       },
       "summary": {
-        "scenarios": 22,
-        "scenarioPass": 0.682,
-        "turns": 39,
-        "actionFit": 0.795,
+        "scenarios": 26,
+        "scenarioPass": 0.615,
+        "turns": 51,
+        "actionFit": 0.745,
         "interventionFit": null,
         "unearnedMoves": 0,
         "overclaims": null,
         "stateMatch": null,
-        "prerequisiteRecovery": "0/2",
-        "helpInFinalCheck": 0,
+        "prerequisiteRecovery": "0/4",
+        "helpInFinalCheck": 1,
         "endStateMatch": null,
         "supportProblems": 0,
         "returnTurnsFit": null,
-        "lessonsCompleted": "0/1",
+        "lessonsCompleted": "0/2",
         "latencyMs": {
-          "turns": 39,
-          "p50": 2371,
+          "turns": 51,
+          "p50": 2385,
           "p95": 3955
         },
         "grading": {
-          "answers": 35,
-          "verdictAccuracy": 0.943,
-          "falsePositives": "0/14",
-          "falseNegatives": "1/18",
+          "answers": 47,
+          "verdictAccuracy": 0.936,
+          "falsePositives": "0/19",
+          "falseNegatives": "2/25",
           "issueAccuracy": "0/4",
           "misconceptionNamed": "0/0"
         },
-        "paraphraseConsistency": "1/1",
+        "paraphraseConsistency": "2/2",
         "text": {
-          "replies": 39,
-          "approvalOnNotCorrect": 1,
+          "replies": 51,
+          "approvalOnNotCorrect": 2,
           "repeatedHelp": 0,
           "endsWithQuestion": 1,
-          "citedReplies": 0.667,
+          "citedReplies": 0.647,
           "invalidCitationIds": 0,
           "unverifiedQuotes": 0,
-          "citationSupportMean": 0.739,
-          "weaklySupportedCitations": "1/30",
+          "citationSupportMean": 0.701,
+          "weaklySupportedCitations": "2/38",
           "missingTag": 0
         },
         "byCategory": {
@@ -115,20 +115,20 @@
             "passed": 2
           },
           "prerequisite": {
-            "scenarios": 1,
+            "scenarios": 2,
             "passed": 0
           },
           "fragile_prerequisite": {
-            "scenarios": 1,
+            "scenarios": 2,
             "passed": 0
           },
           "journey": {
-            "scenarios": 1,
+            "scenarios": 2,
             "passed": 0
           },
           "paraphrase": {
-            "scenarios": 1,
-            "passed": 1
+            "scenarios": 2,
+            "passed": 2
           },
           "wrong_reasoning": {
             "scenarios": 1,
@@ -183,6 +183,28 @@
             "problems": [
               "turn 1: action ask_again, wanted answer_question",
               "turn 1: did not cite c5"
+            ]
+          },
+          {
+            "id": "f9-he-prerequisite",
+            "problems": [
+              "turn 1: action hint, wanted check_earlier"
+            ]
+          },
+          {
+            "id": "f9-he-fragile-prerequisite",
+            "problems": [
+              "turn 1: approval language on an answer that was not correct",
+              "turn 2: action hint, wanted check_earlier",
+              "turn 3: action probe, wanted final_check"
+            ]
+          },
+          {
+            "id": "f9-he-journey",
+            "problems": [
+              "turn 6: action hint, wanted final_check",
+              "turn 6: help during the final check",
+              "turn 7: action ask_again, wanted summary"
             ]
           }
         ]
