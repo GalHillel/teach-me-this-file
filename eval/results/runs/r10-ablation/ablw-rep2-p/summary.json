@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "label": "ablw-rep2-p",
+    "mode": "model",
+    "split": "all",
+    "systems": [
+      "engine"
+    ],
+    "date": "2026-11-01T15:55:13.908Z",
+    "provider": "remote",
+    "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+    "models": {
+      "main": "gemini-3.5-flash-lite",
+      "backup": "gemini-3.5-flash-lite"
+    },
+    "commit": "7545a6b7a0b97d4ec7e7cb3e7fee7b36bc05dd03",
+    "uncommittedChanges": true,
+    "engineVersion": "d72818f8e00d",
+    "promptVersion": "2083a1438a0d",
+    "node": "v24.22.1",
+    "scenariosVersion": "696b74f68208",
+    "scenarioIds": [
+      "f9-en-whole-after-help"
+    ],
+    "pauseMs": 4500
+  },
+  "systems": {
+    "engine": {
+      "counts": {
+        "planned": 1,
+        "complete": 2,
+        "infraErrors": [],
+        "stoppedOnQuota": [],
+        "notRun": []
+      },
+      "modelCalls": {
+        "gemini-3.5-flash-lite": 8
+      },
+      "summary": {
+        "scenarios": 2,
+        "scenarioPass": 0,
+        "turns": 4,
+        "actionFit": 0.5,
+        "interventionFit": null,
+        "unearnedMoves": 0,
+        "overclaims": "0/2",
+        "stateMatch": "2/2",
+        "prerequisiteRecovery": null,
+        "helpInFinalCheck": 0,
+        "endStateMatch": 0,
+        "supportProblems": 0,
+        "returnTurnsFit": null,
+        "lessonsCompleted": null,
+        "latencyMs": {
+          "turns": 4,
+          "p50": 3643,
+          "p95": 4246
+        },
+        "grading": {
+          "answers": 4,
+          "verdictAccuracy": 1,
+          "falsePositives": "0/2",
+          "falseNegatives": "0/2",
+          "issueAccuracy": null,
+          "misconceptionNamed": "0/0"
+        },
+        "paraphraseConsistency": null,
+        "text": {
+          "replies": 4,
+          "approvalOnNotCorrect": 0,
+          "repeatedHelp": 0,
+          "endsWithQuestion": 0.75,
+          "citedReplies": 0.75,
+          "invalidCitationIds": 0,
+          "unverifiedQuotes": 0,
+          "citationSupportMean": 0.576,
+          "weaklySupportedCitations": "0/4",
+          "missingTag": 0
+        },
+        "byCategory": {
+          "narrowing": {
+            "scenarios": 2,
+            "passed": 0
+          }
+        },
+        "failures": [
+          {
+            "id": "f9-en-whole-after-help",
+            "problems": [
+              "turn 2: action back_to_question, wanted next_step",
+              "end: step 1, wanted 2"
+            ]
+          },
+          {
+            "id": "f9-he-whole-after-help",
+            "problems": [
+              "turn 2: action back_to_question, wanted next_step",
+              "end: step 2, wanted 3"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "label": "abl-rep5-g",
+    "mode": "model",
+    "split": "all",
+    "systems": [
+      "engine"
+    ],
+    "date": "2026-11-01T15:48:51.980Z",
+    "provider": "remote",
+    "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+    "models": {
+      "main": "gemini-3.5-flash-lite",
+      "backup": "gemini-3.5-flash-lite"
+    },
+    "commit": "4b42990d6d70edfc4443fb49f3acf9d6fc6fe8cd",
+    "uncommittedChanges": true,
+    "engineVersion": "b8423726bf03",
+    "promptVersion": "2083a1438a0d",
+    "node": "v24.22.1",
+    "scenariosVersion": "696b74f68208",
+    "scenarioIds": [
+      "f9-he-not-in-document"
+    ],
+    "pauseMs": 4500
+  },
+  "systems": {
+    "engine": {
+      "counts": {
+        "planned": 1,
+        "complete": 3,
+        "infraErrors": [],
+        "stoppedOnQuota": [],
+        "notRun": []
+      },
+      "modelCalls": {
+        "gemini-3.5-flash-lite": 8
+      },
+      "summary": {
+        "scenarios": 3,
+        "scenarioPass": 0.667,
+        "turns": 4,
+        "actionFit": 0.75,
+        "interventionFit": null,
+        "unearnedMoves": 0,
+        "overclaims": "0/2",
+        "stateMatch": "3/3",
+        "prerequisiteRecovery": null,
+        "helpInFinalCheck": 0,
+        "endStateMatch": 1,
+        "supportProblems": 0,
+        "returnTurnsFit": null,
+        "lessonsCompleted": null,
+        "latencyMs": {
+          "turns": 4,
+          "p50": 4084,
+          "p95": 4173
+        },
+        "grading": {
+          "answers": 3,
+          "verdictAccuracy": 1,
+          "falsePositives": "0/1",
+          "falseNegatives": "0/1",
+          "issueAccuracy": "1/1",
+          "misconceptionNamed": "0/0"
+        },
+        "paraphraseConsistency": null,
+        "text": {
+          "replies": 4,
+          "approvalOnNotCorrect": 0,
+          "repeatedHelp": 0,
+          "endsWithQuestion": 1,
+          "citedReplies": 0.75,
+          "invalidCitationIds": 0,
+          "unverifiedQuotes": 0,
+          "citationSupportMean": 0.852,
+          "weaklySupportedCitations": "0/4",
+          "missingTag": 0
+        },
+        "byCategory": {
+          "not_in_document": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "copied": {
+            "scenarios": 1,
+            "passed": 1
+          },
+          "misconception": {
+            "scenarios": 1,
+            "passed": 0
+          }
+        },
+        "failures": [
+          {
+            "id": "ho4-en-misconception",
+            "problems": [
+              "turn 1: action check_earlier, wanted hint"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

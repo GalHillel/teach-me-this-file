@@ -25,7 +25,10 @@ export const loadLessons = () => {
   }));
 };
 
-export const loadScenarios = () => read('teaching.json');
+export const loadScenarios = () => {
+  const base = read('teaching.json');
+  return { ...base, scenarios: [...base.scenarios, ...read('teaching-r10.json').scenarios] };
+};
 
 export const planOf = (lesson) => ({
   title: lesson.title,

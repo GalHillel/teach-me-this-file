@@ -1,0 +1,25 @@
+{
+  "label": "abl-rep1-r104",
+  "mode": "model",
+  "split": "all",
+  "systems": [
+    "engine"
+  ],
+  "date": "2026-11-01T15:32:22.736Z",
+  "provider": "remote",
+  "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+  "models": {
+    "main": "gemini-3.5-flash-lite",
+    "backup": "gemini-3.5-flash-lite"
+  },
+  "commit": "b222feda67d15d41b0ee22d0d8846bdee4430195",
+  "uncommittedChanges": true,
+  "engineVersion": "067897c89264",
+  "promptVersion": "438467bf9944",
+  "node": "v24.22.1",
+  "scenariosVersion": "696b74f68208",
+  "scenarioIds": [
+    "f9-he-not-in-document"
+  ],
+  "pauseMs": 4500
+}

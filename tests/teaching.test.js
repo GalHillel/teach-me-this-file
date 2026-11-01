@@ -19,7 +19,7 @@ describe('teaching scenarios', () => {
       expect(categories[scenario.category], scenario.id).toBeTruthy();
       const lesson = lessons[scenario.lesson];
       expect(lesson, scenario.id).toBeTruthy();
-      if (scenario.split !== 'regress9') expect(lesson.split).toBe(scenario.split);
+      if (!['regress9', 'dev10'].includes(scenario.split)) expect(lesson.split).toBe(scenario.split);
       expect(scenario.at ?? 0).toBeLessThan(lesson.steps.length);
       const ids = new Set(lesson.chunks.map((chunk) => chunk.id));
       for (const turn of scenario.turns ?? []) {
