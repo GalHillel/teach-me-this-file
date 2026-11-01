@@ -32,7 +32,7 @@ I chose **A**. It reuses the existing state (the progress object the browser alr
 | `n` | Sequence number in the lesson |
 | `step` | The step the answer was about (for a prerequisite check: the earlier step) |
 | `question` | `check` (the step's question), `narrowed` (an answer while the question is narrowed by help), `detour` (a prerequisite check), `transfer` (final check), `practice` |
-| `support` | `independent`, `hinted` (help that kept the whole question), `narrowed` (help that made the question smaller), `worked` (after a worked solution), `reminded` (a prerequisite check after a reminder) |
+| `support` | `independent`, `hinted` (help that kept the whole question), `narrowed` (help that made the question smaller), `worked` (after a worked solution), `reminded` (a prerequisite check after a reminder), `revealed` (added in round 10: a right answer after the tutor's explanation or a hint on the step had already given it, by the grader's judgement or by the copy check against the tutor's messages) |
 | `verdict`, `issue`, `misconception` | From the grade, after the server checks |
 | `sources` | Ids of the passages given to the grader |
 | `move`, `reason` | What the engine did and why |
@@ -131,3 +131,10 @@ By the decision rule above, B is better than A1. The difference comes from the s
 Changes after B was frozen, each found on held-out-4 or on production and covered by a regression test (AUDIT 99 to 103): Hebrew forms of "do" became stopwords; a final-check fail forced by repeated non-answers is logged; an earlier step whose last check was passed waits for the second wrong answer before it is checked again, and copied, unsure or unexplained answers never trigger that check; the final check gives no hint when it asks again; the closing message claims nothing beyond what was shown. Held-out-4 is not independent evidence for these changes.
 
 Round 9 repeated the comparison on a new pre-registered set (`eval/PREREGISTRATION.md`), with A1 and B on the same Flash-Lite calls and the scenarios tagged as targeted at these rules or not. With three complete repeats: on not-targeted scenarios A1 and B pass about the same (48 and 46 of 54; no measurable difference by the rule fixed in advance); on targeted scenarios B passes 17 of 18 runs and A1 0 of 18; B claimed no step as demonstrated that was not (0 of 60 labelled states, against 6 of 60). The rules work where they apply; that B is better in general is not shown.
+
+## Round 10: an answer the tutor had already given
+
+Round 9 showed that the explanation of a new step often contains what its check question asks for (16 of 36 next-step replies for B). A right answer after that is not evidence that the student can do it alone. Since round 10 a new step is taught in its own message and checked in the next one, the grader is shown the tutor's messages on the current step and reports whether they already gave the answer, and an answer that copies the tutor's explanation is caught like one copied from the file. Such a right answer is logged with support `revealed`: the state becomes `developing` ("shown with help") and the step ends as `learned`, never as shown on your own. The step can still become `demonstrated` later, from an independent final-check or practice answer.
+
+On Flash-Lite, in the 2 defect-check scenarios that completed before the quota ran out, the explanation contained the answer and the grader flagged the right answer that repeated it; the step was recorded as shown with help. The flag also fired on 1 of 9 first answers where the only earlier tutor message was the question itself, a false positive that can only understate what the student showed. This is a small check, not an evaluation.
+
