@@ -25,6 +25,7 @@ describe('normalizeAssessment', () => {
       evidence: 'uses light',
       confidence: 'high',
       missingPrerequisite: 0,
+      answerGiven: false,
       checks: [],
     });
   });

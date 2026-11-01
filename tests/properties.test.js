@@ -1,8 +1,9 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { ISSUES } from '../server/lesson/assessor.js';
-import { MAX_ATTEMPTS, STALL_LIMIT, activeStepIndex, createProgress, planMove } from '../server/lesson/progress.js';
+import { MAX_ATTEMPTS, STALL_LIMIT, activeStepIndex, createProgress, isTeaching, planMove } from '../server/lesson/progress.js';
 import { validateTurnRequest } from '../server/validation.js';
+import { asked } from './asked.js';
 import { chatReducer, initChat } from '../src/lesson/chatReducer.js';
 
 const VERDICTS = ['correct', 'partial', 'incorrect', 'question', 'off_topic', 'unclear'];
@@ -103,8 +104,9 @@ describe('lesson state machine properties', () => {
       let progress = createProgress(plan);
       let countedReplies = 0;
       for (const assessment of events) {
+        const teaching = isTeaching(progress);
         progress = apply(plan, progress, { kind: 'reply', assessment }).progress;
-        if (assessment.verdict !== 'question') countedReplies += 1;
+        if (assessment.verdict !== 'question' && !teaching) countedReplies += 1;
         if (progress.steps[0].status === 'done') break;
         expect(countedReplies).toBeLessThan(MAX_REPLIES_PER_STEP);
       }
@@ -115,16 +117,30 @@ describe('lesson state machine properties', () => {
   it('ends a step that can go back to a prerequisite within 21 non-question replies', () => {
     fc.assert(fc.property(fc.array(fc.oneof(replyArb, questionArb), { minLength: 200, maxLength: 200 }), (events) => {
       const plan = planOf(2);
-      let progress = apply(plan, createProgress(plan), { kind: 'reply', assessment: { verdict: 'correct', confidence: 'high', issue: 'none', conceptsMissing: [], misconception: '' } }).progress;
+      let progress = apply(plan, asked(createProgress(plan)), { kind: 'reply', assessment: { verdict: 'correct', confidence: 'high', issue: 'none', conceptsMissing: [], misconception: '' } }).progress;
       let countedReplies = 0;
       for (const assessment of events) {
+        const teaching = isTeaching(progress);
         progress = apply(plan, progress, { kind: 'reply', assessment }).progress;
-        if (assessment.verdict !== 'question') countedReplies += 1;
+        if (assessment.verdict !== 'question' && !teaching) countedReplies += 1;
         if (progress.steps[1].status === 'done') break;
         expect(countedReplies).toBeLessThan(MAX_REPLIES_WITH_DETOUR);
       }
       if (events.filter((event) => event.verdict !== 'question').length >= MAX_REPLIES_WITH_DETOUR) expect(progress.steps[1].status).toBe('done');
     }), { numRuns: 400 });
+  });
+
+  it('leaves the teach phase after exactly one reply, whatever the reply, and records no evidence for it', () => {
+    fc.assert(fc.property(fc.oneof(replyArb, questionArb), fc.constantFrom('reply', 'hint'), (assessment, kind) => {
+      const plan = planOf(2);
+      const start = createProgress(plan);
+      const next = planMove(start, { kind, assessment: kind === 'reply' ? assessment : null, plan });
+      expect(next.move).toBe('ask_check');
+      expect(isTeaching(next.progress)).toBe(false);
+      expect(next.progress.evidence).toEqual([]);
+      expect(next.progress.steps[0].attempts).toBe(0);
+      expect(next.progress.steps[0].hints).toBe(0);
+    }), { numRuns: 200 });
   });
 
   it('never ends a step on a right answer to a narrowed question', () => {

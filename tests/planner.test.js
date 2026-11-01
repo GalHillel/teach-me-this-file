@@ -226,30 +226,18 @@ describe('the final check gives no help', () => {
   });
 });
 
-describe('round 9: teaching does not give away the check question', () => {
-  it('tells the tutor not to answer the check question while teaching the step, for every approach (AUDIT 96)', () => {
+describe('round 10: a new step is taught first and checked in the next message', () => {
+  it('teaches without a check question for every approach and every move that starts a step', () => {
     for (const approach of ['explain', 'worked_example', 'practice']) {
       for (const move of ['introduce', 'advance', 'review_and_advance']) {
-        const text = moveInstructions({ move, step: { approach } });
-        expect(text).toContain('Do not answer the check question while teaching');
-        expect(text).toContain('do not list the examples, items or reasons the question asks for');
+        const text = moveInstructions({ move, step: { approach }, teaching: true, assessment: { verdict: 'correct', conceptsShown: [], conceptsMissing: [], misconception: '' } });
+        expect(text).toContain('Do not ask a question that checks the step yet');
+        expect(text).not.toContain('then ask its check question');
       }
     }
   });
-});
 
-describe('round 9: going back to the whole question does not answer it', () => {
-  it('links the smaller answer to the whole question without stating the rest of the answer (AUDIT 96, held-out-4 journey)', () => {
-    expect(moveInstructions({ move: 'build_up', assessment: { verdict: 'correct', conceptsShown: [], conceptsMissing: [], misconception: '' } })).toContain('without giving the parts of the answer the student has not said yet');
-  });
-});
-
-describe('round 9: grader rules for earlier steps and other questions', () => {
-  it('names an earlier step only when the missing idea is not taught by the current step (AUDIT 104)', () => {
-    expect(ASSESS_SYSTEM).toContain('Leave it 0 when the current step\'s goal or success criteria cover the missing idea');
-  });
-
-  it('keeps an attempt at the asked question with a wrong reason out of misread_question (AUDIT 105)', () => {
-    expect(ASSESS_SYSTEM).toContain('An attempt at the question that was asked, with a wrong or missing reason, is not "misread_question"');
+  it('keeps the round-8 instruction for lessons saved before the teach phase existed', () => {
+    expect(moveInstructions({ move: 'advance', step: { approach: 'explain' }, assessment: { verdict: 'correct', conceptsShown: [], conceptsMissing: [], misconception: '' } })).toContain('then ask its check question in your own words');
   });
 });

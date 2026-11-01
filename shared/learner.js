@@ -1,6 +1,6 @@
 export const STATES = ['not_assessed', 'emerging', 'developing', 'demonstrated', 'needs_review'];
 export const QUESTIONS = ['check', 'narrowed', 'detour', 'transfer', 'practice'];
-export const SUPPORTS = ['independent', 'hinted', 'narrowed', 'worked', 'reminded'];
+export const SUPPORTS = ['independent', 'hinted', 'narrowed', 'worked', 'reminded', 'revealed'];
 export const EVIDENCE_LIMIT = 60;
 
 const QUALIFIED = new Set(['copied', 'hedged', 'unjustified']);

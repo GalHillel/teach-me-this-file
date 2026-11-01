@@ -5,8 +5,8 @@ import { assessAnswer } from '../server/lesson/assessor.js';
 import { runTurn, toProviderMessages } from '../server/lesson/tutor.js';
 import { turnSources } from '../src/lesson/turnSources.js';
 import {
-  ACTION_OF_MOVE, checkEnd, endStates, supportProblems, checkTurn, citationSupport, labelGrade, wholeLabel, takeTurn, loadLessons, loadScenarios, openingMessage,
-  planOf, plainSystem, policyRun, readTag, startProgress, summarize, turnApplies, verifyReply,
+  ACKNOWLEDGEMENT, ACTION_OF_MOVE, checkEnd, endStates, supportProblems, checkTurn, citationSupport, labelGrade, wholeLabel, takeTurn, loadLessons, loadScenarios, openingMessage,
+  isTeaching, planOf, plainSystem, policyRun, readTag, startProgress, summarize, turnApplies, verifyReply,
 } from './teaching-lib.js';
 import { evalProvider } from './remote-provider.js';
 import { latestRuns, readRun, runMeta, sameVersion, summarizeRun, turnRecord } from './teaching-store.js';
@@ -175,6 +175,14 @@ const modelScenario = async (scenario, system, partial) => {
     row.failures = checkTurn({ turn, row, mode, previousHelp });
     previousHelp = ['hint', 'explain', 'probe'].includes(row.action) ? row.text : null;
     history.push({ role: 'student', content: turn.student }, { role: 'tutor', content: row.text });
+    if (system !== 'plain' && isTeaching(progress) && progress.status === 'active') {
+      await wait(pauseMs);
+      const ack = { student: ACKNOWLEDGEMENT[plan.languageCode] ?? ACKNOWLEDGEMENT.en, label: { verdict: 'question' } };
+      const follow = await engineTurn({ lesson, plan, progress, history, turn: ack });
+      progress = follow.progress;
+      history.push({ role: 'student', content: ack.student }, { role: 'tutor', content: follow.text });
+      row.followUp = { student: ack.student, move: follow.move, action: follow.action, text: follow.text, citations: follow.citations, models: follow.models, totalMs: follow.totalMs };
+    }
     rows.push({ turn, ...row });
     partial.push(turnRecord({ turn, ...row }));
     console.log(`${row.failures.length ? 'FAIL' : 'ok  '} ${system} ${scenario.id} ${row.verdict ?? '-'} ${row.action}${row.intervention ? `/${row.intervention}` : ''}${row.failures.length ? ` (${row.failures.join('; ')})` : ''}`);

@@ -28,12 +28,15 @@ export const newStepState = (status) => ({
   used: [],
   detour: null,
   revisit: null,
+  turns: 0,
 });
+
+const activate = (step) => ({ ...step, status: 'active', phase: 'teach', turns: 0 });
 
 export const createProgress = (plan) => ({
   status: 'active',
   currentStep: 0,
-  steps: plan.steps.map((_, index) => newStepState(index === 0 ? 'active' : 'pending')),
+  steps: plan.steps.map((_, index) => (index === 0 ? activate(newStepState('pending')) : newStepState('pending'))),
   review: null,
   final: null,
   evidence: [],
@@ -63,13 +66,18 @@ const completeCurrent = (plan, progress, outcome) => {
     progress: {
       ...done,
       currentStep: next,
-      steps: done.steps.map((step, index) => (index === next ? { ...step, status: 'active' } : step)),
+      steps: done.steps.map((step, index) => (index === next ? activate(step) : step)),
     },
     last: false,
   };
 };
 
-const answerOutcome = (step) => (step.attempts === 0 && step.hints === 0 ? 'mastered' : 'learned');
+const answerOutcome = (step, assessment) => (step.attempts === 0 && step.hints === 0 && !assessment.answerGiven ? 'mastered' : 'learned');
+
+const rightReason = (outcome, assessment) => {
+  if (outcome === 'mastered') return 'right_without_help';
+  return assessment.answerGiven ? 'answer_was_shown' : 'right_with_help';
+};
 
 const wrongAnswer = (plan, progress, step, assessment) => {
   const attempts = step.attempts + 1;
@@ -106,12 +114,24 @@ const handleAnswer = (plan, progress, step, assessment) => {
     if ((confidence === 'low' || PROBE_ISSUES.has(issue)) && !step.probed) {
       return result('probe', updateCurrent(progress, { probed: true, stalls: 0 }), PROBE_ISSUES.has(issue) ? `${issue}_answer` : 'unsure_grade');
     }
-    const outcome = answerOutcome(step);
+    const outcome = answerOutcome(step, assessment);
     const done = completeCurrent(plan, progress, outcome);
-    return result(done.last ? 'final_check_start' : 'advance', done.progress, outcome === 'mastered' ? 'right_without_help' : 'right_with_help');
+    return result(done.last ? 'final_check_start' : 'advance', done.progress, rightReason(outcome, assessment));
   }
 
   return wrongAnswer(plan, progress, step, assessment);
+};
+
+export const isTeaching = (progress) => {
+  const step = progress.status === 'active' ? progress.steps[progress.currentStep] : null;
+  return step?.phase === 'teach' && !Number.isInteger(step.detour);
+};
+
+export const needsGrade = (progress, kind) => kind === 'reply' && progress.status !== 'completed' && !isTeaching(progress);
+
+const teachingMove = (progress, kind) => {
+  if (kind === 'explain') return result('explain_again', progress, 'explain_before_question', { requested: true });
+  return result('ask_check', updateCurrent(progress, { phase: 'learn' }), kind === 'hint' ? 'hint_before_question' : 'explanation_given');
 };
 
 export const needsWholeQuestionGrade = (progress, assessment) => {
@@ -204,6 +224,7 @@ const helpRequest = (progress, kind) => {
 const decide = (progress, { kind, assessment, plan }) => {
   if (kind === 'start') return result('introduce', progress, 'lesson_start');
   if (kind === 'review') return progress.status === 'completed' ? startPractice(progress) : result('clarify', progress, 'lesson_not_finished');
+  if (isTeaching(progress) && ['reply', 'hint', 'explain'].includes(kind)) return teachingMove(progress, kind);
   if (kind === 'hint' || kind === 'explain') return helpRequest(progress, kind);
   if (kind === 'skip_final') {
     return inFinalCheck(progress) ? result('finish_skipped', finishFinal(progress, progress.review.results, true), 'final_skipped') : result('clarify', progress, 'no_final_check');
@@ -217,6 +238,7 @@ const decide = (progress, { kind, assessment, plan }) => {
     conceptsMissing: assessment?.conceptsMissing ?? [],
     missingPrerequisite: assessment?.missingPrerequisite ?? 0,
     wholeQuestion: assessment?.wholeQuestion === true,
+    answerGiven: assessment?.answerGiven === true,
   };
 
   if (progress.status === 'reviewing') return planReviewMove(progress, grade);
@@ -255,7 +277,13 @@ const subjectOf = (progress) => {
   return { step: progress.currentStep, question: step.scaffold ? 'narrowed' : 'check', support: supportOf(step) };
 };
 
-const isEvidence = (kind, before, grade, reason) => kind === 'reply' && before.status !== 'completed' && grade && (reason === 'no_answer' || !isNonAnswer(grade.verdict, grade.issue ?? 'none'));
+const supportFor = (before, assessment) => {
+  const subject = subjectOf(before);
+  const ownQuestion = subject.question === 'check' || subject.question === 'narrowed';
+  return ownQuestion && assessment.answerGiven && assessment.verdict === 'correct' && subject.support !== 'worked' ? { ...subject, support: 'revealed' } : subject;
+};
+
+const isEvidence = (kind, before, grade, reason) => kind === 'reply' && before.status !== 'completed' && !isTeaching(before) && grade && (reason === 'no_answer' || !isNonAnswer(grade.verdict, grade.issue ?? 'none'));
 
 const recordEvidence = (before, decision, { kind, assessment, sourceIds = [] }) => {
   const log = before.evidence;
@@ -263,7 +291,7 @@ const recordEvidence = (before, decision, { kind, assessment, sourceIds = [] }) 
   const last = log.at(-1)?.n ?? 0;
   const entries = [{
     n: last + 1,
-    ...subjectOf(before),
+    ...supportFor(before, assessment),
     verdict: decision.reason === 'no_answer' ? 'incorrect' : assessment.verdict,
     issue: assessment.issue ?? 'none',
     misconception: (assessment.misconception ?? '').slice(0, 160),
@@ -277,9 +305,22 @@ const recordEvidence = (before, decision, { kind, assessment, sourceIds = [] }) 
   return { ...decision.progress, evidence: [...log, ...entries].slice(-EVIDENCE_LIMIT) };
 };
 
+const countTurn = (progress) => {
+  if (progress.status !== 'active') return progress;
+  const step = progress.steps[progress.currentStep];
+  return updateCurrent(progress, { turns: Math.min((step.turns ?? 0) + 1, 50) });
+};
+
 export const planMove = (progress, options) => {
   const decision = decide(progress, options);
-  return { ...decision, progress: recordEvidence(progress, decision, options) };
+  return { ...decision, progress: countTurn(recordEvidence(progress, decision, options)) };
+};
+
+export const tutorMessagesOnStep = (progress, history) => {
+  if (progress.status !== 'active') return [];
+  const count = progress.steps[progress.currentStep].turns ?? 0;
+  const tutor = history.filter((message) => message.role === 'tutor').map((message) => message.content);
+  return count > 0 ? tutor.slice(-Math.min(count, 8)) : [];
 };
 
 export const lessonPace = (progress) => {

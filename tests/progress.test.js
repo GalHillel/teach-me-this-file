@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { finalCheckQueue, reviewSchedule, stepEvidence } from '../shared/lesson.js';
 import { MAX_ATTEMPTS, STALL_LIMIT, activeStepIndex, createProgress, lessonPace, planMove, stepsToReview } from '../server/lesson/progress.js';
+import { asked } from './asked.js';
 
 const makePlan = (titles, prerequisites = {}) => ({
   steps: titles.map((title, index) => ({
@@ -15,9 +16,9 @@ const makePlan = (titles, prerequisites = {}) => ({
 const plan = makePlan(['Cells', 'Nucleus', 'Membrane']);
 
 const grade = (verdict, confidence = 'high', issue = 'none', extra = {}) => ({ verdict, confidence, issue, ...extra });
-const answerIn = (lessonPlan) => (progress, verdict, confidence, issue, extra) => planMove(progress, { kind: 'reply', assessment: grade(verdict, confidence, issue, extra), plan: lessonPlan });
+const answerIn = (lessonPlan) => (progress, verdict, confidence, issue, extra) => planMove(asked(progress), { kind: 'reply', assessment: grade(verdict, confidence, issue, extra), plan: lessonPlan });
 const answer = answerIn(plan);
-const request = (progress, kind, lessonPlan = plan) => planMove(progress, { kind, plan: lessonPlan });
+const request = (progress, kind, lessonPlan = plan) => planMove(kind === 'start' ? progress : asked(progress), { kind, plan: lessonPlan });
 
 const runIn = (lessonPlan) => (verdicts, start = createProgress(lessonPlan)) =>
   verdicts.reduce(
@@ -30,10 +31,10 @@ const runIn = (lessonPlan) => (verdicts, start = createProgress(lessonPlan)) =>
 const run = runIn(plan);
 
 describe('lesson progress state machine', () => {
-  it('starts on the first step in the learn phase', () => {
+  it('starts on the first step in the teach phase', () => {
     const progress = createProgress(plan);
     expect(progress.currentStep).toBe(0);
-    expect(progress.steps[0]).toEqual({ status: 'active', phase: 'learn', attempts: 0, stalls: 0, probed: false, scaffold: false, built: false, outcome: null, hints: 0, used: [], detour: null, revisit: null });
+    expect(progress.steps[0]).toEqual({ status: 'active', phase: 'teach', attempts: 0, stalls: 0, probed: false, scaffold: false, built: false, outcome: null, hints: 0, used: [], detour: null, revisit: null, turns: 0 });
     expect(progress.review).toBe(null);
     expect(progress.final).toBe(null);
     expect(progress.steps.slice(1).every((step) => step.status === 'pending')).toBe(true);
@@ -125,7 +126,7 @@ describe('lesson progress state machine', () => {
   it('redirects off-topic messages and asks again after unclear grades', () => {
     expect(answer(createProgress(plan), 'off_topic').move).toBe('redirect');
     expect(answer(createProgress(plan), 'unclear').move).toBe('clarify');
-    expect(planMove(createProgress(plan), { kind: 'reply', assessment: null, plan }).move).toBe('clarify');
+    expect(planMove(asked(createProgress(plan)), { kind: 'reply', assessment: null, plan }).move).toBe('clarify');
   });
 
   it('counts a non-answer as an attempt after too many in a row, so a step can not stall forever', () => {

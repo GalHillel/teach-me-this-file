@@ -48,7 +48,7 @@ const mockAssessment = (prompt) => {
   if (answer.includes('partly')) return { ...base, verdict: 'partial', completeness: 0.5, conceptsShown: ['part of it'], conceptsMissing: ['the rest'] };
   if (answer.includes('off topic')) return { ...base, verdict: 'off_topic', completeness: 0 };
   if (answer.endsWith('?')) return { ...base, verdict: 'question', completeness: 0 };
-  return { ...base, verdict: 'correct', completeness: 1, conceptsShown: ['the main point'], confidence: answer.includes('maybe') ? 'low' : 'high' };
+  return { ...base, verdict: 'correct', completeness: 1, conceptsShown: ['the main point'], confidence: answer.includes('maybe') ? 'low' : 'high', answerGiven: answer.includes('as you said') };
 };
 
 export const createMockProvider = ({ delayMs = 40 } = {}) => {

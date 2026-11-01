@@ -38,6 +38,7 @@ const measure = (lines) => {
     prerequisiteRecovery: summary.prerequisiteRecovery,
     teachingLeakage: fraction(sum(text, (item) => item.teachingLeaks.length), sum(text, (item) => item.teachingReplies)),
     helpLeakage: fraction(sum(text, (item) => item.helpLeaks.length), sum(text, (item) => item.helpReplies)),
+    questionLeakage: fraction(sum(text, (item) => item.questionLeaks.length), sum(text, (item) => item.questionReplies)),
     unnecessaryRepetition: fraction(sum(text, (item) => item.repeats.length), sum(text, (item) => item.repeatChances)),
     leaksAt: text.filter((item) => item.teachingLeaks.length || item.helpLeaks.length).map((item) => ({ id: item.id, teaching: item.teachingLeaks, help: item.helpLeaks })),
     repeatsAt: text.filter((item) => item.repeats.length).map((item) => ({ id: item.id, turns: item.repeats })),

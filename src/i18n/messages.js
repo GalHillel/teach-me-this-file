@@ -213,6 +213,8 @@ const en = {
   'move.redirect': 'Back to the lesson',
   'move.free_chat': 'Follow-up',
   'move.reteach': 'Simpler explanation',
+  'move.ask_check': 'Check question',
+  'move.explain_again': 'Another explanation',
   'move.rephrase': 'Question rephrased',
   'move.review_question': 'Review question',
   'move.review_next': 'Review',
@@ -328,6 +330,7 @@ const en = {
   'basis.narrowed_answer': 'You got it after the question was split into smaller parts.',
   'basis.worked_answer': 'You got it after a worked explanation.',
   'basis.reminded_answer': 'You got it after a reminder.',
+  'basis.revealed_answer': 'You answered after the explanation or a hint had already given the answer.',
   'basis.copied_answer': 'Your answer used the words of the file; your own words would show it.',
   'basis.hedged_answer': 'You sounded unsure.',
   'basis.unjustified_answer': 'The reason was missing.',
@@ -352,6 +355,7 @@ const en = {
   'why.unsure_grade': 'Why another question: the answer could be read in more than one way.',
   'why.attempts_used_up': 'Why the full answer: after three tries, seeing it worked out helps more.',
   'why.right_with_help': 'Counted as shown with help, because there was help on this step first.',
+  'why.answer_was_shown': 'Counted as shown with help: the answer had already appeared in the explanation or a hint.',
 };
 
 const he = {
@@ -569,6 +573,8 @@ const he = {
   'move.redirect': 'חזרה לשיעור',
   'move.free_chat': 'המשך שיחה',
   'move.reteach': 'הסבר פשוט יותר',
+  'move.ask_check': 'שאלת בדיקה',
+  'move.explain_again': 'הסבר נוסף',
   'move.rephrase': 'השאלה נוסחה מחדש',
   'move.review_question': 'שאלת חזרה',
   'move.review_next': 'חזרה',
@@ -684,6 +690,7 @@ const he = {
   'basis.narrowed_answer': 'הגעת לתשובה אחרי שהשאלה פורקה לחלקים קטנים.',
   'basis.worked_answer': 'הגעת לתשובה אחרי הסבר מלא.',
   'basis.reminded_answer': 'הגעת לתשובה אחרי תזכורת.',
+  'basis.revealed_answer': 'ענית אחרי שההסבר או רמז כבר נתנו את התשובה.',
   'basis.copied_answer': 'התשובה השתמשה במילים של הקובץ; במילים שלך היא תראה שהבנת.',
   'basis.hedged_answer': 'נשמעת לא בטוח.',
   'basis.unjustified_answer': 'הסיבה חסרה.',
@@ -708,6 +715,7 @@ const he = {
   'why.unsure_grade': 'למה עוד שאלה: אפשר להבין את התשובה ביותר מדרך אחת.',
   'why.attempts_used_up': 'למה התשובה המלאה: אחרי שלושה ניסיונות, עדיף לראות את הפתרון.',
   'why.right_with_help': 'נספר כהודגם בעזרה, כי קודם הייתה עזרה בצעד הזה.',
+  'why.answer_was_shown': 'נספר כהודגם בעזרה: התשובה כבר הופיעה בהסבר או ברמז.',
 };
 
 const fr = {
@@ -925,6 +933,8 @@ const fr = {
   'move.redirect': 'Retour à la leçon',
   'move.free_chat': 'Suite',
   'move.reteach': 'Explication plus simple',
+  'move.ask_check': 'Question de vérification',
+  'move.explain_again': 'Autre explication',
   'move.rephrase': 'Question reformulée',
   'move.review_question': 'Question de révision',
   'move.review_next': 'Révision',
@@ -1040,6 +1050,7 @@ const fr = {
   'basis.narrowed_answer': 'Trouvé après que la question a été découpée.',
   'basis.worked_answer': 'Trouvé après une explication complète.',
   'basis.reminded_answer': 'Trouvé après un rappel.',
+  'basis.revealed_answer': 'Répondu après que l’explication ou un indice avait déjà donné la réponse.',
   'basis.copied_answer': 'La réponse reprenait les mots du fichier ; vos propres mots le montreraient.',
   'basis.hedged_answer': 'Vous sembliez hésiter.',
   'basis.unjustified_answer': 'La raison manquait.',
@@ -1064,6 +1075,7 @@ const fr = {
   'why.unsure_grade': 'Pourquoi une autre question : la réponse peut se lire de plusieurs façons.',
   'why.attempts_used_up': 'Pourquoi la réponse complète : après trois essais, voir la solution aide davantage.',
   'why.right_with_help': 'Compté comme montré avec de l’aide, car il y a eu de l’aide sur cette étape avant.',
+  'why.answer_was_shown': 'Compté comme montré avec de l’aide : la réponse était déjà apparue dans l’explication ou un indice.',
 };
 
 export const MESSAGES = { en, he, fr };

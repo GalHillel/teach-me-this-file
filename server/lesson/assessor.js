@@ -79,7 +79,7 @@ export const unclearAssessment = () => ({
   checks: ['no_usable_grade'],
 });
 
-export const normalizeAssessment = (raw, studentMessage, sources = [], related = []) => {
+export const normalizeAssessment = (raw, studentMessage, sources = [], related = [], taught = []) => {
   const verdictText = String(raw?.verdict ?? '').toLowerCase().trim();
   if (!VERDICTS.has(verdictText)) return unclearAssessment();
 
@@ -126,7 +126,12 @@ export const normalizeAssessment = (raw, studentMessage, sources = [], related =
   if (issue !== 'no_knowledge' && (verdict === 'correct' || verdict === 'partial') && copiedShare(studentMessage, sources) >= COPY_SHARE) {
     issue = 'copied';
     checks.push('copied_from_source');
+  } else if (issue !== 'no_knowledge' && (verdict === 'correct' || verdict === 'partial') && copiedShare(studentMessage, taught.map((message) => ({ text: message }))) >= COPY_SHARE) {
+    issue = 'copied';
+    checks.push('copied_from_tutor');
   }
+  const answerGiven = taught.length > 0 && verdict === 'correct' && (raw?.answerGiven === true || checks.includes('copied_from_tutor'));
+  if (answerGiven) checks.push('answer_in_tutor_messages');
   if (issue !== 'none' && !ISSUE_VERDICTS[issue].has(verdict)) {
     issue = 'none';
     checks.push('issue_does_not_fit_verdict');
@@ -142,21 +147,22 @@ export const normalizeAssessment = (raw, studentMessage, sources = [], related =
     evidence,
     confidence,
     missingPrerequisite: Number.isInteger(raw?.missingPrerequisite) && raw.missingPrerequisite > 0 && verdict !== 'correct' ? raw.missingPrerequisite : 0,
+    answerGiven,
     checks,
   };
 };
 
-export const assessAnswer = async ({ provider, plan, progress, tutorQuestion, studentMessage, sources, related = [], signal, onMeta, task = 'assessment' }) => {
+export const assessAnswer = async ({ provider, plan, progress, tutorQuestion, studentMessage, sources, related = [], taught = [], signal, onMeta, task = 'assessment' }) => {
   const step = plan.steps[assessedStepIndex(progress)];
   try {
     const raw = await provider.generateJson({
       task,
       system: ASSESS_SYSTEM,
-      prompt: buildAssessPrompt({ plan, step, tutorQuestion, studentMessage, sources, related, finalCheck: inFinalCheck(progress), seen: misconceptionsShown(progress) }),
+      prompt: buildAssessPrompt({ plan, step, tutorQuestion, studentMessage, sources, related, taught, finalCheck: inFinalCheck(progress), seen: misconceptionsShown(progress) }),
       signal,
       onMeta,
     });
-    return normalizeAssessment(raw, studentMessage, [...sources, { text: tutorQuestion ?? '' }], related);
+    return normalizeAssessment(raw, studentMessage, [...sources, { text: tutorQuestion ?? '' }], related, taught);
   } catch (error) {
     if (error instanceof AppError && error.code === 'bad_response') return unclearAssessment();
     throw error;

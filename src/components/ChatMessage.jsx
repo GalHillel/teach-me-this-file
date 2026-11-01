@@ -21,6 +21,8 @@ const MOVE_STYLES = {
   review_next: 'bg-pen-soft text-pen',
   review_finish: 'bg-success-soft text-success',
   probe: 'bg-pen-soft text-pen',
+  ask_check: 'bg-pen-soft text-pen',
+  explain_again: 'bg-marker-soft text-ink',
   reveal_and_recheck: 'bg-marker-soft text-ink',
   finish: 'bg-success-soft text-success',
   review_and_finish: 'bg-success-soft text-success',
@@ -37,7 +39,7 @@ const MOVE_STYLES = {
 const RESULT_NOTES = new Set(['review_item', 'final_item']);
 
 const HELP_MOVES = new Set(['hint', 'reteach', 'reveal_and_recheck', 'prerequisite_check', 'resume_after_reteach']);
-const CHECK_MOVES = new Set(['probe', 'rephrase', 'build_up', 'final_check_start', 'final_next', 'review_question', 'review_next']);
+const CHECK_MOVES = new Set(['ask_check', 'probe', 'rephrase', 'build_up', 'final_check_start', 'final_next', 'review_question', 'review_next']);
 
 const bodyStyle = (move) => {
   if (HELP_MOVES.has(move)) return 'rounded-e-xl border-s-4 border-marker-edge bg-marker-soft/60 px-4 py-3';
@@ -47,7 +49,7 @@ const bodyStyle = (move) => {
 
 const LABELLED_BY_INTERVENTION = new Set(['hint', 'reteach', 'prerequisite_check']);
 
-const WHY_REASONS = new Set(['first_wrong', 'second_wrong', 'misconception', 'no_knowledge', 'grader', 'weak_prerequisite', 'narrowed_question_right', 'copied_answer', 'hedged_answer', 'unjustified_answer', 'unsure_grade', 'attempts_used_up', 'right_with_help']);
+const WHY_REASONS = new Set(['first_wrong', 'second_wrong', 'misconception', 'no_knowledge', 'grader', 'weak_prerequisite', 'narrowed_question_right', 'copied_answer', 'hedged_answer', 'unjustified_answer', 'unsure_grade', 'attempts_used_up', 'right_with_help', 'answer_was_shown']);
 
 const SOURCE_STYLES = {
   cited: 'border-pen/40 text-pen hover:border-pen',

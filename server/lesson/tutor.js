@@ -4,7 +4,7 @@ import { AppError } from '../errors.js';
 import { count, recordFirstToken } from '../metrics.js';
 import { assessAnswer } from './assessor.js';
 import { openingPraiseFilter, praiseAllowed } from './calibration.js';
-import { activeStepIndex, lessonPace, needsWholeQuestionGrade, planMove } from './progress.js';
+import { activeStepIndex, lessonPace, needsGrade, needsWholeQuestionGrade, planMove, tutorMessagesOnStep } from './progress.js';
 import { buildTutorSystem } from './prompts.js';
 
 const HISTORY_LIMIT = 12;
@@ -60,6 +60,7 @@ export const publicAssessment = (assessment) =>
       conceptsShown: assessment.conceptsShown,
       conceptsMissing: assessment.conceptsMissing,
       misconception: assessment.misconception,
+      answerGiven: assessment.answerGiven === true,
     }
     : null;
 
@@ -104,7 +105,9 @@ export const runTurn = async ({ provider, input, signal, send }) => {
   };
 
   let assessment = null;
-  if (kind === 'reply' && input.progress.status !== 'completed') {
+  if (needsGrade(input.progress, kind)) {
+    const step = input.progress.status === 'active' ? input.progress.steps[input.progress.currentStep] : null;
+    const taught = step && !Number.isInteger(step.detour) ? tutorMessagesOnStep(input.progress, history) : [];
     send('status', { phase: 'assessing' });
     assessment = await assessAnswer({
       provider,
@@ -114,6 +117,7 @@ export const runTurn = async ({ provider, input, signal, send }) => {
       studentMessage,
       sources: sources.current,
       related: sources.related,
+      taught,
       signal,
       onMeta,
     });

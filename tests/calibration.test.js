@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../server/app.js';
-import { createProgress } from '../server/lesson/progress.js';
+import { createProgress as newProgress } from '../server/lesson/progress.js';
+import { asked } from './asked.js';
 import { openingPraiseFilter, praiseAllowed } from '../server/lesson/calibration.js';
+
+const createProgress = (lessonPlan) => asked(newProgress(lessonPlan));
 
 const run = (active, chunks) => {
   const out = [];

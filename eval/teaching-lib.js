@@ -38,6 +38,9 @@ export const planOf = (lesson) => ({
 
 const { createProgress, planMove } = engine;
 const needsWholeQuestionGrade = engine.needsWholeQuestionGrade ?? (() => false);
+export const isTeaching = engine.isTeaching ?? (() => false);
+
+export const ACKNOWLEDGEMENT = { en: 'OK, that makes sense.', he: 'בסדר, הבנתי.', fr: 'D\'accord, je comprends.' };
 
 export const startProgress = (plan, scenario) => {
   const progress = createProgress(plan);
@@ -47,7 +50,7 @@ export const startProgress = (plan, scenario) => {
     currentStep: at,
     steps: progress.steps.map((step, index) => {
       if (index < at) return { ...step, status: 'done', outcome: scenario.earlier?.[index] ?? 'mastered' };
-      return { ...step, status: index === at ? 'active' : 'pending' };
+      return index === at ? { ...step, status: 'active', phase: 'learn', turns: 1 } : { ...step, status: 'pending', phase: 'learn' };
     }),
   };
 };
@@ -69,6 +72,8 @@ export const ACTION_OF_MOVE = {
   build_up: 'back_to_question',
   advance: 'next_step',
   review_and_advance: 'next_step',
+  ask_check: 'ask_check',
+  explain_again: 'explain',
   final_check_start: 'final_check',
   final_next: 'final_check',
   final_finish: 'summary',
@@ -275,6 +280,7 @@ export const policyRun = (lesson, scenario, system) => {
     const result = decide(progress, { kind: turn.kind ?? 'reply', assessment, plan });
     progress = result.progress;
     turns.push({ turn, assessment, move: result.move, action: ACTION_OF_MOVE[result.move] ?? 'other', intervention: result.intervention, step, progress });
+    if (system === 'engine' && isTeaching(progress)) progress = planMove(progress, { kind: 'reply', assessment: null, plan }).progress;
   }
   return { plan, progress, turns };
 };
@@ -453,7 +459,7 @@ const LEAK_HELP_ACTIONS = new Set(['hint', 'back_to_question']);
 
 export const textMeasures = (line, scenario, markers = {}) => {
   const lessonMarkers = markers[scenario.lesson] ?? {};
-  const result = { teachingReplies: 0, teachingLeaks: [], helpReplies: 0, helpLeaks: [], repeatChances: 0, repeats: [] };
+  const result = { teachingReplies: 0, teachingLeaks: [], questionReplies: 0, questionLeaks: [], helpReplies: 0, helpLeaks: [], repeatChances: 0, repeats: [] };
   let step = scenario.at ?? 0;
   (line.turns ?? []).forEach((row, index) => {
     const turn = row.turn ?? {};
@@ -468,6 +474,10 @@ export const textMeasures = (line, scenario, markers = {}) => {
       if (spec && row.text !== undefined) {
         result.teachingReplies += 1;
         if (markerGroupsFound(row.text, spec) >= spec.min) result.teachingLeaks.push(index + 1);
+      }
+      if (spec && row.followUp?.text !== undefined) {
+        result.questionReplies += 1;
+        if (markerGroupsFound(row.followUp.text, spec) >= spec.min) result.questionLeaks.push(index + 1);
       }
       return;
     }

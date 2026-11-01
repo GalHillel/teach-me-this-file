@@ -3,9 +3,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../server/app.js';
 import { createServerKeyBudget } from '../server/serverKey.js';
 import { AppError } from '../server/errors.js';
-import { createProgress } from '../server/lesson/progress.js';
+import { createProgress as newProgress } from '../server/lesson/progress.js';
+import { asked } from './asked.js';
 import { guardStream, toProviderMessages } from '../server/lesson/tutor.js';
 import { createMockProvider } from '../server/providers/mock.js';
+
+const createProgress = (lessonPlan) => asked(newProgress(lessonPlan));
 
 const document = {
   name: 'cells.txt',

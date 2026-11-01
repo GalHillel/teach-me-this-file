@@ -111,7 +111,7 @@ const plan = (value) => {
 };
 
 const STEP_STATUSES = new Set(['pending', 'active', 'done']);
-const PHASES = new Set(['learn', 'recheck']);
+const PHASES = new Set(['learn', 'recheck', 'teach']);
 const OUTCOMES = new Set([null, ...LESSON_OUTCOMES]);
 
 const count = (value, max, name) => {
@@ -248,6 +248,7 @@ const progress = (value, plan) => {
         used: used(step.used),
         detour,
         revisit,
+        turns: count(step.turns ?? 0, 50, 'progress step turns'),
       };
     }),
   };

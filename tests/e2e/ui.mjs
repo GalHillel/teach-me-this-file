@@ -260,6 +260,11 @@ const journey = async (viewport, language) => {
     await answer(page, 'Plants make glucose from light, the whole answer.');
     await check('whole question answered');
     if ((await progressNow()).currentStep !== 1) problems.push('did not move to step 2 after the whole answer');
+    if (!(await progressNow()).steps[1] || (await progressNow()).steps[1].phase !== 'teach') problems.push('step 2 did not start with teaching');
+    await answer(page, 'OK, that makes sense.');
+    if (turnLog.at(-1).events.find((item) => item.event === 'progress')?.data.move !== 'ask_check') problems.push('the check question was not asked after the reply to the explanation');
+    if (turnLog.at(-1).events.some((item) => item.event === 'status' && item.data.phase === 'assessing')) problems.push('a reply to the explanation was graded');
+    await check('reply to the explanation');
 
     await answer(page, 'Where does the oxygen go?');
     const asked = turnLog.at(-1);
@@ -444,6 +449,7 @@ try {
         record('source-dialog', viewport, language, await audit(page));
         await page.keyboard.press('Escape');
       });
+      await answer(page, 'OK, that makes sense.');
       await answer(page, 'there is a gap in this answer');
       const detourShown = await page.locator('[role=note]').filter({ hasText: language === 'he' ? 'רעיון קודם' : 'earlier idea' }).count() > 0;
       const whyShown = await page.locator('article p').filter({ hasText: language === 'he' ? 'למה צעד קודם' : 'Why an earlier step' }).count() > 0;

@@ -2,6 +2,7 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { EVIDENCE_LIMIT, QUESTIONS, SUPPORTS, learnerModel, misconceptionsShown, stepState } from '../shared/learner.js';
 import { createProgress, planMove } from '../server/lesson/progress.js';
+import { asked } from './asked.js';
 import { validateTurnRequest } from '../server/validation.js';
 
 const plan = {
@@ -21,7 +22,7 @@ const grade = (verdict, extra = {}) => ({ verdict, confidence: 'high', issue: 'n
 
 const play = (moves, start = createProgress(plan)) => moves.reduce((state, item) => {
   const [kind, assessment] = typeof item === 'string' ? ['reply', grade(item)] : Array.isArray(item) ? ['reply', grade(...item)] : [item.kind, null];
-  const decision = planMove(state.progress, { kind, assessment, plan, sourceIds: ['c1'] });
+  const decision = planMove(kind === 'start' ? state.progress : asked(state.progress), { kind, assessment, plan, sourceIds: ['c1'] });
   return { progress: decision.progress, moves: [...state.moves, decision.move], reasons: [...state.reasons, decision.reason] };
 }, { progress: start, moves: [], reasons: [] });
 
@@ -136,7 +137,7 @@ describe('the evidence the policy records', () => {
   });
 
   it('keeps at most the last entries the server accepts, numbered in order', () => {
-    let progress = createProgress(plan);
+    let progress = asked(createProgress(plan));
     for (let index = 0; index < EVIDENCE_LIMIT + 10; index += 1) progress = { ...progress, steps: progress.steps.map((step, position) => (position === 0 ? { ...step, attempts: 0 } : step)), evidence: planMove(progress, { kind: 'reply', assessment: grade('partial'), plan }).progress.evidence };
     expect(progress.evidence).toHaveLength(EVIDENCE_LIMIT);
     expect(progress.evidence.at(-1).n).toBe(EVIDENCE_LIMIT + 10);
