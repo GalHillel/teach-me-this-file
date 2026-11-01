@@ -108,7 +108,7 @@ More rules:
   - "no_knowledge": the student says they do not know, or makes no attempt.
   - "unjustified": the question asks for a reason or an explanation, and the student gives only the final answer.
   - "none": none of these.
-- If the answer is wrong because an idea from one of the earlier steps listed under "Earlier steps this step builds on" is missing or misunderstood, set "missingPrerequisite" to that step's number. That includes an answer that repeats the common mistake of that earlier step, or that contradicts its goal. Otherwise 0.
+- If the answer is wrong because an idea from one of the earlier steps listed under "Earlier steps this step builds on" is missing or misunderstood, set "missingPrerequisite" to that step's number. That includes an answer that repeats the common mistake of that earlier step, or that contradicts its goal. Leave it 0 when the current step's goal or success criteria cover the missing idea, because then the current step is where it is taught. Otherwise 0.
 - Write the short notes in English.
 
 Return only JSON:
