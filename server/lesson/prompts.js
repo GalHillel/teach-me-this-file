@@ -103,7 +103,7 @@ More rules:
 - "evidence" must be copied word for word from the student's message.
 - Set "confidence" to "low" when the answer is ambiguous, could be a guess, or you are unsure how to read it.
 - Set "issue" to describe how the student answered:
-  - "misread_question": the student answered a different question than the one asked, for example described another part of the lesson.
+  - "misread_question": the student answered a different question than the one asked, for example described another part of the lesson. An attempt at the question that was asked, with a wrong or missing reason, is not "misread_question": grade it "incorrect" or "partial" with issue "none", and write the wrong idea in "misconception".
   - "hedged": the content is right, but the student says they are guessing or unsure.
   - "no_knowledge": the student says they do not know, or makes no attempt.
   - "unjustified": the question asks for a reason or an explanation, and the student gives only the final answer.
