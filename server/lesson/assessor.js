@@ -146,11 +146,11 @@ export const normalizeAssessment = (raw, studentMessage, sources = [], related =
   };
 };
 
-export const assessAnswer = async ({ provider, plan, progress, tutorQuestion, studentMessage, sources, related = [], signal, onMeta }) => {
+export const assessAnswer = async ({ provider, plan, progress, tutorQuestion, studentMessage, sources, related = [], signal, onMeta, task = 'assessment' }) => {
   const step = plan.steps[assessedStepIndex(progress)];
   try {
     const raw = await provider.generateJson({
-      task: 'assessment',
+      task,
       system: ASSESS_SYSTEM,
       prompt: buildAssessPrompt({ plan, step, tutorQuestion, studentMessage, sources, related, finalCheck: inFinalCheck(progress), seen: misconceptionsShown(progress) }),
       signal,

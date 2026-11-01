@@ -4,7 +4,7 @@ import { AppError } from '../errors.js';
 import { count, recordFirstToken } from '../metrics.js';
 import { assessAnswer } from './assessor.js';
 import { openingPraiseFilter, praiseAllowed } from './calibration.js';
-import { activeStepIndex, lessonPace, planMove } from './progress.js';
+import { activeStepIndex, lessonPace, needsWholeQuestionGrade, planMove } from './progress.js';
 import { buildTutorSystem } from './prompts.js';
 
 const HISTORY_LIMIT = 12;
@@ -117,6 +117,21 @@ export const runTurn = async ({ provider, input, signal, send }) => {
       signal,
       onMeta,
     });
+    if (needsWholeQuestionGrade(input.progress, assessment)) {
+      const whole = await assessAnswer({
+        provider,
+        plan,
+        progress: input.progress,
+        tutorQuestion: plan.steps[input.progress.currentStep].checkQuestion,
+        studentMessage,
+        sources: sources.current,
+        signal,
+        onMeta,
+        task: 'assessment_whole',
+      });
+      const wholeQuestion = whole.verdict === 'correct' && whole.issue === 'none' && whole.confidence !== 'low';
+      assessment = { ...assessment, wholeQuestion, checks: [...assessment.checks, wholeQuestion ? 'whole_question_right' : 'whole_question_not_right'] };
+    }
   }
 
   const { move, progress, reason, intervention, prerequisite, requested } = planMove(input.progress, { kind, assessment, plan, sourceIds: sources.current.map((chunk) => chunk.id) });
