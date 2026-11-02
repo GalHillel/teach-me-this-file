@@ -504,7 +504,7 @@ The tests and evals show that the policy does what it says and that grading did 
 
 ### Automated tests
 
-`npm test` runs 330 tests (314 before the ninth round, 278 before the eighth, 272 before the seventh, 252 before the sixth, 229 before the fifth, 187 before the fourth, 125 before the third): the second grade of a narrowed answer against the whole question, the eval's leakage and repetition measures and the final set's structure, the learner model (states, the evidence the policy records, the rules for going back to an earlier step, a property test that no step is claimed as shown on your own without an independent right answer, and the server checks on the log), the teaching policy, prerequisite detours, `build_up` after narrowed questions, the teaching-eval checks and the policy layer on the dev set, the final check and evidence levels, citation and quote checks, the copy check, extraction and chunking, BM25 source matching (including thresholds on the golden set), the lesson state machine (including a test that no sequence of messages keeps a step active), grade checks, plan validation and step sizing, prompt fencing, the chat reducer (commit on done, stop, failure, notices, resume), session storage (no key stored, broken storage), translations (every key in all three languages, same placeholders), the SSE parser, the provider adapters (fallback, cooldowns per key, daily quota, backup notice, thinkingLevel only where accepted), Markdown rendering of model output (no `javascript:` links, HTML escaped), and the API with a mock provider (streaming, cancellation, validation, server-key origin check and budget, `trust proxy`, rate limit, key not logged).
+`npm test` runs 346 tests (330 before the tenth round, 314 before the ninth, 278 before the eighth, 272 before the seventh, 252 before the sixth, 229 before the fifth, 187 before the fourth, 125 before the third): the teach phase and the revealed-answer evidence (policy, prompts, adversarial answers and a full API lesson), the second grade of a narrowed answer against the whole question, the eval's leakage and repetition measures and the final set's structure, the learner model (states, the evidence the policy records, the rules for going back to an earlier step, a property test that no step is claimed as shown on your own without an independent right answer, and the server checks on the log), the teaching policy, prerequisite detours, `build_up` after narrowed questions, the teaching-eval checks and the policy layer on the dev set, the final check and evidence levels, citation and quote checks, the copy check, extraction and chunking, BM25 source matching (including thresholds on the golden set), the lesson state machine (including a test that no sequence of messages keeps a step active), grade checks, plan validation and step sizing, prompt fencing, the chat reducer (commit on done, stop, failure, notices, resume), session storage (no key stored, broken storage), translations (every key in all three languages, same placeholders), the SSE parser, the provider adapters (fallback, cooldowns per key, daily quota, backup notice, thinkingLevel only where accepted), Markdown rendering of model output (no `javascript:` links, HTML escaped), and the API with a mock provider (streaming, cancellation, validation, server-key origin check and budget, `trust proxy`, rate limit, key not logged).
 
 ### Golden sets
 
@@ -738,3 +738,88 @@ The findings are in [AUDIT.md](AUDIT.md), 88 to 97, with the open list after the
 - Results on Flash-Lite, three complete repeats: outside the targeted scenarios A1 passed 16, 16 and 16 of 18 and B 14, 17 and 15, which the rules call no measurable difference; on the targeted ones B passed 17 of 18 and A1 0 of 18. On the model, 96 repetition is closed (B 6 of 6 final9 runs, A1 0 of 6); the teaching still answers the check question in about 4 of 10 next-step replies (16 of 36, A1 23 of 30); 104 did not change; 105 was not reproduced, because A1 without the rule also grades the regression answers correctly. Two of B's not-targeted losses come from grading that differs from A1 only by the round-9 rules (AUDIT 106, 109).
 - The pilot has forms and participant sheets and is still NOT RUN.
 - Production is unchanged at `7545a6b`; the round's work is on branch `round9`.
+
+## What changed in the tenth round (1 and 2 November): the final engine
+
+### Which engine is which
+
+Production at the start of the round was `7545a6b`: A1 (`28b8f2e`) plus the round-8 learner model and the fixes for 99 to 103. B (`feab2be`) is production plus four round-9 changes: the second grade against the whole check question, the teaching instruction not to answer the check question, the 104 grader rule and the 105 grader rule. The brief called A1 the stable baseline; the baseline that was actually deployed is production, so the ablation starts there. The final engine `c` is production plus the second grade plus teach-first.
+
+### Isolating the regressions
+
+Each round-9 change was added to production on its own branch and run 5 times on the three problem scenarios, with A1 and B as references, on the same model and day (`eval/ABLATION_R10.md`, written and committed before the runs). The 104 rule is the likely cause of 109 (it failed 3 of 5 alone, 0 of 5 without it). 106 comes from the 104 and 105 rules together (5 of 5 together, at most 2 of 5 apart). Nothing fixes 104. The second grade turns 0 of 6 into 6 of 6 on the whole-answer scenarios. I kept the second grade and removed the 104 rule, the 105 rule and the round-9 teaching instruction. No run had an infrastructure error or an unusable grade, so every count above is behaviour, not model failure.
+
+### Teach first, check after
+
+The leak in round 9 was structural: one message both taught the idea and asked the question about it. Now:
+
+1. A new step starts in a `teach` phase. The teaching message is written from a prompt that does not contain the check question or its success criteria, and it ends by inviting the student to react.
+2. The student's reply to the explanation is not graded and records no evidence. The engine moves to `ask_check`, and a separate message asks the check question without hints. A question in that reply is answered before the check question. "Hint" before the question asks the question; "Explain differently" explains again and stays in the teach phase.
+3. The grader is shown the tutor's messages on the current step (counted by a `turns` field in the step state) and returns `answerGiven`. An answer that copies the tutor's explanation is caught by the same copy check as one copied from the file.
+4. A right answer after the answer was given is logged with support `revealed`. It ends the step as `learned` and the learner state as `developing`; it can never make the step `demonstrated`. Hints were already never independent. Only the final check, which asks a new case without hints, can then show the step on the student's own.
+
+Tests at three levels (`tests/teach.test.js`, 17 tests): the policy (the teach phase, no evidence from the reply, hint and explain before the question, revealed support), the prompts (the teaching prompt has no check question or criteria; the grader prompt carries the tutor's messages), and a full lesson through the API with a mock model. The adversarial cases are the answer stated verbatim in the explanation, inside an example, in a hint, implied by the explanation, copied from the document, and a right answer with the wrong reasoning.
+
+What it does not fix: an explanation of an idea usually contains what a question about that idea asks for. On Flash-Lite the teaching message still contained the answer markers in 7 of 9 next-step messages of the leak scenarios and 10 of 12 on final9; the separate question message did in 1 of 9 and 0 of 12. The change makes that visible in the evidence instead of pretending it does not happen.
+
+### Real-model results for the final engine
+
+All on `gemini-3.5-flash-lite` through the eval deployment, 1 November (ablation scenarios) and 2 November (the rest). Raw results in `eval/results/runs/r10-engine/` and `eval/results/live-r10/`.
+
+| Check | c | p (production) |
+| --- | --- | --- |
+| `f9-en-copied` (109), 5 repeats | 5/5 | 5/5 |
+| `f9-he-not-in-document` (106), 5 repeats | 5/5 | 4/5 |
+| `ho4-en-misconception` (104), 5 repeats | 0/5 | 0/5 |
+| Whole answer after help (96), 2 scenarios x 3 | 6/6 | 0/6 |
+| Revealed-answer scenarios (`dev10`), 3 scenarios x 2 | 6/6 | not run |
+| final9, one repeat, all scenarios | 18/24 | 19/24 |
+| final9, not targeted | 14/18 | 16/18 |
+| final9, targeted | 4/6 | 3/6 |
+| final9, steps claimed as shown on your own that were not | 0/20 | 0/20 |
+| final9, next-step teaching message contains the answer | 10/12 | 9/10 |
+| final9, separate question message contains the answer | 0/12 | none (no separate message) |
+| final9, model calls | 130 | 116 |
+
+The final9 comparison was not pre-registered for this round, final9 has been seen, and it is one repeat, so it is not independent evidence. Read by hand, the three scenarios c failed and production passed:
+
+- `f9-en-understands`: the student answered right at once, but the explanation had already given the answer, so the step ended `developing` instead of `demonstrated`. This is the designed behaviour: a repeated answer is not independent evidence. The scenario was written before that rule and I did not change it.
+- `f9-he-misconception`: the reply opened with a concession ("it sounds logical to think about air, but...") that the approval check counts as praise of a wrong answer. Counted as written.
+- `f9-en-prerequisite`: the grader graded the answer to the earlier-step check as partly right and answering another question, so the tutor asked again twice. Detours do not pass the tutor's messages to the grader, so the only difference on this path is the extra `answerGiven` field in the grader prompt. One run; unattributed (AUDIT 112).
+
+Production failed both whole-answer scenarios, which c passes. Both fail `f9-en-fragile-prerequisite`, `f9-he-copied` (the known approval false flag, 108) and `f9-he-journey`. In round 9, B moved between 14 and 17 of the 18 not-targeted scenarios across three repeats, so 14 against 16 in one repeat does not show a difference in either direction.
+
+### Two complete lessons through the real interface
+
+`eval/live-lesson.mjs` runs the built app with the real Express server and a headless browser, and I answered each message after reading it. The model calls went to Flash-Lite through the eval deployment; this is the round-10 build, not production.
+
+- English, desktop, photosynthesis sample, 2 steps, 8 turns: a reply to the explanation, then the check question; a right answer recorded as `revealed` ("Counted as shown with help: the answer had already appeared in the explanation"); a question in the teach phase answered before the check question; a partial answer, a hint, then the rest; a reload during the final check restored the same state; two final-check answers graded right without help; the summary said both steps were shown. No page errors.
+- Hebrew, phone size (390x844), right to left, water-cycle sample, 3 steps, 12 turns: "Explain differently" explained again and stayed in the teach phase; a misconception got a counter-example; the right answer after it was graded against the whole question (`whole_question_right`) and recorded as revealed; a reload during the final check restored the same state; one final-check answer graded wrong, two right; the summary named the step with the wrong answer as needing practice. No page errors.
+
+Two things I would not have found with scripted students: the first Hebrew teaching message had two Arabic letters inside a Hebrew word (AUDIT 111), and the first final-check question described drops on a pot lid but asked about evaporation, so my answer about condensation was graded wrong (AUDIT 110).
+
+### The decision
+
+Released: production plus the second grade plus teach-first.
+
+- The second grade is the only round-9 change with a measured benefit (0 of 6 to 6 of 6) and no attributed regression.
+- Teach-first is a correction to the evidence, not a bet on better teaching. Production records a right answer as independent even when its own explanation just gave that answer, which is the defect the brief asked me to fix. The final engine records it as shown with help, keeps the question in a separate message, and raises no claim: steps claimed as shown that were not stay at 0 of 20.
+- On general behaviour the evidence is inconclusive (18 against 19 of 24, one repeat). I do not claim the final engine teaches better. The release rests on the two fixes above and on the absence of a critical regression, not on that comparison.
+
+Rejected alternatives:
+
+- **Merging B as it was.** It wins only on the 6 scenarios written for its rules, and two of its four changes caused regressions.
+- **Another prompt instruction against leaking.** Round 9 tried that: leakage went from 23 of 30 to 16 of 36 next-step replies, not to zero, and the instruction could not be tested on its own.
+- **Removing the explanation and asking first.** The plain tutor does that and leaks 0 of 36, but it then teaches through hints, and it passed the fewest scenarios in round 9.
+- **A lexical leak detector on the tutor's text.** Without per-step answer markers in the plan it would match free text against the success criteria, which round 5 showed is unreliable in Hebrew (AUDIT 63). The grader judges instead, and its judgement only ever lowers a claim.
+- **A deterministic rule for 106** (a question near the topic is a question even without a matching passage). After removing the two grader rules the scenario passed 5 of 5; the rule would add code for a case production misses about 1 time in 5. Left open.
+- **A probe after every revealed answer** to get independent evidence at once. It would add a turn to most steps; the final check already asks a new case about the weak steps.
+- **Releasing only the second grade.** Simpler, but it leaves the evidence defect in production.
+
+### Known limitations of the final engine
+
+- One more turn per step: the student replies to the explanation before the question comes.
+- Because the explanation usually states the idea, most first right answers are recorded as shown with help, and most steps show "Counted as shown with help". A student who already knew the idea is under-credited until the final check.
+- `answerGiven` is a model judgement. It fired on 1 of 9 first answers where the only earlier message was the question itself, a false positive that lowers what the student showed.
+- 104 is open: an answer that repeats an earlier step's mistake still sends the student back even when the current step teaches the idea (0 of 5 in every configuration).
+- The evidence is scripted students on scenarios I wrote, one model, and my own answers in two live lessons. The pilot with real students has NOT RUN.

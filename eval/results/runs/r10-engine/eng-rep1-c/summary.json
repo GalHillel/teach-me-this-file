@@ -1,0 +1,90 @@
+{
+  "meta": {
+    "label": "eng-rep1-c",
+    "mode": "model",
+    "split": "all",
+    "systems": [
+      "engine"
+    ],
+    "date": "2026-11-01T16:06:26.399Z",
+    "provider": "remote",
+    "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+    "models": {
+      "main": "gemini-3.5-flash-lite",
+      "backup": "gemini-3.5-flash-lite"
+    },
+    "commit": "eb1559946d52b1754b91bac5cc8b02f5a40306b2",
+    "uncommittedChanges": false,
+    "engineVersion": "e458f387e02f",
+    "promptVersion": "b8cba36dea65",
+    "node": "v24.22.1",
+    "scenariosVersion": "696b74f68208",
+    "scenarioIds": [
+      "r9-en-leak-seasons"
+    ],
+    "pauseMs": 4500
+  },
+  "systems": {
+    "engine": {
+      "counts": {
+        "planned": 1,
+        "complete": 3,
+        "infraErrors": [],
+        "stoppedOnQuota": [],
+        "notRun": []
+      },
+      "modelCalls": {
+        "gemini-3.5-flash-lite": 6
+      },
+      "summary": {
+        "scenarios": 3,
+        "scenarioPass": 1,
+        "turns": 3,
+        "actionFit": 1,
+        "interventionFit": null,
+        "unearnedMoves": 0,
+        "overclaims": null,
+        "stateMatch": null,
+        "prerequisiteRecovery": null,
+        "helpInFinalCheck": 0,
+        "endStateMatch": 1,
+        "supportProblems": 0,
+        "returnTurnsFit": null,
+        "lessonsCompleted": null,
+        "latencyMs": {
+          "turns": 3,
+          "p50": 3935,
+          "p95": 4163
+        },
+        "grading": {
+          "answers": 3,
+          "verdictAccuracy": 1,
+          "falsePositives": "0/0",
+          "falseNegatives": "0/3",
+          "issueAccuracy": null,
+          "misconceptionNamed": "0/0"
+        },
+        "paraphraseConsistency": null,
+        "text": {
+          "replies": 3,
+          "approvalOnNotCorrect": 0,
+          "repeatedHelp": 0,
+          "endsWithQuestion": 1,
+          "citedReplies": 1,
+          "invalidCitationIds": 0,
+          "unverifiedQuotes": 0,
+          "citationSupportMean": 0.712,
+          "weaklySupportedCitations": "0/7",
+          "missingTag": 0
+        },
+        "byCategory": {
+          "understands": {
+            "scenarios": 3,
+            "passed": 3
+          }
+        },
+        "failures": []
+      }
+    }
+  }
+}

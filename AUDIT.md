@@ -308,6 +308,42 @@ Pre-registered in `eval/PREREGISTRATION.md` and committed with a new set (final9
 | Medium | No real learners | Run `pilot/PROTOCOL.md`; it is NOT RUN |
 | Low | 104, 107; 105 not reproduced | More prerequisite scenarios; read the grader's reason on each; a 105 scenario that fails on A1 |
 
+## Tenth round: closure, 1 and 2 November
+
+### State at the start of the round
+
+Production `7545a6b` (A1 plus the learner model and the fixes for 99 to 103). B on branch `round9`, frozen. The round-9 raw results and the pre-registration are kept unchanged. The work is on branch `round10`.
+
+### Findings
+
+| # | Sev. | Area | Problem | Root cause | Fix | Verification | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 96 | Medium | Teaching | Teaching a new step answered its check question, and a right answer after that counted as independent. | One message taught the idea and asked the question; the grader did not see the tutor's messages. | Teach phase from a prompt without the check question or criteria; the question in a separate message after the student replies; the grader sees the tutor's messages on the step and returns `answerGiven`; such an answer is logged as `revealed` and never makes a step `demonstrated`. | 17 tests in `tests/teach.test.js` (policy, prompts, API lesson, adversarial cases). Real model: question message contains the answer 0 of 12 (final9) and 1 of 9 (leak scenarios); revealed-answer scenarios 6 of 6; two live lessons | Fixed in the evidence; the explanation still states the idea in most steps (10 of 12) |
+| 96 | Medium | Teaching | A whole answer after narrowing help was asked again. | See round 9. | The round-9 second grade, kept. | Ablation: 0 of 6 without it, 6 of 6 with it (p, g, b, c) | Fixed, checked on the model |
+| 104 | Low | Grading | An answer repeating an earlier step's mistake sends the student back when the current step teaches the idea. | Grader behaviour; the round-9 rule did not change it. | Rule removed (no benefit, and it caused 109). | Ablation: 0 of 5 in every configuration except the rule alone, 1 of 5 | Open |
+| 105 | Low | Grading | Wrong-reason final answers graded as another question. | Not reproduced in round 9. | Rule removed: no measured benefit, and it adds to 106. | Ablation | Closed as not reproduced |
+| 106 | Medium | Grading | A related question not covered by the document graded `off_topic`. | The 104 and 105 grader rules together (5 of 5 together, at most 2 of 5 apart); production also misses it 1 time in 5, A1 3 in 5. | Both rules removed. No deterministic rule added. | Ablation: c 5 of 5 | Fixed on the scenario; the 1-in-5 base rate is open |
+| 107 | Low | Teaching | A check of an earlier step can state that step's answer and then ask it. | Same as 96, on the detour path. | None | Read by hand | Open |
+| 108 | Low | Eval | The approval check flags "exactly as in the source" as praise. | Pattern | None | final9, both engines | Accepted |
+| 109 | Low | Grading | A pasted rule graded `misread_question` instead of `copied`. | The 104 grader rule (3 of 5 alone, 0 of 5 without it; read by hand: the grader named the copy but returned `misread_question`). | Rule removed. | Ablation: c 5 of 5 | Fixed |
+| 110 | Low | Teaching | A Hebrew final-check question described drops on a pot lid but asked about evaporation, and an answer about condensation was graded wrong. | The model wrote a transfer question that mixes two stages. | None | Live Hebrew lesson, one observation | Open |
+| 111 | Low | Teaching | A Hebrew teaching message had two Arabic letters inside a Hebrew word. | Model output (Flash-Lite). | None | Live Hebrew lesson, one observation | Open |
+| 112 | Low | Grading | On `f9-en-prerequisite` the answer to the earlier-step check was graded partly right and answering another question, so the tutor asked again twice. | Unattributed. Detours do not pass the tutor's messages; the grader prompt differs from production only by the `answerGiven` field. | None | final9, c, one run; production passed | Open |
+| 113 | Low | Learner model | A student who already knows the idea is recorded as shown with help on most steps, because the explanation usually states it. | Design: a repeated answer is not independent evidence. | The final check asks a new case without hints and can show the step. | `f9-en-understands` on c; both live lessons | Accepted, documented |
+
+### Evaluation
+
+The ablation was written and committed before its runs (`eval/ABLATION_R10.md`); results and the attribution are there. The final engine against production on final9, one repeat, not pre-registered: 18 against 19 of 24, 14 against 16 of the 18 not-targeted scenarios, 4 against 3 of the 6 targeted, 0 against 0 of 20 overclaimed steps. That is inside the run-to-run spread of round 9 and is reported as no measured difference. Model failures (infrastructure errors, quota stops, unusable grades) were counted apart: there were none in the counted runs.
+
+### Open after round 10
+
+| Sev. | What | Next step |
+| --- | --- | --- |
+| High | The round-6 snapshot with a key copy (88): `snap_ZcBcR8V0UWWgBppIXRvLfCZmGWBa` was still listed on 1 November | Owner: delete it and rotate the key. Not verified as done |
+| Medium | No real learners | Run `pilot/PROTOCOL.md`; it is NOT RUN |
+| Low | The explanation states the idea in most steps (96); under-credit until the final check (113) | Ask for a different case in the check question at plan time, then measure |
+| Low | 104, 106 base rate, 107, 110, 111, 112 | One scenario each, more repeats |
+
 ## Requirements matrix
 
 Status after the upgrade. "Live" refers to the browser runs against production on 24 October, listed in [DECISIONS.md](DECISIONS.md#live-checks-24-october-morning).

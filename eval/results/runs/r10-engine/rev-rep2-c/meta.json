@@ -1,0 +1,25 @@
+{
+  "label": "rev-rep2-c",
+  "mode": "model",
+  "split": "all",
+  "systems": [
+    "engine"
+  ],
+  "date": "2026-11-02T08:05:07.044Z",
+  "provider": "remote",
+  "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+  "models": {
+    "main": "gemini-3.5-flash-lite",
+    "backup": "gemini-3.5-flash-lite"
+  },
+  "commit": "f4741322bc5e9870060b2847905cc2daf135d882",
+  "uncommittedChanges": false,
+  "engineVersion": "e458f387e02f",
+  "promptVersion": "b8cba36dea65",
+  "node": "v24.22.1",
+  "scenariosVersion": "696b74f68208",
+  "scenarioIds": [
+    "r10-en-revealed-seasons"
+  ],
+  "pauseMs": 4500
+}

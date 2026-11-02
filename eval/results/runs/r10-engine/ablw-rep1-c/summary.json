@@ -1,0 +1,90 @@
+{
+  "meta": {
+    "label": "ablw-rep1-c",
+    "mode": "model",
+    "split": "all",
+    "systems": [
+      "engine"
+    ],
+    "date": "2026-11-01T16:12:15.673Z",
+    "provider": "remote",
+    "remoteHost": "teach-me-this-file-3vfe45kca-gals-projects-e1a37b26.vercel.app",
+    "models": {
+      "main": "gemini-3.5-flash-lite",
+      "backup": "gemini-3.5-flash-lite"
+    },
+    "commit": "eb1559946d52b1754b91bac5cc8b02f5a40306b2",
+    "uncommittedChanges": false,
+    "engineVersion": "e458f387e02f",
+    "promptVersion": "b8cba36dea65",
+    "node": "v24.22.1",
+    "scenariosVersion": "696b74f68208",
+    "scenarioIds": [
+      "f9-en-whole-after-help"
+    ],
+    "pauseMs": 4500
+  },
+  "systems": {
+    "engine": {
+      "counts": {
+        "planned": 1,
+        "complete": 2,
+        "infraErrors": [],
+        "stoppedOnQuota": [],
+        "notRun": []
+      },
+      "modelCalls": {
+        "gemini-3.5-flash-lite": 10
+      },
+      "summary": {
+        "scenarios": 2,
+        "scenarioPass": 1,
+        "turns": 4,
+        "actionFit": 1,
+        "interventionFit": null,
+        "unearnedMoves": 0,
+        "overclaims": "0/2",
+        "stateMatch": "2/2",
+        "prerequisiteRecovery": null,
+        "helpInFinalCheck": 0,
+        "endStateMatch": 1,
+        "supportProblems": 0,
+        "returnTurnsFit": null,
+        "lessonsCompleted": null,
+        "latencyMs": {
+          "turns": 4,
+          "p50": 4881,
+          "p95": 6305
+        },
+        "grading": {
+          "answers": 4,
+          "verdictAccuracy": 1,
+          "falsePositives": "0/2",
+          "falseNegatives": "0/2",
+          "issueAccuracy": null,
+          "misconceptionNamed": "0/0"
+        },
+        "paraphraseConsistency": null,
+        "text": {
+          "replies": 4,
+          "approvalOnNotCorrect": 0,
+          "repeatedHelp": 0,
+          "endsWithQuestion": 1,
+          "citedReplies": 1,
+          "invalidCitationIds": 0,
+          "unverifiedQuotes": 0,
+          "citationSupportMean": 0.68,
+          "weaklySupportedCitations": "1/8",
+          "missingTag": 0
+        },
+        "byCategory": {
+          "narrowing": {
+            "scenarios": 2,
+            "passed": 2
+          }
+        },
+        "failures": []
+      }
+    }
+  }
+}
