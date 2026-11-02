@@ -341,7 +341,7 @@ The ablation was written and committed before its runs (`eval/ABLATION_R10.md`);
 
 | Sev. | What | Next step |
 | --- | --- | --- |
-| High | The round-6 snapshot with a key copy (88): `snap_ZcBcR8V0UWWgBppIXRvLfCZmGWBa` was still listed on 1 November | Owner: delete it and rotate the key. Not verified as done |
+| High | The round-6 snapshot with a key copy (88): on 2 November the Vercel API reports `snap_ZcBcR8V0UWWgBppIXRvLfCZmGWBa` as `deleted` (I did not delete it) | Owner: rotate the key. Rotation is not verified |
 | Medium | No real learners | Run `pilot/PROTOCOL.md`; it is NOT RUN |
 | Low | The explanation states the idea in most steps (96); under-credit until the final check (113) | Ask for a different case in the check question at plan time, then measure |
 | Medium | Provider timeouts and quota on production (114) | A paid key, or fewer calls per step |
