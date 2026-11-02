@@ -330,6 +330,8 @@ Production `7545a6b` (A1 plus the learner model and the fixes for 99 to 103). B 
 | 111 | Low | Teaching | A Hebrew teaching message had two Arabic letters inside a Hebrew word. | Model output (Flash-Lite). | None | Live Hebrew lesson, one observation | Open |
 | 112 | Low | Grading | On `f9-en-prerequisite` the answer to the earlier-step check was graded partly right and answering another question, so the tutor asked again twice. | Unattributed. Detours do not pass the tutor's messages; the grader prompt differs from production only by the `answerGiven` field. | None | final9, c, one run; production passed | Open |
 | 113 | Low | Learner model | A student who already knows the idea is recorded as shown with help on most steps, because the explanation usually states it. | Design: a repeated answer is not independent evidence. | The final check asks a new case without hints and can show the step. | `f9-en-understands` on c; both live lessons | Accepted, documented |
+| 114 | Medium | Provider | On production the Hebrew lesson's summary failed twice with a provider timeout after a fallback to the backup model; the instance had 19 failed model calls out of 44. Teach-first adds a model call per step, which uses the free-tier quota faster. | Provider latency and quota on the shared free-tier key; more calls per lesson | None in code; the state is saved before the reply and Try again resends | Production, 2 November | Open |
+| 115 | Low | Planning | With the default English teacher prompt, a Hebrew document gives an English lesson on Gemini 3.6 Flash and a Hebrew lesson on Flash-Lite. | The rule says "the language of the teacher's instructions"; models apply it differently | None; the lesson-language setting decides | Production and sandbox, 2 November | Accepted |
 
 ### Evaluation
 
@@ -342,6 +344,7 @@ The ablation was written and committed before its runs (`eval/ABLATION_R10.md`);
 | High | The round-6 snapshot with a key copy (88): `snap_ZcBcR8V0UWWgBppIXRvLfCZmGWBa` was still listed on 1 November | Owner: delete it and rotate the key. Not verified as done |
 | Medium | No real learners | Run `pilot/PROTOCOL.md`; it is NOT RUN |
 | Low | The explanation states the idea in most steps (96); under-credit until the final check (113) | Ask for a different case in the check question at plan time, then measure |
+| Medium | Provider timeouts and quota on production (114) | A paid key, or fewer calls per step |
 | Low | 104, 106 base rate, 107, 110, 111, 112 | One scenario each, more repeats |
 
 ## Requirements matrix

@@ -14,6 +14,8 @@ const language = arg('lang', 'en');
 const dir = resolve(arg('dir', `eval/results/live-${language}`));
 const [width, height] = arg('viewport', language === 'he' ? '390x844' : '1280x800').split('x').map(Number);
 const providerName = arg('provider', 'mock');
+const siteUrl = arg('url', null);
+const lessonLanguage = arg('lesson-language', null);
 const root = new URL('../', import.meta.url).pathname;
 const stateFile = `${dir}/state.json`;
 const commandFile = `${dir}/command.json`;
@@ -22,11 +24,12 @@ const logFile = `${dir}/turns.jsonl`;
 mkdirSync(dir, { recursive: true });
 rmSync(commandFile, { force: true });
 
-const provider = providerName === 'remote'
+const provider = siteUrl ? null : providerName === 'remote'
   ? await createRemoteProvider({ url: process.env.EVAL_REMOTE_URL, models: process.env.EVAL_REMOTE_MODELS || null })
   : createMockProvider({ delayMs: 4 });
 
 const turns = [];
+const parseEvents = (text) => text.split('\n\n').map((block) => block.split('\n')).filter(([eventLine, dataLine]) => eventLine?.startsWith('event: ') && dataLine?.startsWith('data: ')).map(([eventLine, dataLine]) => ({ event: eventLine.slice(7), data: JSON.parse(dataLine.slice(6)) }));
 const outer = express();
 outer.use((req, res, next) => {
   if (req.method !== 'POST' || req.path !== '/api/turns') return next();
@@ -46,7 +49,7 @@ outer.use(express.json({ limit: '2mb' }));
 outer.use(createApp({ providerFor: () => ({ provider, usesServerKey: false }) }));
 outer.use(express.static(`${root}dist`));
 outer.use((req, res) => res.sendFile(`${root}dist/index.html`));
-const server = await new Promise((done) => {
+const server = siteUrl ? null : await new Promise((done) => {
   const listening = outer.listen(0, () => done(listening));
 });
 
@@ -56,6 +59,15 @@ await context.addInitScript((code) => localStorage.setItem('tmtf.uiLanguage', co
 const page = await context.newPage();
 const errors = [];
 page.on('pageerror', (error) => errors.push(error.message));
+let pendingTurn = null;
+if (siteUrl) {
+  page.on('response', (response) => {
+    if (response.request().method() !== 'POST' || !response.url().endsWith('/api/turns')) return;
+    const entry = { at: new Date().toISOString(), kind: JSON.parse(response.request().postData() ?? '{}').kind, status: response.status(), events: [] };
+    turns.push(entry);
+    pendingTurn = response.text().then((text) => { entry.events = parseEvents(text); }).catch(() => {});
+  });
+}
 
 const waitTutorDone = (before) => page.waitForFunction((count) => {
   const articles = document.querySelectorAll('article');
@@ -65,6 +77,7 @@ const waitTutorDone = (before) => page.waitForFunction((count) => {
 const storedChat = () => page.evaluate(() => JSON.parse(sessionStorage.getItem('tmtf.chat') ?? 'null')?.chat ?? null);
 
 const report = async (status) => {
+  await pendingTurn;
   const chat = await storedChat();
   const last = turns.at(-1);
   const update = last?.events.find((item) => item.event === 'progress')?.data;
@@ -95,10 +108,11 @@ const nextCommand = async () => {
 };
 
 const sample = SAMPLES.find((item) => (language === 'he' ? /[֐-׿]/.test(item.text) : !/[֐-׿]/.test(item.text)));
-await page.goto(`http://localhost:${server.address().port}`);
+await page.goto(siteUrl ?? `http://localhost:${server.address().port}`);
 try {
   await page.locator('input[type=file]').setInputFiles({ name: sample.fileName, mimeType: 'text/markdown', buffer: Buffer.from(sample.text) });
   await page.waitForSelector('p.text-success');
+  if (lessonLanguage) await page.locator('#lesson-language').selectOption(lessonLanguage);
   await page.locator('main button.btn-primary').last().click();
   await page.waitForFunction(() => document.querySelector('[role=progressbar]') || document.querySelector('[role=alert]'), null, { timeout: 180000 });
   await waitTutorDone(0).catch(() => {});
@@ -131,5 +145,5 @@ for (;;) {
 await page.screenshot({ path: `${dir}/end.png`, fullPage: false });
 await report('stopped');
 await browser.close();
-await provider.close?.();
-server.close();
+await provider?.close?.();
+server?.close();

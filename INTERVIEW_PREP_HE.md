@@ -1470,6 +1470,15 @@ flowchart LR
 
 **איך להגיד את זה:** "I didn't release the new engine because it scored higher. It didn't: 18 against 19 out of 24, one repeat, which is no difference. I released it because production was recording an answer as independent right after its own explanation gave it, and the new engine records it as shown with help without raising any claim."
 
+### מה קרה בפרודקשן אחרי השחרור
+
+- `main` עבר ל־`c9619a8`, ו־Vercel בנה ממנו את פרודקשן. `/api/health` ענה `ok`, והקוד החדש נמצא ב־bundle.
+- **שיעור באנגלית על האתר החי, הושלם:** שאלה שהקובץ לא מכסה קיבלה תשובה כ"מחוץ למסמך" (106); תשובה שהעתקתי מההסבר של המורה נתפסה ונשאלתי במילים שלי (109); "צמחים מקבלים מזון מהאדמה" שלח לצעד הקודם, והתזכורת שם אמרה את התשובה לפני שהיא שאלה (107, נשאר פתוח); שלוש תשובות נכונות בבדיקה הסופית בלי עזרה, והסיכום הגיע.
+- **שיעור בעברית על האתר החי, לא הושלם:** כל התשובות דורגו ונשמרו, אבל הסיכום נכשל פעמיים ב־timeout של הספק אחרי מעבר למודל הגיבוי. ב־instance היו 19 כשלונות מתוך 44 קריאות. זה לא קוד המנוע, אבל teach-first מוסיף קריאה לכל צעד, וזה שורף את המכסה החינמית מהר יותר (ממצא 114).
+- **עם ה־prompt האנגלי שבברירת המחדל, קובץ עברי נתן שיעור באנגלית** על המודל של פרודקשן, ובעברית על Flash-Lite. הכלל הכתוב אומר "בשפת ההוראות של המורה", אז אנגלית היא מה שהכלל אומר. בחירת שפת השיעור פותרת את זה (ממצא 115).
+
+**איך להגיד את זה:** "I verified the release on the live site, and one of the two lessons did not finish. Every answer was graded and saved, but the provider timed out on the summary twice. I report it as it happened. It is the free-tier key, and teach-first makes it worse because it adds a call per step."
+
 ### חמש ההחלטות שאני מוכן להגן עליהן
 
 1. **הקוד מחליט, המודל כותב.** למודל שלוש עבודות צרות, וכל ציון שלו נבדק בקוד לפני שמשתמשים בו.
