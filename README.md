@@ -1,6 +1,6 @@
 # Teach Me This File
 
-A teacher uploads a file and writes a short prompt ("Teach this to 7th graders, in French. Be Socratic. Keep it under 15 minutes."). The app turns the file into a lesson plan and opens a chat where an AI tutor teaches it to a student, one step at a time: it explains one idea, asks a question, grades the answer, gives hints before answers, and moves on when the student shows they understood.
+A teacher uploads a file and writes a short prompt ("Teach this to 7th graders, in French. Be Socratic. Keep it under 15 minutes."). The app turns the file into a lesson plan and opens a chat where an AI tutor teaches it to a student, one step at a time: it explains one idea, waits for the student, then asks a question about it in a separate message, grades the answer, gives hints before answers, and moves on when the student shows they understood.
 
 I built it as a home assignment for an AI Engineer role. The reasoning behind the main choices is in [DECISIONS.md](DECISIONS.md).
 
@@ -15,11 +15,12 @@ I built it as a home assignment for an AI Engineer role. The reasoning behind th
 - Clear messages for files the app cannot use: empty, damaged, password protected, scanned PDFs without a text layer (no OCR), unsupported types, files over 25 MB, and files whose content does not match their name (a renamed image is not read as a PDF).
 - The teacher prompt sets age, style, length and goals. The lesson language is a separate choice (or taken from the prompt). Three editable examples are included, one in Hebrew.
 - The server builds a structured lesson plan: objectives, the content type, 2 to 8 steps sized to the file and the time, and per step an approach (explanation, worked example or practice), a check question, success criteria, a common mistake, the steps it builds on, and the passages it is based on. Steps are put in an order where each comes after the steps it builds on.
+- Each step is taught first and checked after. The explanation is written without the step's check question or its success criteria in the prompt, and ends by inviting the student to react. The check question comes in the next message, after the student has replied; that reply is not graded. A question the student asks there is answered first.
 - Each student answer is graded first: verdict, completeness, concepts shown and missing, misconception, what kind of problem it is (misread the question, unsure, does not know, right without the reasoning, copied from the file), an evidence quote and a confidence level. The server checks the grade, then decides the next move in code.
 - The help after a wrong answer depends on the mistake: a small nudge first, then a focused hint, a counter-example when the grader names a misconception, smaller sub-questions, a worked example or an analogy when the student does not know, and the full explanation with one more check after three tries. The tutor picks a kind of help it has not used on the step yet, and repeats only after the options for that situation run out.
 - When the grader says a wrong answer comes from an idea of an earlier step this one builds on (the code checks that the step really is one), the tutor checks that step first with one short question, grades the answer against it, and comes back to the current question. It also goes back without the grader when the earlier step is fragile: after the second wrong answer if the earlier step was only right with help, after the first if it needed the full explanation or a later answer already showed a gap in it. The grader is shown the common mistake of each earlier step and the wrong ideas this student showed there.
 - A right answer to a smaller question (a sub-question, a counter-example) is not counted as understanding the step: the tutor confirms it and asks the whole question again, unless the answer already covers it. After that, help on the step always asks the whole question.
-- An answer pasted from the document or from the tutor's last message is caught, also when it is several sentences, and the tutor asks for the same answer in the student's own words. A reply to an answer that is not right never opens with praise; the server drops a praise word at the start of the reply.
+- An answer pasted from the document or from the tutor's own messages on the step is caught, also when it is several sentences, and the tutor asks for the same answer in the student's own words. The grader is also shown the tutor's messages on the step and says whether they already gave the answer; a right answer after that counts as shown with help, never as shown on your own. A reply to an answer that is not right never opens with praise; the server drops a praise word at the start of the reply.
 - "Hint" and "Explain differently" buttons let the student ask for help before answering. A right answer after help counts as shown with help, not as understood on the first try.
 - After the last step comes a short final check: up to three steps, chosen by how weak they were, how many steps build on them and how long ago they were taught. Each gets the transfer question the plan wrote for that step in advance, a new case that asks the student to use the idea, answered without hints and graded against the criteria written with it. A copied answer, or one without the asked-for reason, gets one request to say it in their own words before it counts. It can be skipped.
 - Tutor answers stream token by token. Stop cancels the request on the server and the provider, keeps the partial text, and leaves the lesson state unchanged.
@@ -73,23 +74,50 @@ When things go wrong, these are the paths I have seen on the live site and how t
 
 ## How it works
 
-```
-Browser                                               Server (Express on Vercel)
--------                                               --------------------------
-File -> extract text (pdf.js / mammoth)
-     -> passages with page labels
-Teacher prompt + sampled passages -- POST /api/lessons -> planner: prompt -> JSON -> validated plan
-                                  <-- plan + initial progress
-Student answer + plan + progress  -- POST /api/turns  -> assessor: grade the answer (JSON), check the grade
-  + current step passages                              progress.js: decide the move, new progress
-                                  <-- SSE: progress    tutor: stream the reply for that move
-                                  <-- SSE: notice      (only when a backup model answered)
-                                  <-- SSE: delta ...
-                                  <-- SSE: done
-Commit the new progress on "done", match the reply to passages (BM25), save the chat to sessionStorage
+```mermaid
+flowchart LR
+  subgraph Browser
+    F[File: PDF, Word or text] --> X[Text extracted in the browser] --> P[Passages with page or line labels]
+    R[Chat state: plan, progress, evidence log, messages] --- S[(sessionStorage)]
+  end
+  subgraph Server[Express on Vercel, stateless]
+    PL[planner.js: plan as JSON, validated]
+    A[assessor.js: grade as JSON, checked in code]
+    G[progress.js and policy.js: next move, pure functions]
+    L[shared/learner.js: learner state from the evidence log]
+    T[tutor.js and prompts.js: the reply for that move]
+  end
+  M[(Model provider: Gemini, Groq or OpenRouter)]
+  P -- POST /api/lessons --> PL
+  R -- POST /api/turns --> A --> G --> T
+  G --- L
+  PL --> M
+  A --> M
+  T --> M
+  T -- "SSE: progress, delta, done" --> R
 ```
 
-The server is stateless. The lesson plan, progress and messages live in a React reducer in the browser and are sent with each turn. The rules that move the lesson forward are plain functions in `server/lesson/progress.js`, not something the model is asked to remember. Each move comes with a reason code, and each graded answer is appended to an evidence log inside the progress object; the server validates the log like the rest of the progress, and the browser adds the id of the student message each entry came from. `shared/learner.js` turns the log into the learner state that the policy, the final check, the practice list and the interface all read.
+One step of a lesson:
+
+```mermaid
+sequenceDiagram
+  participant S as Student
+  participant E as Engine (code)
+  participant M as Model
+  E->>M: teach the step (prompt has no check question and no success criteria)
+  M-->>S: explanation, ends with "does this make sense?"
+  S->>E: reply (not graded, no evidence)
+  E->>M: ask the step's check question, no hints
+  M-->>S: check question
+  S->>E: answer
+  E->>M: grade it against the question, with the tutor's messages on this step
+  M-->>E: verdict, issue, misconception, answerGiven
+  E->>E: check the grade, log evidence, choose the move
+  E->>M: write the reply for that move
+  M-->>S: hint, follow-up, or the next step's explanation
+```
+
+The server is stateless. The lesson plan, progress and messages live in a React reducer in the browser and are sent with each turn. The rules that move the lesson forward are plain functions in `server/lesson/progress.js`, not something the model is asked to remember. The model does three narrow jobs: write a plan, grade one answer as JSON, and write one reply for a move the code has already chosen. Each move comes with a reason code, and each graded answer is appended to an evidence log inside the progress object; the server validates the log like the rest of the progress, and the browser adds the id of the student message each entry came from. `shared/learner.js` turns the log into the learner state that the policy, the final check, the practice list and the interface all read.
 
 ## Project structure
 
