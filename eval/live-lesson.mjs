@@ -16,6 +16,9 @@ const [width, height] = arg('viewport', language === 'he' ? '390x844' : '1280x80
 const providerName = arg('provider', 'mock');
 const siteUrl = arg('url', null);
 const lessonLanguage = arg('lesson-language', null);
+const filePath = arg('file', null);
+const teacherPrompt = arg('prompt', null);
+const apiKey = process.env.LIVE_LESSON_KEY ?? null;
 const root = new URL('../', import.meta.url).pathname;
 const stateFile = `${dir}/state.json`;
 const commandFile = `${dir}/command.json`;
@@ -76,6 +79,8 @@ const waitTutorDone = (before) => page.waitForFunction((count) => {
 
 const storedChat = () => page.evaluate(() => JSON.parse(sessionStorage.getItem('tmtf.chat') ?? 'null')?.chat ?? null);
 
+let source = null;
+
 const report = async (status) => {
   await pendingTurn;
   const chat = await storedChat();
@@ -94,6 +99,8 @@ const report = async (status) => {
     alert,
     progress: chat?.progress ? { status: chat.progress.status, currentStep: chat.progress.currentStep, phases: chat.progress.steps.map((step) => `${step.status}/${step.phase}/${step.outcome ?? '-'}`), evidence: (chat.progress.evidence ?? []).map((entry) => `${entry.step}:${entry.question ?? 'gap'}:${entry.support ?? '-'}:${entry.verdict ?? '-'}`) } : null,
     tutor,
+    tutorDirection: await lastBody().evaluate((node) => getComputedStyle(node).direction).catch(() => null),
+    source,
     errors,
   };
   writeFileSync(stateFile, `${JSON.stringify(state, null, 2)}\n`);
@@ -108,10 +115,17 @@ const nextCommand = async () => {
 };
 
 const sample = SAMPLES.find((item) => (language === 'he' ? /[֐-׿]/.test(item.text) : !/[֐-׿]/.test(item.text)));
+const lastBody = () => page.locator('article').last().locator('div[dir=auto]').first();
 await page.goto(siteUrl ?? `http://localhost:${server.address().port}`);
 try {
-  await page.locator('input[type=file]').setInputFiles({ name: sample.fileName, mimeType: 'text/markdown', buffer: Buffer.from(sample.text) });
+  if (apiKey) {
+    await page.locator('header button.btn-secondary').click();
+    await page.locator('#api-key').fill(apiKey);
+    await page.locator('dialog[open] button[type=submit]').click();
+  }
+  await page.locator('input[type=file]').setInputFiles(filePath ?? { name: sample.fileName, mimeType: 'text/markdown', buffer: Buffer.from(sample.text) });
   await page.waitForSelector('p.text-success');
+  if (teacherPrompt) await page.locator('#teacher-prompt').fill(teacherPrompt);
   if (lessonLanguage) await page.locator('#lesson-language').selectOption(lessonLanguage);
   await page.locator('main button.btn-primary').last().click();
   await page.waitForFunction(() => document.querySelector('[role=progressbar]') || document.querySelector('[role=alert]'), null, { timeout: 180000 });
@@ -129,6 +143,16 @@ for (;;) {
   const before = await page.locator('article').count();
   if (command.type === 'button') {
     await page.getByRole('button', { name: command.name, exact: true }).click();
+  } else if (command.type === 'source') {
+    const link = page.locator('article').last().locator('button.cite-chip, div.mt-2 button').first();
+    await link.click();
+    const panel = page.locator('dialog[open]');
+    await panel.waitFor();
+    source = { text: (await panel.innerText()).slice(0, 600), direction: await panel.locator('[dir]').last().evaluate((node) => getComputedStyle(node).direction).catch(() => null) };
+    await page.keyboard.press('Escape');
+    await report('source');
+    source = null;
+    continue;
   } else if (command.type === 'reload') {
     await page.reload();
     await page.waitForSelector('article');
@@ -137,6 +161,10 @@ for (;;) {
   } else {
     await page.locator('#answer').fill(command.text);
     await page.locator('#answer').press('Enter');
+    if (command.stopAfterMs) {
+      await page.waitForTimeout(command.stopAfterMs);
+      await page.keyboard.press('Escape');
+    }
   }
   await waitTutorDone(before).catch(() => {});
   await report('waiting');
