@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { stripCitations, verifyCitations } from '../../shared/citations.js';
-import { AppError } from '../errors.js';
+import { AppError, FALLBACK_CODES } from '../errors.js';
 import { count, recordFirstToken } from '../metrics.js';
 import { assessAnswer } from './assessor.js';
 import { openingPraiseFilter, praiseAllowed } from './calibration.js';
@@ -132,8 +132,11 @@ export const runTurn = async ({ provider, input, signal, send }) => {
         signal,
         onMeta,
         task: 'assessment_whole',
+      }).catch((error) => {
+        if (signal?.aborted || !FALLBACK_CODES.has(error.code)) throw error;
+        return null;
       });
-      const wholeQuestion = whole.verdict === 'correct' && whole.issue === 'none' && whole.confidence !== 'low';
+      const wholeQuestion = whole?.verdict === 'correct' && whole.issue === 'none' && whole.confidence !== 'low';
       assessment = { ...assessment, wholeQuestion, checks: [...assessment.checks, wholeQuestion ? 'whole_question_right' : 'whole_question_not_right'] };
     }
   }

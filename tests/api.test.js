@@ -576,6 +576,22 @@ describe('round 9: grading a narrowed answer against the whole question (AUDIT 9
     expect(prompts).toHaveLength(2);
   });
 
+  it('asks the whole question when the second grade fails, instead of failing the turn', async () => {
+    const prompts = [];
+    const base = createMockProvider({ delayMs: 1 });
+    const provider = {
+      ...base,
+      generateJson: async (options) => {
+        prompts.push(options.prompt);
+        if (prompts.length === 2) throw new AppError('provider_unavailable');
+        return right;
+      },
+    };
+    const response = await send(provider, narrowed());
+    expect(parseEvents(response.text).some((item) => item.event === 'error')).toBe(false);
+    expect(moveOf(response).move).toBe('build_up');
+  });
+
   it('grades once when the step was not narrowed or the first answer was not right', async () => {
     const plain = graders([right, right]);
     await send(plain.provider, createProgress(plan));
