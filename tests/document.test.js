@@ -88,6 +88,12 @@ describe('file validation', () => {
     expect(document.warnings).toEqual([{ code: 'images', params: {} }, { code: 'short', params: { count: 27 } }]);
   });
 
+  it('says when a long file is planned from a sample of its passages', () => {
+    const sections = Array.from({ length: 80 }, (_, index) => ({ label: `Lines ${index + 1}–${index + 1}`, text: `Section ${index} ${'about rivers and the sea '.repeat(40)}` }));
+    const document = prepareDocument({ file: fakeFile('long.md', 90000), type: 'txt', sections, pageCount: null, warnings: [] });
+    expect(document.warnings).toContainEqual({ code: 'sampled', params: {} });
+  });
+
   it('refuses documents with no text', () => {
     expect(() => prepareDocument({ file: fakeFile('a.txt', 3), type: 'txt', sections: [], pageCount: null, warnings: [] }))
       .toThrow(expect.objectContaining({ code: 'empty' }));

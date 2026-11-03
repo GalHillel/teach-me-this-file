@@ -2,6 +2,7 @@ import { detectDirection } from '../../shared/text.js';
 import { buildChunks } from './chunk.js';
 import { ExtractionError, unreadableRatio } from './errors.js';
 import { checkSignature, dropDuplicateChunks } from './structure.js';
+import { PLAN_CHAR_BUDGET } from '../lesson/sources.js';
 
 export const MAX_FILE_BYTES = 25 * 1024 * 1024;
 const MAX_DOCUMENT_CHARS = 600_000;
@@ -56,6 +57,8 @@ export const prepareDocument = ({ file, type, sections, pageCount, warnings, rem
   const notes = [...warnings];
   if (kept.length < chunks.length) {
     notes.push({ code: 'long', params: { kept: kept.length, total: chunks.length, label: kept.at(-1).label } });
+  } else if (total > PLAN_CHAR_BUDGET) {
+    notes.push({ code: 'sampled', params: {} });
   }
 
   const sample = kept.slice(0, 20).map((chunk) => chunk.text).join('\n');

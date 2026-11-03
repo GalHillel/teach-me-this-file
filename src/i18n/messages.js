@@ -154,6 +154,7 @@ const en = {
   'fileWarnings.empty_pages_other': '{count} pages had no selectable text (scanned images or diagrams) and were skipped: {pages}.',
   'fileWarnings.images': 'Images in the document are not read. Text inside images will be missing from the lesson.',
   'fileWarnings.long': 'The document is very long. Only the first {kept} of {total} passages are used (up to {label}).',
+  'fileWarnings.sampled': 'This is a long file. The lesson plan is built from passages sampled across the whole file, so it covers the main parts, not every detail. The tutor can still find and cite any passage.',
   'fileWarnings.font': 'Part of the text uses a font that could not be decoded, so some characters may be missing or wrong.',
   'fileWarnings.short': 'This file is very short ({count} characters). The lesson will be short, and the tutor may add general knowledge that is not in the file.',
 
@@ -515,6 +516,7 @@ const he = {
   'fileWarnings.empty_pages_other': 'ב-{count} עמודים לא היה טקסט שניתן לסמן (תמונות סרוקות או תרשימים) והם דולגו: {pages}.',
   'fileWarnings.images': 'תמונות במסמך לא נקראות. טקסט שמופיע בתוך תמונות לא ייכלל בשיעור.',
   'fileWarnings.long': 'המסמך ארוך מאוד. נעשה שימוש רק ב-{kept} הקטעים הראשונים מתוך {total} (עד {label}).',
+  'fileWarnings.sampled': 'זה קובץ ארוך. תוכנית השיעור נבנית מקטעים שנדגמו מכל הקובץ, כך שהיא מכסה את החלקים העיקריים ולא כל פרט. המורה עדיין יכול למצוא ולצטט כל קטע.',
   'fileWarnings.font': 'חלק מהטקסט כתוב בגופן שלא ניתן לפענח, ולכן ייתכן שחלק מהתווים חסרים או שגויים.',
   'fileWarnings.short': 'הקובץ קצר מאוד ({count} תווים). השיעור יהיה קצר, וייתכן שהמורה יוסיף ידע כללי שלא מופיע בקובץ.',
 
@@ -876,6 +878,7 @@ const fr = {
   'fileWarnings.empty_pages_other': '{count} pages n\'avaient pas de texte sélectionnable (images numérisées ou schémas) et ont été ignorées : {pages}.',
   'fileWarnings.images': 'Les images du document ne sont pas lues. Le texte contenu dans les images manquera dans la leçon.',
   'fileWarnings.long': 'Le document est très long. Seuls les {kept} premiers passages sur {total} sont utilisés (jusqu\'à {label}).',
+  'fileWarnings.sampled': 'Ce fichier est long. Le plan de la leçon est construit à partir de passages choisis dans tout le fichier : il couvre les parties principales, pas chaque détail. Le tuteur peut toujours retrouver et citer n\'importe quel passage.',
   'fileWarnings.font': 'Une partie du texte utilise une police qui n\'a pas pu être décodée ; certains caractères peuvent manquer ou être faux.',
   'fileWarnings.short': 'Ce fichier est très court ({count} caractères). La leçon sera courte et le tuteur pourra ajouter des connaissances générales absentes du fichier.',
 
