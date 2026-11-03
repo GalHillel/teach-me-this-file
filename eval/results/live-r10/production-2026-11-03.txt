@@ -1,0 +1,30 @@
+Production run, 3 November 2026, https://teach-me-this-file.vercel.app, deployment d65d839.
+The site's own server key and models; a headless Chromium driven by eval/live-lesson.mjs --url; my own answers.
+One line per /api/turns response: time (UTC), kind, HTTP status, move, reason, grade, support, models, total ms, citations, error.
+Full turn files were kept in the sandbox only; they were scanned for key-shaped strings before deletion (none found).
+
+English, photosynthesis sample, prompt "Teach this to 7th graders. Be Socratic. Keep it under 15 minutes.", 1280x800
+15:07:19 start 200 introduce lesson_start - - 2.5-flash 4562 1
+15:08:01 reply 200 ask_check explanation_given - - 3.6-flash 6299 0
+15:08:44 reply 200 hint misconception incorrect/none independent 3.6-flash+3.6-flash 12134 1
+15:11:48 reply 200 - - - - - - - timeout
+15:12:37 reply 200 answer_question student_question question/none independent 3.6-flash+2.5-flash 31807 3
+15:13:47 reply 200 - - - - - - - timeout
+15:16:16 reply 200 advance answer_was_shown correct/none revealed 3.6-flash+3.6-flash+3.6-flash 28452 2
+15:17:25 reply 200 ask_check explanation_given - - 3.6-flash 4722 2
+15:18:12 reply 200 - - - - - - - (stopped with Esc after 3 s, before any text)
+15:21:43 reply 200 advance answer_was_shown correct/none revealed 2.5-flash+2.5-flash 35948 1
+15:22:57 reply 200 ask_check explanation_given - - 2.5-flash 1033 0
+15:23:38 reply 200 final_check_start answer_was_shown correct/none revealed 3.6-flash+2.5-flash 36653 0
+(page reloaded here; the lesson came back at "Final check 2 of 3")
+15:24:59 reply 200 final_next right_without_help correct/none independent 2.5-flash+2.5-flash 12070 0
+15:26:19 reply 200 final_next right_without_help correct/none independent 2.5-flash+2.5-flash 15869 0
+15:27:11 reply 200 final_finish right_without_help correct/none independent 3.6-flash+2.5-flash 27266 1
+
+Hebrew interface, water-cycle sample (Hebrew), prompt "Teach this in English to 9th graders. Be Socratic and keep it short.", 390x844
+15:28:49 start 200 introduce lesson_start - - 2.5-flash 33924 2
+15:30:40 reply 200 ask_check explanation_given - - 2.5-flash 31408 0
+15:33:27 reply 200 advance answer_was_shown correct/none revealed 2.5-flash+2.5-flash 27030 1
+Stopped after step 1 of 2. Tutor text English and left to right; citation labels and the source panel Hebrew and right to left.
+
+Seen and fixed after this run: both check questions (15:08:01, 15:30:40) opened with "Great!" after the student only said they understood (commit 5aad30e).
