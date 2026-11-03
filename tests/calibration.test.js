@@ -38,13 +38,18 @@ describe('opening praise on an answer that is not right', () => {
     expect(run(true, ['Hi'])).toBe('Hi');
   });
 
-  it('applies only when the grade was not correct, or when the tutor must not say yet', () => {
+  it('allows opening praise only after an answer graded correct', () => {
     expect(praiseAllowed({ move: 'advance', assessment: { verdict: 'correct' } })).toBe(true);
     expect(praiseAllowed({ move: 'build_up', assessment: { verdict: 'correct' } })).toBe(true);
     expect(praiseAllowed({ move: 'probe', assessment: { verdict: 'correct' } })).toBe(false);
     expect(praiseAllowed({ move: 'hint', assessment: { verdict: 'partial' } })).toBe(false);
     expect(praiseAllowed({ move: 'final_next', assessment: { verdict: 'incorrect' } })).toBe(false);
-    expect(praiseAllowed({ move: 'introduce', assessment: null })).toBe(true);
+  });
+
+  it('does not praise a student who only said they understood', () => {
+    expect(praiseAllowed({ move: 'ask_check', assessment: null })).toBe(false);
+    expect(praiseAllowed({ move: 'explain_again', assessment: null })).toBe(false);
+    expect(praiseAllowed({ move: 'introduce', assessment: null })).toBe(false);
   });
 });
 

@@ -2,11 +2,7 @@ const OPENING_PRAISE = /^\s*(?:\*\*|__)?(?:you'?re (?:absolutely |totally |compl
 const DECIDED = /\p{L}[^]*?[!.,:;?\n—–]/u;
 const DECIDE_AFTER = 60;
 
-export const praiseAllowed = ({ move, assessment }) => {
-  if (!assessment) return true;
-  if (move === 'probe') return false;
-  return assessment.verdict === 'correct';
-};
+export const praiseAllowed = ({ move, assessment }) => move !== 'probe' && assessment?.verdict === 'correct';
 
 const stripOpeningPraise = (text) => {
   const match = text.match(OPENING_PRAISE);
