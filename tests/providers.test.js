@@ -151,7 +151,7 @@ describe('Gemini model fallback', () => {
 
     vi.spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(new Response('{"error":{"status":"UNAVAILABLE"}}', { status: 503 }))
-      .mockResolvedValueOnce(sseResponse([{ candidates: [{ content: { parts: [{ text: 'Hi' }] } }] }]));
+      .mockResolvedValueOnce(sseResponse([{ candidates: [{ content: { parts: [{ text: 'Hi' }] }, finishReason: 'STOP' }] }]));
     const provider = createGeminiProvider({ apiKey: 'AIzaThinking', models: ['gemini-3.6-flash', 'gemini-2.5-flash'] });
     await collect(provider.streamText({ system: 's', messages: [{ role: 'user', content: 'hi' }] }));
     const configs = fetch.mock.calls.map(([, options]) => JSON.parse(options.body).generationConfig);
@@ -164,6 +164,33 @@ describe('Gemini model fallback', () => {
     const provider = createGeminiProvider({ apiKey: 'AIzaBad', models: ['a', 'b'] });
     await expect(provider.generateJson({ task: 'plan', system: 's', prompt: 'p' })).rejects.toMatchObject({ code: 'invalid_key' });
     expect(fetch).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('replies cut off by the provider', () => {
+  it('fails a Gemini reply that ends without a STOP finish reason, so it can be retried', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(sseResponse([
+      { candidates: [{ content: { parts: [{ text: 'Plants do not actually get their' }] } }] },
+      { candidates: [{ content: { parts: [{ text: '' }] }, finishReason: 'MAX_TOKENS' }] },
+    ]));
+    const provider = createGeminiProvider({ apiKey: 'AIzaCut', models: ['a'] });
+    await expect(collect(provider.streamText({ system: 's', messages: [{ role: 'user', content: 'hi' }] }))).rejects.toMatchObject({ code: 'bad_response' });
+  });
+
+  it('fails a Gemini stream that just stops', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(sseResponse([{ candidates: [{ content: { parts: [{ text: 'half a sent' }] } }] }]));
+    const provider = createGeminiProvider({ apiKey: 'AIzaDrop', models: ['a'] });
+    await expect(collect(provider.streamText({ system: 's', messages: [{ role: 'user', content: 'hi' }] }))).rejects.toMatchObject({ code: 'bad_response' });
+  });
+
+  it('fails an OpenAI-compatible reply cut by the length limit', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(sseResponse([
+      { choices: [{ delta: { content: 'Half' } }] },
+      { choices: [{ delta: {}, finish_reason: 'length' }] },
+      '[DONE]',
+    ]));
+    const provider = createOpenAiCompatibleProvider({ name: 'groq', apiKey: 'gsk_test', model: 'llama' });
+    await expect(collect(provider.streamText({ system: 's', messages: [{ role: 'user', content: 'hi' }] }))).rejects.toMatchObject({ code: 'bad_response' });
   });
 });
 
@@ -208,7 +235,7 @@ describe('timeouts', () => {
         const gap = gaps[index];
         index += 1;
         return new Promise((resolve) => setTimeout(() => {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text: `w${index} ` }] } }] })}\n\n`));
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text: `w${index} ` }] }, ...(index === gaps.length ? { finishReason: 'STOP' } : {}) }] })}\n\n`));
           resolve();
         }, gap));
       },

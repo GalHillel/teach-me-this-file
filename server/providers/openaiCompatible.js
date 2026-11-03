@@ -65,13 +65,20 @@ export const createOpenAiCompatibleProvider = ({ name, apiKey, model }) => {
         signal,
         onMeta,
       );
+      let finishReason = null;
+      let done = false;
       for await (const data of readSseData(response)) {
-        if (data === '[DONE]') return;
+        if (data === '[DONE]') {
+          done = true;
+          break;
+        }
         const chunk = JSON.parse(data);
         if (chunk.error) throw new AppError('provider_unavailable');
         const text = chunk.choices?.[0]?.delta?.content;
         if (text) yield text;
+        finishReason = chunk.choices?.[0]?.finish_reason ?? finishReason;
       }
+      if (finishReason ? finishReason !== 'stop' : !done) throw new AppError('bad_response', 'The AI stopped before finishing its answer. Try again.');
     },
   };
 };

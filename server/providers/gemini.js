@@ -30,6 +30,8 @@ const answerText = (data) => {
     .join('');
 };
 
+const INCOMPLETE = 'The AI stopped before finishing its answer. Try again.';
+
 const orderByHealth = (tiers, scope) => {
   const healthy = tiers.filter((tier) => !isCooling(scope, tier.model));
   return healthy.length ? healthy : tiers;
@@ -113,10 +115,14 @@ export const createGeminiProvider = ({ apiKey, models, backupModels = [], timeou
             : { temperature: 0.6 },
         }),
       });
+      let finishReason = null;
       for await (const data of readSseData(response)) {
-        const text = answerText(JSON.parse(data));
+        const chunk = JSON.parse(data);
+        const text = answerText(chunk);
         if (text) yield text;
+        finishReason = chunk.candidates?.[0]?.finishReason ?? finishReason;
       }
+      if (finishReason !== 'STOP') throw new AppError('bad_response', INCOMPLETE);
     },
   };
 };
