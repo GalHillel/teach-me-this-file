@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createGeminiProvider, supportsThinkingLevel } from '../server/providers/gemini.js';
-import { detectProvider, resolveProvider } from '../server/providers/index.js';
+import { resolveProvider } from '../server/providers/index.js';
+import { detectProvider } from '../shared/providers.js';
 import { resetModelHealth } from '../server/providers/modelHealth.js';
 import { createOpenAiCompatibleProvider } from '../server/providers/openaiCompatible.js';
 

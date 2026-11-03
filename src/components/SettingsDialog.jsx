@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useI18n } from '../i18n/translate.js';
 import Dialog from './Dialog.jsx';
 import Icon from './Icon.jsx';
+import { detectProvider } from '../../shared/providers.js';
 
 const PROVIDERS = [
   { value: 'auto', labelKey: 'settings.auto' },
@@ -11,19 +12,12 @@ const PROVIDERS = [
   ...(import.meta.env.DEV ? [{ value: 'mock', labelKey: 'settings.mock' }] : []),
 ];
 
-const detectProvider = (key) => {
-  if (key.startsWith('AIza')) return 'Gemini';
-  if (key.startsWith('gsk_')) return 'Groq';
-  if (key.startsWith('sk-or-')) return 'OpenRouter';
-  return null;
-};
-
 function SettingsForm({ settings, serverKey, onSave }) {
   const { t } = useI18n();
   const [apiKey, setApiKey] = useState(settings.apiKey);
   const [provider, setProvider] = useState(settings.provider);
   const [visible, setVisible] = useState(false);
-  const detected = detectProvider(apiKey.trim());
+  const detected = PROVIDERS.find((option) => option.value === detectProvider(apiKey.trim()))?.label;
 
   return (
     <form

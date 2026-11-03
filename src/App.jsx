@@ -30,8 +30,8 @@ export default function App() {
     });
   }, []);
 
-  const keyReady = Boolean(settings.apiKey) || serverKey === true || demo || settings.provider === 'mock';
-  const needsKey = !keyReady && serverKey === false;
+  const keySource = settings.apiKey ? 'own' : serverKey === true || demo || settings.provider === 'mock' ? 'server' : null;
+  const needsKey = !keySource && serverKey === false;
 
   const readFile = async (file) => {
     const id = (uploadRef.current += 1);
@@ -66,7 +66,7 @@ export default function App() {
   return (
     <div className="flex h-dvh flex-col">
       {demo && <p className="border-b border-marker-edge bg-marker-soft px-4 py-2 text-center text-sm font-medium text-ink" role="status">{t('demo.banner')}</p>}
-      <AppHeader keyReady={keyReady} onOpenSettings={() => setSettingsOpen(true)} onNewLesson={lesson ? leaveLesson : null} />
+      <AppHeader keySource={keySource} onOpenSettings={() => setSettingsOpen(true)} onNewLesson={lesson ? leaveLesson : null} />
       {lesson ? (
         <Suspense fallback={<p className="p-6 text-sm text-muted" role="status">{t('lesson.opening')}</p>}>
           <LessonScreen key={lesson.id} lesson={lesson} settings={settings} onOpenSettings={() => setSettingsOpen(true)} onNewLesson={endLesson} />

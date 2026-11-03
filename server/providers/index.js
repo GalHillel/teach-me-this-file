@@ -3,15 +3,9 @@ import { AppError } from '../errors.js';
 import { createGeminiProvider } from './gemini.js';
 import { createMockProvider } from './mock.js';
 import { createOpenAiCompatibleProvider } from './openaiCompatible.js';
+import { detectProvider } from '../../shared/providers.js';
 
 const PROVIDER_NAMES = ['gemini', 'groq', 'openrouter'];
-
-export const detectProvider = (apiKey) => {
-  if (apiKey.startsWith('AIza')) return 'gemini';
-  if (apiKey.startsWith('gsk_')) return 'groq';
-  if (apiKey.startsWith('sk-or-')) return 'openrouter';
-  return null;
-};
 
 const createProvider = (name, apiKey) => {
   if (name === 'gemini') {

@@ -22,7 +22,9 @@ function LanguagePicker() {
   );
 }
 
-export default function AppHeader({ keyReady, onOpenSettings, onNewLesson }) {
+const KEY_LABELS = { own: 'header.ownKey', server: 'header.serverKey' };
+
+export default function AppHeader({ keySource, onOpenSettings, onNewLesson }) {
   const { t } = useI18n();
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-line bg-surface px-4 sm:px-6">
@@ -40,8 +42,8 @@ export default function AppHeader({ keyReady, onOpenSettings, onNewLesson }) {
         <LanguagePicker />
         <button type="button" onClick={onOpenSettings} className="btn-secondary px-3">
           <Icon name="key" className="size-4.5" />
-          <span className="max-sm:sr-only">{keyReady ? t('header.keyReady') : t('header.addKey')}</span>
-          <span className={`size-2 rounded-full ${keyReady ? 'bg-success' : 'bg-margin'}`} aria-hidden="true" />
+          <span className="max-sm:sr-only">{t(KEY_LABELS[keySource] ?? 'header.addKey')}</span>
+          <span className={`size-2 rounded-full ${keySource ? 'bg-success' : 'bg-margin'}`} aria-hidden="true" />
         </button>
       </div>
     </header>

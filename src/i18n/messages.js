@@ -1,7 +1,8 @@
 const en = {
   'app.name': 'Teach Me This File',
   'header.newLesson': 'New lesson',
-  'header.keyReady': 'Key ready',
+  'header.ownKey': 'Your API key',
+  'header.serverKey': 'Demo key · use yours',
   'header.addKey': 'Add API key',
   'header.language': 'Interface language',
 
@@ -361,7 +362,8 @@ const en = {
 const he = {
   'app.name': 'Teach Me This File',
   'header.newLesson': 'שיעור חדש',
-  'header.keyReady': 'מפתח מוכן',
+  'header.ownKey': 'מפתח ה־API שלך',
+  'header.serverKey': 'מפתח הדגמה · להוסיף שלך',
   'header.addKey': 'הוספת מפתח API',
   'header.language': 'שפת הממשק',
 
@@ -721,7 +723,8 @@ const he = {
 const fr = {
   'app.name': 'Teach Me This File',
   'header.newLesson': 'Nouvelle leçon',
-  'header.keyReady': 'Clé prête',
+  'header.ownKey': 'Votre clé API',
+  'header.serverKey': 'Clé de démo · ajouter la vôtre',
   'header.addKey': 'Ajouter une clé API',
   'header.language': 'Langue de l\'interface',
 
