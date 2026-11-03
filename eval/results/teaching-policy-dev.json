@@ -2,27 +2,30 @@
   "label": "policy-dev",
   "mode": "policy",
   "split": "dev",
-  "date": "2026-10-27T13:18:19.680Z",
+  "date": "2026-11-03T14:48:31.466Z",
   "systems": {
     "engine": {
       "summary": {
-        "scenarios": 23,
+        "scenarios": 24,
         "scenarioPass": 1,
-        "turns": 47,
+        "turns": 51,
         "actionFit": 1,
         "interventionFit": 1,
         "unearnedMoves": 0,
+        "overclaims": "0/7",
+        "stateMatch": "10/10",
+        "prerequisiteRecovery": "3/3",
         "helpInFinalCheck": 0,
         "endStateMatch": 1,
         "supportProblems": 0,
-        "returnTurnsFit": "2/2",
+        "returnTurnsFit": "4/4",
         "lessonsCompleted": "2/2",
         "latencyMs": null,
         "grading": {
-          "answers": 43,
+          "answers": 47,
           "verdictAccuracy": 1,
-          "falsePositives": "0/22",
-          "falseNegatives": "0/19",
+          "falsePositives": "0/24",
+          "falseNegatives": "0/21",
           "issueAccuracy": "5/5",
           "misconceptionNamed": "2/2"
         },
@@ -85,6 +88,10 @@
             "scenarios": 1,
             "passed": 1
           },
+          "fragile_prerequisite": {
+            "scenarios": 1,
+            "passed": 1
+          },
           "journey": {
             "scenarios": 1,
             "passed": 1
@@ -110,6 +117,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -130,6 +138,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -150,6 +159,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -181,6 +191,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -201,6 +212,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -221,6 +233,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -263,6 +276,22 @@
             }
           ],
           "endFailures": [],
+          "states": [
+            {
+              "step": 1,
+              "state": "needs_review",
+              "wanted": [
+                "needs_review"
+              ]
+            },
+            {
+              "step": 2,
+              "state": "developing",
+              "wanted": [
+                "developing"
+              ]
+            }
+          ],
           "supportProblems": [],
           "passed": true
         },
@@ -294,6 +323,15 @@
             }
           ],
           "endFailures": [],
+          "states": [
+            {
+              "step": 0,
+              "state": "developing",
+              "wanted": [
+                "developing"
+              ]
+            }
+          ],
           "supportProblems": [],
           "passed": true
         },
@@ -347,6 +385,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -400,6 +439,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -420,6 +460,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -440,6 +481,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -460,6 +502,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -491,6 +534,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -511,6 +555,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -531,6 +576,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -551,6 +597,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -582,6 +629,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -602,6 +650,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -644,6 +693,22 @@
             }
           ],
           "endFailures": [],
+          "states": [
+            {
+              "step": 0,
+              "state": "needs_review",
+              "wanted": [
+                "needs_review"
+              ]
+            },
+            {
+              "step": 1,
+              "state": "developing",
+              "wanted": [
+                "developing"
+              ]
+            }
+          ],
           "supportProblems": [],
           "passed": true
         },
@@ -697,6 +762,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -717,6 +783,76 @@
             }
           ],
           "endFailures": [],
+          "states": [],
+          "supportProblems": [],
+          "passed": true
+        },
+        {
+          "id": "dev-he-fragile-prerequisite",
+          "category": "fragile_prerequisite",
+          "turns": [
+            {
+              "student": "כי העננים קרים.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 1,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "אולי כי הרוח דוחפת אותם למעלה?",
+              "move": "prerequisite_check",
+              "action": "check_earlier",
+              "intervention": "prerequisite",
+              "step": 1,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "השמש מחממת את המים והם מתאדים לאדים שעולים לאוויר.",
+              "move": "resume",
+              "action": "back_to_question",
+              "intervention": null,
+              "step": 1,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "למעלה האוויר קר, האדים מתקררים ומתעבים לטיפות, וכך נוצרים עננים.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 1,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [],
+          "states": [
+            {
+              "step": 0,
+              "state": "needs_review",
+              "wanted": [
+                "needs_review"
+              ]
+            },
+            {
+              "step": 1,
+              "state": "developing",
+              "wanted": [
+                "developing"
+              ]
+            }
+          ],
           "supportProblems": [],
           "passed": true
         },
@@ -814,6 +950,29 @@
             }
           ],
           "endFailures": [],
+          "states": [
+            {
+              "step": 0,
+              "state": "demonstrated",
+              "wanted": [
+                "demonstrated"
+              ]
+            },
+            {
+              "step": 1,
+              "state": "demonstrated",
+              "wanted": [
+                "demonstrated"
+              ]
+            },
+            {
+              "step": 2,
+              "state": "demonstrated",
+              "wanted": [
+                "demonstrated"
+              ]
+            }
+          ],
           "supportProblems": [],
           "passed": true
         }
@@ -821,23 +980,26 @@
     },
     "naive": {
       "summary": {
-        "scenarios": 23,
-        "scenarioPass": 0.522,
-        "turns": 47,
-        "actionFit": 0.511,
+        "scenarios": 24,
+        "scenarioPass": 0.5,
+        "turns": 50,
+        "actionFit": 0.52,
         "interventionFit": 0.333,
         "unearnedMoves": 6,
+        "overclaims": "7/7",
+        "stateMatch": "3/10",
+        "prerequisiteRecovery": "0/3",
         "helpInFinalCheck": 0,
-        "endStateMatch": 0.565,
+        "endStateMatch": 0.542,
         "supportProblems": 0,
-        "returnTurnsFit": "0/2",
+        "returnTurnsFit": "1/3",
         "lessonsCompleted": "0/2",
         "latencyMs": null,
         "grading": {
-          "answers": 43,
+          "answers": 46,
           "verdictAccuracy": 1,
-          "falsePositives": "0/22",
-          "falseNegatives": "0/19",
+          "falsePositives": "0/24",
+          "falseNegatives": "0/20",
           "issueAccuracy": "5/5",
           "misconceptionNamed": "2/2"
         },
@@ -900,6 +1062,10 @@
             "scenarios": 1,
             "passed": 1
           },
+          "fragile_prerequisite": {
+            "scenarios": 1,
+            "passed": 0
+          },
           "journey": {
             "scenarios": 1,
             "passed": 0
@@ -929,6 +1095,8 @@
               "turn 2: moved on without evidence",
               "turn 3: action other, wanted final_check",
               "end: step 3 level shown, wanted shown_with_help",
+              "end: step 2 state demonstrated, wanted needs_review",
+              "end: step 3 state demonstrated, wanted developing",
               "end: step 2 revisit null, wanted pass",
               "end: status completed, wanted reviewing"
             ]
@@ -936,7 +1104,8 @@
           {
             "id": "dev-en-improves",
             "problems": [
-              "end: step 1 level shown, wanted shown_with_help"
+              "end: step 1 level shown, wanted shown_with_help",
+              "end: step 1 state demonstrated, wanted developing"
             ]
           },
           {
@@ -982,6 +1151,8 @@
               "turn 2: moved on without evidence",
               "turn 3: action summary, wanted next_step",
               "end: step 2 level shown, wanted shown_with_help",
+              "end: step 1 state demonstrated, wanted needs_review",
+              "end: step 2 state demonstrated, wanted developing",
               "end: step 1 revisit null, wanted pass"
             ]
           },
@@ -994,6 +1165,14 @@
               "turn 4: action other, wanted final_check|next_step|explain",
               "end: step 3 level shown, wanted needs_practice",
               "end: status completed, wanted reviewing"
+            ]
+          },
+          {
+            "id": "dev-he-fragile-prerequisite",
+            "problems": [
+              "turn 2: action hint, wanted check_earlier",
+              "end: step 1 state demonstrated, wanted needs_review",
+              "end: step 2 state demonstrated, wanted developing"
             ]
           },
           {
@@ -1028,6 +1207,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1048,6 +1228,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1068,6 +1249,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1104,6 +1286,7 @@
           "endFailures": [
             "step 3, wanted 2"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1124,6 +1307,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1148,6 +1332,7 @@
           "endFailures": [
             "step 1 attempts 1, wanted 0"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1198,8 +1383,26 @@
           ],
           "endFailures": [
             "step 3 level shown, wanted shown_with_help",
+            "step 2 state demonstrated, wanted needs_review",
+            "step 3 state demonstrated, wanted developing",
             "step 2 revisit null, wanted pass",
             "status completed, wanted reviewing"
+          ],
+          "states": [
+            {
+              "step": 1,
+              "state": "demonstrated",
+              "wanted": [
+                "needs_review"
+              ]
+            },
+            {
+              "step": 2,
+              "state": "demonstrated",
+              "wanted": [
+                "developing"
+              ]
+            }
           ],
           "supportProblems": null,
           "passed": false
@@ -1232,7 +1435,17 @@
             }
           ],
           "endFailures": [
-            "step 1 level shown, wanted shown_with_help"
+            "step 1 level shown, wanted shown_with_help",
+            "step 1 state demonstrated, wanted developing"
+          ],
+          "states": [
+            {
+              "step": 0,
+              "state": "demonstrated",
+              "wanted": [
+                "developing"
+              ]
+            }
           ],
           "supportProblems": null,
           "passed": false
@@ -1292,6 +1505,7 @@
           "endFailures": [
             "step 1 level shown, wanted needs_practice"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1357,6 +1571,7 @@
             "step 2 level shown, wanted needs_practice",
             "step 3 level shown, wanted applied"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1377,6 +1592,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1397,6 +1613,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1417,6 +1634,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1448,6 +1666,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1468,6 +1687,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1488,6 +1708,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1508,6 +1729,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1544,6 +1766,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1568,6 +1791,7 @@
           "endFailures": [
             "step 2 attempts 1, wanted 0"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1618,7 +1842,25 @@
           ],
           "endFailures": [
             "step 2 level shown, wanted shown_with_help",
+            "step 1 state demonstrated, wanted needs_review",
+            "step 2 state demonstrated, wanted developing",
             "step 1 revisit null, wanted pass"
+          ],
+          "states": [
+            {
+              "step": 0,
+              "state": "demonstrated",
+              "wanted": [
+                "needs_review"
+              ]
+            },
+            {
+              "step": 1,
+              "state": "demonstrated",
+              "wanted": [
+                "developing"
+              ]
+            }
           ],
           "supportProblems": null,
           "passed": false
@@ -1683,6 +1925,7 @@
             "step 3 level shown, wanted needs_practice",
             "status completed, wanted reviewing"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1703,8 +1946,72 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
+        },
+        {
+          "id": "dev-he-fragile-prerequisite",
+          "category": "fragile_prerequisite",
+          "turns": [
+            {
+              "student": "כי העננים קרים.",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 1,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            },
+            {
+              "student": "אולי כי הרוח דוחפת אותם למעלה?",
+              "move": "hint",
+              "action": "hint",
+              "intervention": "nudge",
+              "step": 1,
+              "verdict": "incorrect",
+              "issue": "none",
+              "misconception": "",
+              "failures": [
+                "action hint, wanted check_earlier"
+              ]
+            },
+            {
+              "student": "למעלה האוויר קר, האדים מתקררים ומתעבים לטיפות, וכך נוצרים עננים.",
+              "move": "advance",
+              "action": "next_step",
+              "intervention": null,
+              "step": 1,
+              "verdict": "correct",
+              "issue": "none",
+              "misconception": "",
+              "failures": []
+            }
+          ],
+          "endFailures": [
+            "step 1 state demonstrated, wanted needs_review",
+            "step 2 state demonstrated, wanted developing"
+          ],
+          "states": [
+            {
+              "step": 0,
+              "state": "demonstrated",
+              "wanted": [
+                "needs_review"
+              ]
+            },
+            {
+              "step": 1,
+              "state": "demonstrated",
+              "wanted": [
+                "developing"
+              ]
+            }
+          ],
+          "supportProblems": null,
+          "passed": false
         },
         {
           "id": "dev-en-journey",
@@ -1811,6 +2118,29 @@
             "step 1 level shown, wanted applied",
             "step 2 level shown, wanted applied",
             "step 3 level shown, wanted applied"
+          ],
+          "states": [
+            {
+              "step": 0,
+              "state": "demonstrated",
+              "wanted": [
+                "demonstrated"
+              ]
+            },
+            {
+              "step": 1,
+              "state": "demonstrated",
+              "wanted": [
+                "demonstrated"
+              ]
+            },
+            {
+              "step": 2,
+              "state": "demonstrated",
+              "wanted": [
+                "demonstrated"
+              ]
+            }
           ],
           "supportProblems": null,
           "passed": false

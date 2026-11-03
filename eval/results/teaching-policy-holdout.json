@@ -2,16 +2,19 @@
   "label": "policy-holdout",
   "mode": "policy",
   "split": "holdout",
-  "date": "2026-10-27T13:18:19.785Z",
+  "date": "2026-11-03T14:48:31.592Z",
   "systems": {
     "engine": {
       "summary": {
         "scenarios": 25,
         "scenarioPass": 1,
-        "turns": 57,
+        "turns": 55,
         "actionFit": 1,
         "interventionFit": 1,
         "unearnedMoves": 0,
+        "overclaims": null,
+        "stateMatch": null,
+        "prerequisiteRecovery": "2/2",
         "helpInFinalCheck": 0,
         "endStateMatch": 1,
         "supportProblems": 0,
@@ -19,10 +22,10 @@
         "lessonsCompleted": "3/3",
         "latencyMs": null,
         "grading": {
-          "answers": 53,
+          "answers": 51,
           "verdictAccuracy": 1,
           "falsePositives": "0/20",
-          "falseNegatives": "0/27",
+          "falseNegatives": "0/25",
           "issueAccuracy": "5/5",
           "misconceptionNamed": "2/2"
         },
@@ -110,6 +113,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -130,6 +134,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -150,6 +155,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -181,6 +187,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -201,6 +208,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -221,6 +229,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -263,6 +272,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -294,6 +304,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -347,6 +358,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -400,6 +412,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -420,6 +433,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -440,6 +454,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -471,6 +486,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -491,6 +507,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -511,6 +528,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -531,6 +549,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -562,6 +581,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -582,6 +602,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -602,6 +623,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -644,6 +666,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -686,6 +709,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -706,6 +730,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -726,6 +751,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -768,17 +794,6 @@
             },
             {
               "student": "אז הבועות הן המים עצמם שהפכו לגז, כי החלקיקים נעים כל כך מהר שהם עוזבים את הנוזל.",
-              "move": "build_up",
-              "action": "back_to_question",
-              "intervention": null,
-              "step": 1,
-              "verdict": "correct",
-              "issue": "none",
-              "misconception": "",
-              "failures": []
-            },
-            {
-              "student": "הבועות הן אדי מים: המים עצמם הופכים לגז כשהחלקיקים נעים כל כך מהר שהם עוזבים את הנוזל.",
               "move": "advance",
               "action": "next_step",
               "intervention": null,
@@ -834,6 +849,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         },
@@ -887,17 +903,6 @@
             },
             {
               "student": "No wait, the broken bulb opens the only loop, so no current flows and the second bulb goes out too.",
-              "move": "build_up",
-              "action": "back_to_question",
-              "intervention": null,
-              "step": 2,
-              "verdict": "correct",
-              "issue": "none",
-              "misconception": "",
-              "failures": []
-            },
-            {
-              "student": "The second bulb goes out too, because the broken bulb breaks the only loop, so no current can flow anywhere.",
               "move": "final_check_start",
               "action": "final_check",
               "intervention": null,
@@ -942,6 +947,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": [],
           "passed": true
         }
@@ -955,6 +961,9 @@
         "actionFit": 0.545,
         "interventionFit": 0,
         "unearnedMoves": 5,
+        "overclaims": null,
+        "stateMatch": null,
+        "prerequisiteRecovery": "0/2",
         "helpInFinalCheck": 0,
         "endStateMatch": 0.56,
         "supportProblems": 0,
@@ -1160,6 +1169,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1180,6 +1190,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1200,6 +1211,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1231,6 +1243,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1251,6 +1264,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1275,6 +1289,7 @@
           "endFailures": [
             "step 3 attempts 1, wanted 0"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1328,6 +1343,7 @@
             "step 1 revisit null, wanted pass",
             "status completed, wanted reviewing"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1361,6 +1377,7 @@
           "endFailures": [
             "step 1 level shown, wanted shown_with_help"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1419,6 +1436,7 @@
           "endFailures": [
             "step 2 level shown, wanted needs_practice"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1484,6 +1502,7 @@
             "step 2 level shown, wanted needs_practice",
             "step 3 level shown, wanted applied"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1504,6 +1523,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1524,6 +1544,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1555,6 +1576,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1575,6 +1597,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1595,6 +1618,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1615,6 +1639,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1653,6 +1678,7 @@
           "endFailures": [
             "status completed, wanted reviewing"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1673,6 +1699,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1697,6 +1724,7 @@
           "endFailures": [
             "step 2 attempts 1, wanted 0"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1750,6 +1778,7 @@
             "step 1 revisit null, wanted pass",
             "status completed, wanted reviewing"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1799,6 +1828,7 @@
           "endFailures": [
             "step 2 level shown, wanted shown_with_help"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -1819,6 +1849,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1839,6 +1870,7 @@
             }
           ],
           "endFailures": [],
+          "states": [],
           "supportProblems": null,
           "passed": true
         },
@@ -1948,6 +1980,7 @@
             "step 2 level shown, wanted needs_practice",
             "step 3 level shown, wanted applied"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         },
@@ -2057,6 +2090,7 @@
             "step 2 level shown, wanted applied",
             "step 3 level shown, wanted applied"
           ],
+          "states": [],
           "supportProblems": null,
           "passed": false
         }

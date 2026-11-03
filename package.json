@@ -21,8 +21,6 @@
     "eval:retrieval": "node eval/retrieval.js",
     "eval:sources": "node eval/sources.js",
     "bench": "node eval/bench.js",
-    "eval:hybrid": "node eval/hybrid-retrieval.js",
-    "eval:load": "node eval/load.mjs",
     "eval:teaching": "node eval/teaching.js --mode=policy --split=dev && node eval/teaching.js --mode=policy --split=holdout"
   },
   "dependencies": {
