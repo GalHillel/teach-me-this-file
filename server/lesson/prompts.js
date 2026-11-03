@@ -142,7 +142,7 @@ const earlierSteps = (plan, step, seen = {}) => {
 
 const relatedBlock = (related) => (related.length ? `\nPassages from other parts of the document that match the student's message:\n<sources>\n${formatPassages(related)}\n</sources>\n` : '');
 
-export const plannedQuestion = (step, finalCheck) => (finalCheck && step.transferQuestion
+const plannedQuestion = (step, finalCheck) => (finalCheck && step.transferQuestion
   ? { question: step.transferQuestion, criteria: step.transferCriteria || step.successCriteria }
   : { question: step.checkQuestion, criteria: step.successCriteria });
 
@@ -167,14 +167,6 @@ ${fence(tutorQuestion)}
 <student_message>
 ${fence(studentMessage)}
 </student_message>`;
-
-const APPROACH = {
-  explain: 'teach its idea simply with one concrete example that fits the audience, then ask its check question in your own words',
-  worked_example: 'show one short worked example step by step (a different example from the check question), then ask the student to solve the check question themselves',
-  practice: 'give a one-sentence reminder of the method, then ask the student to try the check question on their own',
-};
-
-const teachAndAsk = (step) => `teach the current step: ${APPROACH[step.approach] ?? APPROACH.explain}.`;
 
 const TEACH_ONLY = {
   explain: 'explain its idea simply, with one concrete example that fits the audience',
@@ -250,13 +242,12 @@ const finalQuestion = (step) => (step?.transferQuestion
   ? `Ask the final-check question of the step shown above: "${fence(step.transferQuestion)}". Keep its case and what it asks; you may only adjust the wording for the audience and the lesson language. Do not teach first and give no hints.`
   : NEW_FINAL_QUESTION);
 
-export const moveInstructions = ({ move, assessment, step, intervention, requested, prerequisite, finalSize = 0, closingLists = {}, finalCheck = false, detour = false, teaching = false }) => {
+export const moveInstructions = ({ move, assessment, step, intervention, requested, prerequisite, finalSize = 0, closingLists = {}, finalCheck = false, detour = false }) => {
   const notes = privateNotes(assessment);
-  const teachCurrentStep = teaching ? teachOnly : teachAndAsk;
   const question = detour ? 'the quick question about the earlier step' : 'the current question';
   switch (move) {
     case 'introduce':
-      return `Start the lesson. Greet the student in one short sentence and say in one sentence what they will learn. Then ${teachCurrentStep(step)}`;
+      return `Start the lesson. Greet the student in one short sentence and say in one sentence what they will learn. Then ${teachOnly(step)}`;
     case 'ask_check':
       return ASK_CHECK;
     case 'explain_again':
@@ -294,9 +285,9 @@ export const moveInstructions = ({ move, assessment, step, intervention, request
     case 'reveal_and_recheck':
       return `${notes}\nThe student has tried several times. Now kindly give the full answer and explain it clearly in two to four sentences, without making them feel bad. Then ask one easier question about the same idea, different from the earlier ones, to check they followed the explanation.`;
     case 'advance':
-      return `${notes}\nThe student answered correctly. Confirm it in one specific sentence. Then move to the current step shown above and ${teachCurrentStep(step)}`;
+      return `${notes}\nThe student answered correctly. Confirm it in one specific sentence. Then move to the current step shown above and ${teachOnly(step)}`;
     case 'review_and_advance':
-      return `${notes}\nThe student still did not get it after the explanation. In one or two sentences, give the right answer again kindly and say you will come back to it later. Then move to the current step shown above and ${teachCurrentStep(step)}`;
+      return `${notes}\nThe student still did not get it after the explanation. In one or two sentences, give the right answer again kindly and say you will come back to it later. Then move to the current step shown above and ${teachOnly(step)}`;
     case 'answer_question':
       return finalCheck
         ? 'The student asked a question during the final check. Answer it briefly, but give no hint toward the answer of the final-check question. Then ask the final-check question again.'
@@ -349,7 +340,7 @@ ${hideQuestion ? '' : questionLines(step, finalCheck)}Common mistake to watch fo
 Builds on: ${(step.prerequisites ?? []).map((id) => plan.steps.find((item) => item.id === id)?.title).filter(Boolean).map(fence).join('; ') || 'nothing earlier'}`;
 };
 
-export const closingListsFor = (plan, progress) => {
+const closingListsFor = (plan, progress) => {
   const shownTitles = [];
   const practiceTitles = [];
   plan.steps.forEach((step, index) => {
@@ -423,6 +414,5 @@ ${moveInstructions({
     closingLists: closingListsFor(plan, progress),
     finalCheck,
     detour: detourIndex !== null,
-    teaching,
   })}`;
 };

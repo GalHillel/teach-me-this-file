@@ -59,7 +59,7 @@ const latinVariants = (token) => {
   return variants.filter((variant) => variant.length >= 3 && !STOPWORDS.has(variant));
 };
 
-export const TERM_OPTIONS = { hebrew: true, latin: false, sectionWeight: 0 };
+const TERM_OPTIONS = { hebrew: true, latin: false, sectionWeight: 0 };
 
 export const termGroups = (text, options = TERM_OPTIONS) =>
   tokenize(text)

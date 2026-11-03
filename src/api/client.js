@@ -1,6 +1,6 @@
 import { readEvents } from './sse.js';
 
-export class ApiError extends Error {
+class ApiError extends Error {
   constructor(code, message, retryable = true) {
     super(message);
     this.code = code;

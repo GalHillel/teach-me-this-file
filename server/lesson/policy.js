@@ -21,7 +21,7 @@ const LADDERS = {
   explain_request: ['analogy', 'worked_example', 'decompose'],
 };
 
-export const NARROWING = new Set(['decompose', 'analogy', 'counterexample']);
+const NARROWING = new Set(['decompose', 'analogy', 'counterexample']);
 export const NARROWS_QUESTION = new Set([...NARROWING, 'focused_hint']);
 
 const QUALIFIED = new Set(['copied', 'hedged', 'unjustified']);

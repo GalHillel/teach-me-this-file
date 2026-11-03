@@ -4,7 +4,7 @@ import { createGeminiProvider } from './gemini.js';
 import { createMockProvider } from './mock.js';
 import { createOpenAiCompatibleProvider } from './openaiCompatible.js';
 
-export const PROVIDER_NAMES = ['gemini', 'groq', 'openrouter'];
+const PROVIDER_NAMES = ['gemini', 'groq', 'openrouter'];
 
 export const detectProvider = (apiKey) => {
   if (apiKey.startsWith('AIza')) return 'gemini';

@@ -4,7 +4,7 @@ import { INTERVENTIONS } from './lesson/policy.js';
 import { ISSUES } from './lesson/assessor.js';
 import { EVIDENCE_LIMIT, QUESTIONS, SUPPORTS } from '../shared/learner.js';
 
-export const LIMITS = {
+const LIMITS = {
   teacherPrompt: 3000,
   studentMessage: 2000,
   chunkText: 2000,

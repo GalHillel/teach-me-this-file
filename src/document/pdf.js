@@ -5,7 +5,7 @@ import { markPdfHeadings, pageLines, pagesToSections, stripRepeatedLines } from 
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
-export const MAX_PDF_PAGES = 300;
+const MAX_PDF_PAGES = 300;
 const MIN_PAGE_CHARS = 25;
 
 

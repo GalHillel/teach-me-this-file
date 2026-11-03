@@ -7,7 +7,7 @@ const words = (text) =>
     .split(/[^\p{L}\p{N}]+/u)
     .filter((word) => word.length > 1);
 
-export const ngramCounts = (text) => {
+const ngramCounts = (text) => {
   const counts = new Map();
   for (const word of words(text)) {
     const padded = ` ${word} `;

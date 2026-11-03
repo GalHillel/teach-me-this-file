@@ -37,7 +37,7 @@ const REQUEST_NOTES = {
 
 const FINISHING_MOVES = new Set(['final_finish', 'review_finish', 'finish_skipped']);
 
-export const pickSources = ({ plan, before, after, move, sources }) => {
+const pickSources = ({ plan, before, after, move, sources }) => {
   const pool = new Map([...sources.current, ...sources.next, ...sources.upcoming].map((chunk) => [chunk.id, chunk]));
   const focus = FINISHING_MOVES.has(move) ? activeStepIndex(before) : activeStepIndex(after);
   const detour = after.steps[activeStepIndex(after)]?.detour;
@@ -50,7 +50,7 @@ export const pickSources = ({ plan, before, after, move, sources }) => {
 
 const lastTutorMessage = (history) => [...history].reverse().find((message) => message.role === 'tutor')?.content ?? '';
 
-export const publicAssessment = (assessment) =>
+const publicAssessment = (assessment) =>
   assessment
     ? {
       verdict: assessment.verdict,
@@ -64,7 +64,7 @@ export const publicAssessment = (assessment) =>
     }
     : null;
 
-export const newCanary = () => `tmtf-${randomBytes(6).toString('hex')}`;
+const newCanary = () => `tmtf-${randomBytes(6).toString('hex')}`;
 
 const CANARY_PROBE = 9;
 

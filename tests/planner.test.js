@@ -237,7 +237,7 @@ describe('round 10: a new step is taught first and checked in the next message',
     }
   });
 
-  it('keeps the round-8 instruction for lessons saved before the teach phase existed', () => {
-    expect(moveInstructions({ move: 'advance', step: { approach: 'explain' }, assessment: { verdict: 'correct', conceptsShown: [], conceptsMissing: [], misconception: '' } })).toContain('then ask its check question in your own words');
+  it('teaches a new step without asking its check question', () => {
+    expect(moveInstructions({ move: 'advance', step: { approach: 'explain' }, assessment: { verdict: 'correct', conceptsShown: [], conceptsMissing: [], misconception: '' } })).toContain('Do not ask a question that checks the step yet');
   });
 });

@@ -6,7 +6,7 @@ export class ExtractionError extends Error {
   }
 }
 
-export const UNREADABLE_CHAR = /[\uE000-\uF8FF\uFFFD]/gu;
+const UNREADABLE_CHAR = /[\uE000-\uF8FF\uFFFD]/gu;
 
 export const unreadableRatio = (text) => {
   if (!text) return 0;

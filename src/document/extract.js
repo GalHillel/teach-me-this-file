@@ -4,8 +4,8 @@ import { ExtractionError, unreadableRatio } from './errors.js';
 import { checkSignature, dropDuplicateChunks } from './structure.js';
 
 export const MAX_FILE_BYTES = 25 * 1024 * 1024;
-export const MAX_DOCUMENT_CHARS = 600_000;
-export const SHORT_DOCUMENT_CHARS = 400;
+const MAX_DOCUMENT_CHARS = 600_000;
+const SHORT_DOCUMENT_CHARS = 400;
 
 export const FILE_TYPES = {
   pdf: { label: 'PDF', extensions: ['pdf'], load: () => import('./pdf.js').then((module) => module.extractPdf) },
@@ -86,7 +86,7 @@ const SIGNATURE_ERRORS = {
   txt: 'This file is named as text but contains binary data.',
 };
 
-export const verifySignature = async (file, type) => {
+const verifySignature = async (file, type) => {
   const head = new Uint8Array(await file.slice(0, 4096).arrayBuffer());
   if (!checkSignature(head, type)) throw new ExtractionError(type === 'txt' ? 'unsupported' : 'corrupt', SIGNATURE_ERRORS[type], { name: file.name });
 };

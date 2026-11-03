@@ -8,7 +8,7 @@ export const praiseAllowed = ({ move, assessment }) => {
   return assessment.verdict === 'correct';
 };
 
-export const stripOpeningPraise = (text) => {
+const stripOpeningPraise = (text) => {
   const match = text.match(OPENING_PRAISE);
   if (!match) return text;
   const rest = text.slice(match[0].length);

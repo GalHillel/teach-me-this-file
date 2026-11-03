@@ -60,7 +60,7 @@ export const errorBody = (error) => ({
   error: { code: error.code, message: error.message, retryable: RETRYABLE.has(error.code) },
 });
 
-export const isDailyQuota = (detail) => /PerDay|per day|daily/i.test(detail);
+const isDailyQuota = (detail) => /PerDay|per day|daily/i.test(detail);
 
 export const providerError = (status, detail = '') => {
   const text = detail.toLowerCase();

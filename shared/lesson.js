@@ -13,8 +13,6 @@ export const assessedStepIndex = (progress) => {
 
 export const inFinalCheck = (progress) => progress.status === 'reviewing' && progress.review?.kind === 'final';
 
-export const LEVELS = ['not_started', 'in_progress', 'needs_practice', 'shown_with_help', 'shown', 'applied'];
-
 export const stepEvidence = (progress, index) => {
   const step = progress.steps[index];
   const model = stepState(progress, index);
@@ -53,7 +51,7 @@ export const reviewQueue = (progress) =>
 
 const WEAKNESS = { needs_review: 3, emerging: 3, developing: 1, demonstrated: 0, not_assessed: 1 };
 
-export const finalCheckSize = (stepCount) => Math.min(stepCount, 3);
+const finalCheckSize = (stepCount) => Math.min(stepCount, 3);
 
 export const finalCheckQueue = (plan, progress) => {
   const count = progress.steps.length;

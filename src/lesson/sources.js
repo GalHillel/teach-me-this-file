@@ -1,6 +1,6 @@
 import { buildIndex, contentWordCount, isStopword, scoreChunks, termGroups, tokenize } from '../../shared/text.js';
 
-export const PLAN_CHAR_BUDGET = 60000;
+const PLAN_CHAR_BUDGET = 60000;
 
 const MIN_SHARED = 2;
 const MIN_COVERAGE = 0.3;

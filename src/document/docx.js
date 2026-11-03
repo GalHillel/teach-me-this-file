@@ -16,7 +16,7 @@ const blockText = (element) => {
   return element.textContent.trim();
 };
 
-export const htmlToSections = (html) => {
+const htmlToSections = (html) => {
   const body = new DOMParser().parseFromString(html, 'text/html').body;
   const sections = [];
   let current = { label: 'Beginning', text: '' };

@@ -2,7 +2,7 @@ import { EVIDENCE_LIMIT } from '../../shared/learner.js';
 import { NEEDS_REVIEW, activeStepIndex, finalCheckQueue, inFinalCheck, reviewQueue } from '../../shared/lesson.js';
 import { NARROWS_QUESTION, chooseIntervention, findPrerequisiteGap, ladderOf, remember } from './policy.js';
 
-export { NEEDS_REVIEW, activeStepIndex, reviewQueue };
+export { activeStepIndex };
 
 export const MAX_ATTEMPTS = 3;
 export const STALL_LIMIT = 2;
@@ -15,7 +15,7 @@ export const REVISITS = ['pass', 'fail'];
 const ANSWER_VERDICTS = new Set(['correct', 'partial', 'incorrect']);
 const PROBE_ISSUES = new Set(['hedged', 'unjustified', 'copied']);
 
-export const newStepState = (status) => ({
+const newStepState = (status) => ({
   status,
   phase: 'learn',
   attempts: 0,

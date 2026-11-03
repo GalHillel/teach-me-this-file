@@ -11,7 +11,7 @@ export const stepSources = (state, index) => {
   return step ? chunksById(state.chunks, step.sourceIds ?? []) : [];
 };
 
-export const stepsForTurn = (progress, kind) => {
+const stepsForTurn = (progress, kind) => {
   if (kind === 'review') return reviewQueue(progress).slice(0, 2);
   if (progress.status === 'reviewing') {
     const { queue, position } = progress.review;

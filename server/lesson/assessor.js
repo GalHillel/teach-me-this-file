@@ -66,7 +66,7 @@ export const copiedShare = (answer, sources) => {
 
 const lowerConfidence = (confidence) => CONFIDENCE[Math.max(0, CONFIDENCE.indexOf(confidence) - 1)];
 
-export const unclearAssessment = () => ({
+const unclearAssessment = () => ({
   verdict: 'unclear',
   issue: 'none',
   completeness: 0,
